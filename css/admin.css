@@ -1,0 +1,189 @@
+/* ============================================
+   ADMIN PAGES - TAB BAR STYLES
+   ============================================ */
+
+.admin-tab-bar {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.admin-tab-bar .nav-link {
+    color: #6c757d;
+    border: none;
+    padding: 15px 20px;
+    font-weight: 500;
+    position: relative;
+}
+
+.admin-tab-bar .nav-link:hover {
+    color: #495057;
+}
+
+.admin-tab-bar .nav-link.active {
+    color: #ffc107;
+    border-bottom: 3px solid #ffc107;
+    background-color: transparent;
+}
+
+/* ============================================
+   DIET CHART PAGE - ADMIN GREETING
+   ============================================ */
+
+.admin-greeting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.admin-greeting-text {
+    font-size: 16px;
+    color: #6c757d;
+}
+
+/* ============================================
+   DIET CHART PAGE - MEAL CARDS
+   ============================================ */
+
+.meal-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-bottom: 20px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.meal-card-header {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meal-card-header input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.meal-card-body {
+    padding: 15px;
+}
+
+/* ============================================
+   DIET CHART PAGE - FOOD ITEMS
+   ============================================ */
+
+.food-item-row {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 0.25rem;
+    border-left: 3px solid #ffc107;
+}
+
+.food-item-row-header {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.food-item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.food-item-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.food-item-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.food-item-field input,
+.food-item-field select {
+    font-size: 14px;
+}
+
+/* ============================================
+   DIET CHART PAGE - CALCULATED FIELDS
+   ============================================ */
+
+.calculated-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #dee2e6;
+}
+
+.calculated-field {
+    padding: 8px;
+    background-color: #e7f3ff;
+    border-radius: 0.25rem;
+    text-align: center;
+}
+
+.calculated-field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #495057;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.calculated-field .value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0056b3;
+}
+
+.btn-remove-item {
+    padding: 0.25rem 0.5rem;
+    font-size: 12px;
+}
+
+/* ============================================
+   ADMIN PAGES - RESPONSIVE MEDIA QUERIES
+   ============================================ */
+
+@media (max-width: 768px) {
+    .admin-tab-bar .nav-link {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .admin-greeting {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .meal-card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .meal-card-header input {
+        width: 100%;
+    }
+
+    .food-item-grid {
+        grid-template-columns: 1fr;
+    }
+}

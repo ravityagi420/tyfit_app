@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Diet Chart Management</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Diet Chart Management for TYFIT" name="description">
+
+    <link href="../img/favicon.ico" rel="icon">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="../lib/animate/animate.min.css" rel="stylesheet">
+    <link href="../lib/flaticon/font/flaticon.css" rel="stylesheet">
+    <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/admin.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="top-bar d-none d-md-block">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="top-bar-left">
+                        <div class="text">
+                            <i class="fa fa-phone-alt"></i>
+                            <h2>+49-1521-5224100</h2>
+                            <p>For Enquiries</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="top-bar-right">
+                        <div class="social">
+                            <a href=""><i class="fab fa-twitter"></i></a>
+                            <a href=""><i class="fab fa-facebook-f"></i></a>
+                            <a href=""><i class="fab fa-linkedin-in"></i></a>
+                            <a href=""><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navbar navbar-expand-lg bg-dark navbar-dark">
+        <div class="container-fluid">
+            <a href="../index.html" class="navbar-brand">TY<span>fit</span></a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                <div class="navbar-nav ml-auto">
+                    <a href="../index.html" class="nav-item nav-link">Home</a>
+                    <a href="../about.html" class="nav-item nav-link">About</a>
+                    <a href="../service.html" class="nav-item nav-link">Service</a>
+                    <a href="../price.html" class="nav-item nav-link">Price</a>
+                    <a href="../class.html" class="nav-item nav-link">Class</a>
+                    <a href="../team.html" class="nav-item nav-link">Trainer</a>
+                    <a href="../portfolio.html" class="nav-item nav-link">Pose</a>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Blog</a>
+                        <div class="dropdown-menu">
+                            <a href="../blog.html" class="dropdown-item">Blog Grid</a>
+                            <a href="../single.html" class="dropdown-item">Blog Detail</a>
+                        </div>
+                    </div>
+                    <a href="../contact.html" class="nav-item nav-link">Contact</a>
+                    <a href="../login.html?returnTo=/admin/diet_chart.html" class="btn btn-outline-light ml-lg-3">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-section" style="padding: 80px 0;">
+        <div class="container">
+            <!-- Admin Tab Bar -->
+            <ul class="nav admin-tab-bar" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Profile Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="diet_chart.html">Diet Chart</a>
+                </li>
+            </ul>
+
+            <!-- Section Header -->
+            <div class="section-header text-center mb-4">
+                <p>Admin Panel</p>
+                <h2>Diet Chart Management</h2>
+                <p class="text-muted">Create and manage client diet charts</p>
+            </div>
+
+            <!-- Admin Greeting -->
+            <div class="admin-greeting">
+                <div>
+                    <span class="admin-greeting-text">Hello, <strong id="adminHelloName">Admin</strong></span>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row">
+                <!-- Left Panel: User Selection -->
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <div class="bg-white rounded shadow p-4 wow zoomIn" data-wow-delay="0.1s">
+                        <h5 class="mb-3">Select Client</h5>
+                        <div class="form-group">
+                            <label for="dietChartUserSelect">Choose Client</label>
+                            <select class="form-control" id="dietChartUserSelect">
+                                <option value="">Select a client...</option>
+                            </select>
+                        </div>
+                        <div id="selectedUserInfo" style="display: none;" class="alert alert-info mt-3">
+                            <small>
+                                <strong>Email:</strong> <span id="selectedUserEmail"></span><br>
+                                <strong>Name:</strong> <span id="selectedUserName"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Diet Chart Form -->
+                <div class="col-lg-8 col-md-12">
+                    <div class="bg-white rounded shadow p-4 wow zoomIn" data-wow-delay="0.2s">
+                        <h5 class="mb-4">Diet Chart Details</h5>
+
+                        <div id="formPlaceholder" class="text-center text-muted">
+                            <p>Select a client to create or edit their diet chart</p>
+                        </div>
+
+                        <form id="dietChartForm" style="display: none;">
+                            <!-- Chart Metadata Section -->
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="dietChartTitle">Chart Title</label>
+                                    <input type="text" class="form-control" id="dietChartTitle" placeholder="e.g., Weekly Diet Plan">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="dietChartNotes">Notes</label>
+                                    <input type="text" class="form-control" id="dietChartNotes" placeholder="Additional notes or remarks">
+                                </div>
+                            </div>
+
+                            <!-- Meals Section -->
+                            <div class="form-group">
+                                <h6 class="mb-3">
+                                    <i class="fa fa-star"></i> Meals
+                                </h6>
+                                <button type="button" class="btn btn-success btn-sm mb-3" id="addMealBtn">
+                                    <i class="fa fa-plus"></i> Add Meal
+                                </button>
+                                <div id="mealsContainer">
+                                    <!-- Meal cards will be dynamically added here -->
+                                </div>
+                            </div>
+
+                            <!-- Save Section -->
+                            <div class="form-group mt-4">
+                                <button type="button" id="saveDietChartBtn" class="btn btn-primary mr-2">
+                                    <i class="fa fa-save"></i> Save Diet Chart
+                                </button>
+                                <button type="button" id="resetDietChartBtn" class="btn btn-secondary">
+                                    <i class="fa fa-undo"></i> Reset
+                                </button>
+                            </div>
+
+                            <div id="dietChartStatus" class="mt-3" style="display: none;"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="../lib/easing/easing.min.js"></script>
+    <script src="../lib/wow/wow.min.js"></script>
+    <script src="../lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="../lib/isotope/isotope.pkgd.min.js"></script>
+    <script src="../lib/lightbox/js/lightbox.min.js"></script>
+    <script src="../mail/jqBootstrapValidation.min.js"></script>
+    <script src="../mail/contact.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/diet_chart.js"></script>
+</body>
+</html>
