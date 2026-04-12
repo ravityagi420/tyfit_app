@@ -592,16 +592,12 @@ function renderFoodCatalogTable(items) {
 
         return `
             <div class="food-catalog-row">
-                <div class="food-catalog-cell food-catalog-cell-image">${imageCell}</div>
-                <div class="food-catalog-cell food-catalog-cell-name">
-                    <div><strong class="food-catalog-name-text">${escapeHtml(item.food_name)}</strong></div>
-                    <div class="food-catalog-meta">${formatNumber(item.quantity)} ${escapeHtml(item.unit_of_quantity)}</div>
-                </div>
-                <div class="food-catalog-cell food-catalog-cell-macros">${macroChart}</div>
-                <div class="food-catalog-cell food-catalog-cell-calories">
-                    <div class="food-catalog-calories">${formatNumber(totalCalories)} kcal</div>
-                </div>
-                <div class="food-row-overlay">
+                <div class="food-row-top">
+                    <div class="food-catalog-cell food-catalog-cell-image">${imageCell}</div>
+                    <div class="food-catalog-cell food-catalog-cell-name">
+                        <div><strong class="food-catalog-name-text">${escapeHtml(item.food_name)}</strong></div>
+                        <div class="food-catalog-meta">${formatNumber(item.quantity)} ${escapeHtml(item.unit_of_quantity)}</div>
+                    </div>
                     <div class="food-row-actions">
                         <button type="button" class="food-action-btn food-action-btn-edit js-edit-food" data-food-id="${escapeHtml(item.food_id)}" aria-label="Edit ${escapeHtml(item.food_name)}" title="Edit">
                             <i class="fa fa-pen"></i>
@@ -611,17 +607,20 @@ function renderFoodCatalogTable(items) {
                         </button>
                     </div>
                 </div>
+                <div class="food-row-bottom">
+                    <div class="food-catalog-cell food-catalog-cell-macros">${macroChart}</div>
+                    <div class="food-catalog-cell food-catalog-cell-calories">
+                        <div class="food-catalog-calories-wrap">
+                            <i class="fa fa-fire"></i>
+                            <span class="food-catalog-calories">${formatNumber(totalCalories)} kcal</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     }).join("");
 
     container.innerHTML = `
-        <div class="food-catalog-head">
-            <div></div>
-            <div>Food Name</div>
-            <div>Macros</div>
-            <div>Total Calories</div>
-        </div>
         <div class="food-catalog-list">${rows}</div>
     `;
 
@@ -715,7 +714,7 @@ function bindFoodCatalogEvents() {
     const addNewBtn = getEl("foodAddNewBtn");
     const imageInput = getEl("foodImage");
     const imageSelectBtn = getEl("foodImageSelectBtn");
-    const sortSelect = getEl("foodSortSelect");
+    const sortMenu = getEl("foodSortMenu");
     const searchInput = getEl("foodSearchInput");
     const modalEl = getEl("foodFormModal");
 
@@ -772,10 +771,12 @@ function bindFoodCatalogEvents() {
         });
     }
 
-    if (sortSelect) {
-        sortSelect.addEventListener("change", () => {
-            foodCatalogState.sortBy = sortSelect.value;
-            renderFoodCatalogTable(foodCatalogState.items);
+    if (sortMenu) {
+        sortMenu.querySelectorAll(".js-sort-option").forEach((sortBtn) => {
+            sortBtn.addEventListener("click", () => {
+                foodCatalogState.sortBy = sortBtn.dataset.sort || "date_desc";
+                renderFoodCatalogTable(foodCatalogState.items);
+            });
         });
     }
 
