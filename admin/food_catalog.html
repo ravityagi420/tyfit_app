@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Food Catalog Management</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Food Catalog Management for TYFIT" name="description">
+
+    <link href="../img/favicon.ico" rel="icon">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="../lib/animate/animate.min.css" rel="stylesheet">
+    <link href="../lib/flaticon/font/flaticon.css" rel="stylesheet">
+    <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/admin.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="header-top-placeholder"></div>
+    <div id="navbar-placeholder"></div>
+
+    <div class="admin-section" style="padding: 80px 0;">
+        <div class="container">
+            <ul class="nav admin-tab-bar" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Profile Management</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="diet_chart.html">Diet Chart</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="food_catalog.html">Food Catalog</a>
+                </li>
+            </ul>
+
+            <div class="section-header text-center mb-4">
+                <p>Admin Panel</p>
+                <h2>Food Catalog Management</h2>
+                <p class="text-muted">Create, update, and review reusable food catalog items</p>
+            </div>
+
+            <div class="admin-greeting">
+                <div>
+                    <span class="admin-greeting-text">Hello, <strong id="adminHelloName">Admin</strong></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="bg-white rounded shadow p-4 wow zoomIn food-list-card" data-wow-delay="0.2s">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 12px;">
+                            <div>
+                                <h5 class="mb-1">Catalog Items</h5>
+                                <p class="text-muted mb-0">Browse and manage saved food items</p>
+                            </div>
+                            <div class="food-list-actions">
+                                <div class="food-table-toolbar">
+                                    <div class="food-table-search">
+                                        <i class="fa fa-search"></i>
+                                        <input type="text" id="foodSearchInput" class="form-control form-control-sm" placeholder="Search food name" autocomplete="off">
+                                        <div id="foodSearchSuggestions" class="food-search-suggestions" style="display: none;"></div>
+                                    </div>
+                                    <select id="foodSortSelect" class="form-control form-control-sm food-sort-select">
+                                        <option value="date_desc">Newest First</option>
+                                        <option value="name_asc">Name: A-Z</option>
+                                        <option value="name_desc">Name: Z-A</option>
+                                        <option value="calories_asc">Calories: Low to High</option>
+                                        <option value="calories_desc">Calories: High to Low</option>
+                                    </select>
+                                </div>
+                                <button type="button" id="foodRefreshBtn" class="btn btn-outline-primary btn-sm food-refresh-btn">
+                                    <i class="fa fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" id="foodAddNewBtn" class="food-add-row-btn mb-3">
+                            <i class="fa fa-plus"></i> Add New Food Item
+                        </button>
+
+                        <div class="food-table-wrapper" id="foodTableWrapper">
+                            <div id="foodCatalogTableContainer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+
+    <div class="modal fade" id="foodFormModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content food-form-modal-content">
+                <div class="modal-header">
+                    <div class="food-modal-title-wrap">
+                        <h5 class="modal-title" id="foodFormModalTitle"><i class="fa fa-utensils mr-2"></i>Add New Food Item</h5>
+                        <small class="food-modal-subtitle"><i class="fa fa-clipboard-list mr-1"></i>Nutrition details and image</small>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="foodCatalogForm" novalidate>
+                        <input type="hidden" id="foodId">
+
+                        <div class="form-group">
+                            <label for="foodName">Food Name</label>
+                            <input type="text" class="form-control" id="foodName" placeholder="e.g., Oats" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="foodQuantity">Quantity</label>
+                                <input type="number" class="form-control" id="foodQuantity" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="foodUnit">Unit</label>
+                                <select class="form-control" id="foodUnit" required>
+                                    <option value="g">g</option>
+                                    <option value="ml">ml</option>
+                                    <option value="piece">piece</option>
+                                    <option value="slice">slice</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="foodCarbs">Carbs</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="foodCarbs" min="0" step="0.01" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">gms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="foodProtein">Protein</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="foodProtein" min="0" step="0.01" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">gms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="foodFats">Fats</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="foodFats" min="0" step="0.01" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">gms</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="foodFibre">Fibre</label>
+                            <input type="number" class="form-control" id="foodFibre" min="0" step="0.01" placeholder="Optional">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="foodImage">Food Image</label>
+                            <input type="file" class="d-none" id="foodImage" accept="image/*">
+                            <div class="food-image-input-row">
+                                <button type="button" id="foodImageSelectBtn" class="btn btn-outline-primary btn-sm">
+                                    <i class="fa fa-image mr-1"></i> Choose Image
+                                </button>
+                                <span id="foodImageFileName" class="food-image-file-name">No file chosen</span>
+                            </div>
+                            <small class="form-text text-muted">Upload an image to display with this food item.</small>
+                            <div id="foodImagePreview" class="food-image-preview">
+                                <img id="foodImagePreviewImg" src="" alt="Food preview">
+                                <small id="foodImagePreviewPath"></small>
+                            </div>
+                        </div>
+
+                        <div class="food-form-actions mt-4">
+                            <button type="submit" id="foodSaveBtn" class="btn btn-primary">
+                                <i class="fa fa-save"></i> Save Food Item
+                            </button>
+                            <button type="button" id="foodCancelBtn" class="btn btn-secondary" data-dismiss="modal">
+                                <i class="fa fa-times"></i> Cancel
+                            </button>
+                        </div>
+
+                        <div id="foodCatalogStatus" class="food-form-status mt-3" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="../lib/easing/easing.min.js"></script>
+    <script src="../lib/wow/wow.min.js"></script>
+    <script src="../lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="../lib/isotope/isotope.pkgd.min.js"></script>
+    <script src="../lib/lightbox/js/lightbox.min.js"></script>
+    <script src="../mail/jqBootstrapValidation.min.js"></script>
+    <script src="../mail/contact.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/login.js"></script>
+    <script src="../js/components-loader.js"></script>
+    <script src="../js/food_catalog.js"></script>
+</body>
+</html>

@@ -124,3 +124,151 @@
     
 })(jQuery);
 
+(function ($) {
+    "use strict";
+
+    let dialogInitialized = false;
+
+    function ensureDialogModal() {
+        if (dialogInitialized) {
+            return;
+        }
+
+        if (!document.body) {
+            return;
+        }
+
+        const modalMarkup = `
+            <div class="modal fade" id="tyfitDialogModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="tyfitDialogTitle">Notice</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="tyfitDialogBody"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" id="tyfitDialogCancelBtn" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="tyfitDialogConfirmBtn">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML("beforeend", modalMarkup);
+        dialogInitialized = true;
+    }
+
+    function escapeDialogText(text) {
+        return String(text ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function normalizeDialogOptions(input, defaults) {
+        if (typeof input === "string") {
+            return {
+                ...defaults,
+                message: input
+            };
+        }
+
+        return {
+            ...defaults,
+            ...(input || {})
+        };
+    }
+
+    function showBootstrapDialog(options) {
+        ensureDialogModal();
+
+        const modalEl = document.getElementById("tyfitDialogModal");
+        const titleEl = document.getElementById("tyfitDialogTitle");
+        const bodyEl = document.getElementById("tyfitDialogBody");
+        const cancelBtn = document.getElementById("tyfitDialogCancelBtn");
+        const confirmBtn = document.getElementById("tyfitDialogConfirmBtn");
+
+        if (!modalEl || !titleEl || !bodyEl || !confirmBtn || !$.fn.modal) {
+            if (options.showCancel) {
+                return Promise.resolve(window.confirm(options.message));
+            }
+
+            window.alert(options.message);
+            return Promise.resolve(true);
+        }
+
+        titleEl.textContent = options.title;
+        bodyEl.innerHTML = `<p class="mb-0">${escapeDialogText(options.message)}</p>`;
+        confirmBtn.textContent = options.confirmText;
+        confirmBtn.className = `btn ${options.confirmClass}`;
+        cancelBtn.style.display = options.showCancel ? "inline-block" : "none";
+        cancelBtn.textContent = options.cancelText;
+
+        return new Promise((resolve) => {
+            let settled = false;
+
+            function cleanup(result) {
+                if (settled) {
+                    return;
+                }
+
+                settled = true;
+                confirmBtn.removeEventListener("click", onConfirm);
+                $(modalEl).off("hidden.bs.modal", onHidden);
+                resolve(result);
+            }
+
+            function onConfirm() {
+                cleanup(true);
+                $(modalEl).modal("hide");
+            }
+
+            function onHidden() {
+                cleanup(options.showCancel ? false : true);
+            }
+
+            confirmBtn.addEventListener("click", onConfirm);
+            $(modalEl).off("hidden.bs.modal").on("hidden.bs.modal", onHidden);
+            $(modalEl).modal({
+                backdrop: true,
+                keyboard: true,
+                show: true
+            });
+        });
+    }
+
+    window.tyfitDialog = {
+        alert(input) {
+            const options = normalizeDialogOptions(input, {
+                title: "Notice",
+                message: "",
+                confirmText: "OK",
+                cancelText: "Cancel",
+                confirmClass: "btn-primary",
+                showCancel: false
+            });
+
+            return showBootstrapDialog(options);
+        },
+
+        confirm(input) {
+            const options = normalizeDialogOptions(input, {
+                title: "Please Confirm",
+                message: "",
+                confirmText: "Confirm",
+                cancelText: "Cancel",
+                confirmClass: "btn-danger",
+                showCancel: true
+            });
+
+            return showBootstrapDialog(options);
+        }
+    };
+})(jQuery);
+

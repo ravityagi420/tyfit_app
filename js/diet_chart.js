@@ -16,6 +16,13 @@ function getInputValue(id) {
     return el ? el.value.trim() : "";
 }
 
+function showDialogAlert(message, options = {}) {
+    return window.tyfitDialog.alert({
+        message,
+        ...options
+    });
+}
+
 function showStatusMessage(message, type = "success") {
     const el = getEl("dietChartStatus");
     if (!el) return;
@@ -225,6 +232,66 @@ function calculateFoodMacros(foodRow) {
 let allUsers = [];
 let selectedUserId = null;
 
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForStableSession(timeoutMs = 4000, intervalMs = 250) {
+    const started = Date.now();
+
+    while (Date.now() - started < timeoutMs) {
+        const { data, error } = await window.supabaseClient.auth.getSession();
+
+        if (error) {
+            console.error("Session check error:", error);
+            return { session: null, error };
+        }
+
+        if (data?.session) {
+            return { session: data.session, error: null };
+        }
+
+        await sleep(intervalMs);
+    }
+
+    return { session: null, error: null };
+}
+
+async function requireLoginOrRedirect() {
+    const { session, error } = await waitForStableSession();
+
+    if (error) {
+        await showDialogAlert("Session error: " + error.message, { title: "Session Error" });
+        window.location.href = "../login.html?returnTo=/admin/diet_chart.html";
+        return null;
+    }
+
+    if (!session) {
+        await showDialogAlert("No active session found. Please log in again.", { title: "Login Required" });
+        window.location.href = "../login.html?returnTo=/admin/diet_chart.html";
+        return null;
+    }
+
+    return session.user;
+}
+
+async function requireAdminOrRedirect(user) {
+    if (typeof window.getAccessState === "function") {
+        const accessState = await window.getAccessState({ user });
+        if (accessState?.isAdmin) {
+            return true;
+        }
+    }
+
+    if (typeof window.isAdminUser === "function" && window.isAdminUser(user)) {
+        return true;
+    }
+
+    await showDialogAlert("You do not have access to the admin portal.", { title: "Access Restricted" });
+    window.location.href = "../index.html";
+    return false;
+}
+
 async function fetchUsers() {
     const { data, error } = await window.supabaseClient
         .from("profiles")
@@ -363,8 +430,13 @@ function resetDietChart() {
 // ============================================
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // Set admin greeting (placeholder - will be updated by JS)
-    getEl("adminHelloName").textContent = "Admin";
+    const user = await requireLoginOrRedirect();
+    if (!user) return;
+
+    if (!await requireAdminOrRedirect(user)) return;
+
+    const meta = user.user_metadata || {};
+    getEl("adminHelloName").textContent = meta.full_name || meta.name || user.email || "Admin";
 
     showPlaceholder();
 

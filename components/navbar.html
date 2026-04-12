@@ -10,7 +10,7 @@
         </button>
 
         <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-            <div class="navbar-nav ml-auto">
+            <div class="navbar-nav ml-auto align-items-lg-center">
                 <a href="index.html" class="nav-item nav-link">Home</a>
                 <a href="about.html" class="nav-item nav-link">About</a>
                 <a href="service.html" class="nav-item nav-link">Service</a>
@@ -26,9 +26,25 @@
                     </div>
                 </div>
                 <a href="contact.html" class="nav-item nav-link">Contact</a>
-                <a href="admin/index.html" id="adminLink" class="nav-item nav-link" style="display: none;">Admin Portal</a>
-                <a href="login.html" id="loginBtn" class="btn btn-outline-light ml-lg-3">Login</a>
-                <a href="#" id="logoutBtn" class="nav-item nav-link" style="display:none;">Logout</a>
+                <a href="admin/index.html" id="adminLink" class="nav-item nav-link" style="display: none;" aria-hidden="true">Admin Portal</a>
+                <div class="nav-item dropdown auth-dropdown ml-lg-3" id="loginDropdown">
+                    <button
+                        type="button"
+                        id="loginBtn"
+                        class="btn auth-nav-btn dropdown-toggle"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                    >
+                        Login
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right auth-dropdown-menu">
+                        <button type="button" id="googleLoginBtn" class="dropdown-item auth-google-item" data-auth-google onclick="googleLogin(event)">
+                            <i class="fab fa-google mr-2"></i>Login with Google
+                        </button>
+                    </div>
+                </div>
+                <button type="button" id="logoutBtn" class="btn auth-nav-btn ml-lg-3" style="display: none;">Logout</button>
             </div>
         </div>
     </div>

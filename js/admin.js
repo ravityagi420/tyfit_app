@@ -49,7 +49,10 @@ function hideStatusMessage() {
 }
 
 function showAlert(message) {
-  alert(message);
+  return window.tyfitDialog.alert({
+    title: "Notice",
+    message
+  });
 }
 
 function showPlaceholder() {
@@ -227,18 +230,35 @@ async function requireLoginOrRedirect() {
   console.log("Admin path:", window.location.pathname);
 
   if (error) {
-    showAlert("Session error: " + error.message);
+    await showAlert("Session error: " + error.message);
     window.location.href = "../login.html?returnTo=/admin/index.html";
     return null;
   }
 
   if (!session) {
-    showAlert("No active session found. Please log in again.");
+    await showAlert("No active session found. Please log in again.");
     window.location.href = "../login.html?returnTo=/admin/index.html";
     return null;
   }
 
   return session.user;
+}
+
+async function requireAdminOrRedirect(user) {
+  if (typeof window.getAccessState === "function") {
+    const accessState = await window.getAccessState({ user });
+    if (accessState?.isAdmin) {
+      return true;
+    }
+  }
+
+  if (typeof window.isAdminUser === "function" && window.isAdminUser(user)) {
+    return true;
+  }
+
+  await showAlert("You do not have access to the admin portal.");
+  window.location.href = "../index.html";
+  return false;
 }
 
 // ------------------------------
@@ -531,7 +551,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const user = await requireLoginOrRedirect();
   if (!user) return;
 
-  console.log("Admin user:", user.email);
+  if (!await requireAdminOrRedirect(user)) return;
+
+  const adminHelloName = getEl("adminHelloName");
+  if (adminHelloName) {
+    const meta = user.user_metadata || {};
+    adminHelloName.textContent = meta.full_name || meta.name || user.email || "Admin";
+  }
 
   await initAdminPage();
 });

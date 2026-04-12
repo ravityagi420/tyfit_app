@@ -25,6 +25,10 @@ const ComponentsLoader = {
             
             if (targetElement) {
                 targetElement.innerHTML = componentHTML;
+
+                if (componentName === 'navbar' && typeof window.refreshAuthUi === 'function') {
+                    await window.refreshAuthUi();
+                }
                 
                 // Trigger custom event for component-loaded
                 const event = new CustomEvent('component-loaded', {
@@ -90,20 +94,6 @@ const ComponentsLoader = {
             }
         }
     },
-
-    /**
-     * Show/hide login/logout buttons based on auth state
-     * @param {boolean} isLoggedIn - Whether user is logged in
-     */
-    updateAuthButtons: function(isLoggedIn) {
-        const loginBtn = document.getElementById('loginBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const adminLink = document.getElementById('adminLink');
-        
-        if (loginBtn) loginBtn.style.display = isLoggedIn ? 'none' : 'inline-block';
-        if (logoutBtn) logoutBtn.style.display = isLoggedIn ? 'inline-block' : 'none';
-        if (adminLink) adminLink.style.display = isLoggedIn ? 'inline-block' : 'none';
-    }
 };
 
 // Auto-load components on DOM ready if placeholders exist
