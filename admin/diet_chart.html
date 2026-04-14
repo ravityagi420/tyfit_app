@@ -19,15 +19,11 @@
 </head>
 
 <body>
-    <!-- Header Top Placeholder -->
     <div id="header-top-placeholder"></div>
-
-    <!-- Navbar Placeholder -->
     <div id="navbar-placeholder"></div>
 
     <div class="admin-section" style="padding: 80px 0;">
         <div class="container">
-            <!-- Admin Tab Bar -->
             <ul class="nav admin-tab-bar" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link" href="index.html">Profile Management</a>
@@ -40,89 +36,195 @@
                 </li>
             </ul>
 
-            <!-- Section Header -->
             <div class="section-header text-center mb-4">
                 <p>Admin Panel</p>
                 <h2>Diet Chart Management</h2>
-                <p class="text-muted">Create and manage client diet charts</p>
+                <p class="text-muted">Create, update, and manage structured meal plans for any user.</p>
             </div>
 
-            <!-- Admin Greeting -->
             <div class="admin-greeting">
                 <div>
                     <span class="admin-greeting-text">Hello, <strong id="adminHelloName">Admin</strong></span>
                 </div>
             </div>
 
-            <!-- Main Content -->
             <div class="row">
-                <!-- Left Panel: User Selection -->
-                <div class="col-lg-4 col-md-12 mb-4">
-                    <div class="bg-white rounded shadow p-4 wow zoomIn" data-wow-delay="0.1s">
-                        <h5 class="mb-3">Select Client</h5>
-                        <div class="form-group">
-                            <label for="dietChartUserSelect">Choose Client</label>
-                            <select class="form-control" id="dietChartUserSelect">
-                                <option value="">Select a client...</option>
-                            </select>
-                        </div>
-                        <div id="selectedUserInfo" style="display: none;" class="alert alert-info mt-3">
-                            <small>
-                                <strong>Email:</strong> <span id="selectedUserEmail"></span><br>
-                                <strong>Name:</strong> <span id="selectedUserName"></span>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Panel: Diet Chart Form -->
-                <div class="col-lg-8 col-md-12">
-                    <div class="bg-white rounded shadow p-4 wow zoomIn" data-wow-delay="0.2s">
-                        <h5 class="mb-4">Diet Chart Details</h5>
-
-                        <div id="formPlaceholder" class="text-center text-muted">
-                            <p>Select a client to create or edit their diet chart</p>
-                        </div>
-
-                        <form id="dietChartForm" style="display: none;">
-                            <!-- Chart Metadata Section -->
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="dietChartTitle">Chart Title</label>
-                                    <input type="text" class="form-control" id="dietChartTitle" placeholder="e.g., Weekly Diet Plan">
+                <div class="col-12">
+                    <div class="bg-white rounded shadow p-4 wow zoomIn food-list-card" data-wow-delay="0.2s">
+                        <div class="diet-user-toolbar mb-3">
+                            <div class="diet-user-select-wrap">
+                                <label for="dietUserSelect" class="mb-2">Select User</label>
+                                <select id="dietUserSelect" class="form-control">
+                                    <option value="">Select user...</option>
+                                </select>
+                            </div>
+                            <div class="diet-user-actions">
+                                <div class="btn-group btn-group-sm mr-2" role="group" aria-label="Mode switch">
+                                    <button type="button" id="dietViewModeBtn" class="btn btn-outline-primary active">
+                                        <i class="fa fa-eye mr-1"></i> View
+                                    </button>
+                                    <button type="button" id="dietEditModeBtn" class="btn btn-outline-primary">
+                                        <i class="fa fa-pen mr-1"></i> Edit
+                                    </button>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label for="dietChartNotes">Notes</label>
-                                    <input type="text" class="form-control" id="dietChartNotes" placeholder="Additional notes or remarks">
+                                <button type="button" id="dietResetPageBtn" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fa fa-undo mr-1"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="dietChartLoadingSpinner" class="diet-loading-spinner" style="display: none;">
+                            <div class="spinner-border" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading diet chart...</p>
+                        </div>
+
+                        <div id="dietChartPageStatus" class="alert" style="display: none;"></div>
+
+                        <div id="dietChartEmptyState" class="diet-empty-state" style="display: none;">
+                            <h5 class="mb-2">No diet chart</h5>
+                            <p class="text-muted mb-3">This user does not have a saved diet chart yet.</p>
+                            <button type="button" id="createDietChartBtn" class="food-add-row-btn">
+                                <i class="fa fa-plus"></i> Create Diet Chart
+                            </button>
+                        </div>
+
+                        <div id="dietChartEditor" style="display: none;">
+                            <div class="diet-header-card mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6 mb-2">
+                                        <label for="dietChartTitle">Diet Chart Title</label>
+                                        <input type="text" id="dietChartTitle" class="form-control" placeholder="e.g., Fat Loss Plan - Week 1">
+                                    </div>
+                                    <div class="form-group col-md-6 mb-2">
+                                        <label for="dietChartNotes">Notes</label>
+                                        <input type="text" id="dietChartNotes" class="form-control" placeholder="Coach notes or instructions">
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Meals Section -->
-                            <div class="form-group">
-                                <h6 class="mb-3">
-                                    <i class="fa fa-star"></i> Meals
-                                </h6>
-                                <button type="button" class="btn btn-success btn-sm mb-3" id="addMealBtn">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 10px;">
+                                <h5 class="mb-0">Meals</h5>
+                                <button type="button" id="addMealBtn" class="food-add-row-btn diet-add-meal-btn">
                                     <i class="fa fa-plus"></i> Add Meal
                                 </button>
-                                <div id="mealsContainer">
-                                    <!-- Meal cards will be dynamically added here -->
+                            </div>
+
+                            <div id="dietMealsContainer"></div>
+
+                            <div class="diet-totals-card mt-3">
+                                <h6 class="mb-3">Full Diet Totals</h6>
+                                <div class="diet-total-chips" id="dietChartTotals">
+                                    <span class="diet-total-chip carbs"><i class="fa fa-bolt"></i> Carbs 0 gms</span>
+                                    <span class="diet-total-chip protein"><i class="fa fa-dumbbell"></i> Protein 0 gms</span>
+                                    <span class="diet-total-chip fats"><i class="fa fa-tint"></i> Fats 0 gms</span>
+                                    <span class="diet-total-chip calories"><i class="fa fa-fire"></i> Calories 0 kcal</span>
                                 </div>
                             </div>
 
-                            <!-- Save Section -->
-                            <div class="form-group mt-4">
-                                <button type="button" id="saveDietChartBtn" class="btn btn-primary mr-2">
-                                    <i class="fa fa-save"></i> Save Diet Chart
+                            <div class="diet-editor-actions mt-4">
+                                <button type="button" id="saveDietChartBtn" class="btn btn-primary">
+                                    <i class="fa fa-save mr-1"></i> Save Diet Chart
                                 </button>
-                                <button type="button" id="resetDietChartBtn" class="btn btn-secondary">
-                                    <i class="fa fa-undo"></i> Reset
+                                <button type="button" id="deleteDietChartBtn" class="btn btn-outline-danger" style="display: none;">
+                                    <i class="fa fa-trash mr-1"></i> Delete Diet Chart
                                 </button>
                             </div>
+                        </div>
 
-                            <div id="dietChartStatus" class="mt-3" style="display: none;"></div>
-                        </form>
+                        <div id="dietChartView" style="display: none;"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content food-form-modal-content">
+                <div class="modal-header">
+                    <div class="food-modal-title-wrap">
+                        <h5 class="modal-title"><i class="fa fa-plus-circle mr-2"></i>Add New Food</h5>
+                        <small class="food-modal-subtitle"><i class="fa fa-clipboard-list mr-1"></i>Create and use this food item instantly.</small>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addFoodForm" novalidate>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="newFoodName">Food Name</label>
+                                <input type="text" id="newFoodName" class="form-control" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="newFoodQuantity">Quantity</label>
+                                <input type="number" id="newFoodQuantity" class="form-control" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="newFoodUnit">Unit</label>
+                                <select id="newFoodUnit" class="form-control" required>
+                                    <option value="g">g</option>
+                                    <option value="ml">ml</option>
+                                    <option value="piece">piece</option>
+                                    <option value="slice">slice</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                <label for="newFoodCarbs">Carbs</label>
+                                <div class="input-group">
+                                    <input type="number" id="newFoodCarbs" class="form-control" min="0" step="0.01" required>
+                                    <div class="input-group-append"><span class="input-group-text">gms</span></div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="newFoodProtein">Protein</label>
+                                <div class="input-group">
+                                    <input type="number" id="newFoodProtein" class="form-control" min="0" step="0.01" required>
+                                    <div class="input-group-append"><span class="input-group-text">gms</span></div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="newFoodFats">Fats</label>
+                                <div class="input-group">
+                                    <input type="number" id="newFoodFats" class="form-control" min="0" step="0.01" required>
+                                    <div class="input-group-append"><span class="input-group-text">gms</span></div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="newFoodFibre">Fibre</label>
+                                <div class="input-group">
+                                    <input type="number" id="newFoodFibre" class="form-control" min="0" step="0.01">
+                                    <div class="input-group-append"><span class="input-group-text">gms</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newFoodImage">Food Image</label>
+                            <input type="file" id="newFoodImage" class="d-none" accept="image/*">
+                            <div class="food-image-input-row">
+                                <button type="button" id="newFoodImageBtn" class="btn btn-outline-primary btn-sm">
+                                    <i class="fa fa-image mr-1"></i> Choose Image
+                                </button>
+                                <span id="newFoodImageName" class="food-image-file-name">No file chosen</span>
+                            </div>
+                        </div>
+
+                        <div class="food-form-actions mt-4">
+                            <button type="submit" class="btn btn-primary" id="saveNewFoodBtn">
+                                <i class="fa fa-save mr-1"></i> Save Food
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                <i class="fa fa-times mr-1"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -134,6 +236,7 @@
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="../lib/easing/easing.min.js"></script>
     <script src="../lib/wow/wow.min.js"></script>
     <script src="../lib/owlcarousel/owl.carousel.min.js"></script>
@@ -145,11 +248,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
     <script src="../js/login.js"></script>
-
-    <!-- Components Loader -->
     <script src="../js/components-loader.js"></script>
-
-    <!-- Diet Chart Scripts -->
     <script src="../js/diet_chart.js"></script>
 </body>
 </html>

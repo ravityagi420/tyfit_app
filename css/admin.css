@@ -572,6 +572,542 @@
 }
 
 /* ============================================
+   DIET CHART PAGE - MODERN LAYOUT
+   ============================================ */
+
+.diet-user-toolbar {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.diet-user-select-wrap {
+    flex: 1 1 320px;
+}
+
+.diet-empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    border: 1px dashed #c7d6e5;
+    border-radius: 12px;
+    background-color: #f8fbff;
+}
+
+.diet-header-card {
+    border: 1px solid #d9e6f2;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    padding: 14px;
+}
+
+.diet-meal-card {
+    border: 1px solid #d9e6f2;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 22px rgba(43, 108, 176, 0.08);
+}
+
+.diet-meal-header {
+    background: linear-gradient(180deg, #f5faff 0%, #edf5ff 100%);
+    border-bottom: 1px solid #d9e6f2;
+}
+
+.diet-meal-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.diet-food-rows {
+    display: grid;
+    gap: 12px;
+}
+
+.diet-food-row {
+    border: 1px solid #dde8f3;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #ffffff;
+}
+
+.diet-food-row-main {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 100px 90px auto auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.diet-food-ref-text {
+    margin-top: 8px;
+}
+
+.diet-row-total-chips,
+.diet-total-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.diet-mini-chip,
+.diet-total-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.diet-mini-chip {
+    font-size: 12px;
+    padding: 5px 10px;
+    margin-top: 8px;
+}
+
+.diet-total-chip {
+    font-size: 13px;
+    padding: 6px 12px;
+}
+
+.diet-mini-chip.carbs,
+.diet-total-chip.carbs {
+    color: #c56a17;
+    background-color: #fff2e5;
+}
+
+.diet-mini-chip.protein,
+.diet-total-chip.protein {
+    color: #1f8f57;
+    background-color: #e8f8ef;
+}
+
+.diet-mini-chip.fats,
+.diet-total-chip.fats {
+    color: #1f6db2;
+    background-color: #e8f2ff;
+}
+
+.diet-mini-chip.calories,
+.diet-total-chip.calories {
+    color: #c53030;
+    background-color: #fdecec;
+}
+
+.diet-totals-card {
+    border: 1px solid #d9e6f2;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    padding: 14px;
+}
+
+.diet-editor-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.diet-editor-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.diet-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.diet-user-actions .btn-group .btn.active {
+    color: #ffffff;
+    background-color: #2b6cb0;
+    border-color: #2b6cb0;
+}
+
+/* ============================================
+   DIET CHART PAGE - LOADING & INTERACTION
+   ============================================ */
+
+#dietChartLoadingSpinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+#dietChartLoadingSpinner .spinner-border {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+    color: #2b6cb0;
+}
+
+/* ============================================
+   DIET CHART PAGE - VIEW MODE SHEET
+   ============================================ */
+
+.diet-view-sheet {
+    border: 1px solid #d9e6f2;
+    border-radius: 12px;
+    padding: 14px;
+    background-color: #ffffff;
+}
+
+.diet-view-header {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #d9e6f2;
+    background: linear-gradient(180deg, #f7fbff 0%, #edf5ff 100%);
+    margin-bottom: 14px;
+}
+
+.diet-view-chart-card {
+    border: 1px solid #d9e6f2;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fafbff 0%, #f5f9ff 100%);
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.diet-view-chart-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 16px;
+}
+
+.diet-view-chart-title {
+    font-weight: 700;
+    color: #1f4f80;
+    font-size: 14px;
+}
+
+.diet-view-health-metrics,
+.diet-view-macro-distribution {
+    border: 1px solid #dfe9f3;
+    border-radius: 10px;
+    background-color: #ffffff;
+    padding: 12px;
+}
+
+.diet-metric-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid #e6eef7;
+    border-radius: 8px;
+    background-color: #f9fcff;
+    margin-bottom: 8px;
+}
+
+.diet-metric-box.total {
+    background-color: #fff5f5;
+    border-color: #f3d1d1;
+}
+
+.diet-metric-label {
+    font-size: 12px;
+    color: #4b5563;
+    font-weight: 600;
+}
+
+.diet-metric-value {
+    font-size: 14px;
+    color: #111827;
+    font-weight: 800;
+}
+
+.diet-view-chart-container {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.diet-chart-wrapper {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#dietMacroChart {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.diet-view-chart-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chart-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    border: 1px solid #e3edf7;
+    font-size: 13px;
+}
+
+.chart-stat-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex: 0 0 12px;
+}
+
+.chart-stat-row.carbs .chart-stat-color {
+    background-color: #c56a17;
+}
+
+.chart-stat-row.protein .chart-stat-color {
+    background-color: #1f8f57;
+}
+
+.chart-stat-row.fats .chart-stat-color {
+    background-color: #1f6db2;
+}
+
+.chart-stat-row .chart-stat-value {
+    margin-left: auto;
+}
+
+.chart-stat-row.total {
+    background-color: #f8fbff;
+    border: 1px solid #c7d6e5;
+    font-weight: 600;
+}
+
+.chart-stat-label {
+    color: #4b5563;
+}
+
+.chart-stat-value {
+    font-weight: 700;
+}
+
+.chart-stat-value.carbs {
+    color: #c56a17;
+}
+
+.chart-stat-value.protein {
+    color: #1f8f57;
+}
+
+.chart-stat-value.fats {
+    color: #1f6db2;
+}
+
+.chart-stat-value.calories {
+    color: #c53030;
+}
+
+/* ============================================
+   DIET CHART PAGE - MEAL BLOCKS
+   ============================================ */
+
+.diet-view-meal-block {
+    border: 1px solid #dbe7f3;
+    border-radius: 12px;
+    overflow: visible;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, #fcfeff 0%, #f8fbff 100%);
+    padding: 10px;
+}
+
+.diet-view-meal-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    color: #2b6cb0;
+    background-color: #edf5ff;
+    border: 1px solid #d3e3f6;
+    margin-bottom: 8px;
+}
+
+.diet-view-meal-content {
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #e4edf7;
+    border-radius: 10px;
+}
+
+.diet-view-item {
+    padding: 8px 0;
+}
+
+.diet-view-item-separator {
+    height: 1px;
+    background-color: rgba(43, 108, 176, 0.2);
+    margin: 8px 0;
+}
+
+.diet-view-item-header {
+    margin-bottom: 8px;
+}
+
+.diet-view-item-top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.diet-view-item-bottom {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.diet-view-item-name {
+    font-weight: 700;
+    color: #1f4f80;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.diet-view-item-qty {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.diet-view-item-macros {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.diet-view-macro {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.diet-view-macro i {
+    font-size: 11px;
+}
+
+.diet-view-macro.carbs {
+    color: #c56a17;
+    background-color: #fff2e5;
+}
+
+.diet-view-macro.protein {
+    color: #1f8f57;
+    background-color: #e8f8ef;
+}
+
+.diet-view-macro.fats {
+    color: #1f6db2;
+    background-color: #e8f2ff;
+}
+
+.diet-view-macro.fibre {
+    color: #5f6b76;
+    background-color: #eff2f5;
+}
+
+.diet-view-macro.calories {
+    color: #c53030;
+    background-color: #fdecec;
+}
+
+.diet-view-item-calories-wrap {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.diet-view-meal-totals {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 10px 6px 10px;
+    border-top: 1px solid #dde8f3;
+    margin-top: 8px;
+}
+
+.diet-view-total-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.diet-view-total-capsule i {
+    font-size: 12px;
+}
+
+.diet-view-total-capsule.protein {
+    color: #1f8f57;
+    background-color: #e8f8ef;
+}
+
+.diet-view-total-capsule.calories {
+    color: #c53030;
+    background-color: #fdecec;
+}
+
+/* ============================================
+   DIET CHART PAGE - RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .diet-view-chart-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .diet-view-chart-container {
+        grid-template-columns: 1fr;
+    }
+
+    .diet-chart-wrapper {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    .diet-view-item-bottom {
+        grid-template-columns: 1fr;
+    }
+
+    .diet-view-item-macros {
+        justify-content: flex-start;
+    }
+
+    .diet-view-item-calories-wrap {
+        justify-content: flex-start;
+    }
+
+    .diet-view-meal-totals {
+        justify-content: flex-start;
+    }
+}
+
+/* ============================================
    ADMIN PAGES - RESPONSIVE MEDIA QUERIES
    ============================================ */
 
@@ -683,6 +1219,59 @@
     .food-catalog-calories-wrap {
         min-width: 160px;
         justify-content: center;
+    }
+
+    .diet-user-toolbar {
+        align-items: stretch;
+    }
+
+    .diet-user-select-wrap {
+        flex: 1 1 100%;
+    }
+
+    .diet-user-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .diet-user-actions .btn {
+        width: auto;
+    }
+
+    .diet-user-actions .btn-group {
+        width: auto;
+        flex: 1 1 auto;
+    }
+
+    .diet-user-actions .btn-group .btn {
+        flex: 1 1 auto;
+    }
+
+    .diet-meal-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .diet-meal-header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .diet-food-row-main {
+        grid-template-columns: 1fr;
+    }
+
+    .diet-food-row-main .btn {
+        width: 100%;
+    }
+
+    .diet-editor-actions .btn {
+        width: 100%;
+    }
+
+    .diet-view-meal-summary {
+        justify-content: flex-start;
     }
 }
 
