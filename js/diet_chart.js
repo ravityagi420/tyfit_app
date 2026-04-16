@@ -230,19 +230,26 @@ function renderDietChartView(chartData) {
 
             return `
                 <div class="diet-view-item">
-                    <div class="diet-view-item-top">
-                        <div class="diet-view-item-name">${escapeHtml(item.food_name || "-")}</div>
-                        <div class="diet-view-item-qty">${formatMacro(item.quantity)} ${escapeHtml(item.quantity_unit || item.reference_unit || "")}</div>
-                    </div>
-                    <div class="diet-view-item-bottom">
+                    <div class="diet-view-item-card">
+                        <div class="diet-view-item-top">
+                            <div class="diet-view-item-title">
+                                <span class="diet-item-dot"></span>
+                                <span class="diet-view-item-name">${escapeHtml(item.food_name || "-")}</span>
+                            </div>
+                            <div class="diet-view-item-calories">${formatMacro(computed.calories)} kcal</div>
+                        </div>
+                        <div class="diet-view-item-qty">
+                            <span class="diet-item-quantity">${formatMacro(item.quantity)}</span>
+                            <span class="diet-item-unit">${escapeHtml(item.quantity_unit || item.reference_unit || "")}</span>
+                        </div>
                         <div class="diet-view-item-macros">
-                            <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> Carbs ${formatMacro(computed.carbs)} gms</span>
-                            <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> Protein ${formatMacro(computed.protein)} gms</span>
-                            <span class="diet-view-macro fats"><i class="fa fa-tint"></i> Fat ${formatMacro(computed.fats)} gms</span>
+                            <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(computed.carbs)} g</span>
+                            <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(computed.protein)} g</span>
+                            <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(computed.fats)} g</span>
                             ${fibreHtml}
                         </div>
-                        <div class="diet-view-item-calories-wrap">
-                            <span class="diet-view-macro calories"><i class="fa fa-fire"></i> ${formatMacro(computed.calories)} kcal</span>
+                        <div class="diet-view-item-actions">
+                            <i class="fa fa-ellipsis-v"></i>
                         </div>
                     </div>
                 </div>
@@ -257,7 +264,13 @@ function renderDietChartView(chartData) {
 
         return `
             <div class="diet-view-meal-block">
-                <div class="diet-view-meal-label">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</div>
+                <div class="diet-view-meal-header">
+                    <div>
+                        <div class="diet-view-meal-label">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</div>
+                        <div class="diet-view-meal-meta">${formatMacro(mealTotals.calories)} kcal • P:${formatMacro(mealTotals.protein)} g</div>
+                    </div>
+                    <button type="button" class="diet-meal-add-btn" aria-label="Add meal item"><i class="fa fa-plus"></i></button>
+                </div>
                 <div class="diet-view-meal-content">
                     ${itemCards || '<div class="text-center text-muted" style="padding: 20px;">No items</div>'}
                 </div>

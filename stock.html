@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Price Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Standalone stock price tracker dashboard with live EUR quotes, buy price comparison, and charts.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="stocks.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script src="stocks.js" defer></script>
+</head>
+<body>
+    <main class="tracker-shell">
+        <header class="tracker-header">
+            <div>
+                <p class="eyebrow">Live Stock Tracker</p>
+                <h1>EUR Watchlist</h1>
+                <p class="intro">Track a manual set of tickers, compare buy prices, and monitor trend charts in a clean dashboard.</p>
+            </div>
+            <span class="data-badge">Mock Data</span>
+        </header>
+
+        <section class="summary-row" aria-label="Tracker summary">
+            <article class="summary-card">
+                <span class="summary-label">Selected</span>
+                <strong id="selectedCount">0</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Gainers</span>
+                <strong id="gainersCount">0</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Losers</span>
+                <strong id="losersCount">0</strong>
+            </article>
+            <article class="summary-card">
+                <span class="summary-label">Average move</span>
+                <strong id="averageMove">—</strong>
+            </article>
+        </section>
+
+        <section class="control-grid">
+            <section class="panel card controls-card">
+                <div class="panel-title">Selection controls</div>
+                <div class="field-row">
+                    <label for="tickerSearch">Search tickers</label>
+                    <input id="tickerSearch" type="search" placeholder="Filter tickers by name or symbol" autocomplete="off">
+                </div>
+                <div class="field-row checkbox-row">
+                    <label class="checkbox-label">
+                        <input id="selectAllTickers" type="checkbox">
+                        <span>Select all</span>
+                    </label>
+                    <button id="clearAllBtn" type="button" class="ghost-button">Clear all</button>
+                </div>
+                <div class="selection-meta">
+                    <span id="selectedBadge">0 selected</span>
+                    <span id="availableBadge">0 available</span>
+                </div>
+            </section>
+
+            <section class="panel card settings-card">
+                <div class="panel-title">Refresh settings</div>
+                <div class="field-row switch-row">
+                    <span>Auto refresh</span>
+                    <label class="toggle-switch">
+                        <input id="autoRefreshToggle" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="field-row">
+                    <label for="refreshInterval">Interval</label>
+                    <select id="refreshInterval">
+                        <option value="15">15 sec</option>
+                        <option value="30">30 sec</option>
+                        <option value="60">60 sec</option>
+                    </select>
+                </div>
+                <div class="field-row">
+                    <label for="sortOption">Sort by</label>
+                    <select id="sortOption">
+                        <option value="ticker">Ticker</option>
+                        <option value="price">Current price</option>
+                        <option value="delta">Delta %</option>
+                        <option value="trend">Trend</option>
+                    </select>
+                </div>
+                <button id="refreshDataBtn" type="button" class="primary-button">Refresh now</button>
+            </section>
+        </section>
+
+        <section class="panel card ticker-panel">
+            <div class="panel-title">Ticker list</div>
+            <div id="tickerSelector" class="ticker-list"></div>
+        </section>
+
+        <section class="panel card chart-panel">
+            <div class="panel-title">Combined trend chart</div>
+            <div class="chart-wrap">
+                <canvas id="combinedChart" aria-label="Combined stock prices chart"></canvas>
+            </div>
+        </section>
+
+        <section id="stockCardsContainer" class="stock-cards"></section>
+
+        <footer class="tracker-footer">
+            This page uses mock data by default. Update <code>stocks.js</code> to plug in a real quote provider.
+        </footer>
+    </main>
+</body>
+</html>
