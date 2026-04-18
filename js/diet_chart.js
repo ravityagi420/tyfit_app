@@ -7,6 +7,10 @@ const DIET_STATE = {
     mealCounter: 0,
     activeAdminId: "",
     isEditMode: false,
+    hasUnsavedChanges: false,
+    isSyncingView: false,
+    swipeHandlersBound: false,
+    reopenCatalogModalAfterCreateFood: false,
     currentChartData: null,
     chartInstance: null,
     selectedUserMeta: {
@@ -14,6 +18,29 @@ const DIET_STATE = {
         tdee: null
     }
 };
+
+function setDietDirty(isDirty) {
+    DIET_STATE.hasUnsavedChanges = Boolean(isDirty);
+
+    const saveBar = getEl("dietViewSaveBar");
+    if (saveBar) {
+        saveBar.style.display = DIET_STATE.hasUnsavedChanges ? "flex" : "none";
+    }
+}
+
+function setViewSaveLoading(isLoading) {
+    DIET_STATE.isSyncingView = Boolean(isLoading);
+
+    const saveBtn = getEl("dietViewSaveBtn");
+    if (!saveBtn) {
+        return;
+    }
+
+    saveBtn.disabled = DIET_STATE.isSyncingView;
+    saveBtn.innerHTML = DIET_STATE.isSyncingView
+        ? '<i class="fa fa-spinner fa-spin mr-1"></i> Saving...'
+        : '<i class="fa fa-save mr-1"></i> Save';
+}
 
 function getEl(id) {
     return document.getElementById(id);
@@ -126,6 +153,8 @@ function setEditorVisibility(showEditor) {
             deleteBtnHidden.style.display = "none";
         }
 
+        setDietDirty(false);
+
         return;
     }
 
@@ -222,10 +251,6 @@ function renderDietChartView(chartData) {
             mealTotals.fats += computed.fats;
             mealTotals.calories += computed.calories;
 
-            const fibreHtml = hasFibreValue(item)
-                ? `<span class="diet-view-macro fibre"><i class="fa fa-seedling"></i> Fibre ${formatMacro(computed.fibre)} gms</span>`
-                : "";
-
             return `
                 <div class="diet-view-item">
                     <div class="diet-view-item-card">
@@ -244,12 +269,14 @@ function renderDietChartView(chartData) {
                             <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(computed.carbs)} g</span>
                             <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(computed.protein)} g</span>
                             <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(computed.fats)} g</span>
-                            ${fibreHtml}
+                            <div class="diet-view-item-actions">
+                                <button type="button" class="diet-item-delete-btn" data-meal-index="${mealIndex}" data-item-index="${itemIndex}" aria-label="Delete food item">
+                                    <i class="fa fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="diet-view-item-actions">
-                            <button type="button" class="diet-item-menu-btn" data-meal-index="${mealIndex}" data-item-index="${itemIndex}" aria-label="Item options">
-                                <i class="fa fa-ellipsis-v"></i>
-                            </button>
+                        <div class="diet-swipe-overlay">
+                            <i class="fa fa-trash-alt"></i>
                         </div>
                     </div>
                 </div>
@@ -271,6 +298,10 @@ function renderDietChartView(chartData) {
                 </div>
                 <div class="diet-view-meal-content">
                     ${itemCards || '<div class="text-center text-muted" style="padding: 20px;">No items</div>'}
+                </div>
+                <div class="diet-view-meal-totals">
+                    <span class="diet-view-meal-total-chip protein"><i class="fa fa-dumbbell"></i> Total Protein: ${formatMacro(mealTotals.protein)} g</span>
+                    <span class="diet-view-meal-total-chip calories"><i class="fa fa-fire"></i> Total Calories: ${formatMacro(mealTotals.calories)} kcal</span>
                 </div>
             </div>
         `;
@@ -326,32 +357,276 @@ function renderDietChartView(chartData) {
 }
 
 function setupViewModeEventHandlers() {
-    // Handle plus button clicks to add new food items
+    // Handle plus button clicks to add food from catalog
     document.querySelectorAll('.diet-meal-add-btn').forEach(btn => {
         btn.addEventListener('click', (event) => {
             const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'));
-            openAddFoodModalForMeal(mealIndex);
+            openFoodCatalogModalForMeal(mealIndex);
         });
     });
 
-    // Handle three-dot menu clicks for item options
-    document.querySelectorAll('.diet-item-menu-btn').forEach(btn => {
+    // Handle delete icon clicks in item macros row
+    document.querySelectorAll('.diet-item-delete-btn').forEach(btn => {
         btn.addEventListener('click', (event) => {
             const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'));
             const itemIndex = parseInt(event.currentTarget.getAttribute('data-item-index'));
-            showItemOptionsMenu(event.currentTarget, mealIndex, itemIndex);
+            showDeleteConfirmationModal(mealIndex, itemIndex);
         });
+    });
+
+    // Add swipe functionality for mobile
+    if ('ontouchstart' in window && window.matchMedia('(max-width: 991px)').matches) {
+        addSwipeFunctionality();
+    }
+}
+
+function addSwipeFunctionality() {
+    if (DIET_STATE.swipeHandlersBound) {
+        return;
+    }
+
+    DIET_STATE.swipeHandlersBound = true;
+
+    let startX, startY, currentX, currentY;
+    let isSwiping = false;
+    let swipeElement = null;
+    let swipeDirection = null;
+    let swipeOverlay = null;
+
+    document.addEventListener('touchstart', (e) => {
+        if (!window.matchMedia('(max-width: 991px)').matches) {
+            return;
+        }
+
+        if (e.target.closest('.diet-view-item-card')) {
+            swipeElement = e.target.closest('.diet-view-item-card');
+            swipeOverlay = swipeElement.querySelector('.diet-swipe-overlay');
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isSwiping = false;
+            swipeDirection = null;
+            
+            // Reset any previous swipe styling
+            swipeElement.style.transform = '';
+            if (swipeOverlay) {
+                swipeOverlay.style.width = '0';
+            }
+        }
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!window.matchMedia('(max-width: 991px)').matches) {
+            return;
+        }
+
+        if (!swipeElement) return;
+        
+        currentX = e.touches[0].clientX;
+        currentY = e.touches[0].clientY;
+        
+        const deltaX = currentX - startX;
+        const deltaY = currentY - startY;
+        
+        // Only consider horizontal swipes
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+            isSwiping = true;
+            swipeDirection = deltaX > 0 ? 'right' : 'left';
+            
+            if (swipeDirection === 'left' && swipeOverlay) {
+                // For left swipe (delete), show red overlay
+                const swipeDistance = Math.abs(deltaX);
+                const maxWidth = swipeElement.offsetWidth * 0.8; // Max 80% of card width
+                const overlayWidth = Math.min(swipeDistance, maxWidth);
+                swipeOverlay.style.width = `${overlayWidth}px`;
+            } else {
+                // For right swipe, keep original behavior or add blue overlay if needed
+                const translateX = Math.min(Math.max(deltaX, -100), 100);
+                swipeElement.style.transform = `translateX(${translateX}px)`;
+            }
+            
+            e.preventDefault(); // Prevent scrolling
+        }
+    });
+
+    document.addEventListener('touchend', (e) => {
+        if (!window.matchMedia('(max-width: 991px)').matches) {
+            swipeElement = null;
+            isSwiping = false;
+            return;
+        }
+
+        if (!swipeElement || !isSwiping) {
+            if (swipeElement) {
+                swipeElement.style.transform = '';
+                if (swipeOverlay) {
+                    swipeOverlay.style.width = '0';
+                }
+            }
+            swipeElement = null;
+            return;
+        }
+        
+        const deltaX = currentX - startX;
+        const mealIndex = parseInt(swipeElement.querySelector('.diet-item-delete-btn')?.getAttribute('data-meal-index'));
+        const itemIndex = parseInt(swipeElement.querySelector('.diet-item-delete-btn')?.getAttribute('data-item-index'));
+        
+        if (Math.abs(deltaX) > 80) { // Minimum swipe distance
+            if (swipeDirection === 'left') {
+                // Swipe left - delete with modal confirmation
+                showDeleteConfirmationModal(mealIndex, itemIndex);
+            } else if (swipeDirection === 'right') {
+                // Swipe right - edit
+                editFoodItem(mealIndex, itemIndex);
+            }
+        }
+        
+        // Reset styling
+        swipeElement.style.transform = '';
+        if (swipeOverlay) {
+            swipeOverlay.style.width = '0';
+        }
+        swipeElement = null;
+        isSwiping = false;
     });
 }
 
-function openAddFoodModalForMeal(mealIndex) {
-    // Open the add food modal for the specific meal
-    const addFoodModal = document.getElementById('addFoodModal');
-    if (addFoodModal) {
-        // Store the meal index for when the food is added
-        addFoodModal.setAttribute('data-target-meal', mealIndex);
-        $('#addFoodModal').modal('show');
+function showDeleteConfirmationModal(mealIndex, itemIndex) {
+    // Store the indices for when user confirms
+    const modal = document.getElementById('deleteFoodModal');
+    if (modal) {
+        modal.setAttribute('data-meal-index', mealIndex);
+        modal.setAttribute('data-item-index', itemIndex);
+        $('#deleteFoodModal').modal('show');
     }
+}
+
+function confirmDeleteFoodItem() {
+    const modal = document.getElementById('deleteFoodModal');
+    if (modal) {
+        const mealIndex = parseInt(modal.getAttribute('data-meal-index'));
+        const itemIndex = parseInt(modal.getAttribute('data-item-index'));
+        if (!isNaN(mealIndex) && !isNaN(itemIndex)) {
+            deleteFoodItem(mealIndex, itemIndex);
+        }
+        $('#deleteFoodModal').modal('hide');
+    }
+}
+
+async function openFoodCatalogModalForMeal(mealIndex) {
+    const modal = getEl("selectFoodModal");
+    if (!modal || Number.isNaN(mealIndex)) {
+        return;
+    }
+
+    modal.setAttribute("data-meal-index", String(mealIndex));
+    const searchInput = getEl("foodSearchInput");
+    if (searchInput) {
+        searchInput.value = "";
+    }
+
+    await renderFoodCatalogModalList("");
+
+    if (window.jQuery && window.jQuery.fn.modal) {
+        window.jQuery("#selectFoodModal").modal("show");
+    }
+}
+
+async function renderFoodCatalogModalList(searchTerm = "") {
+    const listEl = getEl("foodCatalogList");
+    if (!listEl) {
+        return;
+    }
+
+    try {
+        const foods = await loadFoodCatalogOptions(searchTerm);
+
+        if (!foods || foods.length === 0) {
+            listEl.innerHTML = '<div class="food-catalog-empty text-center text-muted py-4">No foods found.</div>';
+            return;
+        }
+
+        listEl.innerHTML = foods.map((food) => {
+            const foodId = escapeHtml(food.food_id);
+            const unit = escapeHtml(food.unit_of_quantity || "");
+            const referenceQty = toNumber(food.quantity, 0);
+            const initialQty = referenceQty > 0 ? referenceQty : 1;
+            const previewText = buildCatalogMacroPreview(food, initialQty);
+
+            return `
+                <div class="food-catalog-pick-row" data-food-id="${foodId}">
+                    <div class="food-catalog-pick-left">
+                        <div class="food-catalog-pick-name">${escapeHtml(food.food_name || "Unnamed Food")}</div>
+                        <div class="food-catalog-pick-meta">${previewText}</div>
+                    </div>
+                    <div class="food-catalog-pick-right">
+                        <input type="number" class="form-control form-control-sm food-catalog-qty-input" value="${formatMacro(initialQty)}" min="0.01" step="0.01" data-food-id="${foodId}">
+                        <span class="food-catalog-unit">${unit}</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary js-add-food-catalog-item" data-food-id="${foodId}">Add</button>
+                    </div>
+                </div>
+            `;
+        }).join("");
+    } catch (error) {
+        console.error("renderFoodCatalogModalList error:", error);
+        listEl.innerHTML = '<div class="food-catalog-empty text-center text-danger py-4">Failed to load food catalog.</div>';
+    }
+}
+
+function buildCatalogMacroPreview(food, quantity) {
+    const referenceQty = toNumber(food.quantity, 0);
+    const factor = referenceQty > 0 ? quantity / referenceQty : 0;
+    const carbs = toNumber(food.carbs, 0) * factor;
+    const protein = toNumber(food.protein, 0) * factor;
+    const fats = toNumber(food.fats, 0) * factor;
+    const calories = (carbs * 4) + (protein * 4) + (fats * 9);
+    const unit = food.unit_of_quantity || "";
+
+    return `${formatMacro(quantity)} ${unit} | C ${formatMacro(carbs)}g | P ${formatMacro(protein)}g | F ${formatMacro(fats)}g | ${formatMacro(calories)} kcal`;
+}
+
+async function addFoodFromCatalogToMeal(foodId, mealIndex, selectedQuantity) {
+    if (!DIET_STATE.currentChartData || !Array.isArray(DIET_STATE.currentChartData.meals)) {
+        return;
+    }
+
+    const meal = DIET_STATE.currentChartData.meals[mealIndex];
+    if (!meal) {
+        return;
+    }
+
+    const selectedFood = DIET_STATE.foodCatalog.find((food) => String(food.food_id) === String(foodId));
+    if (!selectedFood) {
+        return;
+    }
+
+    if (!Array.isArray(meal.items)) {
+        meal.items = [];
+    }
+
+    const quantity = toNumber(selectedQuantity, 0);
+    if (quantity <= 0) {
+        return;
+    }
+
+    meal.items.push({
+        food_name: selectedFood.food_name,
+        quantity,
+        quantity_unit: selectedFood.unit_of_quantity || "g",
+        reference_quantity: toNumber(selectedFood.quantity, 0),
+        reference_unit: selectedFood.unit_of_quantity || "g",
+        reference_carbs: toNumber(selectedFood.carbs, 0),
+        reference_protein: toNumber(selectedFood.protein, 0),
+        reference_fat: toNumber(selectedFood.fats, 0),
+        reference_fibre: toNumber(selectedFood.fibre, 0)
+    });
+
+    if (window.jQuery && window.jQuery.fn.modal) {
+        window.jQuery("#selectFoodModal").modal("hide");
+    }
+
+    setDietDirty(true);
+    renderDietChartView(DIET_STATE.currentChartData);
+    await syncViewChartToSupabase();
 }
 
 function showItemOptionsMenu(button, mealIndex, itemIndex) {
@@ -372,11 +647,23 @@ function showItemOptionsMenu(button, mealIndex, itemIndex) {
         </button>
     `;
 
-    // Position the menu
+    // Position the menu - try to position to the right first, fallback to left if not enough space
     const rect = button.getBoundingClientRect();
-    menu.style.position = 'absolute';
+    const menuWidth = 120; // Approximate menu width
+    const viewportWidth = window.innerWidth;
+    
+    let leftPos;
+    if (rect.left + menuWidth + 10 < viewportWidth) {
+        // Position to the right
+        leftPos = rect.left;
+    } else {
+        // Position to the left
+        leftPos = rect.left - menuWidth + rect.width;
+    }
+    
+    menu.style.position = 'fixed'; // Use fixed positioning for better mobile support
     menu.style.top = `${rect.bottom + 5}px`;
-    menu.style.left = `${rect.left - 100}px`;
+    menu.style.left = `${leftPos}px`;
     menu.style.zIndex = '1000';
 
     document.body.appendChild(menu);
@@ -414,13 +701,172 @@ function editFoodItem(mealIndex, itemIndex) {
     }
 }
 
-function deleteFoodItem(mealIndex, itemIndex) {
-    if (confirm('Are you sure you want to delete this food item?')) {
-        // Remove the item from the data and re-render
-        if (DIET_STATE.currentChartData && DIET_STATE.currentChartData.meals) {
-            DIET_STATE.currentChartData.meals[mealIndex].items.splice(itemIndex, 1);
-            renderDietChartView(DIET_STATE.currentChartData);
+async function deleteFoodItem(mealIndex, itemIndex) {
+    if (DIET_STATE.currentChartData && DIET_STATE.currentChartData.meals) {
+        DIET_STATE.currentChartData.meals[mealIndex].items.splice(itemIndex, 1);
+        setDietDirty(true);
+        renderDietChartView(DIET_STATE.currentChartData);
+        await syncViewChartToSupabase();
+    }
+}
+
+async function ensureViewChartId() {
+    if (DIET_STATE.selectedChartId) {
+        return DIET_STATE.selectedChartId;
+    }
+
+    const userId = DIET_STATE.selectedUserId || DIET_STATE.currentChartData?.chart?.user_id;
+    if (!userId) {
+        throw new Error("No selected user for saving diet chart.");
+    }
+
+    const createdBy = DIET_STATE.activeAdminId || null;
+    const { data, error } = await window.supabaseClient
+        .from("diet_charts")
+        .insert({
+            user_id: userId,
+            title: DIET_STATE.currentChartData?.chart?.title || "Diet Chart",
+            notes: DIET_STATE.currentChartData?.chart?.notes || null,
+            created_by: createdBy,
+            updated_at: new Date().toISOString()
+        })
+        .select("id")
+        .single();
+
+    if (error) {
+        throw new Error("Create failed: " + error.message);
+    }
+
+    DIET_STATE.selectedChartId = data.id;
+    if (!DIET_STATE.currentChartData.chart) {
+        DIET_STATE.currentChartData.chart = {};
+    }
+    DIET_STATE.currentChartData.chart.id = data.id;
+    DIET_STATE.currentChartData.chart.user_id = userId;
+    return data.id;
+}
+
+async function syncViewChartToSupabase() {
+    const chartData = DIET_STATE.currentChartData;
+
+    if (!chartData || !Array.isArray(chartData.meals)) {
+        return false;
+    }
+
+    if (DIET_STATE.isSyncingView) {
+        return false;
+    }
+
+    setViewSaveLoading(true);
+    try {
+        const chartId = await ensureViewChartId();
+
+        const { error: chartUpdateError } = await window.supabaseClient
+            .from("diet_charts")
+            .update({
+                title: chartData?.chart?.title || "",
+                notes: chartData?.chart?.notes || null,
+                updated_at: new Date().toISOString()
+            })
+            .eq("id", chartId);
+
+        if (chartUpdateError) {
+            throw new Error("Chart update failed: " + chartUpdateError.message);
         }
+
+        const { data: existingMeals, error: fetchMealsError } = await window.supabaseClient
+            .from("diet_chart_meals")
+            .select("id")
+            .eq("diet_chart_id", chartId);
+
+        if (fetchMealsError) {
+            throw new Error("Failed to fetch existing meals: " + fetchMealsError.message);
+        }
+
+        const existingMealIds = (existingMeals || []).map((meal) => meal.id);
+        if (existingMealIds.length > 0) {
+            const { error: deleteItemsError } = await window.supabaseClient
+                .from("diet_chart_items")
+                .delete()
+                .in("meal_id", existingMealIds);
+
+            if (deleteItemsError) {
+                throw new Error("Failed to clear existing items: " + deleteItemsError.message);
+            }
+        }
+
+        const { error: deleteMealsError } = await window.supabaseClient
+            .from("diet_chart_meals")
+            .delete()
+            .eq("diet_chart_id", chartId);
+
+        if (deleteMealsError) {
+            throw new Error("Failed to clear existing meals: " + deleteMealsError.message);
+        }
+
+        for (let mealIndex = 0; mealIndex < chartData.meals.length; mealIndex += 1) {
+            const mealPayload = chartData.meals[mealIndex];
+            const { data: insertedMeal, error: mealInsertError } = await window.supabaseClient
+                .from("diet_chart_meals")
+                .insert({
+                    diet_chart_id: chartId,
+                    meal_name: mealPayload.meal_name || `Meal ${mealIndex + 1}`,
+                    sort_order: mealIndex + 1
+                })
+                .select("id")
+                .single();
+
+            if (mealInsertError) {
+                throw new Error("Meal save failed: " + mealInsertError.message);
+            }
+
+            const mealItems = Array.isArray(mealPayload.items) ? mealPayload.items : [];
+            if (mealItems.length > 0) {
+                const itemsPayload = mealItems.map((item, itemIndex) => ({
+                    meal_id: insertedMeal.id,
+                    food_name: item.food_name || "",
+                    quantity: toNumber(item.quantity, 0),
+                    quantity_unit: item.quantity_unit || item.reference_unit || "",
+                    reference_quantity: toNumber(item.reference_quantity, 0),
+                    reference_unit: item.reference_unit || "",
+                    reference_carbs: toNumber(item.reference_carbs, 0),
+                    reference_protein: toNumber(item.reference_protein, 0),
+                    reference_fat: toNumber(item.reference_fat, 0),
+                    reference_fibre: toNumber(item.reference_fibre, 0),
+                    sort_order: itemIndex + 1,
+                    updated_at: new Date().toISOString()
+                }));
+
+                const { error: itemInsertError } = await window.supabaseClient
+                    .from("diet_chart_items")
+                    .insert(itemsPayload);
+
+                if (itemInsertError) {
+                    throw new Error("Item save failed: " + itemInsertError.message);
+                }
+            }
+        }
+
+        setDietDirty(false);
+        return true;
+    } catch (error) {
+        console.error("syncViewChartToSupabase error:", error);
+        await showDietAlert(error.message || "Failed to sync diet chart changes.", { title: "Sync Failed" });
+
+        if (DIET_STATE.selectedChartId) {
+            try {
+                const reloadedChart = await loadDietChart(DIET_STATE.selectedChartId);
+                DIET_STATE.currentChartData = reloadedChart;
+                renderDietChartView(reloadedChart);
+                setDietDirty(true);
+            } catch (reloadError) {
+                console.error("sync reload error:", reloadError);
+            }
+        }
+
+        return false;
+    } finally {
+        setViewSaveLoading(false);
     }
 }
 
@@ -599,8 +1045,10 @@ async function loadUsersList() {
 
     selectEl.innerHTML = '<option value="">Select user...</option>';
     DIET_STATE.users.forEach((user) => {
-        const roleText = user.role ? ` - ${user.role}` : "";
-        const label = `${user.email}${user.full_name ? ` (${user.full_name})` : ""}${roleText}`;
+        const fullName = (user.full_name || "Unnamed User").trim();
+        const roleText = user.role ? user.role.replace(/[_-]/g, " ") : "user";
+        const roleLabel = roleText.charAt(0).toUpperCase() + roleText.slice(1);
+        const label = `${fullName} - ${roleLabel}`;
         const option = document.createElement("option");
         option.value = user.id;
         option.textContent = label;
@@ -1325,6 +1773,7 @@ async function saveDietChart() {
         renderDietChartEditor(loadedChart);
         renderDietChartView(loadedChart);
         setEditorVisibility(true);
+        setDietDirty(false);
         hideLoadingSpinner();
     } catch (error) {
         console.error("saveDietChart error:", error);
@@ -1405,6 +1854,7 @@ function resetDietChartPage() {
     DIET_STATE.selectedUserId = "";
     DIET_STATE.mealCounter = 0;
     DIET_STATE.isEditMode = false;
+    DIET_STATE.hasUnsavedChanges = false;
     DIET_STATE.currentChartData = null;
 
     const userSelect = getEl("dietUserSelect");
@@ -1434,6 +1884,7 @@ function resetDietChartPage() {
     }
 
     hidePageStatus();
+    setDietDirty(false);
     setEditorVisibility(false);
     recalculateDietChartTotals();
 }
@@ -1465,6 +1916,7 @@ async function handleUserSelection(userId) {
         const chartData = await loadDietChart(existingChart.id);
         DIET_STATE.currentChartData = chartData;
         DIET_STATE.isEditMode = false;
+        setDietDirty(false);
         renderDietChartEditor(chartData);
         renderDietChartView(chartData);
         setEditorVisibility(true);
@@ -1707,6 +2159,14 @@ function bindDietChartEvents() {
                     window.jQuery("#addFoodModal").modal("hide");
                 }
 
+                if (DIET_STATE.reopenCatalogModalAfterCreateFood) {
+                    DIET_STATE.reopenCatalogModalAfterCreateFood = false;
+                    await renderFoodCatalogModalList("");
+                    if (window.jQuery && window.jQuery.fn.modal) {
+                        window.jQuery("#selectFoodModal").modal("show");
+                    }
+                }
+
                 await showDietAlert("Food created and selected successfully.", { title: "Food Added" });
             } catch (error) {
                 console.error("add food modal submit error:", error);
@@ -1745,6 +2205,89 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     bindDietChartEvents();
     resetDietChartPage();
+
+    // Add event listener for delete confirmation modal
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', confirmDeleteFoodItem);
+    }
+
+    const viewSaveBtn = getEl("dietViewSaveBtn");
+    if (viewSaveBtn) {
+        viewSaveBtn.addEventListener("click", async () => {
+            await syncViewChartToSupabase();
+        });
+    }
+
+    const openAddFoodFromCatalogModalBtn = getEl("openAddFoodFromCatalogModalBtn");
+    if (openAddFoodFromCatalogModalBtn) {
+        openAddFoodFromCatalogModalBtn.addEventListener("click", () => {
+            DIET_STATE.reopenCatalogModalAfterCreateFood = true;
+            DIET_STATE.addFoodTargetRow = null;
+
+            if (window.jQuery && window.jQuery.fn.modal) {
+                window.jQuery("#selectFoodModal").modal("hide");
+            }
+
+            openAddFoodModal(null);
+        });
+    }
+
+    const foodSearchInput = getEl("foodSearchInput");
+    if (foodSearchInput) {
+        foodSearchInput.addEventListener("input", (event) => {
+            renderFoodCatalogModalList(event.target.value || "");
+        });
+    }
+
+    const foodCatalogList = getEl("foodCatalogList");
+    if (foodCatalogList) {
+        foodCatalogList.addEventListener("input", (event) => {
+            const qtyInput = event.target.closest(".food-catalog-qty-input");
+            if (!qtyInput) {
+                return;
+            }
+
+            const row = qtyInput.closest(".food-catalog-pick-row");
+            if (!row) {
+                return;
+            }
+
+            const foodId = row.getAttribute("data-food-id");
+            const selectedFood = DIET_STATE.foodCatalog.find((food) => String(food.food_id) === String(foodId));
+            const metaEl = row.querySelector(".food-catalog-pick-meta");
+
+            if (!selectedFood || !metaEl) {
+                return;
+            }
+
+            const quantity = toNumber(qtyInput.value, 0);
+            metaEl.textContent = buildCatalogMacroPreview(selectedFood, quantity > 0 ? quantity : 0);
+        });
+
+        foodCatalogList.addEventListener("click", async (event) => {
+            const pickButton = event.target.closest(".js-add-food-catalog-item");
+            if (!pickButton) {
+                return;
+            }
+
+            const modal = getEl("selectFoodModal");
+            const mealIndex = modal ? parseInt(modal.getAttribute("data-meal-index"), 10) : NaN;
+            const foodId = pickButton.getAttribute("data-food-id");
+            const row = pickButton.closest(".food-catalog-pick-row");
+            const qtyInput = row ? row.querySelector(".food-catalog-qty-input") : null;
+            const selectedQuantity = qtyInput ? toNumber(qtyInput.value, 0) : 0;
+
+            if (selectedQuantity <= 0) {
+                showDietAlert("Quantity must be greater than 0.", { title: "Validation" });
+                return;
+            }
+
+            if (foodId && !Number.isNaN(mealIndex)) {
+                await addFoodFromCatalogToMeal(foodId, mealIndex, selectedQuantity);
+            }
+        });
+    }
 });
 
 window.loadUsersList = loadUsersList;
@@ -1763,6 +2306,7 @@ window.recalculateFoodRow = recalculateFoodRow;
 window.recalculateMealTotals = recalculateMealTotals;
 window.recalculateDietChartTotals = recalculateDietChartTotals;
 window.openAddFoodModal = openAddFoodModal;
+window.openFoodCatalogModalForMeal = openFoodCatalogModalForMeal;
 window.uploadFoodImage = uploadFoodImage;
 window.createFoodCatalogItem = createFoodCatalogItem;
 window.collectDietChartFormData = collectDietChartFormData;

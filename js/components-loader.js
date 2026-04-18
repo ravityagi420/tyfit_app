@@ -83,6 +83,15 @@ const ComponentsLoader = {
             });
         }
 
+        // Adjust navbar logo path for admin pages
+        const navbarLogo = document.getElementById('siteLogo');
+        if (navbarLogo) {
+            const src = navbarLogo.getAttribute('src');
+            if (src && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('..')) {
+                navbarLogo.setAttribute('src', '../' + src);
+            }
+        }
+
         // Adjust footer links
         const footer = document.querySelector('.footer-logo');
         if (footer) {

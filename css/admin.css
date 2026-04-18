@@ -50,6 +50,55 @@
     font-weight: 500;
 }
 
+.diet-view-save-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 8px 12px 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background-color: #e5e7eb;
+    border: 1px solid #d1d5db;
+}
+
+.diet-view-save-text {
+    font-size: 13px;
+    color: #334155;
+    font-weight: 600;
+}
+
+.diet-view-save-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 7px 14px;
+    background-color: #f8fafc;
+    color: #1f2937;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.diet-view-save-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.diet-header-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0f172a;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.diet-header-brand-logo {
+    width: 108px;
+    height: auto;
+    display: block;
+}
+
 .diet-page-shell {
     max-width: 920px;
     margin: 0 auto;
@@ -441,6 +490,64 @@
     gap: 12px;
 }
 
+.food-catalog-pick-row {
+    width: 100%;
+    border: 1px solid #d9e6f2;
+    border-radius: 10px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+}
+
+.food-catalog-pick-row:hover {
+    background-color: #f8fbff;
+    border-color: #a5c4e6;
+}
+
+.food-catalog-pick-left {
+    min-width: 0;
+}
+
+.food-catalog-pick-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f4c81;
+}
+
+.food-catalog-pick-meta {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.food-catalog-pick-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#selectFoodModal #foodCatalogList {
+    max-height: calc((72px * 3) + (12px * 2));
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+#selectFoodModal .food-catalog-pick-row {
+    min-height: 72px;
+}
+
+.food-catalog-qty-input {
+    width: 86px;
+}
+
+.food-catalog-unit {
+    font-size: 12px;
+    color: #64748b;
+    min-width: 20px;
+}
+
 .food-catalog-row {
     position: relative;
     display: grid;
@@ -773,6 +880,40 @@
     border-color: #2b6cb0;
 }
 
+.diet-user-select-control {
+    position: relative;
+}
+
+.diet-user-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    padding: 11px 42px 11px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    min-height: 44px;
+}
+
+.diet-user-select:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.diet-user-select-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+    font-size: 12px;
+}
+
 /* ============================================
    DIET CHART PAGE - LOADING & INTERACTION
    ============================================ */
@@ -801,33 +942,32 @@
 }
 
 .diet-view-chart-card {
-    background-color: #f8fafc;
-    border-radius: 22px;
-    padding: 18px;
-    margin-bottom: 18px;
-    border: 1px solid rgba(148, 163, 184, 0.18);
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin: 0 8px 20px 8px;
+    border: none;
 }
 
 .diet-view-chart-title {
-    font-weight: 700;
-    color: #0f172a;
-    font-size: 14px;
-    margin-bottom: 12px;
+    display: none;
 }
 
 .diet-view-chart-container {
-    display: grid;
-    grid-template-columns: 130px 1fr;
-    gap: 16px;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 0 12px;
 }
 
 .diet-chart-wrapper {
-    width: 130px;
-    height: 130px;
+    width: 110px;
+    height: 110px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 #dietMacroChart {
@@ -838,25 +978,34 @@
 .diet-view-chart-stats {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    flex: 1;
 }
 
 .chart-stat-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 18px;
-    background-color: #f8fafc;
-    border: 1px solid rgba(148, 163, 184, 0.14);
-    font-size: 13px;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 0;
+    border-radius: 0;
+    background-color: transparent;
+    border: none;
+    font-size: 14px;
+    margin: 0 0 1px 0;
+}
+
+.chart-stat-row.calories {
+    margin-top: 1px;
+    padding-top: 1px;
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 .chart-stat-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    flex: 0 0 12px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .chart-stat-row.carbs .chart-stat-color {
@@ -882,6 +1031,7 @@
 
 .chart-stat-label {
     color: #475569;
+    font-weight: 600;
 }
 
 .chart-stat-value.carbs {
@@ -964,9 +1114,23 @@
 
 .diet-view-item-card {
     background-color: #f8fafc;
+    background-image: url('../assets/tyfit_img/food_card_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     border-radius: 18px;
     padding: 14px 14px 12px;
     border: 1px solid rgba(148, 163, 184, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.diet-view-item-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 1;
 }
 
 .diet-view-item-top {
@@ -975,6 +1139,8 @@
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 12px;
+    position: relative;
+    z-index: 2;
 }
 
 .diet-view-item-title {
@@ -1020,6 +1186,8 @@
     font-size: 13px;
     margin-bottom: 12px;
     width: fit-content;
+    position: relative;
+    z-index: 2;
 }
 
 .diet-item-quantity,
@@ -1030,14 +1198,19 @@
 .diet-view-item-macros {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 14px;
     align-items: center;
     margin-bottom: 12px;
+    position: relative;
+    z-index: 2;
 }
 
 .diet-view-item-actions {
-    display: flex;
-    justify-content: flex-end;
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    position: relative;
+    z-index: 2;
 }
 
 .diet-view-item-actions i {
@@ -1069,10 +1242,39 @@
     color: #7c3aed;
 }
 
-.diet-view-item-actions .diet-item-menu-btn {
+.diet-view-meal-totals {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(148, 163, 184, 0.35);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.diet-view-meal-total-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+    background-color: rgba(255, 255, 255, 0.72);
+    border-radius: 999px;
+    padding: 6px 10px;
+}
+
+.diet-view-meal-total-chip.protein {
+    color: #15803d;
+}
+
+.diet-view-meal-total-chip.calories {
+    color: #b45309;
+}
+
+.diet-view-item-actions .diet-item-delete-btn {
     background: none;
     border: none;
-    color: #64748b;
+    color: #94a3b8;
     font-size: 14px;
     cursor: pointer;
     padding: 4px;
@@ -1080,8 +1282,12 @@
     transition: background-color 0.2s;
 }
 
-.diet-view-item-actions .diet-item-menu-btn:hover {
-    background-color: rgba(100, 116, 139, 0.1);
+.diet-view-item-actions .diet-item-delete-btn:hover {
+    background-color: rgba(148, 163, 184, 0.16);
+}
+
+.diet-swipe-overlay {
+    display: none;
 }
 
 /* Item Options Menu */
@@ -1164,7 +1370,7 @@
     /* Meals container styles will be added here */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 991px) {
     /* Mobile-specific diet chart changes */
     .diet-view-container {
         background-color: transparent;
@@ -1179,7 +1385,7 @@
         background-color: transparent;
         border-radius: 0;
         padding: 0;
-        margin-bottom: 20px;
+        margin: 0 8px 20px 8px;
         border: none;
     }
 
@@ -1218,12 +1424,12 @@
         background-color: transparent;
         border: none;
         font-size: 14px;
-        margin: 0 0 2px 0;
+        margin: 0 0 1px 0;
     }
 
     .chart-stat-row.calories {
-        margin-top: 2px;
-        padding-top: 2px;
+        margin-top: 1px;
+        padding-top: 1px;
         border-top: 1px solid rgba(148, 163, 184, 0.2);
     }
 
@@ -1249,7 +1455,7 @@
         background-color: transparent;
         border-radius: 0;
         padding: 0;
-        margin: 0 0 20px 0;
+        margin: 0 8px 20px 8px;
         box-shadow: none;
         border: none;
     }
@@ -1288,11 +1494,15 @@
     /* Mobile food item layout - full width with minimal margins */
     .diet-view-item-card {
         background-color: rgba(15, 23, 42, 0.08);
+        background-image: url('../assets/tyfit_img/food_card_bg.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         border-radius: 8px;
         padding: 12px;
         border: 1px solid rgba(148, 163, 184, 0.08);
         position: relative;
-        margin: 0 6px 12px 6px;
+        margin: 0 4px 12px 4px;
     }
 
     .diet-view-item-top {
@@ -1358,22 +1568,18 @@
         margin-bottom: 8px;
     }
 
-    .diet-view-macro.fibre {
-        display: none; /* Hide fibres on mobile */
-    }
-
     .diet-view-item-actions {
-        position: absolute;
-        bottom: 8px;
-        right: 8px;
-        display: flex;
-        justify-content: flex-end;
+        display: none;
     }
 
-    .diet-view-item-actions .diet-item-menu-btn {
+    .diet-view-meal-totals {
+        display: none;
+    }
+
+    .diet-view-item-actions .diet-item-delete-btn {
         background: none;
         border: none;
-        color: #64748b;
+        color: #94a3b8;
         font-size: 12px;
         cursor: pointer;
         padding: 2px;
@@ -1381,8 +1587,47 @@
         transition: background-color 0.2s;
     }
 
-    .diet-view-item-actions .diet-item-menu-btn:hover {
-        background-color: rgba(100, 116, 139, 0.1);
+    .diet-view-item-actions .diet-item-delete-btn:hover {
+        background-color: rgba(148, 163, 184, 0.16);
+    }
+
+    /* Swipe overlay for delete action */
+    .diet-swipe-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 0;
+        background-color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        transition: width 0.1s ease;
+        border-radius: 8px;
+        z-index: 4;
+    }
+
+    .diet-swipe-overlay i {
+        opacity: 0.8;
+    }
+
+    /* Mobile margins for direct elements */
+    .diet-user-toolbar {
+        margin: 0 8px;
+    }
+
+    #dietChartLoadingSpinner {
+        margin: 0 8px;
+    }
+
+    #dietChartPageStatus {
+        margin: 0 8px;
+    }
+
+    #dietChartEmptyState {
+        margin: 0 8px;
     }
 }
 
@@ -1400,6 +1645,35 @@
     .admin-greeting {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .diet-view-save-bar {
+        position: fixed;
+        top: 58px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 1050;
+        margin: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 10px 12px;
+        background-color: #9ca3af;
+    }
+
+    .diet-view-save-text {
+        color: #111827;
+    }
+
+    .diet-view-save-btn {
+        margin-left: auto;
+        background-color: #f3f4f6;
+        color: #111827;
+    }
+
+    .diet-header-brand {
+        margin-bottom: 8px;
     }
 
     .diet-page-card {
