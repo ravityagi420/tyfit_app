@@ -52,7 +52,7 @@ function escapeHtml(value) {
 }
 
 function formatMacro(value) {
-    return toNumber(value, 0).toFixed(2).replace(/\.00$/, "");
+    return toNumber(value, 0).toFixed(1).replace(/\.0$/, "");
 }
 
 function showPageStatus(message, type = "info") {
@@ -226,8 +226,6 @@ function renderDietChartView(chartData) {
                 ? `<span class="diet-view-macro fibre"><i class="fa fa-seedling"></i> Fibre ${formatMacro(computed.fibre)} gms</span>`
                 : "";
 
-            const separator = itemIndex < (meal.items || []).length - 1 ? '<div class="diet-view-item-separator"></div>' : '';
-
             return `
                 <div class="diet-view-item">
                     <div class="diet-view-item-card">
@@ -249,11 +247,12 @@ function renderDietChartView(chartData) {
                             ${fibreHtml}
                         </div>
                         <div class="diet-view-item-actions">
-                            <i class="fa fa-ellipsis-v"></i>
+                            <button type="button" class="diet-item-menu-btn" data-meal-index="${mealIndex}" data-item-index="${itemIndex}" aria-label="Item options">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
-                ${separator}
             `;
         }).join("");
 
@@ -265,86 +264,164 @@ function renderDietChartView(chartData) {
         return `
             <div class="diet-view-meal-block">
                 <div class="diet-view-meal-header">
-                    <div>
-                        <div class="diet-view-meal-label">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</div>
-                        <div class="diet-view-meal-meta">${formatMacro(mealTotals.calories)} kcal • P:${formatMacro(mealTotals.protein)} g</div>
-                    </div>
-                    <button type="button" class="diet-meal-add-btn" aria-label="Add meal item"><i class="fa fa-plus"></i></button>
+                    <div class="diet-view-meal-label">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</div>
+                    <button type="button" class="diet-meal-add-btn" data-meal-index="${mealIndex}" aria-label="Add meal item">
+                        <i class="fa fa-plus"></i>
+                    </button>
                 </div>
                 <div class="diet-view-meal-content">
                     ${itemCards || '<div class="text-center text-muted" style="padding: 20px;">No items</div>'}
-                </div>
-                <div class="diet-view-meal-totals">
-                    <span class="diet-view-total-capsule protein">
-                        <i class="fa fa-dumbbell"></i> Protein ${formatMacro(mealTotals.protein)} gms
-                    </span>
-                    <span class="diet-view-total-capsule calories">
-                        <i class="fa fa-fire"></i> Calories ${formatMacro(mealTotals.calories)} kcal
-                    </span>
                 </div>
             </div>
         `;
     }).join("");
 
     viewEl.innerHTML = `
-        <div class="diet-view-sheet">
-            <div class="diet-view-header">
-                <h4 class="mb-1">${escapeHtml(title)}</h4>
-                ${notes ? `<p class="text-muted mb-0">${escapeHtml(notes)}</p>` : ""}
-            </div>
-            
+        <div class="diet-view-container">
             <div class="diet-view-chart-card">
-                <div class="diet-view-chart-layout">
-                    <div class="diet-view-health-metrics">
-                        <div class="diet-view-chart-title mb-3">Metabolic Summary</div>
-                        <div class="diet-metric-box">
-                            <span class="diet-metric-label">BMR</span>
-                            <span class="diet-metric-value">${bmrText}</span>
-                        </div>
-                        <div class="diet-metric-box">
-                            <span class="diet-metric-label">TDEE</span>
-                            <span class="diet-metric-value">${tdeeText}</span>
-                        </div>
-                        <div class="diet-metric-box total">
-                            <span class="diet-metric-label">Total Calories</span>
-                            <span class="diet-metric-value">${formatMacro(overall.calories)} kcal</span>
-                        </div>
+                <div class="diet-view-chart-title mb-3">Macros Distribution</div>
+                <div class="diet-view-chart-container">
+                    <div class="diet-chart-wrapper">
+                        <canvas id="dietMacroChart"></canvas>
                     </div>
-                    <div class="diet-view-macro-distribution">
-                        <div class="diet-view-chart-title mb-3">Macros Distribution</div>
-                        <div class="diet-view-chart-container">
-                            <div class="diet-chart-wrapper">
-                                <canvas id="dietMacroChart"></canvas>
-                            </div>
-                            <div class="diet-view-chart-stats">
-                                <div class="chart-stat-row carbs">
-                                    <span class="chart-stat-color"></span>
-                                    <span class="chart-stat-label">Carbs</span>
-                                    <span class="chart-stat-value carbs">${formatMacro(overall.carbs)} gms</span>
-                                </div>
-                                <div class="chart-stat-row protein">
-                                    <span class="chart-stat-color"></span>
-                                    <span class="chart-stat-label">Protein</span>
-                                    <span class="chart-stat-value protein">${formatMacro(overall.protein)} gms</span>
-                                </div>
-                                <div class="chart-stat-row fats">
-                                    <span class="chart-stat-color"></span>
-                                    <span class="chart-stat-label">Fats</span>
-                                    <span class="chart-stat-value fats">${formatMacro(overall.fats)} gms</span>
-                                </div>
-                            </div>
+                    <div class="diet-view-chart-stats">
+                        <div class="chart-stat-row carbs">
+                            <span class="chart-stat-color"></span>
+                            <span class="chart-stat-label">Carbs</span>
+                            <span class="chart-stat-value carbs">${formatMacro(overall.carbs)} gms</span>
+                        </div>
+                        <div class="chart-stat-row protein">
+                            <span class="chart-stat-color"></span>
+                            <span class="chart-stat-label">Protein</span>
+                            <span class="chart-stat-value protein">${formatMacro(overall.protein)} gms</span>
+                        </div>
+                        <div class="chart-stat-row fats">
+                            <span class="chart-stat-color"></span>
+                            <span class="chart-stat-label">Fats</span>
+                            <span class="chart-stat-value fats">${formatMacro(overall.fats)} gms</span>
+                        </div>
+                        <div class="chart-stat-row calories total">
+                            <span class="chart-stat-color"></span>
+                            <span class="chart-stat-label">Total Calories</span>
+                            <span class="chart-stat-value calories">${formatMacro(overall.calories)} kcal</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            ${mealsHtml || '<p class="text-muted mb-0">No meals in this diet chart.</p>'}
+            <div class="diet-view-meals">
+                ${mealsHtml || '<p class="text-muted mb-0">No meals in this diet chart.</p>'}
+            </div>
         </div>
     `;
 
     setTimeout(() => {
         renderMacroPieChart(overall);
     }, 100);
+
+    // Add event handlers for view mode interactions
+    setTimeout(() => {
+        setupViewModeEventHandlers();
+    }, 100);
+}
+
+function setupViewModeEventHandlers() {
+    // Handle plus button clicks to add new food items
+    document.querySelectorAll('.diet-meal-add-btn').forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'));
+            openAddFoodModalForMeal(mealIndex);
+        });
+    });
+
+    // Handle three-dot menu clicks for item options
+    document.querySelectorAll('.diet-item-menu-btn').forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'));
+            const itemIndex = parseInt(event.currentTarget.getAttribute('data-item-index'));
+            showItemOptionsMenu(event.currentTarget, mealIndex, itemIndex);
+        });
+    });
+}
+
+function openAddFoodModalForMeal(mealIndex) {
+    // Open the add food modal for the specific meal
+    const addFoodModal = document.getElementById('addFoodModal');
+    if (addFoodModal) {
+        // Store the meal index for when the food is added
+        addFoodModal.setAttribute('data-target-meal', mealIndex);
+        $('#addFoodModal').modal('show');
+    }
+}
+
+function showItemOptionsMenu(button, mealIndex, itemIndex) {
+    // Create a simple dropdown menu for edit/delete options
+    const existingMenu = document.querySelector('.item-options-menu');
+    if (existingMenu) {
+        existingMenu.remove();
+    }
+
+    const menu = document.createElement('div');
+    menu.className = 'item-options-menu';
+    menu.innerHTML = `
+        <button class="item-option-btn edit-btn" data-action="edit" data-meal="${mealIndex}" data-item="${itemIndex}">
+            <i class="fa fa-edit"></i> Edit
+        </button>
+        <button class="item-option-btn delete-btn" data-action="delete" data-meal="${mealIndex}" data-item="${itemIndex}">
+            <i class="fa fa-trash"></i> Delete
+        </button>
+    `;
+
+    // Position the menu
+    const rect = button.getBoundingClientRect();
+    menu.style.position = 'absolute';
+    menu.style.top = `${rect.bottom + 5}px`;
+    menu.style.left = `${rect.left - 100}px`;
+    menu.style.zIndex = '1000';
+
+    document.body.appendChild(menu);
+
+    // Handle menu option clicks
+    menu.addEventListener('click', (event) => {
+        const action = event.target.closest('.item-option-btn')?.getAttribute('data-action');
+        const mealIdx = parseInt(event.target.closest('.item-option-btn')?.getAttribute('data-meal'));
+        const itemIdx = parseInt(event.target.closest('.item-option-btn')?.getAttribute('data-item'));
+
+        if (action === 'edit') {
+            editFoodItem(mealIdx, itemIdx);
+        } else if (action === 'delete') {
+            deleteFoodItem(mealIdx, itemIdx);
+        }
+
+        menu.remove();
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function closeMenu(e) {
+        if (!menu.contains(e.target) && e.target !== button) {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        }
+    });
+}
+
+function editFoodItem(mealIndex, itemIndex) {
+    // Switch to edit mode and focus on the specific item
+    const editModeBtn = document.getElementById('editModeBtn');
+    if (editModeBtn) {
+        editModeBtn.click();
+        // Could add logic here to scroll to and highlight the specific item
+    }
+}
+
+function deleteFoodItem(mealIndex, itemIndex) {
+    if (confirm('Are you sure you want to delete this food item?')) {
+        // Remove the item from the data and re-render
+        if (DIET_STATE.currentChartData && DIET_STATE.currentChartData.meals) {
+            DIET_STATE.currentChartData.meals[mealIndex].items.splice(itemIndex, 1);
+            renderDietChartView(DIET_STATE.currentChartData);
+        }
+    }
 }
 
 function renderMacroPieChart(macros) {
@@ -381,8 +458,8 @@ function renderMacroPieChart(macros) {
                     toNumber(macros.fats, 0)
                 ],
                 backgroundColor: baseColors,
-                borderColor: ["#fff", "#fff", "#fff"],
-                borderWidth: 2,
+                borderColor: ["transparent", "transparent", "transparent"],
+                borderWidth: 0,
                 hoverOffset: 14
             }]
         },

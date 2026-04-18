@@ -19,7 +19,6 @@
 </head>
 
 <body>
-    <div id="header-top-placeholder"></div>
     <div id="navbar-placeholder"></div>
 
     <div class="admin-section diet-page-shell" style="padding: 80px 0; background: #f3f6fb;">
@@ -58,19 +57,6 @@
                                     <option value="">Select user...</option>
                                 </select>
                             </div>
-                            <div class="diet-user-actions">
-                                <div class="btn-group btn-group-sm mr-2" role="group" aria-label="Mode switch">
-                                    <button type="button" id="dietViewModeBtn" class="btn btn-outline-primary active">
-                                        <i class="fa fa-eye mr-1"></i> View
-                                    </button>
-                                    <button type="button" id="dietEditModeBtn" class="btn btn-outline-primary">
-                                        <i class="fa fa-pen mr-1"></i> Edit
-                                    </button>
-                                </div>
-                                <button type="button" id="dietResetPageBtn" class="btn btn-outline-secondary btn-sm">
-                                    <i class="fa fa-undo mr-1"></i> Reset
-                                </button>
-                            </div>
                         </div>
 
                         <div id="dietChartLoadingSpinner" class="diet-loading-spinner" style="display: none;">
@@ -79,7 +65,13 @@
                             </div>
                             <p class="mt-2">Loading diet chart...</p>
                         </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="bg-white rounded shadow p-4 wow zoomIn food-list-card diet-page-card" data-wow-delay="0.2s">
                         <div id="dietChartPageStatus" class="alert" style="display: none;"></div>
 
                         <div id="dietChartEmptyState" class="diet-empty-state" style="display: none;">
@@ -88,49 +80,6 @@
                             <button type="button" id="createDietChartBtn" class="food-add-row-btn">
                                 <i class="fa fa-plus"></i> Create Diet Chart
                             </button>
-                        </div>
-
-                        <div id="dietChartEditor" style="display: none;">
-                            <div class="diet-header-card mb-3">
-                                <div class="form-row">
-                                    <div class="form-group col-md-6 mb-2">
-                                        <label for="dietChartTitle">Diet Chart Title</label>
-                                        <input type="text" id="dietChartTitle" class="form-control" placeholder="e.g., Fat Loss Plan - Week 1">
-                                    </div>
-                                    <div class="form-group col-md-6 mb-2">
-                                        <label for="dietChartNotes">Notes</label>
-                                        <input type="text" id="dietChartNotes" class="form-control" placeholder="Coach notes or instructions">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 10px;">
-                                <h5 class="mb-0">Meals</h5>
-                                <button type="button" id="addMealBtn" class="food-add-row-btn diet-add-meal-btn">
-                                    <i class="fa fa-plus"></i> Add Meal
-                                </button>
-                            </div>
-
-                            <div id="dietMealsContainer"></div>
-
-                            <div class="diet-totals-card mt-3">
-                                <h6 class="mb-3">Full Diet Totals</h6>
-                                <div class="diet-total-chips" id="dietChartTotals">
-                                    <span class="diet-total-chip carbs"><i class="fa fa-bolt"></i> Carbs 0 gms</span>
-                                    <span class="diet-total-chip protein"><i class="fa fa-dumbbell"></i> Protein 0 gms</span>
-                                    <span class="diet-total-chip fats"><i class="fa fa-tint"></i> Fats 0 gms</span>
-                                    <span class="diet-total-chip calories"><i class="fa fa-fire"></i> Calories 0 kcal</span>
-                                </div>
-                            </div>
-
-                            <div class="diet-editor-actions mt-4">
-                                <button type="button" id="saveDietChartBtn" class="btn btn-primary">
-                                    <i class="fa fa-save mr-1"></i> Save Diet Chart
-                                </button>
-                                <button type="button" id="deleteDietChartBtn" class="btn btn-outline-danger" style="display: none;">
-                                    <i class="fa fa-trash mr-1"></i> Delete Diet Chart
-                                </button>
-                            </div>
                         </div>
 
                         <div id="dietChartView" style="display: none;"></div>
@@ -229,8 +178,6 @@
             </div>
         </div>
     </div>
-
-    <div id="footer-placeholder"></div>
 
     <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
 

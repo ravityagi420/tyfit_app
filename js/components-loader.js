@@ -56,9 +56,7 @@ const ComponentsLoader = {
         const basePath = options.basePath || '';
         
         // Load components
-        await this.loadComponent('header-top', '#header-top-placeholder', { basePath });
         await this.loadComponent('navbar', '#navbar-placeholder', { basePath });
-        await this.loadComponent('footer', '#footer-placeholder', { basePath });
         
         // Adjust navbar links if this is an admin page
         if (options.isAdminPage) {
@@ -99,9 +97,7 @@ const ComponentsLoader = {
 // Auto-load components on DOM ready if placeholders exist
 document.addEventListener('DOMContentLoaded', function() {
     // Check for component placeholders
-    const hasPlaceholders = document.getElementById('header-top-placeholder') || 
-                           document.getElementById('navbar-placeholder') || 
-                           document.getElementById('footer-placeholder');
+    const hasPlaceholders = document.getElementById('navbar-placeholder');
     
     if (hasPlaceholders) {
         // Determine if this is an admin page
