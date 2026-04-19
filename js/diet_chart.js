@@ -11,6 +11,7 @@ const DIET_STATE = {
     isSyncingView: false,
     swipeHandlersBound: false,
     reopenCatalogModalAfterCreateFood: false,
+    viewMealMenuOutsideBound: false,
     currentChartData: null,
     chartInstance: null,
     selectedUserMeta: {
@@ -226,269 +227,390 @@ async function loadSelectedUserMeta(userId) {
 }
 
 function renderDietChartView(chartData) {
-    const viewEl = getEl("dietChartView");
-    if (!viewEl) {
-        return;
-    }
+        const viewEl = getEl("dietChartView");
+        if (!viewEl) {
+            return;
+        }
 
-    DIET_STATE.currentChartData = chartData;
+        DIET_STATE.currentChartData = chartData;
 
-    const title = chartData?.chart?.title || "Diet Chart";
-    const notes = chartData?.chart?.notes || "";
-    const meals = chartData?.meals || [];
-    const bmrText = DIET_STATE.selectedUserMeta.bmr !== null ? `${formatMacro(DIET_STATE.selectedUserMeta.bmr)} kcal` : "-";
-    const tdeeText = DIET_STATE.selectedUserMeta.tdee !== null ? `${formatMacro(DIET_STATE.selectedUserMeta.tdee)} kcal` : "-";
+        const meals = chartData?.meals || [];
+        let overall = { carbs: 0, protein: 0, fats: 0, calories: 0 };
 
-    let overall = { carbs: 0, protein: 0, fats: 0, calories: 0 };
+        const mealsHtml = meals.map((meal, mealIndex) => {
+            let mealTotals = { carbs: 0, protein: 0, fats: 0, calories: 0 };
 
-    const mealsHtml = meals.map((meal, mealIndex) => {
-        let mealTotals = { carbs: 0, protein: 0, fats: 0, calories: 0 };
+            const itemCards = (meal.items || []).map((item, itemIndex) => {
+                const computed = getComputedFromItem(item);
+                mealTotals.carbs += computed.carbs;
+                mealTotals.protein += computed.protein;
+                mealTotals.fats += computed.fats;
+                mealTotals.calories += computed.calories;
 
-        const itemCards = (meal.items || []).map((item, itemIndex) => {
-            const computed = getComputedFromItem(item);
-            mealTotals.carbs += computed.carbs;
-            mealTotals.protein += computed.protein;
-            mealTotals.fats += computed.fats;
-            mealTotals.calories += computed.calories;
+                return `
+                    <div class="diet-view-item">
+                        <div class="diet-view-item-card">
+                            <div class="diet-view-item-top">
+                                <div class="diet-view-item-title">
+                                    <span class="diet-item-dot"></span>
+                                    <span class="diet-view-item-name">${escapeHtml(item.food_name || "-")}</span>
+                                </div>
+                                <div class="diet-view-item-calories">${formatMacro(computed.calories)} kcal</div>
+                            </div>
+                            <div class="diet-view-item-qty">
+                                <span class="diet-item-quantity">${formatMacro(item.quantity)}</span>
+                                <span class="diet-item-unit">${escapeHtml(item.quantity_unit || item.reference_unit || "")}</span>
+                            </div>
+                            <div class="diet-view-item-macros">
+                                <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(computed.carbs)} g</span>
+                                <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(computed.protein)} g</span>
+                                <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(computed.fats)} g</span>
+                                <div class="diet-view-item-actions">
+                                    <button type="button" class="diet-item-delete-btn" data-meal-index="${mealIndex}" data-item-index="${itemIndex}" aria-label="Delete food item">
+                                        <i class="fa fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="diet-swipe-overlay">
+                                <i class="fa fa-trash-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            overall.carbs += mealTotals.carbs;
+            overall.protein += mealTotals.protein;
+            overall.fats += mealTotals.fats;
+            overall.calories += mealTotals.calories;
 
             return `
-                <div class="diet-view-item">
-                    <div class="diet-view-item-card">
-                        <div class="diet-view-item-top">
-                            <div class="diet-view-item-title">
-                                <span class="diet-item-dot"></span>
-                                <span class="diet-view-item-name">${escapeHtml(item.food_name || "-")}</span>
-                            </div>
-                            <div class="diet-view-item-calories">${formatMacro(computed.calories)} kcal</div>
+                <div class="diet-view-meal-block">
+                    <div class="diet-view-meal-header">
+                        <div class="diet-view-meal-label-wrap">
+                            <span class="diet-view-meal-label js-meal-name-label" data-meal-index="${mealIndex}">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</span>
+                            <input type="text" class="form-control form-control-sm diet-meal-name-inline-input" data-meal-index="${mealIndex}" value="${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}" style="display: none;">
                         </div>
-                        <div class="diet-view-item-qty">
-                            <span class="diet-item-quantity">${formatMacro(item.quantity)}</span>
-                            <span class="diet-item-unit">${escapeHtml(item.quantity_unit || item.reference_unit || "")}</span>
-                        </div>
-                        <div class="diet-view-item-macros">
-                            <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(computed.carbs)} g</span>
-                            <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(computed.protein)} g</span>
-                            <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(computed.fats)} g</span>
-                            <div class="diet-view-item-actions">
-                                <button type="button" class="diet-item-delete-btn" data-meal-index="${mealIndex}" data-item-index="${itemIndex}" aria-label="Delete food item">
-                                    <i class="fa fa-trash-alt"></i>
+                        <div class="diet-view-meal-header-actions">
+                            <button type="button" class="diet-meal-add-btn" data-meal-index="${mealIndex}" aria-label="Add food item">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                            <div class="diet-meal-menu-wrap" data-meal-index="${mealIndex}">
+                                <button type="button" class="diet-meal-menu-btn" data-meal-index="${mealIndex}" aria-label="Meal actions" aria-expanded="false">
+                                    <i class="fa fa-ellipsis-v"></i>
                                 </button>
+                                <div class="diet-meal-menu" data-meal-index="${mealIndex}">
+                                    <button type="button" class="diet-meal-menu-item js-meal-action-edit" data-meal-index="${mealIndex}">
+                                        <i class="fa fa-pencil-alt"></i> Edit meal
+                                    </button>
+                                    <button type="button" class="diet-meal-menu-item danger js-meal-action-delete" data-meal-index="${mealIndex}">
+                                        <i class="fa fa-trash-alt"></i> Delete meal
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="diet-swipe-overlay">
-                            <i class="fa fa-trash-alt"></i>
-                        </div>
+                    </div>
+                    <div class="diet-view-meal-content">
+                        ${itemCards || '<div class="text-center text-muted" style="padding: 20px;">No items</div>'}
+                    </div>
+                    <div class="diet-view-meal-totals">
+                        <span class="diet-view-meal-total-chip protein"><i class="fa fa-dumbbell"></i> Total Protein: ${formatMacro(mealTotals.protein)} g</span>
+                        <span class="diet-view-meal-total-chip calories"><i class="fa fa-fire"></i> Total Calories: ${formatMacro(mealTotals.calories)} kcal</span>
                     </div>
                 </div>
             `;
         }).join("");
 
-        overall.carbs += mealTotals.carbs;
-        overall.protein += mealTotals.protein;
-        overall.fats += mealTotals.fats;
-        overall.calories += mealTotals.calories;
+        viewEl.innerHTML = `
+            <div class="diet-view-container">
+                <div class="diet-view-chart-card">
+                    <div class="diet-view-chart-title mb-3">Macros Distribution</div>
+                    <div class="diet-view-chart-container">
+                        <div class="diet-chart-wrapper">
+                            <canvas id="dietMacroChart"></canvas>
+                        </div>
+                        <div class="diet-view-chart-stats">
+                            <div class="chart-stat-row carbs">
+                                <span class="chart-stat-color"></span>
+                                <span class="chart-stat-label">Carbs</span>
+                                <span class="chart-stat-value carbs">${formatMacro(overall.carbs)} gms</span>
+                            </div>
+                            <div class="chart-stat-row protein">
+                                <span class="chart-stat-color"></span>
+                                <span class="chart-stat-label">Protein</span>
+                                <span class="chart-stat-value protein">${formatMacro(overall.protein)} gms</span>
+                            </div>
+                            <div class="chart-stat-row fats">
+                                <span class="chart-stat-color"></span>
+                                <span class="chart-stat-label">Fats</span>
+                                <span class="chart-stat-value fats">${formatMacro(overall.fats)} gms</span>
+                            </div>
+                            <div class="chart-stat-row calories total">
+                                <span class="chart-stat-color"></span>
+                                <span class="chart-stat-label">Total Calories</span>
+                                <span class="chart-stat-value calories">${formatMacro(overall.calories)} kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        return `
-            <div class="diet-view-meal-block">
-                <div class="diet-view-meal-header">
-                    <div class="diet-view-meal-label">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</div>
-                    <button type="button" class="diet-meal-add-btn" data-meal-index="${mealIndex}" aria-label="Add meal item">
-                        <i class="fa fa-plus"></i>
+                <div class="diet-view-meals">
+                    ${mealsHtml || '<p class="text-muted mb-0">No meals in this diet chart.</p>'}
+                </div>
+                <div class="diet-view-add-meal-row">
+                    <button type="button" id="dietViewAddMealBtn" class="diet-view-add-meal-btn">
+                        <i class="fa fa-plus mr-2"></i> Add New Meal
                     </button>
-                </div>
-                <div class="diet-view-meal-content">
-                    ${itemCards || '<div class="text-center text-muted" style="padding: 20px;">No items</div>'}
-                </div>
-                <div class="diet-view-meal-totals">
-                    <span class="diet-view-meal-total-chip protein"><i class="fa fa-dumbbell"></i> Total Protein: ${formatMacro(mealTotals.protein)} g</span>
-                    <span class="diet-view-meal-total-chip calories"><i class="fa fa-fire"></i> Total Calories: ${formatMacro(mealTotals.calories)} kcal</span>
                 </div>
             </div>
         `;
-    }).join("");
 
-    viewEl.innerHTML = `
-        <div class="diet-view-container">
-            <div class="diet-view-chart-card">
-                <div class="diet-view-chart-title mb-3">Macros Distribution</div>
-                <div class="diet-view-chart-container">
-                    <div class="diet-chart-wrapper">
-                        <canvas id="dietMacroChart"></canvas>
-                    </div>
-                    <div class="diet-view-chart-stats">
-                        <div class="chart-stat-row carbs">
-                            <span class="chart-stat-color"></span>
-                            <span class="chart-stat-label">Carbs</span>
-                            <span class="chart-stat-value carbs">${formatMacro(overall.carbs)} gms</span>
-                        </div>
-                        <div class="chart-stat-row protein">
-                            <span class="chart-stat-color"></span>
-                            <span class="chart-stat-label">Protein</span>
-                            <span class="chart-stat-value protein">${formatMacro(overall.protein)} gms</span>
-                        </div>
-                        <div class="chart-stat-row fats">
-                            <span class="chart-stat-color"></span>
-                            <span class="chart-stat-label">Fats</span>
-                            <span class="chart-stat-value fats">${formatMacro(overall.fats)} gms</span>
-                        </div>
-                        <div class="chart-stat-row calories total">
-                            <span class="chart-stat-color"></span>
-                            <span class="chart-stat-label">Total Calories</span>
-                            <span class="chart-stat-value calories">${formatMacro(overall.calories)} kcal</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        setTimeout(() => {
+            renderMacroPieChart(overall);
+        }, 100);
 
-            <div class="diet-view-meals">
-                ${mealsHtml || '<p class="text-muted mb-0">No meals in this diet chart.</p>'}
-            </div>
-        </div>
-    `;
-
-    setTimeout(() => {
-        renderMacroPieChart(overall);
-    }, 100);
-
-    // Add event handlers for view mode interactions
-    setTimeout(() => {
-        setupViewModeEventHandlers();
-    }, 100);
-}
-
-function setupViewModeEventHandlers() {
-    // Handle plus button clicks to add food from catalog
-    document.querySelectorAll('.diet-meal-add-btn').forEach(btn => {
-        btn.addEventListener('click', (event) => {
-            const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'));
-            openFoodCatalogModalForMeal(mealIndex);
-        });
-    });
-
-    // Handle delete icon clicks in item macros row
-    document.querySelectorAll('.diet-item-delete-btn').forEach(btn => {
-        btn.addEventListener('click', (event) => {
-            const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'));
-            const itemIndex = parseInt(event.currentTarget.getAttribute('data-item-index'));
-            showDeleteConfirmationModal(mealIndex, itemIndex);
-        });
-    });
-
-    // Add swipe functionality for mobile
-    if ('ontouchstart' in window && window.matchMedia('(max-width: 991px)').matches) {
-        addSwipeFunctionality();
-    }
-}
-
-function addSwipeFunctionality() {
-    if (DIET_STATE.swipeHandlersBound) {
-        return;
+        setTimeout(() => {
+            setupViewModeEventHandlers();
+        }, 100);
     }
 
-    DIET_STATE.swipeHandlersBound = true;
+    function setupViewModeEventHandlers() {
+        document.querySelectorAll('.diet-meal-menu-btn').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const mealIndex = event.currentTarget.getAttribute('data-meal-index');
+                const menu = document.querySelector(`.diet-meal-menu[data-meal-index="${mealIndex}"]`);
 
-    let startX, startY, currentX, currentY;
-    let isSwiping = false;
-    let swipeElement = null;
-    let swipeDirection = null;
-    let swipeOverlay = null;
+                document.querySelectorAll('.diet-meal-menu').forEach((m) => {
+                    if (m !== menu) {
+                        m.classList.remove('open');
+                    }
+                });
 
-    document.addEventListener('touchstart', (e) => {
-        if (!window.matchMedia('(max-width: 991px)').matches) {
+                if (menu) {
+                    const opened = menu.classList.toggle('open');
+                    event.currentTarget.setAttribute('aria-expanded', opened ? 'true' : 'false');
+                }
+            });
+        });
+
+        if (!DIET_STATE.viewMealMenuOutsideBound) {
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.diet-meal-menu').forEach((menu) => menu.classList.remove('open'));
+                document.querySelectorAll('.diet-meal-menu-btn').forEach((btn) => btn.setAttribute('aria-expanded', 'false'));
+            });
+            DIET_STATE.viewMealMenuOutsideBound = true;
+        }
+
+        document.querySelectorAll('.js-meal-action-edit').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'), 10);
+                const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
+                const input = document.querySelector(`.diet-meal-name-inline-input[data-meal-index="${mealIndex}"]`);
+                const menu = document.querySelector(`.diet-meal-menu[data-meal-index="${mealIndex}"]`);
+
+                if (!label || !input) {
+                    return;
+                }
+
+                if (menu) {
+                    menu.classList.remove('open');
+                }
+
+                label.style.display = 'none';
+                input.style.display = 'block';
+                input.focus();
+                input.select();
+            });
+        });
+
+        document.querySelectorAll('.js-meal-action-delete').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'), 10);
+                const menu = document.querySelector(`.diet-meal-menu[data-meal-index="${mealIndex}"]`);
+                if (menu) {
+                    menu.classList.remove('open');
+                }
+                showDeleteMealConfirmationModal(mealIndex);
+            });
+        });
+
+        document.querySelectorAll('.diet-meal-name-inline-input').forEach((input) => {
+            const submit = async () => {
+                const mealIndex = parseInt(input.getAttribute('data-meal-index'), 10);
+                const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
+                const newName = (input.value || '').trim();
+
+                if (!newName) {
+                    input.value = label ? label.textContent : `Meal ${mealIndex + 1}`;
+                }
+
+                if (label) {
+                    label.style.display = 'inline-block';
+                }
+                input.style.display = 'none';
+
+                if (newName) {
+                    await renameMealInViewChart(mealIndex, newName);
+                }
+            };
+
+            input.addEventListener('keydown', async (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    await submit();
+                }
+                if (event.key === 'Escape') {
+                    const mealIndex = parseInt(input.getAttribute('data-meal-index'), 10);
+                    const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
+                    input.value = label ? label.textContent : '';
+                    input.style.display = 'none';
+                    if (label) {
+                        label.style.display = 'inline-block';
+                    }
+                }
+            });
+
+            input.addEventListener('blur', async () => {
+                if (input.style.display !== 'none') {
+                    await submit();
+                }
+            });
+        });
+
+        document.querySelectorAll('.diet-meal-add-btn').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'), 10);
+                openFoodCatalogModalForMeal(mealIndex);
+            });
+        });
+
+        const addMealBtn = document.getElementById('dietViewAddMealBtn');
+        if (addMealBtn) {
+            addMealBtn.addEventListener('click', () => {
+                addMealToViewChart();
+            });
+        }
+
+        document.querySelectorAll('.diet-item-delete-btn').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'), 10);
+                const itemIndex = parseInt(event.currentTarget.getAttribute('data-item-index'), 10);
+                showDeleteConfirmationModal(mealIndex, itemIndex);
+            });
+        });
+
+        if ('ontouchstart' in window && window.matchMedia('(max-width: 991px)').matches) {
+            addSwipeFunctionality();
+        }
+    }
+
+    function addSwipeFunctionality() {
+        if (DIET_STATE.swipeHandlersBound) {
             return;
         }
 
-        if (e.target.closest('.diet-view-item-card')) {
-            swipeElement = e.target.closest('.diet-view-item-card');
-            swipeOverlay = swipeElement.querySelector('.diet-swipe-overlay');
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-            isSwiping = false;
-            swipeDirection = null;
-            
-            // Reset any previous swipe styling
-            swipeElement.style.transform = '';
-            if (swipeOverlay) {
-                swipeOverlay.style.width = '0';
+        DIET_STATE.swipeHandlersBound = true;
+
+        let startX, startY, currentX, currentY;
+        let isSwiping = false;
+        let swipeElement = null;
+        let swipeDirection = null;
+        let swipeOverlay = null;
+
+        document.addEventListener('touchstart', (e) => {
+            if (!window.matchMedia('(max-width: 991px)').matches) {
+                return;
             }
-        }
-    });
 
-    document.addEventListener('touchmove', (e) => {
-        if (!window.matchMedia('(max-width: 991px)').matches) {
-            return;
-        }
+            if (e.target.closest('.diet-view-item-card')) {
+                swipeElement = e.target.closest('.diet-view-item-card');
+                swipeOverlay = swipeElement.querySelector('.diet-swipe-overlay');
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isSwiping = false;
+                swipeDirection = null;
 
-        if (!swipeElement) return;
-        
-        currentX = e.touches[0].clientX;
-        currentY = e.touches[0].clientY;
-        
-        const deltaX = currentX - startX;
-        const deltaY = currentY - startY;
-        
-        // Only consider horizontal swipes
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-            isSwiping = true;
-            swipeDirection = deltaX > 0 ? 'right' : 'left';
-            
-            if (swipeDirection === 'left' && swipeOverlay) {
-                // For left swipe (delete), show red overlay
-                const swipeDistance = Math.abs(deltaX);
-                const maxWidth = swipeElement.offsetWidth * 0.8; // Max 80% of card width
-                const overlayWidth = Math.min(swipeDistance, maxWidth);
-                swipeOverlay.style.width = `${overlayWidth}px`;
-            } else {
-                // For right swipe, keep original behavior or add blue overlay if needed
-                const translateX = Math.min(Math.max(deltaX, -100), 100);
-                swipeElement.style.transform = `translateX(${translateX}px)`;
-            }
-            
-            e.preventDefault(); // Prevent scrolling
-        }
-    });
-
-    document.addEventListener('touchend', (e) => {
-        if (!window.matchMedia('(max-width: 991px)').matches) {
-            swipeElement = null;
-            isSwiping = false;
-            return;
-        }
-
-        if (!swipeElement || !isSwiping) {
-            if (swipeElement) {
                 swipeElement.style.transform = '';
                 if (swipeOverlay) {
                     swipeOverlay.style.width = '0';
                 }
             }
-            swipeElement = null;
-            return;
-        }
-        
-        const deltaX = currentX - startX;
-        const mealIndex = parseInt(swipeElement.querySelector('.diet-item-delete-btn')?.getAttribute('data-meal-index'));
-        const itemIndex = parseInt(swipeElement.querySelector('.diet-item-delete-btn')?.getAttribute('data-item-index'));
-        
-        if (Math.abs(deltaX) > 80) { // Minimum swipe distance
-            if (swipeDirection === 'left') {
-                // Swipe left - delete with modal confirmation
-                showDeleteConfirmationModal(mealIndex, itemIndex);
-            } else if (swipeDirection === 'right') {
-                // Swipe right - edit
-                editFoodItem(mealIndex, itemIndex);
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!window.matchMedia('(max-width: 991px)').matches) {
+                return;
             }
-        }
-        
-        // Reset styling
-        swipeElement.style.transform = '';
-        if (swipeOverlay) {
-            swipeOverlay.style.width = '0';
-        }
-        swipeElement = null;
-        isSwiping = false;
-    });
-}
+
+            if (!swipeElement) {
+                return;
+            }
+
+            currentX = e.touches[0].clientX;
+            currentY = e.touches[0].clientY;
+
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+                isSwiping = true;
+                swipeDirection = deltaX > 0 ? 'right' : 'left';
+
+                if (swipeDirection === 'left' && swipeOverlay) {
+                    const swipeDistance = Math.abs(deltaX);
+                    const maxWidth = swipeElement.offsetWidth * 0.8;
+                    const overlayWidth = Math.min(swipeDistance, maxWidth);
+                    swipeOverlay.style.width = `${overlayWidth}px`;
+                } else {
+                    const translateX = Math.min(Math.max(deltaX, -100), 100);
+                    swipeElement.style.transform = `translateX(${translateX}px)`;
+                }
+
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            if (!window.matchMedia('(max-width: 991px)').matches) {
+                swipeElement = null;
+                isSwiping = false;
+                return;
+            }
+
+            if (!swipeElement || !isSwiping) {
+                if (swipeElement) {
+                    swipeElement.style.transform = '';
+                    if (swipeOverlay) {
+                        swipeOverlay.style.width = '0';
+                    }
+                }
+                swipeElement = null;
+                return;
+            }
+
+            const deltaX = currentX - startX;
+            const mealIndex = parseInt(swipeElement.querySelector('.diet-item-delete-btn')?.getAttribute('data-meal-index'), 10);
+            const itemIndex = parseInt(swipeElement.querySelector('.diet-item-delete-btn')?.getAttribute('data-item-index'), 10);
+
+            if (Math.abs(deltaX) > 80) {
+                if (swipeDirection === 'left') {
+                    showDeleteConfirmationModal(mealIndex, itemIndex);
+                } else if (swipeDirection === 'right') {
+                    editFoodItem(mealIndex, itemIndex);
+                }
+            }
+
+            swipeElement.style.transform = '';
+            if (swipeOverlay) {
+                swipeOverlay.style.width = '0';
+            }
+            swipeElement = null;
+            isSwiping = false;
+        });
+    }
 
 function showDeleteConfirmationModal(mealIndex, itemIndex) {
     // Store the indices for when user confirms
@@ -708,6 +830,62 @@ async function deleteFoodItem(mealIndex, itemIndex) {
         renderDietChartView(DIET_STATE.currentChartData);
         await syncViewChartToSupabase();
     }
+}
+
+function addMealToViewChart() {
+    if (!DIET_STATE.currentChartData) {
+        return;
+    }
+    if (!Array.isArray(DIET_STATE.currentChartData.meals)) {
+        DIET_STATE.currentChartData.meals = [];
+    }
+    const nextNum = DIET_STATE.currentChartData.meals.length + 1;
+    DIET_STATE.currentChartData.meals.push({ meal_name: `Meal ${nextNum}`, sort_order: nextNum, items: [] });
+    setDietDirty(true);
+    renderDietChartView(DIET_STATE.currentChartData);
+    syncViewChartToSupabase();
+}
+
+function showDeleteMealConfirmationModal(mealIndex) {
+    const modal = document.getElementById('deleteMealModal');
+    if (modal) {
+        modal.setAttribute('data-meal-index', mealIndex);
+        $('#deleteMealModal').modal('show');
+    } else {
+        // Fallback: delete directly without modal
+        deleteMealFromViewChart(mealIndex);
+    }
+}
+
+async function deleteMealFromViewChart(mealIndex) {
+    if (!DIET_STATE.currentChartData || !Array.isArray(DIET_STATE.currentChartData.meals)) {
+        return;
+    }
+    DIET_STATE.currentChartData.meals.splice(mealIndex, 1);
+    setDietDirty(true);
+    renderDietChartView(DIET_STATE.currentChartData);
+    await syncViewChartToSupabase();
+}
+
+async function renameMealInViewChart(mealIndex, newName) {
+    if (!DIET_STATE.currentChartData || !Array.isArray(DIET_STATE.currentChartData.meals)) {
+        return;
+    }
+
+    const meal = DIET_STATE.currentChartData.meals[mealIndex];
+    if (!meal) {
+        return;
+    }
+
+    const normalized = (newName || '').trim();
+    if (!normalized) {
+        return;
+    }
+
+    meal.meal_name = normalized;
+    setDietDirty(true);
+    renderDietChartView(DIET_STATE.currentChartData);
+    await syncViewChartToSupabase();
 }
 
 async function ensureViewChartId() {
@@ -1184,24 +1362,25 @@ function renderDietChartEditor(chartData) {
 function createEmptyDietChart(userId) {
     DIET_STATE.selectedUserId = userId;
     DIET_STATE.selectedChartId = "";
-    DIET_STATE.isEditMode = true;
+    DIET_STATE.isEditMode = false;
+    DIET_STATE.swipeHandlersBound = false;
+    DIET_STATE.hasUnsavedChanges = false;
 
-    renderDietChartEditor({
-        chart: {
-            user_id: userId,
-            title: "",
-            notes: ""
-        },
-        meals: [
-            {
-                meal_name: "Meal 1",
-                sort_order: 1,
-                items: []
-            }
-        ]
-    });
+    const emptyChart = {
+        chart: { user_id: userId, title: "", notes: "" },
+        meals: [{ meal_name: "Meal 1", sort_order: 1, items: [] }]
+    };
 
-    showPageStatus("New diet chart initialized. Add meals and foods, then save.", "info");
+    DIET_STATE.currentChartData = emptyChart;
+
+    const emptyStateEl = getEl("dietChartEmptyState");
+    if (emptyStateEl) emptyStateEl.style.display = "none";
+
+    const viewEl = getEl("dietChartView");
+    if (viewEl) viewEl.style.display = "block";
+
+    renderDietChartView(emptyChart);
+    showPageStatus("New diet chart started. Add meals and foods — changes are saved automatically.", "info");
 }
 
 function addMeal(mealData = {}) {
@@ -2212,6 +2391,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         confirmDeleteBtn.addEventListener('click', confirmDeleteFoodItem);
     }
 
+    // Add event listener for delete meal confirmation modal
+    const confirmDeleteMealBtn = document.getElementById('confirmDeleteMealBtn');
+    if (confirmDeleteMealBtn) {
+        confirmDeleteMealBtn.addEventListener('click', () => {
+            const modal = document.getElementById('deleteMealModal');
+            if (modal) {
+                const mealIndex = parseInt(modal.getAttribute('data-meal-index'));
+                if (!isNaN(mealIndex)) {
+                    deleteMealFromViewChart(mealIndex);
+                }
+                $('#deleteMealModal').modal('hide');
+            }
+        });
+    }
+
     const viewSaveBtn = getEl("dietViewSaveBtn");
     if (viewSaveBtn) {
         viewSaveBtn.addEventListener("click", async () => {
@@ -2298,6 +2492,8 @@ window.renderDietChartEditor = renderDietChartEditor;
 window.createEmptyDietChart = createEmptyDietChart;
 window.addMeal = addMeal;
 window.deleteMeal = deleteMeal;
+window.addMealToViewChart = addMealToViewChart;
+window.deleteMealFromViewChart = deleteMealFromViewChart;
 window.addFoodRow = addFoodRow;
 window.deleteFoodRow = deleteFoodRow;
 window.loadFoodCatalogOptions = loadFoodCatalogOptions;

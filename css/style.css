@@ -170,6 +170,18 @@ a:focus {
     transition: background-color 0.3s ease;
 }
 
+.navbar .container-fluid {
+    display: flex;
+    align-items: center;
+    min-height: 60px;
+    padding: 0 16px;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
 .navbar.nav-sticky {
     position: fixed;
     top: 0;
@@ -184,13 +196,14 @@ a:focus {
     display: flex;
     align-items: center;
     transition: .5s;
-    
 }
 
-.logo {
-    height: 45px;     /* adjust if needed */
+.app-logo {
+    height: 32px;
     width: auto;
     display: block;
+    margin: 0;
+    padding: 0;
 }
 
 .navbar .navbar-brand span {
@@ -205,7 +218,13 @@ a:focus {
 
 .navbar .navbar-brand img {
     max-width: 100%;
-    max-height: 40px;
+    max-height: none;
+}
+
+@media (min-width: 768px) {
+    .app-logo {
+        height: 38px;
+    }
 }
 
 .navbar-dark .navbar-nav .nav-link,
@@ -302,14 +321,22 @@ a:focus {
         position: absolute;
         width: 100%;
         top: 35px;
-        padding: 20px 60px;
+        padding: 0;
         background: rgba(17, 17, 17, 0.96) !important;
         z-index: 9;
     }
+
+    .navbar .container-fluid {
+        padding: 14px 60px;
+    }
     
     .navbar.nav-sticky {
-        padding: 10px 60px;
+        padding: 0;
         background: #111111 !important;
+    }
+
+    .navbar.nav-sticky .container-fluid {
+        padding: 10px 60px;
     }
     
     .navbar a.nav-link {
@@ -322,8 +349,12 @@ a:focus {
 
 @media (max-width: 991.98px) {   
     .navbar {
-        padding: 15px;
+        padding: 0;
         background: #343148 !important;
+    }
+
+    .navbar .container-fluid {
+        padding: 0 16px;
     }
     
     .navbar .navbar-brand span {

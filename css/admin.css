@@ -1050,10 +1050,6 @@
     color: #b91c1c;
 }
 
-.diet-view-meals {
-    /* Meals container styles will be added here */
-}
-
 .chart-stat-value.protein {
     color: #166534;
 }
@@ -1074,17 +1070,36 @@
 .diet-view-meal-header {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
-    align-items: flex-start;
-    margin-bottom: 16px;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
 }
 
 .diet-view-meal-label {
     display: block;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 800;
     color: #0f172a;
-    margin-bottom: 6px;
+    line-height: 1.2;
+    margin-bottom: 0;
+}
+
+.diet-view-meal-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+.diet-meal-name-inline-input {
+    min-width: 180px;
+    max-width: 280px;
+    height: 34px;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .diet-view-meal-meta {
@@ -1092,24 +1107,133 @@
     color: #64748b;
 }
 
+.diet-view-meal-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .diet-meal-add-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 14px;
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    background-color: #f8fafc;
-    color: #0f172a;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: #eaf2ff;
+    color: #1d4ed8;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-size: 14px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.diet-meal-add-btn:hover {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.diet-meal-menu-wrap {
+    position: relative;
+}
+
+.diet-meal-menu-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.diet-meal-menu-btn:hover {
+    background-color: rgba(148, 163, 184, 0.14);
+    color: #334155;
+}
+
+.diet-meal-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 150px;
+    padding: 6px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+    z-index: 12;
+    display: none;
+}
+
+.diet-meal-menu.open {
+    display: block;
+}
+
+.diet-meal-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    color: #334155;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.diet-meal-menu-item:hover {
+    background-color: #f1f5f9;
+}
+
+.diet-meal-menu-item.danger {
+    color: #dc2626;
+}
+
+.diet-meal-menu-item.danger:hover {
+    background-color: rgba(220, 38, 38, 0.08);
+}
+
+.diet-view-add-meal-row {
+    display: flex;
+    justify-content: center;
+    margin: 24px 0 8px 0;
+}
+
+.diet-view-add-meal-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 28px;
+    border-radius: 999px;
+    border: 2px dashed #cbd5e1;
+    background: transparent;
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.diet-view-add-meal-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
 }
 
 .diet-view-meal-content {
-    padding: 8px 0 0 0;
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .diet-view-item {
-    margin-bottom: 12px;
+    margin-bottom: 0;
 }
 
 .diet-view-item-card {
@@ -1118,8 +1242,8 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    border-radius: 18px;
-    padding: 14px 14px 12px;
+    border-radius: 14px;
+    padding: 14px;
     border: 1px solid rgba(148, 163, 184, 0.12);
     position: relative;
     overflow: hidden;
@@ -1335,41 +1459,6 @@
     background-color: rgba(220, 38, 38, 0.1);
 }
 
-.diet-view-meal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
-.diet-view-meal-label {
-    font-size: 16px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.diet-meal-add-btn {
-    background-color: #2563eb;
-    color: #ffffff;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.diet-meal-add-btn:hover {
-    background-color: #1d4ed8;
-}
-
-.diet-view-meal-content {
-    /* Meals container styles will be added here */
-}
-
 @media (max-width: 991px) {
     /* Mobile-specific diet chart changes */
     .diet-view-container {
@@ -1465,30 +1554,73 @@
         align-items: center;
         justify-content: space-between;
         margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        gap: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
     }
 
     .diet-view-meal-label {
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 17px;
+        font-weight: 800;
         color: #0f172a;
         margin: 0;
     }
 
+    .diet-view-meal-header-actions {
+        gap: 8px;
+    }
+
+    .diet-meal-menu-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+    }
+
+    .diet-meal-menu {
+        min-width: 142px;
+    }
+
+    .diet-meal-menu-item {
+        font-size: 12px;
+        padding: 8px 9px;
+    }
+
+    .diet-meal-name-inline-input {
+        min-width: 140px;
+        max-width: 180px;
+        height: 30px;
+        font-size: 13px;
+    }
+
     .diet-meal-add-btn {
-        background-color: #2563eb;
-        color: #ffffff;
+        background-color: #eaf2ff;
+        color: #1d4ed8;
         border: none;
         border-radius: 50%;
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s, color 0.2s;
         flex-shrink: 0;
+    }
+
+    .diet-meal-add-btn:hover {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+
+    .diet-view-meal-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-top: 12px;
+    }
+
+    .diet-view-item {
+        margin-bottom: 0;
     }
 
     /* Mobile food item layout - full width with minimal margins */
@@ -1498,11 +1630,11 @@
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        border-radius: 8px;
-        padding: 12px;
+        border-radius: 14px;
+        padding: 14px;
         border: 1px solid rgba(148, 163, 184, 0.08);
         position: relative;
-        margin: 0 4px 12px 4px;
+        margin: 0 4px;
     }
 
     .diet-view-item-top {
