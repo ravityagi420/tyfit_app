@@ -17,37 +17,18 @@
     <link href="../lib/flaticon/font/flaticon.css" rel="stylesheet">
     <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
+    <link href="../css/style.css?v=20260419d" rel="stylesheet">
+    <link href="../css/admin.css?v=20260419d" rel="stylesheet">
 </head>
 
 <body>
     <div id="navbar-placeholder"></div>
 
-    <div class="admin-section diet-page-shell" style="padding: 80px 0; background: #f3f6fb;">
+    <div class="admin-section diet-page-shell" style="padding: 80px 0;">
         <div class="container">
-            <ul class="nav admin-tab-bar" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html">Profile Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="diet_chart.html">Diet Chart</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="food_catalog.html">Food Catalog</a>
-                </li>
-            </ul>
-
             <div class="diet-page-top text-center mb-4">
-                <p class="diet-page-subtitle mb-1">Admin Panel</p>
+                <p class="diet-page-subtitle mb-1">Food Catalog</p>
                 <h2 class="diet-page-title">Food Catalog Management</h2>
-                <p class="diet-page-copy text-muted mb-0">Create, update, and review reusable food catalog items</p>
-            </div>
-
-            <div class="admin-greeting">
-                <div>
-                    <span class="admin-greeting-text">Hello, <strong id="adminHelloName">Admin</strong></span>
-                </div>
             </div>
 
             <div class="row">
@@ -56,7 +37,6 @@
                         <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 12px;">
                             <div>
                                 <h5 class="mb-1">Catalog Items</h5>
-                                <p class="text-muted mb-0">Browse and manage saved food items</p>
                             </div>
                             <div class="food-list-actions">
                                 <div class="food-table-toolbar">
@@ -103,7 +83,7 @@
                 <div class="modal-header">
                     <div class="food-modal-title-wrap">
                         <h5 class="modal-title" id="foodFormModalTitle"><i class="fa fa-utensils mr-2"></i>Add New Food Item</h5>
-                        <small class="food-modal-subtitle"><i class="fa fa-clipboard-list mr-1"></i>Nutrition details and image</small>
+
                     </div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -215,8 +195,8 @@
     <script src="../js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
-    <script src="../js/login.js"></script>
-    <script src="../js/components-loader.js?v=20260419"></script>
-    <script src="../js/food_catalog.js"></script>
+    <script src="../js/login.js?v=20260419d"></script>
+    <script src="../js/components-loader.js?v=20260419d"></script>
+    <script src="../js/food_catalog.js?v=20260419d"></script>
 </body>
 </html>

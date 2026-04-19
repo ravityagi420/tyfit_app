@@ -4,13 +4,17 @@ const FOOD_UNITS = ["g", "ml", "piece", "slice"];
 const foodCatalogState = {
     editingFoodId: null,
     items: [],
+    customItems: [],
+    globalItems: [],
     suggestionNames: [],
+    currentUserId: "",
     currentImagePath: "",
     currentPreviewUrl: "",
     sortBy: "date_desc",
     searchTerm: "",
     menuOutsideBound: false,
-    swipeHandlersBound: false
+    swipeHandlersBound: false,
+    isAdmin: false
 };
 
 function getEl(id) {
@@ -77,27 +81,23 @@ function renderMacroBars(item) {
 
     const fibreHtml = fibre !== null && !Number.isNaN(fibre)
         ? `
-            <div class="food-macro-item food-macro-item-fibre">
-                <i class="fa fa-seedling" aria-hidden="true"></i>
-                <span>Fibre ${formatNumber(fibre)} gms</span>
-            </div>
+            <span class="diet-view-macro fibre">
+                <i class="fa fa-seedling" aria-hidden="true"></i> Fi:${formatNumber(fibre)} g
+            </span>
         `
         : "";
 
     return `
         <div class="food-macro-bars">
-            <div class="food-macro-item food-macro-item-carbs">
-                <i class="fa fa-bolt" aria-hidden="true"></i>
-                <span>Carbs ${formatNumber(carbs)} gms</span>
-            </div>
-            <div class="food-macro-item food-macro-item-protein">
-                <i class="fa fa-dumbbell" aria-hidden="true"></i>
-                <span>Protein ${formatNumber(protein)} gms</span>
-            </div>
-            <div class="food-macro-item food-macro-item-fats">
-                <i class="fa fa-tint" aria-hidden="true"></i>
-                <span>Fats ${formatNumber(fats)} gms</span>
-            </div>
+            <span class="diet-view-macro carbs">
+                <i class="fa fa-bolt" aria-hidden="true"></i> C:${formatNumber(carbs)} g
+            </span>
+            <span class="diet-view-macro protein">
+                <i class="fa fa-dumbbell" aria-hidden="true"></i> P:${formatNumber(protein)} g
+            </span>
+            <span class="diet-view-macro fats">
+                <i class="fa fa-tint" aria-hidden="true"></i> F:${formatNumber(fats)} g
+            </span>
             ${fibreHtml}
         </div>
     `;
@@ -216,17 +216,21 @@ async function waitForStableSession(timeoutMs = 4000, intervalMs = 250) {
 }
 
 async function requireLoginOrRedirect() {
+    if (typeof window.requireLoginWithModal === "function") {
+        return window.requireLoginWithModal();
+    }
+
     const { session, error } = await waitForStableSession();
 
     if (error) {
         await showDialogAlert("Session error: " + error.message, { title: "Session Error" });
-        window.location.href = "../login.html?returnTo=/admin/food_catalog.html";
         return null;
     }
 
     if (!session) {
-        await showDialogAlert("No active session found. Please log in again.", { title: "Login Required" });
-        window.location.href = "../login.html?returnTo=/admin/food_catalog.html";
+        if (typeof window.openAuthModal === "function") {
+            window.openAuthModal({ locked: true });
+        }
         return null;
     }
 
@@ -269,9 +273,13 @@ function setSaveButtonState(isSaving) {
 function openFoodFormModal() {
     const titleEl = getEl("foodFormModalTitle");
     if (titleEl) {
-        titleEl.innerHTML = foodCatalogState.editingFoodId
-            ? '<i class="fa fa-pen mr-2"></i>Edit Food Item'
-            : '<i class="fa fa-utensils mr-2"></i>Add New Food Item';
+        if (foodCatalogState.editingFoodId) {
+            titleEl.innerHTML = '<i class="fa fa-pen mr-2"></i>Edit Food Item';
+        } else {
+            titleEl.innerHTML = foodCatalogState.isAdmin
+                ? '<i class="fa fa-utensils mr-2"></i>Add New Food Item'
+                : '<i class="fa fa-plus-circle mr-2"></i>Add Custom Food';
+        }
     }
 
     if (window.jQuery && window.jQuery.fn.modal) {
@@ -412,17 +420,36 @@ async function uploadFoodImage(file) {
 }
 
 async function loadFoodCatalog() {
-    const { data, error } = await window.supabaseClient
-        .from("food_catalog")
-        .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, created_at, updated_at")
-        .order("created_at", { ascending: false });
+    const userId = foodCatalogState.currentUserId;
 
-    if (error) {
-        console.error("loadFoodCatalog error:", error);
-        throw new Error("Failed to load food catalog. " + error.message);
+    const [globalResult, customResult] = await Promise.all([
+        window.supabaseClient
+            .from("food_catalog")
+            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, created_at, updated_at, is_custom, created_by_user_id")
+            .or("is_custom.is.null,is_custom.eq.false")
+            .order("created_at", { ascending: false }),
+        userId
+            ? window.supabaseClient
+                .from("food_catalog")
+                .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, created_at, updated_at, is_custom, created_by_user_id")
+                .eq("is_custom", true)
+                .eq("created_by_user_id", userId)
+                .order("created_at", { ascending: false })
+            : Promise.resolve({ data: [], error: null })
+    ]);
+
+    if (globalResult.error) {
+        console.error("loadFoodCatalog global error:", globalResult.error);
+        throw new Error("Failed to load food catalog. " + globalResult.error.message);
+    }
+    if (customResult.error) {
+        console.error("loadFoodCatalog custom error:", customResult.error);
+        throw new Error("Failed to load custom foods. " + customResult.error.message);
     }
 
-    foodCatalogState.items = data || [];
+    foodCatalogState.globalItems = globalResult.data || [];
+    foodCatalogState.customItems = customResult.data || [];
+    foodCatalogState.items = [...foodCatalogState.customItems, ...foodCatalogState.globalItems];
     updateSearchSuggestions(foodCatalogState.items);
     renderFoodCatalogTable(foodCatalogState.items);
     return foodCatalogState.items;
@@ -529,6 +556,11 @@ async function deleteFoodItem(foodId) {
         return;
     }
 
+    if (!canEditFoodItem(item)) {
+        await showDialogAlert("You don't have permission to delete this food item.", { title: "Access Denied" });
+        return;
+    }
+
     const isConfirmed = await showDialogConfirm(`Delete ${item.food_name}? This action cannot be undone.`, {
         title: "Delete Food Item",
         confirmText: "Delete",
@@ -572,79 +604,102 @@ async function deleteFoodItem(foodId) {
     }
 }
 
+function canEditFoodItem(item) {
+    if (foodCatalogState.isAdmin) return true;
+    return Boolean(item.is_custom && item.created_by_user_id === foodCatalogState.currentUserId);
+}
+
 function renderFoodCatalogTable(items) {
     const container = getEl("foodCatalogTableContainer");
     if (!container) {
         return;
     }
 
-    const visibleItems = getVisibleFoodCatalogItems(items);
+    const allVisible = getVisibleFoodCatalogItems(items);
 
-    if (!visibleItems || visibleItems.length === 0) {
+    if (!allVisible || allVisible.length === 0) {
         container.innerHTML = foodCatalogState.searchTerm
             ? '<div class="food-catalog-empty">No food items match your search.</div>'
             : '<div class="food-catalog-empty">No food catalog items found.</div>';
         return;
     }
 
-    const rows = visibleItems.map((item) => {
-        const imageCell = createFoodImageCell(item);
+    const customVisible = allVisible.filter((item) => item.is_custom && item.created_by_user_id === foodCatalogState.currentUserId);
+    const globalVisible = allVisible.filter((item) => !item.is_custom);
+
+    function buildRows(sectionItems) {
+        return sectionItems.map((item) => {
         const totalCalories = calculateTotalCalories(item);
         const macroChart = renderMacroBars(item);
         const foodId = escapeHtml(item.food_id);
         const foodName = escapeHtml(item.food_name);
-
-        return `
-            <div class="food-catalog-row diet-view-item-card food-catalog-item-card" data-food-id="${foodId}">
-                <div class="food-row-top">
-                    <div class="food-catalog-cell food-catalog-cell-image">${imageCell}</div>
-                    <div class="food-catalog-cell food-catalog-cell-name">
-                        <div><strong class="food-catalog-name-text">${foodName}</strong></div>
-                        <div class="food-catalog-meta">${formatNumber(item.quantity)} ${escapeHtml(item.unit_of_quantity)}</div>
-                    </div>
-                    <div class="food-row-actions food-row-actions-desktop">
-                        <button type="button" class="food-action-btn food-action-btn-edit js-edit-food" data-food-id="${foodId}" aria-label="Edit ${foodName}" title="Edit">
-                            <i class="fa fa-pen"></i>
-                        </button>
-                        <button type="button" class="food-action-btn food-action-btn-delete js-delete-food" data-food-id="${foodId}" aria-label="Delete ${foodName}" title="Delete">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </div>
-                    <div class="food-row-actions-mobile">
-                        <div class="food-item-menu-wrap" data-food-id="${foodId}">
-                            <button type="button" class="food-item-menu-btn" data-food-id="${foodId}" aria-label="Food actions" aria-expanded="false">
-                                <i class="fa fa-ellipsis-v"></i>
-                            </button>
-                            <div class="food-item-menu" data-food-id="${foodId}">
-                                <button type="button" class="food-item-menu-item js-food-action-edit" data-food-id="${foodId}">
-                                    <i class="fa fa-pen"></i> Edit item
+        const foodUnit = escapeHtml(item.unit_of_quantity || "");
+        const canEdit = canEditFoodItem(item);
+        const actionButtons = canEdit ? `
+                            <div class="food-row-actions food-row-actions-desktop">
+                                <button type="button" class="food-action-btn food-action-btn-edit js-edit-food" data-food-id="${foodId}" aria-label="Edit ${foodName}" title="Edit">
+                                    <i class="fa fa-pen"></i>
                                 </button>
-                                <button type="button" class="food-item-menu-item danger js-food-action-delete" data-food-id="${foodId}">
-                                    <i class="fa fa-trash"></i> Delete item
+                                <button type="button" class="food-action-btn food-action-btn-delete js-delete-food" data-food-id="${foodId}" aria-label="Delete ${foodName}" title="Delete">
+                                    <i class="fa fa-trash"></i>
                                 </button>
                             </div>
+                            <div class="food-row-actions-mobile">
+                                <div class="food-item-menu-wrap" data-food-id="${foodId}">
+                                    <button type="button" class="food-item-menu-btn" data-food-id="${foodId}" aria-label="Food actions" aria-expanded="false">
+                                        <i class="fa fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="food-item-menu" data-food-id="${foodId}">
+                                        <button type="button" class="food-item-menu-item js-food-action-edit" data-food-id="${foodId}">
+                                            <i class="fa fa-pen"></i> Edit item
+                                        </button>
+                                        <button type="button" class="food-item-menu-item danger js-food-action-delete" data-food-id="${foodId}">
+                                            <i class="fa fa-trash"></i> Delete item
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>` : "";
+        return `
+            <div class="food-catalog-entry">
+                <div class="diet-view-item-card food-catalog-entry-card" data-food-id="${foodId}">
+                    <div class="diet-view-item-top">
+                        <div class="diet-view-item-title">
+                            <span class="diet-item-dot"></span>
+                            <span class="diet-view-item-name">${foodName}</span>
+                        </div>
+                        <div class="food-catalog-entry-top-right">
+                            <div class="diet-view-item-calories">${formatNumber(totalCalories)} kcal</div>
+                            ${actionButtons}
                         </div>
                     </div>
-                </div>
-                <div class="food-row-bottom">
-                    <div class="food-catalog-cell food-catalog-cell-macros">${macroChart}</div>
-                    <div class="food-catalog-cell food-catalog-cell-calories">
-                        <div class="food-catalog-calories-wrap">
-                            <i class="fa fa-fire"></i>
-                            <span class="food-catalog-calories">${formatNumber(totalCalories)} kcal</span>
-                        </div>
+                    <div class="diet-view-item-qty">
+                        <span class="diet-item-quantity">${formatNumber(item.quantity)}</span>
+                        <span class="diet-item-unit">${foodUnit}</span>
                     </div>
-                </div>
-                <div class="food-catalog-swipe-overlay">
-                    <i class="fa fa-trash-alt"></i>
+                    <div class="diet-view-item-macros">
+                        ${macroChart}
+                    </div>
+                    ${canEdit ? '<div class="food-catalog-swipe-overlay diet-swipe-overlay"><i class="fa fa-trash-alt"></i></div>' : ""}
                 </div>
             </div>
         `;
-    }).join("");
+        }).join("");
+    }
 
-    container.innerHTML = `
-        <div class="food-catalog-list">${rows}</div>
-    `;
+    let html = '<div class="food-catalog-list">';
+    if (customVisible.length > 0) {
+        html += `<div class="catalog-section-label px-1 pt-2">Your Custom Foods</div>`;
+        html += buildRows(customVisible);
+    }
+    if (globalVisible.length > 0) {
+        if (customVisible.length > 0) {
+            html += `<div class="catalog-section-label px-1 pt-3">Food Catalog</div>`;
+        }
+        html += buildRows(globalVisible);
+    }
+    html += '</div>';
+
+    container.innerHTML = html;
 
     container.querySelectorAll(".js-edit-food").forEach((button) => {
         button.addEventListener("click", () => {
@@ -735,7 +790,7 @@ function setupFoodCatalogMobileInteractions(container) {
         });
     });
 
-    // Add swipe delete on touch devices up to 991px (mobile + tablet)
+    // Add swipe delete on touch devices up to 991px (mobile + tablet) — admin only
     if ('ontouchstart' in window) {
         addFoodCatalogSwipeDelete();
     }
@@ -760,7 +815,7 @@ function addFoodCatalogSwipeDelete() {
             return;
         }
 
-        const card = event.target.closest('.food-catalog-row');
+        const card = event.target.closest('.food-catalog-entry-card');
         if (!card) {
             return;
         }
@@ -878,6 +933,9 @@ async function saveFoodItem() {
                 throw new Error(error.message);
             }
         } else {
+            payload.is_custom = !foodCatalogState.isAdmin;
+            payload.created_by_user_id = payload.is_custom ? foodCatalogState.currentUserId : null;
+
             const { error } = await window.supabaseClient
                 .from("food_catalog")
                 .insert(payload);
@@ -1004,13 +1062,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     const user = await requireLoginOrRedirect();
     if (!user) return;
 
-    const isAdmin = await requireAdminOrRedirect(user);
-    if (!isAdmin) return;
+    // Determine role — admins can create/edit/delete; clients view only
+    const accessState = await window.getAccessState({ user });
+    foodCatalogState.isAdmin = Boolean(accessState?.isAdmin);
+    foodCatalogState.currentUserId = user.id || "";
 
-    const meta = user.user_metadata || {};
-    const adminNameEl = getEl("adminHelloName");
-    if (adminNameEl) {
-        adminNameEl.textContent = meta.full_name || meta.name || user.email || "Admin";
+    // Keep add action available for all users; non-admin saves create custom foods.
+    const addNewBtn = getEl("foodAddNewBtn");
+    if (addNewBtn && !foodCatalogState.isAdmin) {
+        addNewBtn.innerHTML = '<i class="fa fa-plus"></i> Add Custom Food';
+    }
+
+    if (!foodCatalogState.isAdmin) {
+        const pageTitle = document.querySelector(".diet-page-title");
+        if (pageTitle) {
+            pageTitle.textContent = "Food Catalog";
+        }
+
+        document.querySelectorAll(".food-catalog-admin-only").forEach((el) => {
+            if (el !== addNewBtn) {
+                el.style.display = "none";
+            }
+        });
     }
 
     bindFoodCatalogEvents();

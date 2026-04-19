@@ -270,7 +270,6 @@
 
 .food-form-modal-content {
     border: 0;
-    border-top: 4px solid #ffc107;
     border-radius: 14px;
     overflow: hidden;
 }
@@ -529,24 +528,414 @@
     gap: 8px;
 }
 
-#selectFoodModal #foodCatalogList {
-    max-height: calc((72px * 3) + (12px * 2));
-    overflow-y: auto;
-    padding-right: 4px;
+/* ── Catalog modal search ── */
+/* ── Catalog modal header: light on mobile/tablet, dark on desktop ── */
+#selectFoodModal .catalog-modal-header {
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+    border-radius: 14px 14px 0 0;
 }
 
-#selectFoodModal .food-catalog-pick-row {
-    min-height: 72px;
+#customFoodModal .catalog-modal-header {
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+    border-radius: 14px 14px 0 0;
+}
+
+#selectFoodModal .catalog-modal-header .modal-title,
+#selectFoodModal .catalog-modal-header .food-modal-title-wrap {
+    color: #0f172a;
+}
+
+#customFoodModal .catalog-modal-header .modal-title,
+#customFoodModal .catalog-modal-header .food-modal-title-wrap {
+    color: #0f172a;
+}
+
+#selectFoodModal .catalog-modal-close {
+    color: #374151;
+    opacity: 0.7;
+}
+
+#customFoodModal .catalog-modal-close {
+    color: #374151;
+    opacity: 0.7;
+}
+
+#selectFoodModal .catalog-modal-close:hover {
+    color: #0f172a;
+    opacity: 1;
+}
+
+#customFoodModal .catalog-modal-close:hover {
+    color: #0f172a;
+    opacity: 1;
+}
+
+@media (min-width: 992px) {
+    #selectFoodModal .catalog-modal-header {
+        background: linear-gradient(135deg, #0f2744 0%, #1a3d6e 100%);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    #customFoodModal .catalog-modal-header {
+        background: linear-gradient(135deg, #0f2744 0%, #1a3d6e 100%);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    #selectFoodModal .catalog-modal-header .modal-title,
+    #selectFoodModal .catalog-modal-header .food-modal-title-wrap {
+        color: #ffffff;
+    }
+
+    #customFoodModal .catalog-modal-header .modal-title,
+    #customFoodModal .catalog-modal-header .food-modal-title-wrap {
+        color: #ffffff;
+    }
+
+    #selectFoodModal .catalog-modal-close {
+        color: rgba(255, 255, 255, 0.8);
+        opacity: 1;
+        text-shadow: none;
+    }
+
+    #customFoodModal .catalog-modal-close {
+        color: rgba(255, 255, 255, 0.8);
+        opacity: 1;
+        text-shadow: none;
+    }
+
+    #selectFoodModal .catalog-modal-close:hover {
+        color: #ffffff;
+        opacity: 1;
+    }
+
+    #customFoodModal .catalog-modal-close:hover {
+        color: #ffffff;
+        opacity: 1;
+    }
+}
+
+#customFoodModal .modal-body {
+    background: linear-gradient(180deg, #fbfdff 0%, #f4f8fd 100%);
+}
+
+#customFoodModal .form-group label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: #334155;
+    text-transform: uppercase;
+}
+
+#customFoodModal .form-control {
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid #c7d6e5;
+    box-shadow: none;
+    background: #f8fcff;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+#customFoodModal .form-control:focus {
+    border-color: #7bafd4;
+    background: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
+}
+
+#customFoodModal .input-group-text {
+    border: 1px solid #c7d6e5;
+    background: #eef5ff;
+    color: #334155;
+    font-weight: 600;
+}
+
+#customFoodModal .food-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+#customFoodModal .food-form-actions .btn {
+    border-radius: 999px;
+    font-weight: 700;
+    padding: 8px 18px;
+    min-width: 110px;
+}
+
+#customFoodModal .food-form-actions .btn-primary {
+    background: linear-gradient(135deg, #2b6cb0 0%, #1a4f8a 100%);
+    border-color: transparent;
+}
+
+#customFoodModal .food-form-actions .btn-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+#customFoodModal .food-form-actions .btn-secondary {
+    background: #eef2f7;
+    color: #334155;
+    border: 1px solid #d4dde8;
+}
+
+#customFoodModal .food-form-actions .btn-secondary:hover {
+    background: #e5ebf3;
+    color: #1f2937;
+}
+
+.catalog-search-wrap {
+    position: relative;
+}
+
+.catalog-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #4b6380;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.catalog-search-input {
+    padding-left: 38px !important;
+    height: 42px;
+    border-radius: 999px !important;
+    border-color: #c7d6e5 !important;
+    box-shadow: none !important;
+    font-size: 14px;
+    background: #f8fcff;
+}
+
+.catalog-search-input:focus {
+    border-color: #7bafd4 !important;
+    background: #fff;
+}
+
+/* ── Diet-themed catalog pick cards ── */
+.diet-catalog-pick-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc;
+    background-image: url('../assets/tyfit_img/food_card_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 14px;
+    padding: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    position: relative;
+    overflow: visible;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.diet-catalog-pick-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.76);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.diet-catalog-pick-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+.diet-catalog-pick-card:hover {
+    border-color: #a5c4e6;
+    box-shadow: 0 4px 16px rgba(15, 76, 129, 0.1);
+}
+
+.diet-catalog-pick-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.diet-catalog-pick-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.diet-catalog-pick-name {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.diet-catalog-ref-qty {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    background: rgba(100, 116, 139, 0.1);
+    border: 1px solid rgba(100, 116, 139, 0.2);
+    border-radius: 999px;
+    padding: 1px 8px;
+    white-space: nowrap;
+    line-height: 1.6;
+}
+
+.diet-catalog-pick-calories {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f59e0b;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.diet-catalog-pick-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+/* ── Food card footer strip ── */
+.diet-catalog-pick-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px 12px;
+    min-height: 56px;
+    background: #e8f1fb;
+    border: 1px solid #c8daef;
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    visibility: visible;
+    opacity: 1;
+    position: relative;
+    z-index: 3;
+}
+
+.diet-catalog-qty-row {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 2px;
+    background: #ffffff;
+    border: 1px solid #d1dde9;
+    border-radius: 999px;
+    padding: 3px 6px;
+}
+
+.diet-catalog-qty-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #2b6cb0;
+    font-size: 10px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.diet-catalog-qty-btn:hover {
+    background: #eef6ff;
 }
 
 .food-catalog-qty-input {
-    width: 86px;
+    width: 52px;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    padding: 0 2px !important;
 }
 
-.food-catalog-unit {
-    font-size: 12px;
+.diet-catalog-unit-pill {
+    font-size: 11px;
+    font-weight: 600;
     color: #64748b;
-    min-width: 20px;
+    background: rgba(100, 116, 139, 0.1);
+    border: 1px solid rgba(100, 116, 139, 0.18);
+    border-radius: 999px;
+    padding: 1px 7px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.diet-catalog-add-btn {
+    border: none;
+    background: linear-gradient(135deg, #2b6cb0 0%, #1a4f8a 100%);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.diet-catalog-add-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+#selectFoodModal #foodCatalogList {
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 4px;
+    padding-bottom: 24px;
+}
+
+/* ── Styled modal footer buttons ── */
+.food-form-modal-content .modal-footer {
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 14px 14px;
+    background: #fafbfc;
+}
+
+.food-form-modal-content .modal-footer .btn-secondary {
+    border-radius: 999px;
+    padding: 7px 20px;
+    font-weight: 600;
+}
+
+.food-form-modal-content .modal-footer .btn-danger {
+    border-radius: 999px;
+    padding: 7px 20px;
+    font-weight: 600;
+}
+
+.food-form-modal-content .modal-footer .btn-outline-primary {
+    border-radius: 999px;
+    padding: 7px 18px;
+    font-weight: 600;
+}
+
+.food-form-modal-content .modal-footer .btn-outline-secondary {
+    border-radius: 999px;
+    padding: 7px 18px;
+    font-weight: 600;
 }
 
 .food-catalog-row {
@@ -832,6 +1221,29 @@
 
 .food-catalog-swipe-overlay {
     display: none;
+}
+
+.food-catalog-entry {
+    margin-bottom: 12px;
+}
+
+.food-catalog-entry-card {
+    margin: 0;
+}
+
+.food-catalog-entry-top-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.food-catalog-entry-card .diet-view-item-qty {
+    margin-bottom: 10px;
+}
+
+.food-catalog-entry-card .diet-view-item-macros {
+    margin-bottom: 0;
 }
 
 /* ============================================
@@ -2146,6 +2558,24 @@
 @media (max-width: 991.98px) {
     .admin-dashboard {
         padding-top: 20px !important;
+        /* Catalog modal section labels */
+        .catalog-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #64748b;
+            padding: 4px 2px 6px;
+        }
+
+        /* Flash highlight for newly added custom food card */
+        @keyframes catalogCardHighlight {
+            0% { box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.5); }
+            100% { box-shadow: none; }
+        }
+        .catalog-card-highlight {
+            animation: catalogCardHighlight 1.2s ease-out forwards;
+        }
         padding-bottom: 20px !important;
     }
 

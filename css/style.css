@@ -2249,6 +2249,129 @@ a:focus {
     display: block;
 }
 
+.tmh-settings-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tmh-settings-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 148px;
+    padding: 6px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+    display: none;
+    z-index: 1060;
+}
+
+.tmh-settings-menu.open {
+    display: block;
+}
+
+.tmh-settings-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: #ffffff;
+    color: #334155;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.tmh-settings-menu-item:hover,
+.tmh-settings-menu-item:focus {
+    background: #f1f5f9;
+}
+
+.tyfit-auth-modal-content {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+}
+
+.tyfit-auth-modal-header {
+    justify-content: center;
+    padding: 22px 24px 12px;
+    border-bottom: none;
+    position: relative;
+}
+
+.tyfit-auth-close {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    z-index: 2;
+}
+
+.tyfit-auth-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    display: block;
+}
+
+.tyfit-auth-modal-body {
+    padding: 8px 28px 28px;
+    text-align: center;
+}
+
+.tyfit-auth-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.tyfit-auth-copy {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #64748b;
+    margin-bottom: 22px;
+}
+
+.tyfit-auth-google-btn {
+    border: none;
+    background: #111111;
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 12px 28px rgba(17, 17, 17, 0.16);
+}
+
+.tyfit-auth-google-btn:hover,
+.tyfit-auth-google-btn:focus {
+    background: #1f2937;
+    color: #ffffff;
+}
+
+body.tyfit-auth-locked {
+    overflow: hidden;
+}
+
+body.tyfit-auth-locked #navbar-placeholder,
+body.tyfit-auth-locked .admin-dashboard,
+body.tyfit-auth-locked .admin-section,
+body.tyfit-auth-locked .back-to-top,
+body.tyfit-auth-locked main,
+body.tyfit-auth-locked .hero-section,
+body.tyfit-auth-locked .container,
+body.tyfit-auth-locked .row {
+    filter: blur(8px);
+    pointer-events: none;
+    user-select: none;
+}
+
 /* ----------------------------------
    DESKTOP HEADER
    ---------------------------------- */
@@ -2433,3 +2556,262 @@ a:focus {
         font-size: 11px;
     }
 }
+
+/* =========================================================
+   HOME PAGE — TYFIT Premium Layout
+   ========================================================= */
+
+/* ---- Page shell ---- */
+.tyfit-home-main {
+    padding-top: 70px; /* below fixed mobile header */
+    padding-bottom: 100px; /* above fixed bottom nav */
+    background: #f5f7fa;
+    min-height: 100vh;
+}
+
+@media (min-width: 992px) {
+    .tyfit-home-main {
+        padding-top: 90px;
+        padding-bottom: 40px;
+        max-width: 520px;
+        margin: 0 auto;
+    }
+}
+
+/* ---- Hero Section ---- */
+.tyfit-home-hero {
+    position: relative;
+    background: #ffffff;
+    border-radius: 0 0 40px 40px;
+    padding: 32px 24px 36px;
+    overflow: hidden;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.tyfit-home-hero-blob {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 340px;
+    height: 260px;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);
+    border-radius: 50%;
+    z-index: 0;
+    filter: blur(8px);
+    opacity: 0.7;
+}
+
+.tyfit-home-hero-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tyfit-home-avatar-ring {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, #6c63ff, #00b4d8);
+    margin-bottom: 14px;
+    box-shadow: 0 6px 24px rgba(108,99,255,0.22);
+}
+
+.tyfit-home-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ffffff;
+    background: #e8eaf6;
+    display: block;
+}
+
+.tyfit-home-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 6px;
+    letter-spacing: -0.3px;
+}
+
+.tyfit-see-profile-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6c63ff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.2s;
+}
+
+.tyfit-see-profile-link:hover {
+    opacity: 0.75;
+    text-decoration: none;
+    color: #6c63ff;
+}
+
+/* ---- Stats Section ---- */
+.tyfit-home-stats-section {
+    padding: 20px 16px 8px;
+}
+
+.tyfit-home-stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.tyfit-home-stat-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 18px 16px 16px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.tyfit-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+}
+
+.tyfit-stat-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.tyfit-stat-unit {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.tyfit-home-cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    background: #0f172a;
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 15px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.18);
+    transition: background 0.2s, box-shadow 0.2s;
+    margin-bottom: 8px;
+}
+
+.tyfit-home-cta-btn:hover {
+    background: #1e293b;
+    color: #ffffff;
+    text-decoration: none;
+    box-shadow: 0 12px 32px rgba(15,23,42,0.22);
+}
+
+/* ---- Tools Section ---- */
+.tyfit-home-tools-section {
+    padding: 8px 16px 16px;
+}
+
+.tyfit-home-tools-header {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 14px;
+    padding: 0 4px;
+}
+
+.tyfit-home-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+@media (min-width: 400px) {
+    .tyfit-home-tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.tyfit-tool-item {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 18px 8px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.tyfit-tool-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+    text-decoration: none;
+}
+
+.tyfit-tool-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #6c63ff;
+}
+
+.tyfit-tool-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* ---- Skeleton Loader ---- */
+.tyfit-home-skeleton {
+    padding-top: 70px;
+    padding-bottom: 100px;
+    background: #f5f7fa;
+    min-height: 100vh;
+    display: none;
+}
+
+@keyframes tyfitSkeletonShimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+
+.tyfit-skeleton-hero,
+.tyfit-skeleton-stats,
+.tyfit-skeleton-tools {
+    margin: 0 0 12px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 800px 100%;
+    animation: tyfitSkeletonShimmer 1.4s infinite linear;
+}
+
+.tyfit-skeleton-hero  { height: 220px; border-radius: 0 0 40px 40px; }
+.tyfit-skeleton-stats { height: 130px; margin: 16px 16px; border-radius: 20px; }
+.tyfit-skeleton-tools { height: 220px; margin: 0 16px; border-radius: 20px; }

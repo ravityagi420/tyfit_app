@@ -6,6 +6,8 @@ const DIET_STATE = {
     addFoodTargetRow: null,
     mealCounter: 0,
     activeAdminId: "",
+    currentUserId: "",
+    isAdmin: false,
     isEditMode: false,
     hasUnsavedChanges: false,
     isSyncingView: false,
@@ -675,27 +677,71 @@ async function renderFoodCatalogModalList(searchTerm = "") {
             return;
         }
 
-        listEl.innerHTML = foods.map((food) => {
+        const userId = DIET_STATE.currentUserId;
+        const customFoods = foods.filter((f) => f.is_custom && f.created_by_user_id === userId);
+        const globalFoods = foods.filter((f) => !f.is_custom);
+
+        const renderCard = (food) => {
             const foodId = escapeHtml(food.food_id);
             const unit = escapeHtml(food.unit_of_quantity || "");
             const referenceQty = toNumber(food.quantity, 0);
             const initialQty = referenceQty > 0 ? referenceQty : 1;
-            const previewText = buildCatalogMacroPreview(food, initialQty);
+            const carbs = toNumber(food.carbs, 0);
+            const protein = toNumber(food.protein, 0);
+            const fats = toNumber(food.fats, 0);
+            const calories = (carbs * 4) + (protein * 4) + (fats * 9);
 
             return `
-                <div class="food-catalog-pick-row" data-food-id="${foodId}">
-                    <div class="food-catalog-pick-left">
-                        <div class="food-catalog-pick-name">${escapeHtml(food.food_name || "Unnamed Food")}</div>
-                        <div class="food-catalog-pick-meta">${previewText}</div>
+                <div class="diet-catalog-pick-card" data-food-id="${foodId}">
+                    <div class="diet-catalog-pick-top">
+                        <div class="diet-catalog-pick-title">
+                            <span class="diet-item-dot"></span>
+                            <span class="diet-catalog-pick-name">${escapeHtml(food.food_name || "Unnamed Food")}</span>
+                            <span class="diet-catalog-ref-qty">${formatMacro(initialQty)}&thinsp;${unit}</span>
+                        </div>
+                        <div class="diet-catalog-pick-calories">${formatMacro(calories)} kcal</div>
                     </div>
-                    <div class="food-catalog-pick-right">
-                        <input type="number" class="form-control form-control-sm food-catalog-qty-input" value="${formatMacro(initialQty)}" min="0.01" step="0.01" data-food-id="${foodId}">
-                        <span class="food-catalog-unit">${unit}</span>
-                        <button type="button" class="btn btn-sm btn-outline-primary js-add-food-catalog-item" data-food-id="${foodId}">Add</button>
+                    <div class="diet-catalog-pick-macros">
+                        <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(carbs)} g</span>
+                        <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(protein)} g</span>
+                        <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(fats)} g</span>
+                    </div>
+                    <div class="diet-catalog-pick-footer">
+                        <div class="diet-catalog-qty-row">
+                            <button type="button" class="diet-catalog-qty-btn js-catalog-qty-minus" data-food-id="${foodId}" aria-label="Decrease quantity">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                            <input type="number" class="food-catalog-qty-input" value="${formatMacro(initialQty)}" min="0.01" step="0.01" data-food-id="${foodId}" aria-label="Quantity">
+                            <span class="diet-catalog-unit-pill">${unit}</span>
+                            <button type="button" class="diet-catalog-qty-btn js-catalog-qty-plus" data-food-id="${foodId}" aria-label="Increase quantity">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                        <button type="button" class="diet-catalog-add-btn js-add-food-catalog-item" data-food-id="${foodId}">
+                            <i class="fa fa-plus mr-1"></i> Add
+                        </button>
                     </div>
                 </div>
             `;
-        }).join("");
+        };
+
+        let html = "";
+
+        if (customFoods.length > 0) {
+            html += `<div class="catalog-section-label">Your Custom Foods</div>`;
+            html += customFoods.map(renderCard).join("");
+        }
+
+        if (globalFoods.length > 0) {
+            html += `<div class="catalog-section-label${customFoods.length > 0 ? " mt-3" : ""}">Food Catalog</div>`;
+            html += globalFoods.map(renderCard).join("");
+        }
+
+        if (!html) {
+            html = '<div class="food-catalog-empty text-center text-muted py-4">No foods found.</div>';
+        }
+
+        listEl.innerHTML = html;
     } catch (error) {
         console.error("renderFoodCatalogModalList error:", error);
         listEl.innerHTML = '<div class="food-catalog-empty text-center text-danger py-4">Failed to load food catalog.</div>';
@@ -1177,17 +1223,21 @@ async function waitForStableSession(timeoutMs = 4000, intervalMs = 250) {
 }
 
 async function requireLoginOrRedirect() {
+    if (typeof window.requireLoginWithModal === "function") {
+        return window.requireLoginWithModal();
+    }
+
     const { session, error } = await waitForStableSession();
 
     if (error) {
         await showDietAlert("Session error: " + error.message, { title: "Session Error" });
-        window.location.href = "../login.html?returnTo=/admin/diet_chart.html";
         return null;
     }
 
     if (!session) {
-        await showDietAlert("No active session found. Please log in again.", { title: "Login Required" });
-        window.location.href = "../login.html?returnTo=/admin/diet_chart.html";
+        if (typeof window.openAuthModal === "function") {
+            window.openAuthModal({ locked: true });
+        }
         return null;
     }
 
@@ -1243,19 +1293,8 @@ async function loadUsersList() {
 }
 
 async function loadFoodCatalogOptions(searchTerm = "") {
-    if (DIET_STATE.foodCatalog.length === 0) {
-        const { data, error } = await window.supabaseClient
-            .from("food_catalog")
-            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path")
-            .order("food_name", { ascending: true });
-
-        if (error) {
-            console.error("loadFoodCatalogOptions error:", error);
-            throw new Error("Failed to load food catalog: " + error.message);
-        }
-
-        DIET_STATE.foodCatalog = data || [];
-    }
+    // Always force a fresh load so newly created custom foods appear immediately
+    await loadVisibleFoodCatalogItems();
 
     if (!searchTerm) {
         return DIET_STATE.foodCatalog;
@@ -1265,6 +1304,41 @@ async function loadFoodCatalogOptions(searchTerm = "") {
     return DIET_STATE.foodCatalog.filter((food) =>
         (food.food_name || "").toLowerCase().includes(query)
     );
+}
+
+async function loadVisibleFoodCatalogItems() {
+    const userId = DIET_STATE.currentUserId;
+
+    // Fetch global foods
+    const { data: globalFoods, error: globalError } = await window.supabaseClient
+        .from("food_catalog")
+        .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, is_custom, created_by_user_id")
+        .eq("is_custom", false)
+        .order("food_name", { ascending: true });
+
+    if (globalError) {
+        console.error("loadVisibleFoodCatalogItems global error:", globalError);
+        throw new Error("Failed to load food catalog: " + globalError.message);
+    }
+
+    let customFoods = [];
+    if (userId) {
+        const { data: myFoods, error: customError } = await window.supabaseClient
+            .from("food_catalog")
+            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, is_custom, created_by_user_id")
+            .eq("is_custom", true)
+            .eq("created_by_user_id", userId)
+            .order("food_name", { ascending: true });
+
+        if (customError) {
+            console.error("loadVisibleFoodCatalogItems custom error:", customError);
+        } else {
+            customFoods = myFoods || [];
+        }
+    }
+
+    // Own custom foods first, then global
+    DIET_STATE.foodCatalog = [...customFoods, ...(globalFoods || [])];
 }
 
 async function checkExistingDietChart(userId) {
@@ -1755,6 +1829,124 @@ async function createFoodCatalogItem(payload) {
     }
 
     return data;
+}
+
+function openAddCustomFoodModal() {
+    const form = getEl("customFoodForm");
+    if (form) {
+        form.reset();
+    }
+    const statusEl = getEl("customFoodStatus");
+    if (statusEl) {
+        statusEl.style.display = "none";
+        statusEl.textContent = "";
+    }
+    if (window.jQuery && window.jQuery.fn.modal) {
+        window.jQuery("#selectFoodModal").modal("hide");
+        window.jQuery("#customFoodModal").modal("show");
+    }
+}
+
+async function saveCustomFoodItem() {
+    const statusEl = getEl("customFoodStatus");
+
+    const foodName = (getEl("cfFoodName")?.value || "").trim();
+    const quantity = toNumber(getEl("cfQuantity")?.value, 0);
+    const unit = getEl("cfUnit")?.value || "g";
+    const carbs = toNumber(getEl("cfCarbs")?.value, -1);
+    const protein = toNumber(getEl("cfProtein")?.value, -1);
+    const fats = toNumber(getEl("cfFats")?.value, -1);
+    const fibreRaw = (getEl("cfFibre")?.value || "").trim();
+    const fibre = fibreRaw === "" ? null : toNumber(fibreRaw, -1);
+
+    if (!foodName) {
+        showCustomFoodStatus("Food name is required.", "warning");
+        return;
+    }
+    if (quantity <= 0) {
+        showCustomFoodStatus("Quantity must be greater than 0.", "warning");
+        return;
+    }
+    if (carbs < 0 || protein < 0 || fats < 0) {
+        showCustomFoodStatus("Carbs, protein and fats cannot be negative.", "warning");
+        return;
+    }
+    if (fibre !== null && fibre < 0) {
+        showCustomFoodStatus("Fibre cannot be negative.", "warning");
+        return;
+    }
+
+    const saveBtn = getEl("customFoodSaveBtn");
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i> Saving...';
+    }
+
+    try {
+        const payload = {
+            food_name: foodName,
+            quantity,
+            unit_of_quantity: unit,
+            carbs,
+            protein,
+            fats,
+            fibre: fibre,
+            image_path: null,
+            is_custom: true,
+            created_by_user_id: DIET_STATE.currentUserId || null,
+            updated_at: new Date().toISOString()
+        };
+
+        const { data, error } = await window.supabaseClient
+            .from("food_catalog")
+            .insert(payload)
+            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, is_custom, created_by_user_id")
+            .single();
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        // Force reload so new item appears in catalog
+        DIET_STATE.foodCatalog = [];
+        await loadFoodCatalogOptions();
+
+        if (window.jQuery && window.jQuery.fn.modal) {
+            window.jQuery("#customFoodModal").modal("hide");
+        }
+
+        // Reopen catalog modal and highlight the new food
+        await renderFoodCatalogModalList("");
+        if (window.jQuery && window.jQuery.fn.modal) {
+            window.jQuery("#selectFoodModal").modal("show");
+        }
+
+        // Briefly flash the new card
+        setTimeout(() => {
+            const newCard = document.querySelector(`[data-food-id="${data.food_id}"]`);
+            if (newCard) {
+                newCard.classList.add("catalog-card-highlight");
+                setTimeout(() => newCard.classList.remove("catalog-card-highlight"), 1200);
+                newCard.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }, 200);
+    } catch (err) {
+        console.error("saveCustomFoodItem error:", err);
+        showCustomFoodStatus(err.message || "Failed to save custom food.", "danger");
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa fa-save mr-1"></i> Save';
+        }
+    }
+}
+
+function showCustomFoodStatus(message, type = "danger") {
+    const el = getEl("customFoodStatus");
+    if (!el) return;
+    el.className = `alert alert-${type} mt-3 mb-0`;
+    el.textContent = message;
+    el.style.display = "block";
 }
 
 function collectDietChartFormData() {
@@ -2369,29 +2561,75 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    const hasAccess = await requireAdminOrRedirect(user);
-    if (!hasAccess) {
-        return;
-    }
+    // Determine role — admins get full user-selector; clients load own chart only
+    const accessState = await window.getAccessState({ user });
+    const isAdmin = Boolean(accessState?.isAdmin);
 
     DIET_STATE.activeAdminId = user.id;
+    DIET_STATE.currentUserId = user.id;
+    DIET_STATE.isAdmin = isAdmin;
 
-    const adminHelloName = getEl("adminHelloName");
-    if (adminHelloName) {
-        const meta = user.user_metadata || {};
-        adminHelloName.textContent = meta.full_name || meta.name || user.email || "Admin";
-    }
+    if (!isAdmin) {
+        // Client: hide the user selector section
+        const userToolbar = document.querySelector('.diet-user-toolbar');
+        if (userToolbar) userToolbar.style.display = 'none';
 
-    try {
-        await loadFoodCatalogOptions();
-        await loadUsersList();
-    } catch (error) {
-        console.error("diet chart init error:", error);
-        await showDietAlert(error.message || "Failed to initialize page.", { title: "Initialization Error" });
+        // Remove admin-oriented management wording for client view.
+        const pageTitle = document.querySelector('.diet-page-title');
+        if (pageTitle) pageTitle.textContent = 'Diet Chart';
+
+        // Swap "Add New Food Item" for "Add Custom Food" in catalog modal footer
+        const addNewFoodBtn = getEl('openAddFoodFromCatalogModalBtn');
+        const addCustomFoodBtn = getEl('addCustomFoodBtn');
+        if (addNewFoodBtn) addNewFoodBtn.style.display = 'none';
+        if (addCustomFoodBtn) addCustomFoodBtn.style.display = '';
+
+        // Update page subtitle
+        const subtitle = document.querySelector('.diet-page-subtitle');
+        if (subtitle) subtitle.textContent = 'My Diet Chart';
+        const copy = document.querySelector('.diet-page-copy');
+        if (copy) copy.textContent = 'View and manage your personal meal plan.';
+
+        try {
+            await loadFoodCatalogOptions();
+            // Auto-load the current user's own diet chart
+            DIET_STATE.selectedUserId = user.id;
+            await loadSelectedUserMeta(user.id);
+            showLoadingSpinner();
+            const existingChart = await checkExistingDietChart(user.id);
+            if (existingChart) {
+                DIET_STATE.selectedChartId = existingChart.id;
+                const chartData = await loadDietChart(existingChart.id);
+                DIET_STATE.currentChartData = chartData;
+                DIET_STATE.isEditMode = false;
+                setDietDirty(false);
+                renderDietChartView(chartData);
+                setEditorVisibility(true);
+            } else {
+                // No chart yet — start a blank one so client can create
+                createEmptyDietChart(user.id);
+            }
+            hideLoadingSpinner();
+        } catch (error) {
+            hideLoadingSpinner();
+            console.error("diet chart client init error:", error);
+            await showDietAlert(error.message || "Failed to load your diet chart.", { title: "Initialization Error" });
+        }
+    } else {
+        // Admin: existing behavior
+        try {
+            await loadFoodCatalogOptions();
+            await loadUsersList();
+        } catch (error) {
+            console.error("diet chart admin init error:", error);
+            await showDietAlert(error.message || "Failed to initialize page.", { title: "Initialization Error" });
+        }
     }
 
     bindDietChartEvents();
-    resetDietChartPage();
+    if (isAdmin) {
+        resetDietChartPage();
+    }
 
     // Add event listener for delete confirmation modal
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -2435,6 +2673,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    const addCustomFoodBtn = getEl("addCustomFoodBtn");
+    if (addCustomFoodBtn) {
+        addCustomFoodBtn.addEventListener("click", () => {
+            openAddCustomFoodModal();
+        });
+    }
+
+    const customFoodForm = getEl("customFoodForm");
+    if (customFoodForm) {
+        customFoodForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            await saveCustomFoodItem();
+        });
+    }
+
+    const customFoodCancelBtn = getEl("customFoodCancelBtn");
+    if (customFoodCancelBtn) {
+        customFoodCancelBtn.addEventListener("click", () => {
+            if (window.jQuery && window.jQuery.fn.modal) {
+                window.jQuery("#customFoodModal").modal("hide");
+                window.jQuery("#selectFoodModal").modal("show");
+            }
+        });
+    }
+
     const foodSearchInput = getEl("foodSearchInput");
     if (foodSearchInput) {
         foodSearchInput.addEventListener("input", (event) => {
@@ -2450,24 +2713,28 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
-            const row = qtyInput.closest(".food-catalog-pick-row");
-            if (!row) {
+            const card = qtyInput.closest(".diet-catalog-pick-card");
+            if (!card) {
                 return;
             }
-
-            const foodId = row.getAttribute("data-food-id");
-            const selectedFood = DIET_STATE.foodCatalog.find((food) => String(food.food_id) === String(foodId));
-            const metaEl = row.querySelector(".food-catalog-pick-meta");
-
-            if (!selectedFood || !metaEl) {
-                return;
-            }
-
-            const quantity = toNumber(qtyInput.value, 0);
-            metaEl.textContent = buildCatalogMacroPreview(selectedFood, quantity > 0 ? quantity : 0);
         });
 
         foodCatalogList.addEventListener("click", async (event) => {
+            // Handle +/- qty buttons
+            const minusBtn = event.target.closest(".js-catalog-qty-minus");
+            const plusBtn = event.target.closest(".js-catalog-qty-plus");
+            if (minusBtn || plusBtn) {
+                const card = (minusBtn || plusBtn).closest(".diet-catalog-pick-card");
+                const qtyInput = card ? card.querySelector(".food-catalog-qty-input") : null;
+                if (qtyInput) {
+                    const step = parseFloat(qtyInput.step) || 1;
+                    let val = toNumber(qtyInput.value, step);
+                    val = minusBtn ? Math.max(step, parseFloat((val - step).toFixed(2))) : parseFloat((val + step).toFixed(2));
+                    qtyInput.value = formatMacro(val);
+                }
+                return;
+            }
+
             const pickButton = event.target.closest(".js-add-food-catalog-item");
             if (!pickButton) {
                 return;
@@ -2476,7 +2743,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const modal = getEl("selectFoodModal");
             const mealIndex = modal ? parseInt(modal.getAttribute("data-meal-index"), 10) : NaN;
             const foodId = pickButton.getAttribute("data-food-id");
-            const row = pickButton.closest(".food-catalog-pick-row");
+            const row = pickButton.closest(".diet-catalog-pick-card");
             const qtyInput = row ? row.querySelector(".food-catalog-qty-input") : null;
             const selectedQuantity = qtyInput ? toNumber(qtyInput.value, 0) : 0;
 
@@ -2505,6 +2772,9 @@ window.deleteMealFromViewChart = deleteMealFromViewChart;
 window.addFoodRow = addFoodRow;
 window.deleteFoodRow = deleteFoodRow;
 window.loadFoodCatalogOptions = loadFoodCatalogOptions;
+window.loadVisibleFoodCatalogItems = loadVisibleFoodCatalogItems;
+window.openAddCustomFoodModal = openAddCustomFoodModal;
+window.saveCustomFoodItem = saveCustomFoodItem;
 window.populateFoodRowFromCatalog = populateFoodRowFromCatalog;
 window.recalculateFoodRow = recalculateFoodRow;
 window.recalculateMealTotals = recalculateMealTotals;

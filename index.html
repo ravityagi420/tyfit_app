@@ -2,10 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>TYFIT | Personalized Fitness Coaching</title>
+        <title>TYFIT | Home</title>
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="Free Website Template" name="keywords">
-        <meta content="Free Website Template" name="description">
+        <meta content="TYFIT Personalized Fitness Coaching" name="description">
 
         <!-- Favicon -->
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -19,46 +18,76 @@
         <!-- CSS Libraries -->
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-        <link href="lib/animate/animate.min.css" rel="stylesheet">
-        <link href="lib/flaticon/font/flaticon.css" rel="stylesheet"> 
-        <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
-        <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet">
 
         <!-- Template Stylesheet -->
-        <link href="css/style.css" rel="stylesheet">
-        
+        <link href="css/style.css?v=20260419d" rel="stylesheet">
     </head>
 
-    <body onload="showUser()">
+    <body>
         <!-- Navbar Placeholder -->
         <div id="navbar-placeholder"></div>
 
-        <!-- Main Content Area -->
-        <!-- Add your page content here -->
+        <!-- Home Page Main -->
+        <main class="tyfit-home-main" id="homeMain" style="display:none;">
+
+            <!-- Hero Section -->
+            <section class="tyfit-home-hero">
+                <div class="tyfit-home-hero-blob"></div>
+                <div class="tyfit-home-hero-inner">
+                    <div class="tyfit-home-avatar-ring">
+                        <img id="homeAvatar" src="" alt="Profile" class="tyfit-home-avatar">
+                    </div>
+                    <h2 id="homeFullName" class="tyfit-home-name">--</h2>
+                    <a href="#" id="homeSeeProfileLink" class="tyfit-see-profile-link">See profile <i class="fa fa-arrow-right"></i></a>
+                </div>
+            </section>
+
+            <!-- Stats + CTA -->
+            <section class="tyfit-home-stats-section">
+                <div class="tyfit-home-stats-row">
+                    <div class="tyfit-home-stat-card">
+                        <div class="tyfit-stat-label">Age</div>
+                        <div class="tyfit-stat-value" id="homeAge">--</div>
+                        <div class="tyfit-stat-unit">yrs</div>
+                    </div>
+                    <div class="tyfit-home-stat-card">
+                        <div class="tyfit-stat-label">Current Weight</div>
+                        <div class="tyfit-stat-value" id="homeWeight">--</div>
+                        <div class="tyfit-stat-unit">kg</div>
+                    </div>
+                </div>
+                <a href="#" id="homeViewProfileBtn" class="tyfit-home-cta-btn">View My Profile <i class="fa fa-arrow-right"></i></a>
+            </section>
+
+            <!-- Tools Section -->
+            <section class="tyfit-home-tools-section">
+                <div class="tyfit-home-tools-header">Tools</div>
+                <div class="tyfit-home-tools-grid" id="homeToolsGrid"></div>
+            </section>
+
+        </main>
+
+        <!-- Skeleton loader shown while data loads -->
+        <div id="homeSkeleton" class="tyfit-home-skeleton">
+            <div class="tyfit-skeleton-hero"></div>
+            <div class="tyfit-skeleton-stats"></div>
+            <div class="tyfit-skeleton-tools"></div>
+        </div>
 
         <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
 
         <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-        <script src="lib/easing/easing.min.js"></script>
-        <script src="lib/wow/wow.min.js"></script>
-        <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-        <script src="lib/isotope/isotope.pkgd.min.js"></script>
-        <script src="lib/lightbox/js/lightbox.min.js"></script>
-        
-        <!-- Contact Javascript File -->
-        <script src="mail/jqBootstrapValidation.min.js"></script>
-        <script src="mail/contact.js"></script>
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="js/supabase-client.js"></script>
-        <script src="js/login.js"></script>
+        <script src="js/login.js?v=20260419d"></script>
 
         <!-- Components Loader -->
-        <script src="js/components-loader.js?v=20260419"></script>
+        <script src="js/components-loader.js?v=20260419d"></script>
 
-        <!-- Template Javascript -->
-        <script src="js/main.js"></script>
+        <!-- Home Page Logic -->
+        <script src="js/home.js?v=20260419d"></script>
     </body>
 </html>

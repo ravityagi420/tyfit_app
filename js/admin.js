@@ -223,21 +223,21 @@ async function waitForStableSession(timeoutMs = 4000, intervalMs = 250) {
 }
 
 async function requireLoginOrRedirect() {
-  const { session, error } = await waitForStableSession();
+  if (typeof window.requireLoginWithModal === "function") {
+    return window.requireLoginWithModal();
+  }
 
-  console.log("Admin session:", session);
-  console.log("Admin origin:", window.location.origin);
-  console.log("Admin path:", window.location.pathname);
+  const { session, error } = await waitForStableSession();
 
   if (error) {
     await showAlert("Session error: " + error.message);
-    window.location.href = "../login.html?returnTo=/admin/index.html";
     return null;
   }
 
   if (!session) {
-    await showAlert("No active session found. Please log in again.");
-    window.location.href = "../login.html?returnTo=/admin/index.html";
+    if (typeof window.openAuthModal === "function") {
+      window.openAuthModal({ locked: true });
+    }
     return null;
   }
 
@@ -552,12 +552,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!user) return;
 
   if (!await requireAdminOrRedirect(user)) return;
-
-  const adminHelloName = getEl("adminHelloName");
-  if (adminHelloName) {
-    const meta = user.user_metadata || {};
-    adminHelloName.textContent = meta.full_name || meta.name || user.email || "Admin";
-  }
 
   await initAdminPage();
 });

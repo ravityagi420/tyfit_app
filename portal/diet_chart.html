@@ -17,8 +17,8 @@
     <link href="../lib/flaticon/font/flaticon.css" rel="stylesheet">
     <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
+    <link href="../css/style.css?v=20260419d" rel="stylesheet">
+    <link href="../css/admin.css?v=20260419d" rel="stylesheet">
 </head>
 
 <body>
@@ -26,28 +26,9 @@
 
     <div class="admin-section diet-page-shell" style="padding: 80px 0;">
         <div class="container">
-            <ul class="nav admin-tab-bar" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.html">Profile Management</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="diet_chart.html">Diet Chart</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="food_catalog.html">Food Catalog</a>
-                </li>
-            </ul>
-
             <div class="diet-page-top text-center mb-4">
-                <p class="diet-page-subtitle mb-1">Admin Panel</p>
+                <p class="diet-page-subtitle mb-1" id="dietPageSubtitle">Diet Chart</p>
                 <h2 class="diet-page-title">Diet Chart Management</h2>
-                <p class="diet-page-copy text-muted mb-0">Create, update, and manage structured meal plans for any user.</p>
-            </div>
-
-            <div class="admin-greeting diet-page-header-row">
-                <div>
-                    <span class="admin-greeting-text">Hello, <strong id="adminHelloName">Admin</strong></span>
-                </div>
             </div>
 
             <div id="dietViewSaveBar" class="diet-view-save-bar" style="display: none;">
@@ -100,6 +81,7 @@
         </div>
     </div>
 
+    <!-- Add New Food Modal (admin only) -->
     <div class="modal fade" id="addFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content food-form-modal-content">
@@ -133,7 +115,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="form-row">
                             <div class="form-group col-md-3">
                                 <label for="newFoodCarbs">Carbs</label>
@@ -164,7 +145,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label for="newFoodImage">Food Image</label>
                             <input type="file" id="newFoodImage" class="d-none" accept="image/*">
@@ -175,7 +155,6 @@
                                 <span id="newFoodImageName" class="food-image-file-name">No file chosen</span>
                             </div>
                         </div>
-
                         <div class="food-form-actions mt-4">
                             <button type="submit" class="btn btn-primary" id="saveNewFoodBtn">
                                 <i class="fa fa-save mr-1"></i> Save Food
@@ -190,18 +169,22 @@
         </div>
     </div>
 
+    <!-- Select Food From Catalog Modal -->
     <div class="modal fade" id="selectFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fa fa-utensils mr-2"></i>Add Food From Catalog</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <div class="modal-content food-form-modal-content">
+                <div class="modal-header catalog-modal-header">
+                    <div class="food-modal-title-wrap">
+                        <h5 class="modal-title"><i class="fa fa-utensils mr-2"></i>Add Food From Catalog</h5>
+                    </div>
+                    <button type="button" class="close catalog-modal-close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <input type="text" id="foodSearchInput" class="form-control" placeholder="Search food by name...">
+                    <div class="catalog-search-wrap mb-3">
+                        <i class="fa fa-search catalog-search-icon"></i>
+                        <input type="text" id="foodSearchInput" class="form-control catalog-search-input" placeholder="Search food by name..." autocomplete="off">
                     </div>
                     <div id="foodCatalogList" class="food-catalog-list"></div>
                 </div>
@@ -209,17 +192,103 @@
                     <button type="button" class="btn btn-outline-primary mr-auto" id="openAddFoodFromCatalogModalBtn">
                         <i class="fa fa-plus mr-1"></i> Add New Food Item
                     </button>
+                    <button type="button" class="btn btn-outline-secondary mr-auto" id="addCustomFoodBtn" style="display: none;">
+                        <i class="fa fa-plus mr-1"></i> Add Custom Food
+                    </button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Add Custom Food Modal -->
+    <div class="modal fade" id="customFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content food-form-modal-content">
+                <div class="modal-header catalog-modal-header">
+                    <div class="food-modal-title-wrap">
+                        <h5 class="modal-title"><i class="fa fa-plus-circle mr-2"></i>Add Custom Food</h5>
+                    </div>
+                    <button type="button" class="close catalog-modal-close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="customFoodForm" novalidate>
+                        <div class="form-row">
+                            <div class="form-group col-12">
+                                <label for="cfFoodName">Food Name <span class="text-danger">*</span></label>
+                                <input type="text" id="cfFoodName" class="form-control" placeholder="e.g., Homemade Dahl" required autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="cfQuantity">Reference Quantity <span class="text-danger">*</span></label>
+                                <input type="number" id="cfQuantity" class="form-control" min="0.01" step="0.01" placeholder="e.g., 100" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="cfUnit">Unit</label>
+                                <select id="cfUnit" class="form-control">
+                                    <option value="g">g</option>
+                                    <option value="ml">ml</option>
+                                    <option value="piece">piece</option>
+                                    <option value="slice">slice</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="cfCarbs">Carbs <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" id="cfCarbs" class="form-control" min="0" step="0.01" placeholder="0" required>
+                                    <div class="input-group-append"><span class="input-group-text">g</span></div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="cfProtein">Protein <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" id="cfProtein" class="form-control" min="0" step="0.01" placeholder="0" required>
+                                    <div class="input-group-append"><span class="input-group-text">g</span></div>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="cfFats">Fats <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" id="cfFats" class="form-control" min="0" step="0.01" placeholder="0" required>
+                                    <div class="input-group-append"><span class="input-group-text">g</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cfFibre">Fibre <span class="text-muted small">(optional)</span></label>
+                            <div class="input-group">
+                                <input type="number" id="cfFibre" class="form-control" min="0" step="0.01" placeholder="Optional">
+                                <div class="input-group-append"><span class="input-group-text">g</span></div>
+                            </div>
+                        </div>
+                        <div id="customFoodStatus" class="alert" style="display: none;"></div>
+                        <div class="food-form-actions mt-3">
+                            <button type="submit" id="customFoodSaveBtn" class="btn btn-primary">
+                                <i class="fa fa-save mr-1"></i> Save
+                            </button>
+                            <button type="button" id="customFoodCancelBtn" class="btn btn-secondary">
+                                <i class="fa fa-arrow-left mr-1"></i> Back
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Food Item Confirmation Modal -->
     <div class="modal fade" id="deleteFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
+            <div class="modal-content food-form-modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fa fa-trash-alt mr-2 text-danger"></i>Delete Food Item</h5>
+                    <div class="food-modal-title-wrap">
+                        <h5 class="modal-title"><i class="fa fa-trash-alt mr-2 text-danger"></i>Delete Food Item</h5>
+                    </div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -238,11 +307,14 @@
         </div>
     </div>
 
+    <!-- Delete Meal Confirmation Modal -->
     <div class="modal fade" id="deleteMealModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
+            <div class="modal-content food-form-modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fa fa-trash-alt mr-2 text-danger"></i>Delete Meal</h5>
+                    <div class="food-modal-title-wrap">
+                        <h5 class="modal-title"><i class="fa fa-trash-alt mr-2 text-danger"></i>Delete Meal</h5>
+                    </div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -276,8 +348,8 @@
     <script src="../js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
-    <script src="../js/login.js"></script>
-    <script src="../js/components-loader.js?v=20260419"></script>
-    <script src="../js/diet_chart.js"></script>
+    <script src="../js/login.js?v=20260419d"></script>
+    <script src="../js/components-loader.js?v=20260419d"></script>
+    <script src="../js/diet_chart.js?v=20260419d"></script>
 </body>
 </html>

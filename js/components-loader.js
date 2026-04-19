@@ -13,7 +13,7 @@ const ComponentsLoader = {
     loadComponent: async function(componentName, targetSelector, options = {}) {
         try {
             const basePath = options.basePath || '';
-            const componentVersion = '20260419';
+            const componentVersion = '20260419d';
             const componentPath = `${basePath}components/${componentName}.html?v=${componentVersion}`;
             
             const response = await fetch(componentPath);
@@ -87,15 +87,15 @@ const ComponentsLoader = {
         }
 
         nav.innerHTML = `
-            <a href="admin/index.html" class="tbn-item" data-page="home" id="bnav-home">
+            <a href="portal/index.html" class="tbn-item" data-page="home" id="bnav-home">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 <span>Home</span>
             </a>
-            <a href="admin/food_catalog.html" class="tbn-item" data-page="food" id="bnav-food">
+            <a href="portal/food_catalog.html" class="tbn-item" data-page="food" id="bnav-food">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
                 <span>Catalog</span>
             </a>
-            <a href="admin/diet_chart.html" class="tbn-item" data-page="diet" id="bnav-diet">
+            <a href="portal/diet_chart.html" class="tbn-item" data-page="diet" id="bnav-diet">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
                 <span>Diet Plan</span>
             </a>
@@ -160,14 +160,13 @@ const ComponentsLoader = {
     _detectCurrentPage: function() {
         const path = window.location.pathname;
         const file = path.split('/').pop() || 'index.html';
+        const pathLower = path.toLowerCase();
+        if (pathLower.includes('portal') && (file === 'index.html' || file === '')) return 'home';
         if (file === 'index.html' || file === '') return 'home';
         if (file === 'diet_chart.html') return 'diet';
         if (file === 'exercise_chart.html') return 'exercise';
         if (file === 'food_catalog.html') return 'food';
         if (file === 'login.html') return null;
-        // admin/index.html – profile page
-        const pathLower = path.toLowerCase();
-        if (pathLower.includes('admin') && (file === 'index.html' || file === '')) return 'profile';
         return null;
     },
 
@@ -220,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (hasPlaceholders) {
         // Determine if this is an admin page
-        const isAdminPage = window.location.pathname.includes('/admin/');
+        const isAdminPage = window.location.pathname.includes('/portal/');
         const basePath = isAdminPage ? '../' : '';
         
         ComponentsLoader.loadAllComponents({

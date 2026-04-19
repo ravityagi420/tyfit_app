@@ -34,22 +34,21 @@ async function ensureProfile(session) {
 }
 
 function getPostLoginRedirect() {
-  const params = new URLSearchParams(window.location.search);
-  const requestedPath = params.get("returnTo");
-
-  if (requestedPath) {
-    return requestedPath;
-  }
-
-  if (window.location.pathname.endsWith("/login.html")) {
-    return "/index.html";
-  }
-
-  return window.location.pathname;
+  return "/index.html";
 }
 
 function getPublicHomeHref() {
-  return window.location.pathname.includes("/admin/") ? "../index.html" : "index.html";
+  return window.location.pathname.includes("/portal/") ? "../index.html" : "index.html";
+}
+
+function getAdminHomeHref() {
+  return window.location.pathname.includes("/portal/") ? "index.html" : "portal/index.html";
+}
+
+function getBlackLogoHref() {
+  return window.location.pathname.includes("/portal/")
+    ? "../assets/tyfit_img/black_icon_logo.png"
+    : "assets/tyfit_img/black_icon_logo.png";
 }
 
 function getDisplayName(session) {
@@ -220,13 +219,184 @@ function updateAuthButtons(isLoggedIn) {
   }
 }
 
+function updatePrimaryNavLinks(accessState) {
+  const targetHref = accessState?.isAdmin ? getAdminHomeHref() : getPublicHomeHref();
+  ["mobileLogoLink", "desktopLogoLink", "dnav-home", "bnav-home"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.setAttribute("href", targetHref);
+    }
+  });
+}
+
+function updateMobileSettingsAction(accessState) {
+  const actionBtn = document.getElementById("mobileSettingsAction");
+  if (!actionBtn) {
+    return;
+  }
+
+  actionBtn.innerHTML = accessState?.isLoggedIn
+    ? '<i class="fa fa-sign-out-alt"></i><span>Logout</span>'
+    : '<i class="fa fa-sign-in-alt"></i><span>Login</span>';
+}
+
+function ensureAuthModal() {
+  if (document.getElementById("tyfitAuthModal")) {
+    return;
+  }
+
+  if (!document.body) {
+    return;
+  }
+
+  const modalMarkup = `
+    <div class="modal fade" id="tyfitAuthModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content tyfit-auth-modal-content border-0 shadow">
+          <div class="modal-header tyfit-auth-modal-header">
+            <button type="button" class="close tyfit-auth-close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <img src="${getBlackLogoHref()}" alt="Tyfit" class="tyfit-auth-logo" id="tyfitAuthLogo">
+          </div>
+          <div class="modal-body tyfit-auth-modal-body">
+            <h5 class="tyfit-auth-title">Login to TYFIT</h5>
+            <p class="tyfit-auth-copy">Use your Google account to continue to the portal.</p>
+            <button type="button" class="btn tyfit-auth-google-btn btn-block" id="tyfitAuthGoogleBtn">
+              <i class="fab fa-google mr-2"></i> Continue with Google
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalMarkup);
+
+  const googleBtn = document.getElementById("tyfitAuthGoogleBtn");
+  if (googleBtn) {
+    googleBtn.addEventListener("click", googleLogin);
+  }
+}
+
+function openAuthModal(options = {}) {
+  ensureAuthModal();
+
+  const modalEl = document.getElementById("tyfitAuthModal");
+  const closeBtn = modalEl?.querySelector(".tyfit-auth-close");
+  const logoEl = document.getElementById("tyfitAuthLogo");
+  const locked = options.locked !== false;
+
+  if (!modalEl || !window.jQuery || !window.jQuery.fn.modal) {
+    return;
+  }
+
+  if (logoEl) {
+    logoEl.src = getBlackLogoHref();
+  }
+
+  if (closeBtn) {
+    closeBtn.style.display = locked ? "none" : "block";
+  }
+
+  if (locked) {
+    document.body.classList.add("tyfit-auth-locked");
+  }
+
+  window.jQuery(modalEl).modal({
+    backdrop: locked ? "static" : true,
+    keyboard: !locked,
+    show: true
+  });
+}
+
+function closeAuthModal() {
+  const modalEl = document.getElementById("tyfitAuthModal");
+  document.body.classList.remove("tyfit-auth-locked");
+  if (modalEl && window.jQuery && window.jQuery.fn.modal) {
+    window.jQuery(modalEl).modal("hide");
+  }
+}
+
+async function requireLoginWithModal() {
+  const session = await getCurrentSession();
+  if (!session) {
+    openAuthModal({ locked: true });
+    return null;
+  }
+
+  closeAuthModal();
+  return session.user;
+}
+
 function bindAuthUi() {
+  const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
+  const mobileSettingsBtn = document.getElementById("mobileSettingsBtn");
+  const mobileSettingsMenu = document.getElementById("mobileSettingsMenu");
+  const mobileSettingsAction = document.getElementById("mobileSettingsAction");
+
+  if (loginBtn && loginBtn.dataset.authBound !== "true") {
+    loginBtn.dataset.authBound = "true";
+    loginBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      openAuthModal({ locked: false });
+    });
+  }
+
   if (logoutBtn && logoutBtn.dataset.authBound !== "true") {
     logoutBtn.dataset.authBound = "true";
     logoutBtn.addEventListener("click", logout);
   }
 
+  if (mobileSettingsBtn && mobileSettingsBtn.dataset.authBound !== "true") {
+    mobileSettingsBtn.dataset.authBound = "true";
+    mobileSettingsBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!mobileSettingsMenu) {
+        return;
+      }
+      const opened = mobileSettingsMenu.classList.toggle("open");
+      mobileSettingsBtn.setAttribute("aria-expanded", String(opened));
+    });
+  }
+
+  if (mobileSettingsAction && mobileSettingsAction.dataset.authBound !== "true") {
+    mobileSettingsAction.dataset.authBound = "true";
+    mobileSettingsAction.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const accessState = await getAccessState();
+      if (mobileSettingsMenu) {
+        mobileSettingsMenu.classList.remove("open");
+      }
+      if (mobileSettingsBtn) {
+        mobileSettingsBtn.setAttribute("aria-expanded", "false");
+      }
+
+      if (accessState?.isLoggedIn) {
+        await logout(event);
+        return;
+      }
+
+      openAuthModal({ locked: false });
+    });
+  }
+
+  if (document.body && document.body.dataset.mobileSettingsBound !== "true") {
+    document.body.dataset.mobileSettingsBound = "true";
+    document.addEventListener("click", (event) => {
+      if (!mobileSettingsMenu || !mobileSettingsBtn) {
+        return;
+      }
+      if (event.target.closest("#mobileSettingsBtn") || event.target.closest("#mobileSettingsMenu")) {
+        return;
+      }
+      mobileSettingsMenu.classList.remove("open");
+      mobileSettingsBtn.setAttribute("aria-expanded", "false");
+    });
+  }
 }
 
 async function syncAuthUi(sessionArg) {
@@ -236,6 +406,8 @@ async function syncAuthUi(sessionArg) {
   bindAuthUi();
   updateAuthButtons(accessState.isLoggedIn);
   updateAdminLinkState(accessState);
+  updatePrimaryNavLinks(accessState);
+  updateMobileSettingsAction(accessState);
   await showUser(session);
   updateLoginPageState(session);
 
@@ -305,8 +477,6 @@ async function logout(event) {
   }
 
   window.tyfitAccessState = null;
-
-  window.location.href = getPublicHomeHref();
 }
 
 async function processOAuthCallback() {
@@ -342,6 +512,7 @@ async function processOAuthCallback() {
 async function handleAuthStateChange(event, session) {
   if (event === "SIGNED_IN" && session) {
     await ensureProfile(session);
+    closeAuthModal();
     await syncAuthUi(session);
     await maybeRedirectAfterLogin(session);
     return;
@@ -349,8 +520,12 @@ async function handleAuthStateChange(event, session) {
 
   if (event === "SIGNED_OUT") {
     await syncAuthUi(null);
-    if (window.location.pathname.includes("/admin/")) {
-      window.location.href = "../index.html";
+    // Lock any protected page (portal pages AND home page)
+    const pathname = window.location.pathname;
+    const isProtectedPage = pathname.includes("/portal/") ||
+      pathname === "/index.html" || pathname === "/" || pathname.endsWith("/index.html");
+    if (isProtectedPage) {
+      openAuthModal({ locked: true });
     }
     return;
   }
@@ -368,6 +543,7 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   try {
+    ensureAuthModal();
     bindAuthUi();
     const callbackSession = await processOAuthCallback();
     const session = callbackSession || await getCurrentSession();
@@ -407,3 +583,6 @@ window.isAdminUser = isAdminUser;
 window.getProfileRole = getProfileRole;
 window.getAccessState = getAccessState;
 window.refreshAuthUi = syncAuthUi;
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.requireLoginWithModal = requireLoginWithModal;
