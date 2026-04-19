@@ -374,7 +374,7 @@ async function selectUser(userId) {
 
     setInputValue("full_name", profile?.full_name || "");
     setInputValue("date_of_birth", profile?.date_of_birth || "");
-    setInputValue("gender", profile?.gender || "Male");
+    setInputValue("gender", profile?.gender || "");
     setInputValue("weight", profile?.weight ?? "");
     setInputValue("height", profile?.height ?? "");
     setInputValue("goal", profile?.goal || "");

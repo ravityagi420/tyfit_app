@@ -422,6 +422,14 @@ function renderDietChartView(chartData) {
                 input.style.display = 'block';
                 input.focus();
                 input.select();
+
+                // Prevent mobile zoom on input focus
+                const handleBlur = () => {
+                    // Force viewport reset to prevent zoom stuck
+                    document.body.style.zoom = '1';
+                    input.removeEventListener('blur', handleBlur);
+                };
+                input.addEventListener('blur', handleBlur);
             });
         });
 

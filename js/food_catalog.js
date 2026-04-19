@@ -8,7 +8,9 @@ const foodCatalogState = {
     currentImagePath: "",
     currentPreviewUrl: "",
     sortBy: "date_desc",
-    searchTerm: ""
+    searchTerm: "",
+    menuOutsideBound: false,
+    swipeHandlersBound: false
 };
 
 function getEl(id) {
@@ -589,22 +591,39 @@ function renderFoodCatalogTable(items) {
         const imageCell = createFoodImageCell(item);
         const totalCalories = calculateTotalCalories(item);
         const macroChart = renderMacroBars(item);
+        const foodId = escapeHtml(item.food_id);
+        const foodName = escapeHtml(item.food_name);
 
         return `
-            <div class="food-catalog-row">
+            <div class="food-catalog-row diet-view-item-card food-catalog-item-card" data-food-id="${foodId}">
                 <div class="food-row-top">
                     <div class="food-catalog-cell food-catalog-cell-image">${imageCell}</div>
                     <div class="food-catalog-cell food-catalog-cell-name">
-                        <div><strong class="food-catalog-name-text">${escapeHtml(item.food_name)}</strong></div>
+                        <div><strong class="food-catalog-name-text">${foodName}</strong></div>
                         <div class="food-catalog-meta">${formatNumber(item.quantity)} ${escapeHtml(item.unit_of_quantity)}</div>
                     </div>
-                    <div class="food-row-actions">
-                        <button type="button" class="food-action-btn food-action-btn-edit js-edit-food" data-food-id="${escapeHtml(item.food_id)}" aria-label="Edit ${escapeHtml(item.food_name)}" title="Edit">
+                    <div class="food-row-actions food-row-actions-desktop">
+                        <button type="button" class="food-action-btn food-action-btn-edit js-edit-food" data-food-id="${foodId}" aria-label="Edit ${foodName}" title="Edit">
                             <i class="fa fa-pen"></i>
                         </button>
-                        <button type="button" class="food-action-btn food-action-btn-delete js-delete-food" data-food-id="${escapeHtml(item.food_id)}" aria-label="Delete ${escapeHtml(item.food_name)}" title="Delete">
+                        <button type="button" class="food-action-btn food-action-btn-delete js-delete-food" data-food-id="${foodId}" aria-label="Delete ${foodName}" title="Delete">
                             <i class="fa fa-trash"></i>
                         </button>
+                    </div>
+                    <div class="food-row-actions-mobile">
+                        <div class="food-item-menu-wrap" data-food-id="${foodId}">
+                            <button type="button" class="food-item-menu-btn" data-food-id="${foodId}" aria-label="Food actions" aria-expanded="false">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </button>
+                            <div class="food-item-menu" data-food-id="${foodId}">
+                                <button type="button" class="food-item-menu-item js-food-action-edit" data-food-id="${foodId}">
+                                    <i class="fa fa-pen"></i> Edit item
+                                </button>
+                                <button type="button" class="food-item-menu-item danger js-food-action-delete" data-food-id="${foodId}">
+                                    <i class="fa fa-trash"></i> Delete item
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="food-row-bottom">
@@ -615,6 +634,9 @@ function renderFoodCatalogTable(items) {
                             <span class="food-catalog-calories">${formatNumber(totalCalories)} kcal</span>
                         </div>
                     </div>
+                </div>
+                <div class="food-catalog-swipe-overlay">
+                    <i class="fa fa-trash-alt"></i>
                 </div>
             </div>
         `;
@@ -636,6 +658,176 @@ function renderFoodCatalogTable(items) {
         button.addEventListener("click", async () => {
             await deleteFoodItem(button.dataset.foodId);
         });
+    });
+
+    setupFoodCatalogMobileInteractions(container);
+}
+
+function setupFoodCatalogMobileInteractions(container) {
+    container.querySelectorAll('.food-item-menu-btn').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const foodId = event.currentTarget.getAttribute('data-food-id');
+            const menu = container.querySelector(`.food-item-menu[data-food-id="${foodId}"]`);
+
+            container.querySelectorAll('.food-item-menu').forEach((m) => {
+                if (m !== menu) {
+                    m.classList.remove('open');
+                }
+            });
+
+            if (menu) {
+                const opened = menu.classList.toggle('open');
+                event.currentTarget.setAttribute('aria-expanded', opened ? 'true' : 'false');
+                
+                if (opened) {
+                    // Calculate position for fixed positioning
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    const menuWidth = 148;
+                    const offset = 6;
+                    
+                    // Position below button, align right edge with button right edge
+                    let top = rect.bottom + offset;
+                    let left = rect.right - menuWidth;
+                    
+                    // Adjust if menu goes off-screen on the left
+                    if (left < 10) {
+                        left = 10;
+                    }
+                    
+                    // Adjust if menu goes off-screen on the right
+                    if (left + menuWidth > window.innerWidth - 10) {
+                        left = window.innerWidth - menuWidth - 10;
+                    }
+                    
+                    menu.style.top = top + 'px';
+                    menu.style.left = left + 'px';
+                }
+            }
+        });
+    });
+
+    if (!foodCatalogState.menuOutsideBound) {
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.food-item-menu').forEach((menu) => menu.classList.remove('open'));
+            document.querySelectorAll('.food-item-menu-btn').forEach((btn) => btn.setAttribute('aria-expanded', 'false'));
+        });
+        foodCatalogState.menuOutsideBound = true;
+    }
+
+    container.querySelectorAll('.js-food-action-edit').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const foodId = event.currentTarget.getAttribute('data-food-id');
+            const item = foodCatalogState.items.find((entry) => entry.food_id === foodId);
+            if (item) {
+                populateFoodForm(item);
+                openFoodFormModal();
+            }
+        });
+    });
+
+    container.querySelectorAll('.js-food-action-delete').forEach((btn) => {
+        btn.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            const foodId = event.currentTarget.getAttribute('data-food-id');
+            await deleteFoodItem(foodId);
+        });
+    });
+
+    // Add swipe delete on touch devices up to 991px (mobile + tablet)
+    if ('ontouchstart' in window) {
+        addFoodCatalogSwipeDelete();
+    }
+}
+
+function addFoodCatalogSwipeDelete() {
+    if (foodCatalogState.swipeHandlersBound) {
+        return;
+    }
+
+    foodCatalogState.swipeHandlersBound = true;
+
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let isSwiping = false;
+    let swipeElement = null;
+    let swipeOverlay = null;
+
+    document.addEventListener('touchstart', (event) => {
+        if (!window.matchMedia('(max-width: 991px)').matches) {
+            return;
+        }
+
+        const card = event.target.closest('.food-catalog-row');
+        if (!card) {
+            return;
+        }
+
+        swipeElement = card;
+        swipeOverlay = swipeElement.querySelector('.food-catalog-swipe-overlay');
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
+        currentX = startX;
+        isSwiping = false;
+
+        swipeElement.style.transform = '';
+        if (swipeOverlay) {
+            swipeOverlay.style.width = '0';
+        }
+    });
+
+    document.addEventListener('touchmove', (event) => {
+        if (!window.matchMedia('(max-width: 991px)').matches || !swipeElement) {
+            return;
+        }
+
+        currentX = event.touches[0].clientX;
+        const currentY = event.touches[0].clientY;
+        const deltaX = currentX - startX;
+        const deltaY = currentY - startY;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+            isSwiping = true;
+
+            if (deltaX < 0 && swipeOverlay) {
+                const swipeDistance = Math.abs(deltaX);
+                const maxWidth = swipeElement.offsetWidth * 0.8;
+                swipeOverlay.style.width = `${Math.min(swipeDistance, maxWidth)}px`;
+            }
+
+            event.preventDefault();
+        }
+    });
+
+    document.addEventListener('touchend', async () => {
+        if (!window.matchMedia('(max-width: 991px)').matches) {
+            swipeElement = null;
+            isSwiping = false;
+            return;
+        }
+
+        if (!swipeElement || !isSwiping) {
+            if (swipeElement && swipeOverlay) {
+                swipeOverlay.style.width = '0';
+            }
+            swipeElement = null;
+            return;
+        }
+
+        const deltaX = currentX - startX;
+        const foodId = swipeElement.getAttribute('data-food-id');
+
+        if (deltaX < -80 && foodId) {
+            await deleteFoodItem(foodId);
+        }
+
+        if (swipeOverlay) {
+            swipeOverlay.style.width = '0';
+        }
+        swipeElement = null;
+        isSwiping = false;
     });
 }
 

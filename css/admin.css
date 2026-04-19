@@ -486,7 +486,8 @@
 }
 
 .food-catalog-list {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 12px;
 }
 
@@ -553,10 +554,23 @@
     display: grid;
     gap: 12px;
     padding: 14px;
-    border-radius: 12px;
-    border: 1px solid #d9e6f2;
-    background-color: #ffffff;
-    box-shadow: 0 8px 22px rgba(43, 108, 176, 0.08);
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    background-color: #f8fafc;
+    background-image: url('../assets/tyfit_img/food_card_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.food-catalog-row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    z-index: 1;
 }
 
 .food-row-top {
@@ -564,6 +578,8 @@
     grid-template-columns: 64px 1fr auto;
     gap: 12px;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 .food-row-bottom {
@@ -571,12 +587,13 @@
     grid-template-columns: 1fr auto;
     gap: 12px;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 .food-catalog-row:hover {
-    background-color: #f8fbff;
-    border-color: #a5c4e6;
-    box-shadow: 0 12px 28px rgba(43, 108, 176, 0.15);
+    border-color: rgba(125, 160, 197, 0.34);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.1);
 }
 
 .food-catalog-cell {
@@ -584,8 +601,8 @@
 }
 
 .food-catalog-name-text {
-    color: #0f4c81;
-    font-size: 16px;
+    color: #0f172a;
+    font-size: 15px;
     font-weight: 700;
 }
 
@@ -598,9 +615,9 @@
 .food-catalog-thumbnail {
     width: 64px;
     height: 64px;
-    border-radius: 8px;
+    border-radius: 10px;
     object-fit: cover;
-    border: 1px solid #dee2e6;
+    border: 1px solid rgba(148, 163, 184, 0.16);
     background-color: #f8f9fa;
 }
 
@@ -614,42 +631,61 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px;
 }
 
 .food-macro-item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
-    border-radius: 999px;
+    padding: 0;
+    border-radius: 0;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 500;
     white-space: nowrap;
+    color: #475569;
+    background: transparent;
 }
 
 .food-macro-item i {
     font-size: 12px;
+    flex-shrink: 0;
 }
 
 .food-macro-item-carbs {
+    color: #475569;
+    background-color: transparent;
+}
+
+.food-macro-item-carbs i {
     color: #c56a17;
-    background-color: #fff2e5;
 }
 
 .food-macro-item-protein {
+    color: #475569;
+    background-color: transparent;
+}
+
+.food-macro-item-protein i {
     color: #1f8f57;
-    background-color: #e8f8ef;
 }
 
 .food-macro-item-fats {
+    color: #475569;
+    background-color: transparent;
+}
+
+.food-macro-item-fats i {
     color: #1f6db2;
-    background-color: #e8f2ff;
 }
 
 .food-macro-item-fibre {
+    color: #475569;
+    background-color: transparent;
+}
+
+.food-macro-item-fibre i {
     color: #6b7280;
-    background-color: #f1f3f5;
 }
 
 .food-catalog-meta {
@@ -687,12 +723,16 @@
     gap: 8px;
 }
 
+.food-row-actions-mobile {
+    display: none;
+}
+
 .food-action-btn {
-    width: 34px;
-    height: 34px;
-    border: 1px solid #d3e1ef;
+    width: 32px;
+    height: 32px;
+    border: none;
     border-radius: 10px;
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.78);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -710,7 +750,6 @@
 
 .food-action-btn-edit:hover {
     background-color: #ebf4ff;
-    border-color: #90cdf4;
     transform: translateY(-1px);
 }
 
@@ -720,8 +759,79 @@
 
 .food-action-btn-delete:hover {
     background-color: #fff5f5;
-    border-color: #feb2b2;
     transform: translateY(-1px);
+}
+
+.food-item-menu-wrap {
+    position: relative;
+}
+
+.food-item-menu-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.food-item-menu-btn:hover {
+    background-color: rgba(148, 163, 184, 0.14);
+    color: #334155;
+}
+
+.food-item-menu {
+    position: fixed;
+    min-width: 148px;
+    padding: 6px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    z-index: 1050;
+    display: none;
+    backdrop-filter: blur(2px);
+    background-clip: padding-box;
+}
+
+.food-item-menu.open {
+    display: block;
+}
+
+.food-item-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: #ffffff;
+    color: #334155;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.food-item-menu-item:hover {
+    background-color: #f1f5f9;
+}
+
+.food-item-menu-item.danger {
+    color: #dc2626;
+}
+
+.food-item-menu-item.danger:hover {
+    background-color: rgba(220, 38, 38, 0.08);
+}
+
+.food-catalog-swipe-overlay {
+    display: none;
 }
 
 /* ============================================
@@ -1589,7 +1699,7 @@
         min-width: 140px;
         max-width: 180px;
         height: 30px;
-        font-size: 13px;
+        font-size: 16px;
     }
 
     .diet-meal-add-btn {
@@ -1969,6 +2079,38 @@
 }
 
 @media (max-width: 991px) {
+    .food-row-actions-desktop {
+        display: none;
+    }
+
+    .food-row-actions-mobile {
+        display: inline-flex;
+        align-self: start;
+    }
+
+    .food-catalog-swipe-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 0;
+        background-color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 18px;
+        transition: width 0.1s ease;
+        border-radius: 14px;
+        z-index: 4;
+    }
+
+    .food-catalog-swipe-overlay i {
+        opacity: 0.9;
+    }
+}
+
+@media (max-width: 991px) {
     .food-macro-bars {
         justify-content: center;
     }
@@ -1979,5 +2121,35 @@
 
     .food-catalog-cell-calories {
         justify-content: center;
+    }
+}
+
+
+/* ============================================================
+   ADMIN CONTENT TOP PADDING — override inline styles set for old navbar height
+   The old navbar pushed content with padding: 120px on .admin-dashboard.
+   New fixed headers are 70px (desktop) / 64px (mobile) + body padding-top handles offset.
+   These rules normalise the extra gap.
+   ============================================================ */
+
+/* Desktop: body already has padding-top:70px; only 24px extra wanted */
+.admin-dashboard {
+    padding-top: 28px !important;
+}
+
+/* Diet chart / food catalog page shell */
+.admin-section.diet-page-shell {
+    padding-top: 28px !important;
+}
+
+/* Mobile/tablet: body already has padding-top:64px */
+@media (max-width: 991.98px) {
+    .admin-dashboard {
+        padding-top: 20px !important;
+        padding-bottom: 20px !important;
+    }
+
+    .admin-section.diet-page-shell {
+        padding-top: 20px !important;
     }
 }
