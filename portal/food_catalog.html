@@ -17,8 +17,8 @@
     <link href="../lib/flaticon/font/flaticon.css" rel="stylesheet">
     <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-    <link href="../css/style.css?v=20260419d" rel="stylesheet">
-    <link href="../css/admin.css?v=20260419d" rel="stylesheet">
+    <link href="../css/style.css?v=20260422b" rel="stylesheet">
+    <link href="../css/admin.css?v=20260422b" rel="stylesheet">
 </head>
 
 <body>
@@ -65,7 +65,7 @@
                         </div>
 
                         <button type="button" id="foodAddNewBtn" class="food-add-row-btn mb-3">
-                            <i class="fa fa-plus"></i> Add New Food Item
+                            <i class="fa fa-plus"></i> Add Custom Food Item
                         </button>
 
                         <div class="food-table-wrapper" id="foodTableWrapper">
@@ -80,12 +80,12 @@
     <div class="modal fade" id="foodFormModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content food-form-modal-content">
-                <div class="modal-header">
+                <div class="modal-header catalog-modal-header">
                     <div class="food-modal-title-wrap">
-                        <h5 class="modal-title" id="foodFormModalTitle"><i class="fa fa-utensils mr-2"></i>Add New Food Item</h5>
+                        <h5 class="modal-title" id="foodFormModalTitle"><i class="fa fa-utensils mr-2"></i>Add Custom Food Item</h5>
 
                     </div>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close catalog-modal-close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -106,7 +106,7 @@
                             <div class="form-group col-md-6">
                                 <label for="foodUnit">Unit</label>
                                 <select class="form-control" id="foodUnit" required>
-                                    <option value="g">g</option>
+                                    <option value="g">gms</option>
                                     <option value="ml">ml</option>
                                     <option value="piece">piece</option>
                                     <option value="slice">slice</option>
@@ -117,29 +117,23 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="foodCarbs">Carbs</label>
-                                <div class="input-group">
+                                <div class="unit-inside-wrap">
                                     <input type="number" class="form-control" id="foodCarbs" min="0" step="0.01" required>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">gms</span>
-                                    </div>
+                                    <span class="unit-inside-suffix">gms</span>
                                 </div>
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="foodProtein">Protein</label>
-                                <div class="input-group">
+                                <div class="unit-inside-wrap">
                                     <input type="number" class="form-control" id="foodProtein" min="0" step="0.01" required>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">gms</span>
-                                    </div>
+                                    <span class="unit-inside-suffix">gms</span>
                                 </div>
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="foodFats">Fats</label>
-                                <div class="input-group">
+                                <div class="unit-inside-wrap">
                                     <input type="number" class="form-control" id="foodFats" min="0" step="0.01" required>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">gms</span>
-                                    </div>
+                                    <span class="unit-inside-suffix">gms</span>
                                 </div>
                             </div>
                         </div>
@@ -147,22 +141,6 @@
                         <div class="form-group">
                             <label for="foodFibre">Fibre</label>
                             <input type="number" class="form-control" id="foodFibre" min="0" step="0.01" placeholder="Optional">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="foodImage">Food Image</label>
-                            <input type="file" class="d-none" id="foodImage" accept="image/*">
-                            <div class="food-image-input-row">
-                                <button type="button" id="foodImageSelectBtn" class="btn btn-outline-primary btn-sm">
-                                    <i class="fa fa-image mr-1"></i> Choose Image
-                                </button>
-                                <span id="foodImageFileName" class="food-image-file-name">No file chosen</span>
-                            </div>
-                            <small class="form-text text-muted">Upload an image to display with this food item.</small>
-                            <div id="foodImagePreview" class="food-image-preview">
-                                <img id="foodImagePreviewImg" src="" alt="Food preview">
-                                <small id="foodImagePreviewPath"></small>
-                            </div>
                         </div>
 
                         <div class="food-form-actions mt-4">
@@ -192,11 +170,11 @@
     <script src="../lib/lightbox/js/lightbox.min.js"></script>
     <script src="../mail/jqBootstrapValidation.min.js"></script>
     <script src="../mail/contact.js"></script>
-    <script src="../js/main.js"></script>
+    <script src="../js/main.js?v=20260422b"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
-    <script src="../js/login.js?v=20260419d"></script>
-    <script src="../js/components-loader.js?v=20260419d"></script>
-    <script src="../js/food_catalog.js?v=20260419d"></script>
+    <script src="../js/login.js?v=20260422b"></script>
+    <script src="../js/components-loader.js?v=20260422b"></script>
+    <script src="../js/food_catalog.js?v=20260422b"></script>
 </body>
 </html>

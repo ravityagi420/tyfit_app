@@ -131,17 +131,17 @@
         const modalMarkup = `
             <div class="modal fade" id="tyfitDialogModal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content border-0 shadow">
-                        <div class="modal-header">
+                    <div class="modal-content border-0 shadow tyfit-dialog-content">
+                        <div class="modal-header tyfit-dialog-header">
                             <h5 class="modal-title" id="tyfitDialogTitle">Notice</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <button type="button" class="close tyfit-dialog-close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body" id="tyfitDialogBody"></div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" id="tyfitDialogCancelBtn" data-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" id="tyfitDialogConfirmBtn">OK</button>
+                        <div class="modal-body tyfit-dialog-body" id="tyfitDialogBody"></div>
+                        <div class="modal-footer tyfit-dialog-footer">
+                            <button type="button" class="btn btn-outline-secondary tyfit-dialog-btn" id="tyfitDialogCancelBtn" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary tyfit-dialog-btn" id="tyfitDialogConfirmBtn">OK</button>
                         </div>
                     </div>
                 </div>
@@ -194,9 +194,10 @@
         }
 
         titleEl.textContent = options.title;
-        bodyEl.innerHTML = `<p class="mb-0">${escapeDialogText(options.message)}</p>`;
+        bodyEl.innerHTML = `<p class="mb-0 tyfit-dialog-message">${escapeDialogText(options.message)}</p>`;
         confirmBtn.textContent = options.confirmText;
-        confirmBtn.className = `btn ${options.confirmClass}`;
+        confirmBtn.className = `btn tyfit-dialog-btn ${options.confirmClass}`;
+        cancelBtn.className = "btn btn-outline-secondary tyfit-dialog-btn";
         cancelBtn.style.display = options.showCancel ? "inline-block" : "none";
         cancelBtn.textContent = options.cancelText;
 

@@ -14,6 +14,7 @@ const DIET_STATE = {
     swipeHandlersBound: false,
     reopenCatalogModalAfterCreateFood: false,
     viewMealMenuOutsideBound: false,
+    skipChartMetaUpdate: false,
     currentChartData: null,
     chartInstance: null,
     selectedUserMeta: {
@@ -47,6 +48,20 @@ function setViewSaveLoading(isLoading) {
 
 function getEl(id) {
     return document.getElementById(id);
+}
+
+function getCatalogCustomOwnerId() {
+    if (DIET_STATE.isAdmin) {
+        return DIET_STATE.selectedUserId || DIET_STATE.currentChartData?.chart?.user_id || "";
+    }
+    return DIET_STATE.currentUserId || "";
+}
+
+function updateCustomFoodScopeUi() {
+    const scopeSwitch = getEl("cfScopeGlobalSwitch");
+    if (!scopeSwitch) {
+        return;
+    }
 }
 
 function showDietAlert(message, options = {}) {
@@ -291,7 +306,12 @@ function renderDietChartView(chartData) {
                     <div class="diet-view-meal-header">
                         <div class="diet-view-meal-label-wrap">
                             <span class="diet-view-meal-label js-meal-name-label" data-meal-index="${mealIndex}">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</span>
-                            <input type="text" class="form-control form-control-sm diet-meal-name-inline-input" data-meal-index="${mealIndex}" value="${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}" style="display: none;">
+                            <div class="diet-meal-name-edit-wrap" style="display: none;">
+                                <input type="text" class="form-control form-control-sm diet-meal-name-inline-input" data-meal-index="${mealIndex}" value="${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}">
+                                <button type="button" class="diet-meal-name-save-btn" data-meal-index="${mealIndex}" aria-label="Save meal name" title="Save meal name">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="diet-view-meal-header-actions">
                             <button type="button" class="diet-meal-add-btn" data-meal-index="${mealIndex}" aria-label="Add food item">
@@ -410,6 +430,7 @@ function renderDietChartView(chartData) {
                 const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'), 10);
                 const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
                 const input = document.querySelector(`.diet-meal-name-inline-input[data-meal-index="${mealIndex}"]`);
+                const editWrap = input ? input.closest('.diet-meal-name-edit-wrap') : null;
                 const menu = document.querySelector(`.diet-meal-menu[data-meal-index="${mealIndex}"]`);
 
                 if (!label || !input) {
@@ -421,17 +442,11 @@ function renderDietChartView(chartData) {
                 }
 
                 label.style.display = 'none';
-                input.style.display = 'block';
+                if (editWrap) {
+                    editWrap.style.display = 'inline-flex';
+                }
                 input.focus();
                 input.select();
-
-                // Prevent mobile zoom on input focus
-                const handleBlur = () => {
-                    // Force viewport reset to prevent zoom stuck
-                    document.body.style.zoom = '1';
-                    input.removeEventListener('blur', handleBlur);
-                };
-                input.addEventListener('blur', handleBlur);
             });
         });
 
@@ -451,6 +466,7 @@ function renderDietChartView(chartData) {
             const submit = async () => {
                 const mealIndex = parseInt(input.getAttribute('data-meal-index'), 10);
                 const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
+                const editWrap = input.closest('.diet-meal-name-edit-wrap');
                 const newName = (input.value || '').trim();
 
                 if (!newName) {
@@ -460,7 +476,9 @@ function renderDietChartView(chartData) {
                 if (label) {
                     label.style.display = 'inline-block';
                 }
-                input.style.display = 'none';
+                if (editWrap) {
+                    editWrap.style.display = 'none';
+                }
 
                 if (newName) {
                     await renameMealInViewChart(mealIndex, newName);
@@ -475,8 +493,11 @@ function renderDietChartView(chartData) {
                 if (event.key === 'Escape') {
                     const mealIndex = parseInt(input.getAttribute('data-meal-index'), 10);
                     const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
+                    const editWrap = input.closest('.diet-meal-name-edit-wrap');
                     input.value = label ? label.textContent : '';
-                    input.style.display = 'none';
+                    if (editWrap) {
+                        editWrap.style.display = 'none';
+                    }
                     if (label) {
                         label.style.display = 'inline-block';
                     }
@@ -484,8 +505,24 @@ function renderDietChartView(chartData) {
             });
 
             input.addEventListener('blur', async () => {
-                if (input.style.display !== 'none') {
+                const editWrap = input.closest('.diet-meal-name-edit-wrap');
+                if (editWrap && editWrap.style.display !== 'none') {
                     await submit();
+                }
+            });
+        });
+
+        document.querySelectorAll('.diet-meal-name-save-btn').forEach((saveBtn) => {
+            saveBtn.addEventListener('mousedown', (event) => {
+                event.preventDefault();
+            });
+            saveBtn.addEventListener('click', async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const mealIndex = parseInt(saveBtn.getAttribute('data-meal-index'), 10);
+                const input = document.querySelector(`.diet-meal-name-inline-input[data-meal-index="${mealIndex}"]`);
+                if (input) {
+                    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
                 }
             });
         });
@@ -677,7 +714,7 @@ async function renderFoodCatalogModalList(searchTerm = "") {
             return;
         }
 
-        const userId = DIET_STATE.currentUserId;
+        const userId = getCatalogCustomOwnerId();
         const customFoods = foods.filter((f) => f.is_custom && f.created_by_user_id === userId);
         const globalFoods = foods.filter((f) => !f.is_custom);
 
@@ -702,9 +739,9 @@ async function renderFoodCatalogModalList(searchTerm = "") {
                         <div class="diet-catalog-pick-calories">${formatMacro(calories)} kcal</div>
                     </div>
                     <div class="diet-catalog-pick-macros">
-                        <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(carbs)} g</span>
-                        <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(protein)} g</span>
-                        <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(fats)} g</span>
+                        <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(carbs)} gms</span>
+                        <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(protein)} gms</span>
+                        <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(fats)} gms</span>
                     </div>
                     <div class="diet-catalog-pick-footer">
                         <div class="diet-catalog-qty-row">
@@ -728,7 +765,7 @@ async function renderFoodCatalogModalList(searchTerm = "") {
         let html = "";
 
         if (customFoods.length > 0) {
-            html += `<div class="catalog-section-label">Your Custom Foods</div>`;
+            html += `<div class="catalog-section-label">${DIET_STATE.isAdmin ? "Selected User Custom Foods" : "Your Custom Foods"}</div>`;
             html += customFoods.map(renderCard).join("");
         }
 
@@ -784,17 +821,32 @@ async function addFoodFromCatalogToMeal(foodId, mealIndex, selectedQuantity) {
         return;
     }
 
-    meal.items.push({
-        food_name: selectedFood.food_name,
-        quantity,
-        quantity_unit: selectedFood.unit_of_quantity || "g",
-        reference_quantity: toNumber(selectedFood.quantity, 0),
-        reference_unit: selectedFood.unit_of_quantity || "g",
-        reference_carbs: toNumber(selectedFood.carbs, 0),
-        reference_protein: toNumber(selectedFood.protein, 0),
-        reference_fat: toNumber(selectedFood.fats, 0),
-        reference_fibre: toNumber(selectedFood.fibre, 0)
-    });
+    const existingItem = meal.items.find((item) =>
+        String(item.food_name || "").trim().toLowerCase() === String(selectedFood.food_name || "").trim().toLowerCase()
+    );
+
+    if (existingItem) {
+        existingItem.quantity = toNumber(existingItem.quantity, 0) + quantity;
+        existingItem.quantity_unit = selectedFood.unit_of_quantity || existingItem.quantity_unit || "g";
+        existingItem.reference_quantity = toNumber(selectedFood.quantity, 0);
+        existingItem.reference_unit = selectedFood.unit_of_quantity || "g";
+        existingItem.reference_carbs = toNumber(selectedFood.carbs, 0);
+        existingItem.reference_protein = toNumber(selectedFood.protein, 0);
+        existingItem.reference_fat = toNumber(selectedFood.fats, 0);
+        existingItem.reference_fibre = toNumber(selectedFood.fibre, 0);
+    } else {
+        meal.items.push({
+            food_name: selectedFood.food_name,
+            quantity,
+            quantity_unit: selectedFood.unit_of_quantity || "g",
+            reference_quantity: toNumber(selectedFood.quantity, 0),
+            reference_unit: selectedFood.unit_of_quantity || "g",
+            reference_carbs: toNumber(selectedFood.carbs, 0),
+            reference_protein: toNumber(selectedFood.protein, 0),
+            reference_fat: toNumber(selectedFood.fats, 0),
+            reference_fibre: toNumber(selectedFood.fibre, 0)
+        });
+    }
 
     if (window.jQuery && window.jQuery.fn.modal) {
         window.jQuery("#selectFoodModal").modal("hide");
@@ -993,17 +1045,26 @@ async function syncViewChartToSupabase() {
     try {
         const chartId = await ensureViewChartId();
 
-        const { error: chartUpdateError } = await window.supabaseClient
-            .from("diet_charts")
-            .update({
-                title: chartData?.chart?.title || "",
-                notes: chartData?.chart?.notes || null,
-                updated_at: new Date().toISOString()
-            })
-            .eq("id", chartId);
+        if (!DIET_STATE.skipChartMetaUpdate) {
+            const { error: chartUpdateError } = await window.supabaseClient
+                .from("diet_charts")
+                .update({
+                    title: chartData?.chart?.title || "",
+                    notes: chartData?.chart?.notes || null
+                })
+                .eq("id", chartId);
 
-        if (chartUpdateError) {
-            throw new Error("Chart update failed: " + chartUpdateError.message);
+            if (chartUpdateError) {
+                const chartErrorMsg = String(chartUpdateError.message || "").toLowerCase();
+                const isStackDepthError = chartErrorMsg.includes("stack depth") && chartErrorMsg.includes("limit exceeded");
+
+                if (isStackDepthError) {
+                    DIET_STATE.skipChartMetaUpdate = true;
+                    console.warn("Skipping diet_charts metadata update due to stack depth DB trigger.", chartUpdateError);
+                } else {
+                    throw new Error("Chart update failed: " + chartUpdateError.message);
+                }
+            }
         }
 
         const { data: existingMeals, error: fetchMealsError } = await window.supabaseClient
@@ -1048,8 +1109,14 @@ async function syncViewChartToSupabase() {
                 .select("id")
                 .single();
 
-            if (mealInsertError) {
-                throw new Error("Meal save failed: " + mealInsertError.message);
+            if (mealInsertError || !insertedMeal) {
+                const mealErrMsg = String(mealInsertError?.message || "").toLowerCase();
+                if (mealErrMsg.includes("stack depth") && mealErrMsg.includes("limit exceeded")) {
+                    console.warn("Ignoring stack depth error on diet_chart_meals insert, skipping items for this meal.", mealInsertError);
+                    continue;
+                } else {
+                    throw new Error("Meal save failed: " + (mealInsertError?.message || "no meal ID returned"));
+                }
             }
 
             const mealItems = Array.isArray(mealPayload.items) ? mealPayload.items : [];
@@ -1065,8 +1132,7 @@ async function syncViewChartToSupabase() {
                     reference_protein: toNumber(item.reference_protein, 0),
                     reference_fat: toNumber(item.reference_fat, 0),
                     reference_fibre: toNumber(item.reference_fibre, 0),
-                    sort_order: itemIndex + 1,
-                    updated_at: new Date().toISOString()
+                    sort_order: itemIndex + 1
                 }));
 
                 const { error: itemInsertError } = await window.supabaseClient
@@ -1074,7 +1140,12 @@ async function syncViewChartToSupabase() {
                     .insert(itemsPayload);
 
                 if (itemInsertError) {
-                    throw new Error("Item save failed: " + itemInsertError.message);
+                    const itemErrMsg = String(itemInsertError.message || "").toLowerCase();
+                    if (itemErrMsg.includes("stack depth") && itemErrMsg.includes("limit exceeded")) {
+                        console.warn("Ignoring stack depth error on diet_chart_items insert.", itemInsertError);
+                    } else {
+                        throw new Error("Item save failed: " + itemInsertError.message);
+                    }
                 }
             }
         }
@@ -1307,12 +1378,12 @@ async function loadFoodCatalogOptions(searchTerm = "") {
 }
 
 async function loadVisibleFoodCatalogItems() {
-    const userId = DIET_STATE.currentUserId;
+    const userId = getCatalogCustomOwnerId();
 
     // Fetch global foods
     const { data: globalFoods, error: globalError } = await window.supabaseClient
         .from("food_catalog")
-        .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, is_custom, created_by_user_id")
+        .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, is_custom, created_by_user_id")
         .eq("is_custom", false)
         .order("food_name", { ascending: true });
 
@@ -1325,7 +1396,7 @@ async function loadVisibleFoodCatalogItems() {
     if (userId) {
         const { data: myFoods, error: customError } = await window.supabaseClient
             .from("food_catalog")
-            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, is_custom, created_by_user_id")
+            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, is_custom, created_by_user_id")
             .eq("is_custom", true)
             .eq("created_by_user_id", userId)
             .order("food_name", { ascending: true });
@@ -1767,60 +1838,14 @@ function recalculateDietChartTotals() {
 }
 
 function openAddFoodModal(targetRow) {
-    DIET_STATE.addFoodTargetRow = targetRow || null;
-
-    const form = getEl("addFoodForm");
-    if (form) {
-        form.reset();
-    }
-
-    const imageName = getEl("newFoodImageName");
-    if (imageName) {
-        imageName.textContent = "No file chosen";
-    }
-
-    if (window.jQuery && window.jQuery.fn.modal) {
-        window.jQuery("#addFoodModal").modal("show");
-    }
-}
-
-async function uploadFoodImage(file) {
-    if (!file) {
-        return "";
-    }
-
-    if (!file.type || !file.type.startsWith("image/")) {
-        throw new Error("Please select a valid image file.");
-    }
-
-    const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "jpg";
-    const baseName = file.name.includes(".") ? file.name.slice(0, file.name.lastIndexOf(".")) : file.name;
-    const safeName = baseName.replace(/[^a-zA-Z0-9_-]/g, "-").toLowerCase();
-    const uniqueName = typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const storagePath = `catalog/${uniqueName}-${safeName}.${extension}`;
-
-    const { error } = await window.supabaseClient.storage
-        .from("food-images")
-        .upload(storagePath, file, {
-            cacheControl: "3600",
-            upsert: false
-        });
-
-    if (error) {
-        console.error("uploadFoodImage error:", error);
-        throw new Error("Image upload failed: " + error.message);
-    }
-
-    return storagePath;
+    openAddCustomFoodModal({ targetRow: targetRow || null, reopenCatalog: false, hideCatalog: false });
 }
 
 async function createFoodCatalogItem(payload) {
     const { data, error } = await window.supabaseClient
         .from("food_catalog")
         .insert(payload)
-        .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path")
+        .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre")
         .single();
 
     if (error) {
@@ -1831,7 +1856,10 @@ async function createFoodCatalogItem(payload) {
     return data;
 }
 
-function openAddCustomFoodModal() {
+function openAddCustomFoodModal(options = {}) {
+    DIET_STATE.addFoodTargetRow = options.targetRow || null;
+    DIET_STATE.reopenCatalogModalAfterCreateFood = Boolean(options.reopenCatalog);
+
     const form = getEl("customFoodForm");
     if (form) {
         form.reset();
@@ -1841,8 +1869,27 @@ function openAddCustomFoodModal() {
         statusEl.style.display = "none";
         statusEl.textContent = "";
     }
+
+    const scopeWrap = getEl("customFoodScopeWrap");
+    const scopeSwitch = getEl("cfScopeGlobalSwitch");
+    if (DIET_STATE.isAdmin) {
+        if (scopeWrap) {
+            scopeWrap.style.display = "block";
+        }
+        if (scopeSwitch) {
+            scopeSwitch.checked = false;
+        }
+    } else {
+        if (scopeWrap) {
+            scopeWrap.style.display = "none";
+        }
+    }
+    updateCustomFoodScopeUi();
+
     if (window.jQuery && window.jQuery.fn.modal) {
-        window.jQuery("#selectFoodModal").modal("hide");
+        if (options.hideCatalog !== false) {
+            window.jQuery("#selectFoodModal").modal("hide");
+        }
         window.jQuery("#customFoodModal").modal("show");
     }
 }
@@ -1883,6 +1930,12 @@ async function saveCustomFoodItem() {
     }
 
     try {
+        const ownerUserId = getCatalogCustomOwnerId() || null;
+        const isGlobal = Boolean(DIET_STATE.isAdmin && getEl("cfScopeGlobalSwitch")?.checked);
+        if (!isGlobal && !ownerUserId) {
+            throw new Error("Please select a user before saving a custom food.");
+        }
+
         const payload = {
             food_name: foodName,
             quantity,
@@ -1891,45 +1944,83 @@ async function saveCustomFoodItem() {
             protein,
             fats,
             fibre: fibre,
-            image_path: null,
-            is_custom: true,
-            created_by_user_id: DIET_STATE.currentUserId || null,
+            is_custom: !isGlobal,
+            created_by_user_id: isGlobal ? null : ownerUserId,
             updated_at: new Date().toISOString()
         };
 
+        let savedItem = null;
         const { data, error } = await window.supabaseClient
             .from("food_catalog")
             .insert(payload)
-            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, is_custom, created_by_user_id")
+            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, is_custom, created_by_user_id")
             .single();
 
         if (error) {
-            throw new Error(error.message);
+            const errMsg = String(error.message || "").toLowerCase();
+            if (errMsg.includes("stack depth") && errMsg.includes("limit exceeded")) {
+                // Recursive DB trigger on food_catalog fired. The INSERT may still have succeeded.
+                // Reload catalog — if the item exists treat as success, otherwise surface a clear message.
+                DIET_STATE.foodCatalog = [];
+                await loadFoodCatalogOptions();
+                const saved = DIET_STATE.foodCatalog.find((f) => {
+                    if (f.food_name !== foodName) {
+                        return false;
+                    }
+                    if (isGlobal) {
+                        return !f.is_custom;
+                    }
+                    return f.is_custom && f.created_by_user_id === ownerUserId;
+                });
+                if (!saved) {
+                    throw new Error("Could not save custom food due to a database configuration issue. Please contact your admin.");
+                }
+                savedItem = saved;
+                // Item was saved — fall through to success UI
+            } else {
+                throw new Error(error.message);
+            }
+        } else {
+            // Normal success path — reload catalog with fresh data
+            savedItem = data;
+            DIET_STATE.foodCatalog = [];
+            await loadFoodCatalogOptions();
         }
 
-        // Force reload so new item appears in catalog
-        DIET_STATE.foodCatalog = [];
-        await loadFoodCatalogOptions();
+        if (DIET_STATE.addFoodTargetRow && savedItem?.food_id) {
+            const selectEl = DIET_STATE.addFoodTargetRow.querySelector(".diet-food-select");
+            if (selectEl) {
+                selectEl.innerHTML = buildFoodOptionsHtml(savedItem.food_id);
+                selectEl.value = savedItem.food_id;
+                populateFoodRowFromCatalog(DIET_STATE.addFoodTargetRow, savedItem);
+            }
+        }
 
         if (window.jQuery && window.jQuery.fn.modal) {
             window.jQuery("#customFoodModal").modal("hide");
         }
 
-        // Reopen catalog modal and highlight the new food
-        await renderFoodCatalogModalList("");
-        if (window.jQuery && window.jQuery.fn.modal) {
-            window.jQuery("#selectFoodModal").modal("show");
+        if (DIET_STATE.reopenCatalogModalAfterCreateFood) {
+            await renderFoodCatalogModalList("");
+            if (window.jQuery && window.jQuery.fn.modal) {
+                window.jQuery("#selectFoodModal").modal("show");
+            }
         }
 
         // Briefly flash the new card
-        setTimeout(() => {
-            const newCard = document.querySelector(`[data-food-id="${data.food_id}"]`);
-            if (newCard) {
-                newCard.classList.add("catalog-card-highlight");
-                setTimeout(() => newCard.classList.remove("catalog-card-highlight"), 1200);
-                newCard.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
-        }, 200);
+        if (DIET_STATE.reopenCatalogModalAfterCreateFood) {
+            setTimeout(() => {
+                const newCard = document.querySelector(`[data-food-id="${savedItem?.food_id}"]`);
+                if (newCard) {
+                    newCard.classList.add("catalog-card-highlight");
+                    setTimeout(() => newCard.classList.remove("catalog-card-highlight"), 1200);
+                    newCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+            }, 200);
+        }
+
+        DIET_STATE.reopenCatalogModalAfterCreateFood = false;
+        DIET_STATE.addFoodTargetRow = null;
     } catch (err) {
         console.error("saveCustomFoodItem error:", err);
         showCustomFoodStatus(err.message || "Failed to save custom food.", "danger");
@@ -2116,8 +2207,14 @@ async function saveDietChart() {
                 .select("id")
                 .single();
 
-            if (mealInsertError) {
-                throw new Error("Meal save failed: " + mealInsertError.message);
+            if (mealInsertError || !insertedMeal) {
+                const mealErrMsg = String(mealInsertError?.message || "").toLowerCase();
+                if (mealErrMsg.includes("stack depth") && mealErrMsg.includes("limit exceeded")) {
+                    console.warn("Ignoring stack depth error on diet_chart_meals insert, skipping items for this meal.", mealInsertError);
+                    continue;
+                } else {
+                    throw new Error("Meal save failed: " + (mealInsertError?.message || "no meal ID returned"));
+                }
             }
 
             if (mealPayload.items.length > 0) {
@@ -2132,8 +2229,7 @@ async function saveDietChart() {
                     reference_protein: item.reference_protein,
                     reference_fat: item.reference_fat,
                     reference_fibre: item.reference_fibre,
-                    sort_order: item.sort_order,
-                    updated_at: new Date().toISOString()
+                    sort_order: item.sort_order
                 }));
 
                 const { error: itemInsertError } = await window.supabaseClient
@@ -2141,7 +2237,12 @@ async function saveDietChart() {
                     .insert(itemsPayload);
 
                 if (itemInsertError) {
-                    throw new Error("Item save failed: " + itemInsertError.message);
+                    const itemErrMsg = String(itemInsertError.message || "").toLowerCase();
+                    if (itemErrMsg.includes("stack depth") && itemErrMsg.includes("limit exceeded")) {
+                        console.warn("Ignoring stack depth error on diet_chart_items insert.", itemInsertError);
+                    } else {
+                        throw new Error("Item save failed: " + itemInsertError.message);
+                    }
                 }
             }
         }
@@ -2462,24 +2563,6 @@ function bindDietChartEvents() {
     }
 
     const addFoodForm = getEl("addFoodForm");
-    const newFoodImageInput = getEl("newFoodImage");
-    const newFoodImageBtn = getEl("newFoodImageBtn");
-
-    if (newFoodImageBtn && newFoodImageInput) {
-        newFoodImageBtn.addEventListener("click", () => {
-            newFoodImageInput.click();
-        });
-    }
-
-    if (newFoodImageInput) {
-        newFoodImageInput.addEventListener("change", () => {
-            const fileNameEl = getEl("newFoodImageName");
-            const file = newFoodImageInput.files && newFoodImageInput.files[0];
-            if (fileNameEl) {
-                fileNameEl.textContent = file ? file.name : "No file chosen";
-            }
-        });
-    }
 
     if (addFoodForm) {
         addFoodForm.addEventListener("submit", async (event) => {
@@ -2496,7 +2579,6 @@ function bindDietChartEvents() {
                     const raw = getEl("newFoodFibre")?.value;
                     return raw === "" || raw === null || raw === undefined ? null : toNumber(raw, 0);
                 })(),
-                image_path: null,
                 updated_at: new Date().toISOString()
             };
 
@@ -2516,11 +2598,6 @@ function bindDietChartEvents() {
             }
 
             try {
-                const imageFile = newFoodImageInput?.files?.[0] || null;
-                if (imageFile) {
-                    payload.image_path = await uploadFoodImage(imageFile);
-                }
-
                 const createdFood = await createFoodCatalogItem(payload);
                 DIET_STATE.foodCatalog = [];
                 await loadFoodCatalogOptions();
@@ -2578,11 +2655,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const pageTitle = document.querySelector('.diet-page-title');
         if (pageTitle) pageTitle.textContent = 'Diet Chart';
 
-        // Swap "Add New Food Item" for "Add Custom Food" in catalog modal footer
+        // Use one add-food action in catalog modal footer
         const addNewFoodBtn = getEl('openAddFoodFromCatalogModalBtn');
-        const addCustomFoodBtn = getEl('addCustomFoodBtn');
-        if (addNewFoodBtn) addNewFoodBtn.style.display = 'none';
-        if (addCustomFoodBtn) addCustomFoodBtn.style.display = '';
+        if (addNewFoodBtn) {
+            addNewFoodBtn.style.display = '';
+            addNewFoodBtn.innerHTML = '<i class="fa fa-plus mr-1"></i> Add Custom Food Item';
+        }
 
         // Update page subtitle
         const subtitle = document.querySelector('.diet-page-subtitle');
@@ -2662,21 +2740,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const openAddFoodFromCatalogModalBtn = getEl("openAddFoodFromCatalogModalBtn");
     if (openAddFoodFromCatalogModalBtn) {
         openAddFoodFromCatalogModalBtn.addEventListener("click", () => {
-            DIET_STATE.reopenCatalogModalAfterCreateFood = true;
-            DIET_STATE.addFoodTargetRow = null;
-
-            if (window.jQuery && window.jQuery.fn.modal) {
-                window.jQuery("#selectFoodModal").modal("hide");
-            }
-
-            openAddFoodModal(null);
-        });
-    }
-
-    const addCustomFoodBtn = getEl("addCustomFoodBtn");
-    if (addCustomFoodBtn) {
-        addCustomFoodBtn.addEventListener("click", () => {
-            openAddCustomFoodModal();
+            openAddCustomFoodModal({ targetRow: null, reopenCatalog: true, hideCatalog: true });
         });
     }
 
@@ -2695,6 +2759,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 window.jQuery("#customFoodModal").modal("hide");
                 window.jQuery("#selectFoodModal").modal("show");
             }
+        });
+    }
+
+    const cfScopeGlobalSwitch = getEl("cfScopeGlobalSwitch");
+    if (cfScopeGlobalSwitch) {
+        cfScopeGlobalSwitch.addEventListener("change", () => {
+            updateCustomFoodScopeUi();
         });
     }
 
@@ -2781,7 +2852,6 @@ window.recalculateMealTotals = recalculateMealTotals;
 window.recalculateDietChartTotals = recalculateDietChartTotals;
 window.openAddFoodModal = openAddFoodModal;
 window.openFoodCatalogModalForMeal = openFoodCatalogModalForMeal;
-window.uploadFoodImage = uploadFoodImage;
 window.createFoodCatalogItem = createFoodCatalogItem;
 window.collectDietChartFormData = collectDietChartFormData;
 window.saveDietChart = saveDietChart;

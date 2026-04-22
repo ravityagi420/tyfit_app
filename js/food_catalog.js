@@ -1,4 +1,3 @@
-const FOOD_IMAGE_BUCKET = "food-images";
 const FOOD_UNITS = ["g", "ml", "piece", "slice"];
 
 const foodCatalogState = {
@@ -8,8 +7,6 @@ const foodCatalogState = {
     globalItems: [],
     suggestionNames: [],
     currentUserId: "",
-    currentImagePath: "",
-    currentPreviewUrl: "",
     sortBy: "date_desc",
     searchTerm: "",
     menuOutsideBound: false,
@@ -82,7 +79,7 @@ function renderMacroBars(item) {
     const fibreHtml = fibre !== null && !Number.isNaN(fibre)
         ? `
             <span class="diet-view-macro fibre">
-                <i class="fa fa-seedling" aria-hidden="true"></i> Fi:${formatNumber(fibre)} g
+                <i class="fa fa-seedling" aria-hidden="true"></i> Fi:${formatNumber(fibre)} gms
             </span>
         `
         : "";
@@ -90,13 +87,13 @@ function renderMacroBars(item) {
     return `
         <div class="food-macro-bars">
             <span class="diet-view-macro carbs">
-                <i class="fa fa-bolt" aria-hidden="true"></i> C:${formatNumber(carbs)} g
+                <i class="fa fa-bolt" aria-hidden="true"></i> C:${formatNumber(carbs)} gms
             </span>
             <span class="diet-view-macro protein">
-                <i class="fa fa-dumbbell" aria-hidden="true"></i> P:${formatNumber(protein)} g
+                <i class="fa fa-dumbbell" aria-hidden="true"></i> P:${formatNumber(protein)} gms
             </span>
             <span class="diet-view-macro fats">
-                <i class="fa fa-tint" aria-hidden="true"></i> F:${formatNumber(fats)} g
+                <i class="fa fa-tint" aria-hidden="true"></i> F:${formatNumber(fats)} gms
             </span>
             ${fibreHtml}
         </div>
@@ -262,7 +259,7 @@ function setSaveButtonState(isSaving) {
         saveBtn.disabled = isSaving;
         saveBtn.innerHTML = isSaving
             ? '<i class="fa fa-spinner fa-spin"></i> Saving...'
-            : `<i class="fa fa-save"></i> ${foodCatalogState.editingFoodId ? "Update Food Item" : "Save Food Item"}`;
+            : `<i class="fa fa-save"></i> ${foodCatalogState.editingFoodId ? "Update Custom Food Item" : "Save Custom Food Item"}`;
     }
 
     if (refreshBtn) {
@@ -274,11 +271,9 @@ function openFoodFormModal() {
     const titleEl = getEl("foodFormModalTitle");
     if (titleEl) {
         if (foodCatalogState.editingFoodId) {
-            titleEl.innerHTML = '<i class="fa fa-pen mr-2"></i>Edit Food Item';
+            titleEl.innerHTML = '<i class="fa fa-pen mr-2"></i>Edit Custom Food Item';
         } else {
-            titleEl.innerHTML = foodCatalogState.isAdmin
-                ? '<i class="fa fa-utensils mr-2"></i>Add New Food Item'
-                : '<i class="fa fa-plus-circle mr-2"></i>Add Custom Food';
+            titleEl.innerHTML = '<i class="fa fa-plus-circle mr-2"></i>Add Custom Food Item';
         }
     }
 
@@ -291,56 +286,6 @@ function closeFoodFormModal() {
     if (window.jQuery && window.jQuery.fn.modal) {
         window.jQuery("#foodFormModal").modal("hide");
     }
-}
-
-function getStoragePublicUrl(path) {
-    if (!path) {
-        return "";
-    }
-
-    const { data } = window.supabaseClient.storage.from(FOOD_IMAGE_BUCKET).getPublicUrl(path);
-    return data?.publicUrl || "";
-}
-
-function revokePreviewUrlIfNeeded() {
-    if (foodCatalogState.currentPreviewUrl && foodCatalogState.currentPreviewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(foodCatalogState.currentPreviewUrl);
-    }
-    foodCatalogState.currentPreviewUrl = "";
-}
-
-function updateImagePreview(imagePath = "", previewUrl = "") {
-    const previewWrapper = getEl("foodImagePreview");
-    const previewImg = getEl("foodImagePreviewImg");
-    const previewPath = getEl("foodImagePreviewPath");
-
-    if (!previewWrapper || !previewImg || !previewPath) {
-        return;
-    }
-
-    revokePreviewUrlIfNeeded();
-
-    const resolvedUrl = previewUrl || getStoragePublicUrl(imagePath);
-    if (!resolvedUrl) {
-        previewWrapper.classList.remove("is-visible");
-        previewImg.src = "";
-        previewPath.textContent = "";
-        return;
-    }
-
-    foodCatalogState.currentPreviewUrl = previewUrl || "";
-    previewImg.src = resolvedUrl;
-    previewPath.textContent = imagePath || "Selected new image";
-    previewWrapper.classList.add("is-visible");
-}
-
-function updateImageFileName(name) {
-    const fileNameEl = getEl("foodImageFileName");
-    if (!fileNameEl) {
-        return;
-    }
-
-    fileNameEl.textContent = name || "No file chosen";
 }
 
 function getFoodFormValues() {
@@ -387,51 +332,19 @@ function validateFoodForm(values) {
     return "";
 }
 
-async function uploadFoodImage(file) {
-    if (!file) {
-        return "";
-    }
-
-    if (!file.type || !file.type.startsWith("image/")) {
-        throw new Error("Please select a valid image file.");
-    }
-
-    const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "jpg";
-    const baseName = file.name.includes(".") ? file.name.slice(0, file.name.lastIndexOf(".")) : file.name;
-    const safeName = baseName.replace(/[^a-zA-Z0-9_-]/g, "-").toLowerCase();
-    const fileName = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const storagePath = `catalog/${fileName}-${safeName}.${extension}`;
-
-    const { error } = await window.supabaseClient.storage
-        .from(FOOD_IMAGE_BUCKET)
-        .upload(storagePath, file, {
-            cacheControl: "3600",
-            upsert: false
-        });
-
-    if (error) {
-        console.error("uploadFoodImage error:", error);
-        throw new Error("Image upload failed. " + error.message);
-    }
-
-    return storagePath;
-}
-
 async function loadFoodCatalog() {
     const userId = foodCatalogState.currentUserId;
 
     const [globalResult, customResult] = await Promise.all([
         window.supabaseClient
             .from("food_catalog")
-            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, created_at, updated_at, is_custom, created_by_user_id")
+            .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, created_at, updated_at, is_custom, created_by_user_id")
             .or("is_custom.is.null,is_custom.eq.false")
             .order("created_at", { ascending: false }),
         userId
             ? window.supabaseClient
                 .from("food_catalog")
-                .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, image_path, created_at, updated_at, is_custom, created_by_user_id")
+                .select("food_id, food_name, quantity, unit_of_quantity, carbs, protein, fats, fibre, created_at, updated_at, is_custom, created_by_user_id")
                 .eq("is_custom", true)
                 .eq("created_by_user_id", userId)
                 .order("created_at", { ascending: false })
@@ -498,7 +411,6 @@ function populateFoodForm(item) {
     }
 
     foodCatalogState.editingFoodId = item.food_id;
-    foodCatalogState.currentImagePath = item.image_path || "";
 
     setInputValue("foodId", item.food_id);
     setInputValue("foodName", item.food_name);
@@ -508,10 +420,6 @@ function populateFoodForm(item) {
     setInputValue("foodProtein", item.protein);
     setInputValue("foodFats", item.fats);
     setInputValue("foodFibre", item.fibre ?? "");
-    setInputValue("foodImage", "");
-    updateImageFileName("No file chosen");
-
-    updateImagePreview(item.image_path || "");
 
     setSaveButtonState(false);
     hideStatusMessage();
@@ -524,29 +432,13 @@ function resetFoodForm() {
     }
 
     foodCatalogState.editingFoodId = null;
-    foodCatalogState.currentImagePath = "";
 
     setInputValue("foodId", "");
     setInputValue("foodUnit", "g");
     setInputValue("foodFibre", "");
-    updateImageFileName("No file chosen");
 
     hideStatusMessage();
-    updateImagePreview();
     setSaveButtonState(false);
-}
-
-function createFoodImageCell(item) {
-    if (!item.image_path) {
-        return '<span class="text-muted">No image</span>';
-    }
-
-    const publicUrl = getStoragePublicUrl(item.image_path);
-    if (!publicUrl) {
-        return '<span class="text-muted">Unavailable</span>';
-    }
-
-    return `<img src="${escapeHtml(publicUrl)}" alt="${escapeHtml(item.food_name)}" class="food-catalog-thumbnail">`;
 }
 
 async function deleteFoodItem(foodId) {
@@ -580,16 +472,6 @@ async function deleteFoodItem(foodId) {
 
         if (error) {
             throw new Error(error.message);
-        }
-
-        if (item.image_path) {
-            const { error: storageError } = await window.supabaseClient.storage
-                .from(FOOD_IMAGE_BUCKET)
-                .remove([item.image_path]);
-
-            if (storageError) {
-                console.warn("deleteFoodItem storage cleanup warning:", storageError);
-            }
         }
 
         if (foodCatalogState.editingFoodId === foodId) {
@@ -896,20 +778,12 @@ async function saveFoodItem() {
         return;
     }
 
-    const imageFile = getEl("foodImage")?.files?.[0] || null;
-
     setSaveButtonState(true);
 
     try {
-        let imagePath = foodCatalogState.currentImagePath || "";
         const successMessage = foodCatalogState.editingFoodId
             ? "Food item updated successfully."
             : "Food item added successfully.";
-
-        // Only upload when the admin selects a new image. The table stores the storage path, not a public URL.
-        if (imageFile) {
-            imagePath = await uploadFoodImage(imageFile);
-        }
 
         const payload = {
             food_name: values.food_name,
@@ -919,7 +793,6 @@ async function saveFoodItem() {
             protein: values.protein,
             fats: values.fats,
             fibre: values.fibre,
-            image_path: imagePath || null,
             updated_at: new Date().toISOString()
         };
 
@@ -962,8 +835,6 @@ function bindFoodCatalogEvents() {
     const cancelBtn = getEl("foodCancelBtn");
     const refreshBtn = getEl("foodRefreshBtn");
     const addNewBtn = getEl("foodAddNewBtn");
-    const imageInput = getEl("foodImage");
-    const imageSelectBtn = getEl("foodImageSelectBtn");
     const sortMenu = getEl("foodSortMenu");
     const searchInput = getEl("foodSearchInput");
     const modalEl = getEl("foodFormModal");
@@ -997,27 +868,6 @@ function bindFoodCatalogEvents() {
         addNewBtn.addEventListener("click", () => {
             resetFoodForm();
             openFoodFormModal();
-        });
-    }
-
-    if (imageInput) {
-        imageInput.addEventListener("change", () => {
-            const file = imageInput.files && imageInput.files[0];
-            if (!file) {
-                updateImageFileName("No file chosen");
-                updateImagePreview(foodCatalogState.currentImagePath || "");
-                return;
-            }
-
-            updateImageFileName(file.name);
-            const previewUrl = URL.createObjectURL(file);
-            updateImagePreview("", previewUrl);
-        });
-    }
-
-    if (imageSelectBtn && imageInput) {
-        imageSelectBtn.addEventListener("click", () => {
-            imageInput.click();
         });
     }
 
@@ -1069,8 +919,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Keep add action available for all users; non-admin saves create custom foods.
     const addNewBtn = getEl("foodAddNewBtn");
-    if (addNewBtn && !foodCatalogState.isAdmin) {
-        addNewBtn.innerHTML = '<i class="fa fa-plus"></i> Add Custom Food';
+    if (addNewBtn) {
+        addNewBtn.innerHTML = '<i class="fa fa-plus"></i> Add Custom Food Item';
     }
 
     if (!foodCatalogState.isAdmin) {
@@ -1100,7 +950,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 window.loadFoodCatalog = loadFoodCatalog;
 window.populateFoodForm = populateFoodForm;
 window.resetFoodForm = resetFoodForm;
-window.uploadFoodImage = uploadFoodImage;
 window.saveFoodItem = saveFoodItem;
 window.renderFoodCatalogTable = renderFoodCatalogTable;
 window.deleteFoodItem = deleteFoodItem;

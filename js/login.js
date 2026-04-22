@@ -37,6 +37,12 @@ function getPostLoginRedirect() {
   return "/index.html";
 }
 
+function getOAuthRedirectUrl() {
+  const isProdAppHost = window.location.hostname === "app.tyfit.de";
+  const origin = isProdAppHost ? "https://app.tyfit.de" : window.location.origin;
+  return `${origin}/index.html`;
+}
+
 function getPublicHomeHref() {
   return window.location.pathname.includes("/portal/") ? "../index.html" : "index.html";
 }
@@ -386,15 +392,33 @@ function bindAuthUi() {
 
   if (document.body && document.body.dataset.mobileSettingsBound !== "true") {
     document.body.dataset.mobileSettingsBound = "true";
-    document.addEventListener("click", (event) => {
-      if (!mobileSettingsMenu || !mobileSettingsBtn) {
+    const closeMobileSettingsOnOutsideInteraction = (event) => {
+      const activeMobileSettingsBtn = document.getElementById("mobileSettingsBtn");
+      const activeMobileSettingsMenu = document.getElementById("mobileSettingsMenu");
+      if (!activeMobileSettingsMenu || !activeMobileSettingsBtn) {
         return;
       }
       if (event.target.closest("#mobileSettingsBtn") || event.target.closest("#mobileSettingsMenu")) {
         return;
       }
-      mobileSettingsMenu.classList.remove("open");
-      mobileSettingsBtn.setAttribute("aria-expanded", "false");
+      activeMobileSettingsMenu.classList.remove("open");
+      activeMobileSettingsBtn.setAttribute("aria-expanded", "false");
+    };
+
+    // Capture phase ensures this still runs even when inner handlers stop propagation on mobile.
+    document.addEventListener("pointerdown", closeMobileSettingsOnOutsideInteraction, true);
+    document.addEventListener("click", closeMobileSettingsOnOutsideInteraction, true);
+
+    document.addEventListener("click", (event) => {
+      if (event.target.closest(".auth-dropdown")) {
+        return;
+      }
+      document.querySelectorAll(".auth-dropdown.show").forEach((dropdown) => {
+        dropdown.classList.remove("show");
+      });
+      document.querySelectorAll(".auth-dropdown-menu.show").forEach((menu) => {
+        menu.classList.remove("show");
+      });
     });
   }
 }
@@ -447,14 +471,14 @@ async function googleLogin(event) {
   const { error } = await window.supabaseClient.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: window.location.origin + "/index.html"
+      redirectTo: getOAuthRedirectUrl()
     }
   });
 
   if (error) {
     await window.tyfitDialog.alert({
       title: "Login Error",
-      message: "Google login error: " + error.message
+      message: "Google login could not be started. Please try again."
     });
     console.error(error);
   }
@@ -477,6 +501,16 @@ async function logout(event) {
   }
 
   window.tyfitAccessState = null;
+  updateAuthButtons(false);
+
+  const mobileSettingsMenu = document.getElementById("mobileSettingsMenu");
+  const mobileSettingsBtn = document.getElementById("mobileSettingsBtn");
+  if (mobileSettingsMenu) {
+    mobileSettingsMenu.classList.remove("open");
+  }
+  if (mobileSettingsBtn) {
+    mobileSettingsBtn.setAttribute("aria-expanded", "false");
+  }
 }
 
 async function processOAuthCallback() {

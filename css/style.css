@@ -5,6 +5,7 @@ body {
     color: #797979;
     background: #ffffff;
     font-family: 'Manrope', sans-serif;
+    -webkit-text-size-adjust: 100%;
 }
 
 h1,
@@ -2150,6 +2151,15 @@ a:focus {
         padding-top: 64px;
         padding-bottom: 70px;
     }
+
+    .admin-section input,
+    .admin-section select,
+    .admin-section textarea,
+    .modal input,
+    .modal select,
+    .modal textarea {
+        font-size: 16px !important;
+    }
 }
 
 @media (min-width: 992px) {
@@ -2296,6 +2306,51 @@ a:focus {
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+}
+
+.modal,
+.modal-open {
+    padding-right: 0 !important;
+}
+
+.modal-dialog.modal-dialog-centered {
+    min-height: calc(100dvh - 1rem);
+}
+
+#tyfitDialogModal .tyfit-dialog-content {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 56px rgba(15, 23, 42, 0.22);
+}
+
+#tyfitDialogModal .tyfit-dialog-header {
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+}
+
+#tyfitDialogModal .tyfit-dialog-title,
+#tyfitDialogModal .modal-title {
+    color: #0f172a;
+    font-weight: 800;
+}
+
+#tyfitDialogModal .tyfit-dialog-body {
+    background: #fbfdff;
+}
+
+#tyfitDialogModal .tyfit-dialog-message {
+    color: #334155;
+    line-height: 1.55;
+}
+
+#tyfitDialogModal .tyfit-dialog-footer {
+    border-top: 1px solid #e2e8f0;
+}
+
+#tyfitDialogModal .tyfit-dialog-btn {
+    border-radius: 999px;
+    font-weight: 700;
+    padding: 8px 16px;
 }
 
 .tyfit-auth-modal-header {
@@ -2479,6 +2534,7 @@ body.tyfit-auth-locked .row {
     text-decoration: none;
     transition: background 0.18s, color 0.18s;
     padding: 6px 4px;
+    flex-shrink: 0;
 }
 
 .tbn-item span {
