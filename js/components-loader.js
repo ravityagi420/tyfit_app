@@ -13,7 +13,7 @@ const ComponentsLoader = {
     loadComponent: async function(componentName, targetSelector, options = {}) {
         try {
             const basePath = options.basePath || '';
-            const componentVersion = '20260419d';
+            const componentVersion = '20260423a';
             const componentPath = `${basePath}components/${componentName}.html?v=${componentVersion}`;
             
             const response = await fetch(componentPath);
@@ -103,7 +103,7 @@ const ComponentsLoader = {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/><line x1="6" y1="12" x2="18" y2="12"/><circle cx="6" cy="4" r="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="4" r="2"/><circle cx="18" cy="20" r="2"/></svg>
                 <span>Training Plan</span>
             </a>
-            <a href="#" class="tbn-item" data-page="me" id="bnav-me">
+            <a href="profile_edit.html" class="tbn-item" data-page="profile" id="bnav-me">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <span>Me</span>
             </a>
@@ -166,6 +166,7 @@ const ComponentsLoader = {
         if (file === 'diet_chart.html') return 'diet';
         if (file === 'exercise_chart.html') return 'exercise';
         if (file === 'food_catalog.html') return 'food';
+        if (file === 'profile_edit.html') return 'profile';
         if (file === 'login.html') return null;
         return null;
     },

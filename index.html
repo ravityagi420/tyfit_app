@@ -20,7 +20,7 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
 
         <!-- Template Stylesheet -->
-        <link href="css/style.css?v=20260422b" rel="stylesheet">
+        <link href="css/style.css?v=20260423e" rel="stylesheet">
     </head>
 
     <body>
@@ -56,7 +56,14 @@
                         <div class="tyfit-stat-unit">kg</div>
                     </div>
                 </div>
-                <a href="#" id="homeViewProfileBtn" class="tyfit-home-cta-btn">View My Profile <i class="fa fa-arrow-right"></i></a>
+                <div id="homeProfileCompletionCard" class="tyfit-profile-completion-card" style="display:none;">
+                    <div class="tyfit-profile-completion-head" id="homeCompletionHead">
+                        <span class="tyfit-profile-completion-title" id="homeCompletionTitle">Profile 0% completed</span>
+                        <span class="tyfit-profile-completion-pill" id="homeCompletionPill">0%</span>
+                    </div>
+                    <p class="tyfit-profile-completion-copy" id="homeCompletionCopy"></p>
+                    <a href="profile_edit.html" id="homeViewProfileBtn" class="tyfit-home-cta-btn tyfit-home-profile-btn">Complete Profile <i class="fa fa-arrow-right"></i></a>
+                </div>
             </section>
 
             <!-- Tools Section -->
@@ -82,12 +89,13 @@
 
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="js/supabase-client.js"></script>
-        <script src="js/login.js?v=20260422b"></script>
+        <script src="js/login.js?v=20260423a"></script>
+        <script src="js/profile-utils.js?v=20260423c"></script>
 
         <!-- Components Loader -->
-        <script src="js/components-loader.js?v=20260422b"></script>
+        <script src="js/components-loader.js?v=20260423a"></script>
 
         <!-- Home Page Logic -->
-        <script src="js/home.js?v=20260419d"></script>
+        <script src="js/home.js?v=20260423b"></script>
     </body>
 </html>
