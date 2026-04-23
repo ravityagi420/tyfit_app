@@ -87,12 +87,34 @@ const COUNTRY_DATA = [
 /* ── Helpers ───────────────────────────────────────────────── */
 function pe(id) { return document.getElementById(id); }
 
+let _toastTimer = null;
 function showProfileStatus(message, type) {
-    const status = pe("profileSaveStatus");
-    if (!status) return;
-    status.className = `tyfit-profile-status ${type || ""}`;
-    status.textContent = message;
-    status.style.display = "block";
+    let toast = document.getElementById("tyfit-floating-toast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "tyfit-floating-toast";
+        toast.className = "tyfit-toast";
+        toast.innerHTML = '<span class="tyfit-toast__icon"></span><span class="tyfit-toast__msg"></span>';
+        document.body.appendChild(toast);
+    }
+    clearTimeout(_toastTimer);
+    const icon = toast.querySelector(".tyfit-toast__icon");
+    const msg = toast.querySelector(".tyfit-toast__msg");
+    toast.className = "tyfit-toast" + (type === "error" ? " error" : "");
+    icon.innerHTML = type === "error"
+        ? '<i class="fas fa-exclamation-circle"></i>'
+        : '<i class="fas fa-check-circle"></i>';
+    msg.textContent = message;
+    // Force reflow so transition fires from hidden state
+    toast.getBoundingClientRect();
+    toast.classList.add("is-visible");
+    const delay = type === "error" ? 4000 : 2600;
+    _toastTimer = setTimeout(() => {
+        toast.classList.add("is-hiding");
+        setTimeout(() => {
+            toast.classList.remove("is-visible", "is-hiding");
+        }, 380);
+    }, delay);
 }
 
 function getAvatarSrcByKey(avatarKey) {
@@ -324,6 +346,7 @@ function bindAvatarPicker() {
         setPhotoPickerMode("avatar");
         updatePreviewImage();
         togglePhotoPicker(false);
+        autoSaveProfilePicture();
     });
 }
 
@@ -595,6 +618,74 @@ function collectProfilePatches() {
     return { profilePatch, userAboutPatch };
 }
 
+/* ── Dirty-state helpers ───────────────────────────────────── */
+let _autoSaveTimer = null;
+const AUTO_SAVE_DELAY = 30000; // 30 seconds
+
+function scheduleAutoSave() {
+    clearTimeout(_autoSaveTimer);
+    _autoSaveTimer = setTimeout(() => {
+        if (PROFILE_EDIT_STATE.dirty) {
+            pe("profileEditForm")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        }
+    }, AUTO_SAVE_DELAY);
+}
+
+function markFormDirty() {
+    PROFILE_EDIT_STATE.dirty = true;
+    const bar = document.getElementById("profileSaveBar");
+    if (bar) { bar.classList.add("is-dirty"); bar.removeAttribute("aria-hidden"); }
+    scheduleAutoSave();
+}
+
+function markFormClean() {
+    PROFILE_EDIT_STATE.dirty = false;
+    clearTimeout(_autoSaveTimer);
+    const bar = document.getElementById("profileSaveBar");
+    if (bar) { bar.classList.remove("is-dirty"); bar.setAttribute("aria-hidden", "true"); }
+}
+
+/* ── Auto-save profile picture ──────────────────────────────── */
+async function autoSaveProfilePicture() {
+    const previewEl = pe("profilePreviewImage");
+    if (previewEl) previewEl.style.opacity = "0.55";
+    try {
+        let profilePictureUrl = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
+        if (PROFILE_EDIT_STATE.mode === "upload" && PROFILE_EDIT_STATE.uploadedFile) {
+            const uploaded = await window.tyfitProfile.uploadProfilePicture(
+                PROFILE_EDIT_STATE.uploadedFile,
+                PROFILE_EDIT_STATE.user.id
+            );
+            profilePictureUrl = uploaded.publicUrl || uploaded.path;
+        }
+        const profilePatch = {
+            profile_picture_url: PROFILE_EDIT_STATE.mode === "avatar" ? null : (profilePictureUrl || null)
+        };
+        const userAboutPatch = {
+            avatar_key: PROFILE_EDIT_STATE.selectedAvatarKey || null
+        };
+        await window.tyfitProfile.saveProfileEdits({
+            userId: PROFILE_EDIT_STATE.user.id,
+            profilePatch,
+            userAboutPatch
+        });
+        PROFILE_EDIT_STATE.profile = { ...PROFILE_EDIT_STATE.profile, ...profilePatch };
+        PROFILE_EDIT_STATE.userAbout = { ...PROFILE_EDIT_STATE.userAbout, ...userAboutPatch };
+        PROFILE_EDIT_STATE.uploadedFile = null;
+        if (PROFILE_EDIT_STATE.previewObjectUrl) {
+            URL.revokeObjectURL(PROFILE_EDIT_STATE.previewObjectUrl);
+            PROFILE_EDIT_STATE.previewObjectUrl = "";
+        }
+        showProfileStatus("Profile picture updated.", "success");
+        if (typeof window.refreshAuthUi === "function") await window.refreshAuthUi();
+    } catch (error) {
+        console.error("autoSaveProfilePicture error:", error);
+        showProfileStatus(error.message || "Could not update picture.", "error");
+    } finally {
+        if (previewEl) previewEl.style.opacity = "";
+    }
+}
+
 /* ── Save ──────────────────────────────────────────────────── */
 async function handleProfileSave(event) {
     event.preventDefault();
@@ -631,6 +722,7 @@ async function handleProfileSave(event) {
         updatePreviewImage();
         updateDisplayName();
         showProfileStatus("Profile updated successfully.", "success");
+        markFormClean();
 
         if (typeof window.refreshAuthUi === "function") await window.refreshAuthUi();
     } catch (error) {
@@ -670,6 +762,7 @@ function bindFormEvents() {
             setPhotoPickerMode("upload");
             updatePreviewImage();
             togglePhotoPicker(false);
+            autoSaveProfilePicture();
         });
     }
 
@@ -691,6 +784,17 @@ function bindFormEvents() {
     ["profileFirstName", "profileLastName"].forEach(id => {
         const el = pe(id);
         if (el) el.addEventListener("input", updateDisplayName);
+    });
+
+    // Dirty tracking — show save bar when any field changes
+    const TRACKED_FIELDS = [
+        "profileFirstName", "profileLastName", "profileDob", "profileGender",
+        "profileHeight", "profileWeight", "profileGoal", "profileActivityLevel",
+        "profileCountry", "profilePhoneNumber", "profilePhoneCode"
+    ];
+    TRACKED_FIELDS.forEach(id => {
+        const el = pe(id);
+        if (el) { el.addEventListener("input", markFormDirty); el.addEventListener("change", markFormDirty); }
     });
 
     // Close picker when user clicks away from the photo card.

@@ -327,22 +327,22 @@
 
         const { error: profileError } = await window.supabaseClient
             .from("profiles")
-            .upsert({
-                id: userId,
+            .update({
                 ...normalizedProfilePatch,
                 updated_at: new Date().toISOString()
-            }, { onConflict: "id" });
+            })
+            .eq("id", userId);
 
         if (profileError) {
             if (String(profileError.message || "").includes("profiles_phone_number_check")) {
                 const { error: fallbackError } = await window.supabaseClient
                     .from("profiles")
-                    .upsert({
-                        id: userId,
+                    .update({
                         ...normalizedProfilePatch,
                         phone_number: null,
                         updated_at: new Date().toISOString()
-                    }, { onConflict: "id" });
+                    })
+                    .eq("id", userId);
 
                 if (!fallbackError) {
                     await upsertUserAbout(userId, userAboutPatch);

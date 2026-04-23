@@ -16,7 +16,7 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 
-        <link href="css/style.css?v=20260423g" rel="stylesheet">
+        <link href="css/style.css?v=20260423i" rel="stylesheet">
     </head>
 
     <body>
@@ -203,16 +203,18 @@
                         </div>
                     </section>
 
-                    <div class="tyfit-profile-actions">
-                        <a href="index.html" class="tyfit-profile-back-btn">Cancel</a>
-                        <button type="submit" id="profileSaveBtn" class="tyfit-profile-save-btn">
-                            <i class="fa fa-check mr-1"></i> Save Changes
-                        </button>
-                    </div>
-                    <div id="profileSaveStatus" class="tyfit-profile-status" style="display:none;"></div>
+                    <!-- toast is rendered dynamically by showProfileStatus() -->
                 </form>
             </section>
         </main>
+
+        <!-- Sticky save bar: appears only when form has unsaved changes -->
+        <div class="tyfit-save-bar" id="profileSaveBar" aria-hidden="true">
+            <span class="tyfit-save-bar__hint">Unsaved changes</span>
+            <button type="submit" form="profileEditForm" id="profileSaveBtn" class="tyfit-save-bar__btn">
+                <i class="fa fa-check mr-1"></i> Save
+            </button>
+        </div>
 
         <div id="profileSkeleton" class="tyfit-profile-skeleton">
             <div class="tyfit-profile-skel-head"></div>
@@ -229,9 +231,9 @@
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="js/supabase-client.js"></script>
         <script src="js/login.js?v=20260423a"></script>
-        <script src="js/profile-utils.js?v=20260423c"></script>
+        <script src="js/profile-utils.js?v=20260423d"></script>
 
         <script src="js/components-loader.js?v=20260423a"></script>
-        <script src="js/profile_edit.js?v=20260423h"></script>
+        <script src="js/profile_edit.js?v=20260423k"></script>
     </body>
 </html>
