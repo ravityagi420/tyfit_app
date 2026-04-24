@@ -16,20 +16,54 @@
 </head>
 <body class="tyfit-app" data-page="profile">
     <header class="tyfit-mobile-topbar">
-        <a class="tyfit-logo-link" href="index.html" aria-label="TYFIT home">
-            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
-        </a>
-        <h1 class="tyfit-mobile-title">Profile</h1>
-        <button class="tyfit-icon-btn" id="mobileSettingsBtn" aria-label="Settings">
-            <i data-lucide="settings"></i>
+        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
         </button>
+        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home">
+            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+            <span class="tyfit-wordmark">TYFIT</span>
+        </a>
+        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown">
+            <button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications">
+                <i data-lucide="bell"></i>
+            </button>
+        </div>
     </header>
 
+    <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
+        <div class="tyfit-mobile-drawer-head">
+            <a class="tyfit-logo-link" href="index.html" aria-label="TYFIT home">
+                <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                <span class="tyfit-wordmark">TYFIT</span>
+            </a>
+            <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        <nav class="tyfit-sidebar-nav sidebar-nav" aria-label="Mobile menu">
+            <a href="index.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+            <a href="portal/diet_chart.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+            <a href="portal/food_catalog.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
+            <div class="tyfit-nav-separator sidebar-divider" role="separator" aria-hidden="true"></div>
+            <a href="profile.html" class="tyfit-nav-item sidebar-nav-item is-active active"><i data-lucide="user"></i><span>Profile</span></a>
+            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+        </nav>
+    </aside>
+    <div class="tyfit-mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
+
     <div class="tyfit-layout" id="tyfitLayout">
-        <aside class="tyfit-sidebar" id="tyfitSidebar">
+        <aside class="tyfit-sidebar sidebar" id="tyfitSidebar">
             <div class="tyfit-sidebar-head">
                 <a class="tyfit-logo-link sidebar-logo" href="index.html" aria-label="TYFIT home">
                     <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                    <span class="tyfit-wordmark">TYFIT</span>
                 </a>
                 <button class="tyfit-icon-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
                     <i data-lucide="panel-left-close"></i>

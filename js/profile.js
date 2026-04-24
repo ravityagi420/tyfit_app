@@ -34,6 +34,9 @@ function showToast(message) {
 function bindShellInteractions() {
     const desktopMenuBtn = byId("desktopMenuBtn");
     const sidebarCollapseBtn = byId("sidebarCollapseBtn");
+    const mobileMenuBtn = byId("mobileMenuBtn");
+    const mobileDrawerClose = byId("mobileDrawerClose");
+    const mobileDrawerBackdrop = byId("mobileDrawerBackdrop");
     const quickAddBtn = byId("quickAddBtn");
     const sheet = byId("quickSheet");
     const sheetBackdrop = byId("quickSheetBackdrop");
@@ -41,6 +44,22 @@ function bindShellInteractions() {
 
     function toggleSidebar() {
         document.body.classList.toggle("sidebar-collapsed");
+    }
+
+    function openMobileDrawer() {
+        const drawer = byId("mobileDrawer");
+        if (!drawer || !mobileDrawerBackdrop) return;
+        drawer.classList.add("is-open");
+        drawer.setAttribute("aria-hidden", "false");
+        mobileDrawerBackdrop.hidden = false;
+    }
+
+    function closeMobileDrawer() {
+        const drawer = byId("mobileDrawer");
+        if (!drawer || !mobileDrawerBackdrop) return;
+        drawer.classList.remove("is-open");
+        drawer.setAttribute("aria-hidden", "true");
+        mobileDrawerBackdrop.hidden = true;
     }
 
     function openSheet() {
@@ -59,6 +78,9 @@ function bindShellInteractions() {
 
     if (desktopMenuBtn) desktopMenuBtn.addEventListener("click", toggleSidebar);
     if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener("click", toggleSidebar);
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openMobileDrawer);
+    if (mobileDrawerClose) mobileDrawerClose.addEventListener("click", closeMobileDrawer);
+    if (mobileDrawerBackdrop) mobileDrawerBackdrop.addEventListener("click", closeMobileDrawer);
     if (quickAddBtn) quickAddBtn.addEventListener("click", openSheet);
     if (sheetClose) sheetClose.addEventListener("click", closeSheet);
     if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
