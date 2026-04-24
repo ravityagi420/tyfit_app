@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TYFIT profile overview">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260424d" rel="stylesheet">
+</head>
+<body class="tyfit-app" data-page="profile">
+    <header class="tyfit-mobile-topbar">
+        <a class="tyfit-logo-link" href="index.html" aria-label="TYFIT home">
+            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+        </a>
+        <h1 class="tyfit-mobile-title">Profile</h1>
+        <button class="tyfit-icon-btn" id="mobileSettingsBtn" aria-label="Settings">
+            <i data-lucide="settings"></i>
+        </button>
+    </header>
+
+    <div class="tyfit-layout" id="tyfitLayout">
+        <aside class="tyfit-sidebar" id="tyfitSidebar">
+            <div class="tyfit-sidebar-head">
+                <a class="tyfit-logo-link sidebar-logo" href="index.html" aria-label="TYFIT home">
+                    <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                </a>
+                <button class="tyfit-icon-btn" id="sidebarCollapseBtn" aria-label="Collapse sidebar">
+                    <i data-lucide="panel-left-close"></i>
+                </button>
+            </div>
+
+            <nav class="tyfit-sidebar-nav sidebar-nav" aria-label="Primary">
+                <a href="index.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                <a href="portal/diet_chart.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                <a href="portal/food_catalog.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
+            </nav>
+
+            <nav class="tyfit-sidebar-nav sidebar-nav tyfit-sidebar-nav--secondary" aria-label="Lower">
+                <a href="profile.html" class="tyfit-nav-item sidebar-nav-item is-active active"><i data-lucide="user"></i><span>Profile</span></a>
+                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+            </nav>
+
+            <div class="tyfit-premium-card">
+                <p class="tyfit-premium-title">Go Premium</p>
+                <p class="tyfit-premium-copy">Unlock advanced plans, insights and coach-level guidance.</p>
+                <button type="button" class="tyfit-premium-btn" id="upgradeNowBtn">Upgrade Now</button>
+            </div>
+        </aside>
+
+        <main class="tyfit-main">
+            <header class="tyfit-desktop-topbar">
+                <button class="tyfit-icon-btn" id="desktopMenuBtn" aria-label="Toggle sidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h2 class="tyfit-desktop-title">Profile</h2>
+                <div class="tyfit-topbar-right">
+                    <button class="tyfit-icon-btn" aria-label="Notifications"><i data-lucide="bell"></i></button>
+                    <a class="tyfit-profile-chip" href="profile.html"><i data-lucide="user"></i><span id="desktopChipName">Ravikant</span></a>
+                </div>
+            </header>
+
+            <div class="tyfit-main-inner">
+                <section class="tyfit-profile-band">
+                    <article class="tyfit-profile-summary-card">
+                        <div class="tyfit-summary-head">
+                            <div class="tyfit-summary-user">
+                                <img id="profileAvatar" class="tyfit-summary-avatar" src="assets/avatars/default-profile.png" alt="Profile avatar">
+                                <div>
+                                    <h3 id="profileName">Ravikant Tyagi</h3>
+                                    <p id="profileEmail">ravityagi2104@gmail.com</p>
+                                </div>
+                            </div>
+                            <button class="tyfit-mini-edit" id="profileEditAction" type="button" aria-label="Edit profile">
+                                <i data-lucide="pencil"></i><span>Edit</span>
+                            </button>
+                        </div>
+
+                        <div class="tyfit-summary-meta" id="profileMetaRow"></div>
+                    </article>
+                </section>
+
+                <section class="tyfit-profile-sections-card">
+                    <h4>Profile Sections</h4>
+                    <div id="profileSectionsList"></div>
+                </section>
+
+                <button class="tyfit-logout-card" id="logoutAction" type="button">
+                    <span><i data-lucide="log-out"></i> Log Out</span>
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">
+        <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
+        <a href="portal/diet_chart.html"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+        <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
+        <a href="#"><i data-lucide="dumbbell"></i><span>Training</span></a>
+        <a href="profile.html" class="is-active"><i data-lucide="user"></i><span>Profile</span></a>
+    </nav>
+
+    <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
+    <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
+        <header>
+            <h4>Quick Actions</h4>
+            <button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close">
+                <i data-lucide="x"></i>
+            </button>
+        </header>
+        <button type="button" class="tyfit-sheet-action" data-action="meal"><i data-lucide="salad"></i> Add Meal</button>
+        <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
+    </section>
+
+    <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/login.js?v=20260423a"></script>
+    <script src="js/profile-utils.js?v=20260423d"></script>
+    <script src="js/profile.js?v=20260424a"></script>
+</body>
+</html>
