@@ -16,6 +16,7 @@
         drawer.classList.add('is-open');
         drawer.setAttribute('aria-hidden', 'false');
         backdrop.hidden = false;
+        document.body.style.overflow = 'hidden';
     }
 
     function closeMobileDrawer() {
@@ -25,6 +26,7 @@
         drawer.classList.remove('is-open');
         drawer.setAttribute('aria-hidden', 'true');
         backdrop.hidden = true;
+        document.body.style.overflow = '';
     }
 
     function openSheet() {
@@ -72,6 +74,23 @@
         if (sheetClose)         sheetClose.addEventListener('click', closeSheet);
         if (sheetBackdrop)      sheetBackdrop.addEventListener('click', closeSheet);
         if (upgradeNowBtn)      upgradeNowBtn.addEventListener('click', () => showToast('Premium flow coming soon.'));
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeMobileDrawer();
+        });
+
+        document.querySelectorAll('.sidebar-logout').forEach(function (btn) {
+            btn.addEventListener('click', async function () {
+                try {
+                    if (window.supabaseClient && window.supabaseClient.auth) {
+                        await window.supabaseClient.auth.signOut();
+                    }
+                } catch (err) {
+                    console.warn('Logout error:', err);
+                }
+                window.location.href = '/login.html';
+            });
+        });
 
         document.querySelectorAll('.tyfit-sheet-action').forEach(btn => {
             btn.addEventListener('click', () => {

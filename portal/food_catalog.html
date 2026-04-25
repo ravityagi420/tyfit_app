@@ -40,58 +40,78 @@
     </header>
 
     <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
-        <div class="tyfit-mobile-drawer-head">
-            <a class="tyfit-logo-link" href="../index.html" aria-label="TYFIT home">
-                <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
-                <span class="tyfit-wordmark">TYFIT</span>
-            </a>
-            <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu">
-                <i data-lucide="x"></i>
-            </button>
+        <div class="sidebar-inner">
+            <div class="tyfit-mobile-drawer-head">
+                <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu">
+                    <i data-lucide="x"></i>
+                </button>
+                <a class="tyfit-logo-link" href="../index.html" aria-label="TYFIT home">
+                    <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                    <span class="tyfit-wordmark">TYFIT</span>
+                </a>
+            </div>
+            <div class="sidebar-menu">
+                <p class="sidebar-section-label">MAIN</p>
+                <a href="../index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                <a href="diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                <a href="food_catalog.html" class="sidebar-nav-item active"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">TOOLS</p>
+                <a href="../training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">ACCOUNT</p>
+                <a href="../profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+            </div>
+            <div class="sidebar-footer">
+                <button type="button" class="sidebar-logout" data-action="logout">
+                    <i data-lucide="log-out"></i><span>Log Out</span>
+                </button>
+            </div>
         </div>
-        <nav class="tyfit-sidebar-nav sidebar-nav" aria-label="Mobile menu">
-            <a href="../index.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
-            <a href="diet_chart.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-            <a href="food_catalog.html" class="tyfit-nav-item sidebar-nav-item is-active active"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
-            <div class="tyfit-nav-separator sidebar-divider" role="separator" aria-hidden="true"></div>
-            <a href="../profile.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
-        </nav>
     </aside>
     <div class="tyfit-mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
 
     <div class="tyfit-layout" id="tyfitLayout">
         <aside class="tyfit-sidebar sidebar" id="tyfitSidebar">
-            <div class="tyfit-sidebar-head">
-                <a class="tyfit-logo-link sidebar-logo" href="../index.html" aria-label="TYFIT home">
-                    <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
-                    <span class="tyfit-wordmark">TYFIT</span>
-                </a>
+            <div class="sidebar-inner">
+                <div class="tyfit-sidebar-head">
+                    <a class="tyfit-logo-link sidebar-logo" href="../index.html" aria-label="TYFIT home">
+                        <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                        <span class="tyfit-wordmark">TYFIT</span>
+                    </a>
+                </div>
+                <div class="sidebar-menu">
+                    <p class="sidebar-section-label">MAIN</p>
+                    <a href="../index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                    <a href="diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                    <a href="food_catalog.html" class="sidebar-nav-item active"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">TOOLS</p>
+                    <a href="../training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">ACCOUNT</p>
+                    <a href="../profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+                </div>
+                <div class="sidebar-footer">
+                    <button type="button" class="sidebar-logout" data-action="logout">
+                        <i data-lucide="log-out"></i><span>Log Out</span>
+                    </button>
+                </div>
             </div>
-            <nav class="tyfit-sidebar-nav sidebar-nav" aria-label="Primary">
-                <a href="../index.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
-                <a href="diet_chart.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-                <a href="food_catalog.html" class="tyfit-nav-item sidebar-nav-item is-active active"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
-                <div class="tyfit-nav-separator sidebar-divider" role="separator" aria-hidden="true"></div>
-            </nav>
-            <nav class="tyfit-sidebar-nav sidebar-nav tyfit-sidebar-nav--secondary" aria-label="Lower">
-                <a href="../profile.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
-            </nav>
         </aside>
 
         <button class="tyfit-sidebar-toggle-floating" id="sidebarCollapseBtn" aria-label="Toggle sidebar">
@@ -244,7 +264,7 @@
         <a href="../index.html"><i data-lucide="home"></i><span>Home</span></a>
         <a href="diet_chart.html"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
         <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
-        <a href="#"><i data-lucide="dumbbell"></i><span>Training</span></a>
+        <a href="../training_plan.html"><i data-lucide="dumbbell"></i><span>Training</span></a>
         <a href="../profile.html"><i data-lucide="user"></i><span>Profile</span></a>
     </nav>
 

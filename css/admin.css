@@ -1026,6 +1026,496 @@
     font-weight: 600;
 }
 
+/* ============================================
+   DIET MODALS REDESIGN
+   ============================================ */
+#addFoodModal,
+#customFoodModal,
+#selectFoodModal {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.food-modal {
+    background: #ffffff;
+    border: 0;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.food-modal-dialog {
+    margin: 1.2rem auto;
+}
+
+#customFoodModal .food-modal-dialog,
+#addFoodModal .food-modal-dialog {
+    max-width: min(760px, 92vw);
+}
+
+#selectFoodModal .food-modal-dialog {
+    max-width: min(860px, 94vw);
+}
+
+.food-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #e6ecf5;
+}
+
+.food-modal-head-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.food-modal-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: #eaf3ff;
+    color: #0f6fea;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.food-modal-title-wrap {
+    display: grid;
+    gap: 4px;
+}
+
+.food-modal-header .modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #101828;
+}
+
+.food-modal-subtitle {
+    color: #667085;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.food-modal-close-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid #e6ecf5;
+    background: #ffffff;
+    color: #667085;
+    text-shadow: none;
+    opacity: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.food-modal-close-btn:hover {
+    background: #f8fbff;
+    color: #101828;
+}
+
+.modal-content-scroll {
+    background: #f7f9fc;
+    padding: 20px 24px 24px;
+}
+
+#customFoodModal .form-group label,
+#addFoodModal .form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #101828;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-bottom: 8px;
+}
+
+#customFoodModal .form-control,
+#addFoodModal .form-control,
+#selectFoodModal .catalog-search-input {
+    height: 56px;
+    border: 1px solid #e6ecf5;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #101828;
+    box-shadow: none;
+}
+
+#customFoodModal .form-control:focus,
+#addFoodModal .form-control:focus,
+#selectFoodModal .catalog-search-input:focus {
+    border-color: #0f6fea;
+    box-shadow: 0 0 0 4px rgba(15, 111, 234, 0.1);
+    background: #ffffff;
+}
+
+.unit-inside-wrap .form-control {
+    padding-right: 58px;
+}
+
+.unit-inside-suffix {
+    font-size: 12px;
+    font-weight: 600;
+    color: #667085;
+}
+
+.custom-food-macro-grid {
+    row-gap: 0;
+}
+
+.food-modal-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 14px;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.food-modal-footer-actions,
+.food-modal-footer {
+    border-top: 1px solid #e6ecf5;
+    background: #ffffff;
+    padding: 14px 24px;
+    margin-top: 0;
+    gap: 10px;
+}
+
+#customFoodModal .food-form-actions .btn,
+#addFoodModal .food-form-actions .btn {
+    height: 56px;
+    border-radius: 18px;
+    font-weight: 600;
+    min-width: 160px;
+    padding: 0 22px;
+}
+
+#customFoodModal .food-form-actions .btn-primary,
+#addFoodModal .food-form-actions .btn-primary,
+#selectFoodModal .food-modal-footer .btn-outline-primary {
+    background: #0f6fea;
+    border-color: #0f6fea;
+    color: #ffffff;
+}
+
+#customFoodModal .food-form-actions .btn-secondary,
+#addFoodModal .food-form-actions .btn-secondary,
+#selectFoodModal .food-modal-footer .btn-secondary {
+    border: 1px solid #e6ecf5;
+    background: #ffffff;
+    color: #344054;
+}
+
+.catalog-search-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+.catalog-filter-btn {
+    width: 56px;
+    height: 56px;
+    border: 1px solid #e6ecf5;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #0f6fea;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.catalog-quick-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.catalog-chip {
+    border: 1px solid #dbeafe;
+    background: #f8fbff;
+    color: #0f6fea;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+#selectFoodModal #foodCatalogList {
+    max-height: 48vh;
+    overflow-y: auto;
+    padding-right: 2px;
+    padding-bottom: 4px;
+}
+
+.diet-catalog-pick-card {
+    border: 1px solid #e6ecf5;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: none;
+    padding: 14px;
+}
+
+.diet-catalog-pick-card::before {
+    display: none;
+}
+
+.diet-catalog-pick-main {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.food-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.food-icon.food-oil { background: #fff3e8; color: #f97316; }
+.food-icon.food-grain { background: #ecfdf3; color: #16a34a; }
+.food-icon.food-rice { background: #eaf3ff; color: #0f6fea; }
+.food-icon.food-default { background: #f1eeff; color: #6c63ff; }
+
+.diet-catalog-pick-body {
+    min-width: 0;
+}
+
+.diet-catalog-pick-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.diet-catalog-pick-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #101828;
+}
+
+.diet-catalog-ref-qty {
+    background: #f2f4f7;
+    border: 1px solid #e4e7ec;
+    color: #667085;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+}
+
+.diet-catalog-pick-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.diet-macro-text {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.diet-macro-text.carbs { color: #f97316; }
+.diet-macro-text.protein { color: #16a34a; }
+.diet-macro-text.fats { color: #2563eb; }
+
+.diet-catalog-pick-calories {
+    color: #101828;
+    font-size: 13px;
+    font-weight: 600;
+    background: #f2f4f7;
+    border-radius: 999px;
+    padding: 5px 10px;
+}
+
+.diet-catalog-pick-footer {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #e6ecf5;
+    background: #f8fbff;
+}
+
+.diet-catalog-qty-row {
+    border: 1px solid #dbe3ee;
+    background: #ffffff;
+    border-radius: 999px;
+    padding: 4px 8px;
+    gap: 4px;
+}
+
+.diet-catalog-qty-btn {
+    width: 28px;
+    height: 28px;
+    color: #0f6fea;
+    font-size: 11px;
+}
+
+.food-catalog-qty-input {
+    width: 56px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.diet-catalog-unit-pill {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    color: #1d4ed8;
+}
+
+.diet-catalog-add-btn {
+    background: #0f6fea;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+}
+
+@media (max-width: 1023px) {
+    .modal-backdrop.show {
+        background: #ffffff;
+        opacity: 1;
+    }
+
+    .food-modal-dialog {
+        width: 100vw;
+        max-width: none;
+        margin: 0;
+        height: 100dvh;
+    }
+
+    .food-modal {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .food-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        padding: 24px;
+    }
+
+    .modal-content-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 20px 110px;
+        background: #f7f9fc;
+    }
+
+    .food-modal-footer,
+    .food-modal-footer-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 6;
+        padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+        margin: 0 -20px -20px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .food-modal-footer .btn,
+    .food-modal-footer-actions .btn,
+    #customFoodModal .food-form-actions .btn,
+    #addFoodModal .food-form-actions .btn {
+        width: 100%;
+        margin: 0;
+    }
+
+    .food-modal-footer .mr-auto {
+        margin-right: 0 !important;
+    }
+
+    .catalog-search-row {
+        grid-template-columns: 1fr;
+    }
+
+    .catalog-filter-btn {
+        display: none;
+    }
+
+    .diet-catalog-pick-main {
+        grid-template-columns: auto 1fr;
+    }
+
+    .diet-catalog-pick-aside {
+        grid-column: 1 / -1;
+    }
+
+    .diet-catalog-pick-calories {
+        display: inline-flex;
+    }
+
+    #selectFoodModal #foodCatalogList {
+        max-height: none;
+        overflow-y: visible;
+    }
+}
+
+@media (min-width: 1024px) {
+    .modal-backdrop.show {
+        background: rgba(16, 24, 40, 0.45);
+        opacity: 1;
+    }
+
+    .food-modal {
+        max-height: 90vh;
+        border-radius: 24px;
+        box-shadow: 0 24px 80px rgba(16, 24, 40, 0.18);
+    }
+
+    .food-modal-header {
+        padding: 28px;
+    }
+
+    .modal-content-scroll {
+        max-height: calc(90vh - 180px);
+        overflow-y: auto;
+        padding: 22px 28px 26px;
+    }
+
+    .food-modal-footer,
+    .food-modal-footer-actions {
+        padding: 16px 28px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}
+
 .food-catalog-row {
     position: relative;
     display: grid;

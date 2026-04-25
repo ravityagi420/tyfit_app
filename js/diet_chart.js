@@ -718,6 +718,14 @@ async function renderFoodCatalogModalList(searchTerm = "") {
         const customFoods = foods.filter((f) => f.is_custom && f.created_by_user_id === userId);
         const globalFoods = foods.filter((f) => !f.is_custom);
 
+        const getFoodIconClass = (foodName) => {
+            const name = String(foodName || "").toLowerCase();
+            if (name.includes("oil") || name.includes("ghee") || name.includes("butter")) return "food-oil";
+            if (name.includes("rice")) return "food-rice";
+            if (name.includes("lentil") || name.includes("dal") || name.includes("legume") || name.includes("bean") || name.includes("roti") || name.includes("wheat")) return "food-grain";
+            return "food-default";
+        };
+
         const renderCard = (food) => {
             const foodId = escapeHtml(food.food_id);
             const unit = escapeHtml(food.unit_of_quantity || "");
@@ -727,21 +735,28 @@ async function renderFoodCatalogModalList(searchTerm = "") {
             const protein = toNumber(food.protein, 0);
             const fats = toNumber(food.fats, 0);
             const calories = (carbs * 4) + (protein * 4) + (fats * 9);
+            const iconClass = getFoodIconClass(food.food_name);
 
             return `
                 <div class="diet-catalog-pick-card" data-food-id="${foodId}">
-                    <div class="diet-catalog-pick-top">
-                        <div class="diet-catalog-pick-title">
-                            <span class="diet-item-dot"></span>
-                            <span class="diet-catalog-pick-name">${escapeHtml(food.food_name || "Unnamed Food")}</span>
-                            <span class="diet-catalog-ref-qty">${formatMacro(initialQty)}&thinsp;${unit}</span>
+                    <div class="diet-catalog-pick-main">
+                        <div class="food-icon ${iconClass}">
+                            <i class="fa fa-utensils" aria-hidden="true"></i>
                         </div>
-                        <div class="diet-catalog-pick-calories">${formatMacro(calories)} kcal</div>
-                    </div>
-                    <div class="diet-catalog-pick-macros">
-                        <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(carbs)} gms</span>
-                        <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(protein)} gms</span>
-                        <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(fats)} gms</span>
+                        <div class="diet-catalog-pick-body">
+                            <div class="diet-catalog-pick-title">
+                                <span class="diet-catalog-pick-name">${escapeHtml(food.food_name || "Unnamed Food")}</span>
+                                <span class="diet-catalog-ref-qty">${formatMacro(initialQty)}&thinsp;${unit}</span>
+                            </div>
+                            <div class="diet-catalog-pick-macros">
+                                <span class="diet-macro-text carbs">C ${formatMacro(carbs)}g</span>
+                                <span class="diet-macro-text protein">P ${formatMacro(protein)}g</span>
+                                <span class="diet-macro-text fats">F ${formatMacro(fats)}g</span>
+                            </div>
+                        </div>
+                        <div class="diet-catalog-pick-aside">
+                            <div class="diet-catalog-pick-calories">${formatMacro(calories)} kcal</div>
+                        </div>
                     </div>
                     <div class="diet-catalog-pick-footer">
                         <div class="diet-catalog-qty-row">
@@ -2773,6 +2788,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (foodSearchInput) {
         foodSearchInput.addEventListener("input", (event) => {
             renderFoodCatalogModalList(event.target.value || "");
+        });
+    }
+
+    const catalogQuickSuggestions = getEl("catalogQuickSuggestions");
+    if (catalogQuickSuggestions && foodSearchInput) {
+        catalogQuickSuggestions.addEventListener("click", (event) => {
+            const chip = event.target.closest("[data-search-chip]");
+            if (!chip) {
+                return;
+            }
+            const term = chip.getAttribute("data-search-chip") || "";
+            foodSearchInput.value = term;
+            renderFoodCatalogModalList(term);
         });
     }
 

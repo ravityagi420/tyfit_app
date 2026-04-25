@@ -40,58 +40,78 @@
     </header>
 
     <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
-        <div class="tyfit-mobile-drawer-head">
-            <a class="tyfit-logo-link" href="../index.html" aria-label="TYFIT home">
-                <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
-                <span class="tyfit-wordmark">TYFIT</span>
-            </a>
-            <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu">
-                <i data-lucide="x"></i>
-            </button>
+        <div class="sidebar-inner">
+            <div class="tyfit-mobile-drawer-head">
+                <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu">
+                    <i data-lucide="x"></i>
+                </button>
+                <a class="tyfit-logo-link" href="../index.html" aria-label="TYFIT home">
+                    <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                    <span class="tyfit-wordmark">TYFIT</span>
+                </a>
+            </div>
+            <div class="sidebar-menu">
+                <p class="sidebar-section-label">MAIN</p>
+                <a href="../index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                <a href="diet_chart.html" class="sidebar-nav-item active"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                <a href="food_catalog.html" class="sidebar-nav-item"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">TOOLS</p>
+                <a href="../training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">ACCOUNT</p>
+                <a href="../profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+            </div>
+            <div class="sidebar-footer">
+                <button type="button" class="sidebar-logout" data-action="logout">
+                    <i data-lucide="log-out"></i><span>Log Out</span>
+                </button>
+            </div>
         </div>
-        <nav class="tyfit-sidebar-nav sidebar-nav" aria-label="Mobile menu">
-            <a href="../index.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
-            <a href="diet_chart.html" class="tyfit-nav-item sidebar-nav-item is-active active"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-            <a href="food_catalog.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
-            <div class="tyfit-nav-separator sidebar-divider" role="separator" aria-hidden="true"></div>
-            <a href="../profile.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
-            <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
-        </nav>
     </aside>
     <div class="tyfit-mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
 
     <div class="tyfit-layout" id="tyfitLayout">
         <aside class="tyfit-sidebar sidebar" id="tyfitSidebar">
-            <div class="tyfit-sidebar-head">
-                <a class="tyfit-logo-link sidebar-logo" href="../index.html" aria-label="TYFIT home">
-                    <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
-                    <span class="tyfit-wordmark">TYFIT</span>
-                </a>
+            <div class="sidebar-inner">
+                <div class="tyfit-sidebar-head">
+                    <a class="tyfit-logo-link sidebar-logo" href="../index.html" aria-label="TYFIT home">
+                        <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                        <span class="tyfit-wordmark">TYFIT</span>
+                    </a>
+                </div>
+                <div class="sidebar-menu">
+                    <p class="sidebar-section-label">MAIN</p>
+                    <a href="../index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                    <a href="diet_chart.html" class="sidebar-nav-item active"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                    <a href="food_catalog.html" class="sidebar-nav-item"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">TOOLS</p>
+                    <a href="../training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">ACCOUNT</p>
+                    <a href="../profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+                </div>
+                <div class="sidebar-footer">
+                    <button type="button" class="sidebar-logout" data-action="logout">
+                        <i data-lucide="log-out"></i><span>Log Out</span>
+                    </button>
+                </div>
             </div>
-            <nav class="tyfit-sidebar-nav sidebar-nav" aria-label="Primary">
-                <a href="../index.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
-                <a href="diet_chart.html" class="tyfit-nav-item sidebar-nav-item is-active active"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-                <a href="food_catalog.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
-                <div class="tyfit-nav-separator sidebar-divider" role="separator" aria-hidden="true"></div>
-            </nav>
-            <nav class="tyfit-sidebar-nav sidebar-nav tyfit-sidebar-nav--secondary" aria-label="Lower">
-                <a href="../profile.html" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
-                <a href="#" class="tyfit-nav-item sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
-            </nav>
         </aside>
 
         <button class="tyfit-sidebar-toggle-floating" id="sidebarCollapseBtn" aria-label="Toggle sidebar">
@@ -236,25 +256,41 @@
     </div>
 
     <!-- Select Food From Catalog Modal -->
-    <div class="modal fade" id="selectFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content food-form-modal-content">
-                <div class="modal-header catalog-modal-header">
-                    <div class="food-modal-title-wrap">
-                        <h5 class="modal-title"><i class="fa fa-utensils mr-2"></i>Add Food From Catalog</h5>
+    <div class="modal fade food-modal-overlay" id="selectFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered food-modal-dialog" role="document">
+            <div class="modal-content food-form-modal-content food-modal add-from-catalog-modal modal-panel">
+                <div class="modal-header catalog-modal-header food-modal-header">
+                    <div class="food-modal-head-main">
+                        <span class="food-modal-badge" aria-hidden="true"><i class="fa fa-shopping-basket"></i></span>
+                        <div class="food-modal-title-wrap">
+                            <h5 class="modal-title">Add Food From Catalog</h5>
+                            <small class="food-modal-subtitle">Search and add food items from our catalog to your diet chart.</small>
+                        </div>
                     </div>
-                    <button type="button" class="close catalog-modal-close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close catalog-modal-close food-modal-close-btn" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div class="catalog-search-wrap mb-3">
-                        <i class="fa fa-search catalog-search-icon"></i>
-                        <input type="text" id="foodSearchInput" class="form-control catalog-search-input" placeholder="Search food by name..." autocomplete="off">
+                <div class="modal-body modal-content-scroll">
+                    <div class="catalog-search-row mb-3">
+                        <div class="catalog-search-wrap mb-0">
+                            <i class="fa fa-search catalog-search-icon"></i>
+                            <input type="text" id="foodSearchInput" class="form-control catalog-search-input" placeholder="Search food by name..." autocomplete="off">
+                        </div>
+                        <button type="button" class="catalog-filter-btn" aria-label="Filter foods">
+                            <i class="fa fa-sliders-h"></i>
+                        </button>
+                    </div>
+                    <div class="catalog-quick-suggestions" id="catalogQuickSuggestions">
+                        <button type="button" class="catalog-chip" data-search-chip="Roti">Roti</button>
+                        <button type="button" class="catalog-chip" data-search-chip="Rice">Rice</button>
+                        <button type="button" class="catalog-chip" data-search-chip="Banana">Banana</button>
+                        <button type="button" class="catalog-chip" data-search-chip="Egg">Egg</button>
+                        <button type="button" class="catalog-chip" data-search-chip="Apple">Apple</button>
                     </div>
                     <div id="foodCatalogList" class="food-catalog-list"></div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer food-modal-footer">
                     <button type="button" class="btn btn-outline-primary mr-auto" id="openAddFoodFromCatalogModalBtn">
                         <i class="fa fa-plus mr-1"></i> Add Custom Food Item
                     </button>
@@ -265,18 +301,22 @@
     </div>
 
     <!-- Add Custom Food Modal -->
-    <div class="modal fade" id="customFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content food-form-modal-content">
-                <div class="modal-header catalog-modal-header">
-                    <div class="food-modal-title-wrap">
-                        <h5 class="modal-title"><i class="fa fa-plus-circle mr-2"></i>Add Custom Food Item</h5>
+    <div class="modal fade food-modal-overlay" id="customFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered food-modal-dialog" role="document">
+            <div class="modal-content food-form-modal-content food-modal modal-panel">
+                <div class="modal-header catalog-modal-header food-modal-header">
+                    <div class="food-modal-head-main">
+                        <span class="food-modal-badge" aria-hidden="true"><i class="fa fa-plus"></i></span>
+                        <div class="food-modal-title-wrap">
+                            <h5 class="modal-title">Add Custom Food Item</h5>
+                            <small class="food-modal-subtitle">Add your food item and nutritional information per reference quantity.</small>
+                        </div>
                     </div>
-                    <button type="button" class="close catalog-modal-close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close catalog-modal-close food-modal-close-btn" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body modal-content-scroll">
                     <form id="customFoodForm" novalidate>
                         <div class="form-group custom-food-scope-top" id="customFoodScopeWrap" style="display: none;">
                             <div class="custom-food-scope-control">
@@ -309,40 +349,44 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
+                        <div class="form-row custom-food-macro-grid">
+                            <div class="form-group col-md-6">
                                 <label for="cfCarbs">Carbs <span class="text-danger">*</span></label>
                                 <div class="unit-inside-wrap">
                                     <input type="number" id="cfCarbs" class="form-control" min="0" step="0.01" placeholder="0" required>
                                     <span class="unit-inside-suffix">gms</span>
                                 </div>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-6">
                                 <label for="cfProtein">Protein <span class="text-danger">*</span></label>
                                 <div class="unit-inside-wrap">
                                     <input type="number" id="cfProtein" class="form-control" min="0" step="0.01" placeholder="0" required>
                                     <span class="unit-inside-suffix">gms</span>
                                 </div>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-6">
                                 <label for="cfFats">Fats <span class="text-danger">*</span></label>
                                 <div class="unit-inside-wrap">
                                     <input type="number" id="cfFats" class="form-control" min="0" step="0.01" placeholder="0" required>
                                     <span class="unit-inside-suffix">gms</span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="cfFibre">Fibre <span class="text-muted small">(optional)</span></label>
-                            <div class="unit-inside-wrap">
-                                <input type="number" id="cfFibre" class="form-control" min="0" step="0.01" placeholder="Optional">
-                                <span class="unit-inside-suffix">gms</span>
+                            <div class="form-group col-md-6">
+                                <label for="cfFibre">Fibre <span class="text-muted small">(optional)</span></label>
+                                <div class="unit-inside-wrap">
+                                    <input type="number" id="cfFibre" class="form-control" min="0" step="0.01" placeholder="Optional">
+                                    <span class="unit-inside-suffix">gms</span>
+                                </div>
                             </div>
                         </div>
+                        <div class="food-modal-note">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                            <span>Nutritional values are for the reference quantity mentioned above.</span>
+                        </div>
                         <div id="customFoodStatus" class="alert" style="display: none;"></div>
-                        <div class="food-form-actions mt-3">
+                        <div class="food-form-actions mt-3 food-modal-footer-actions modal-footer">
                             <button type="submit" id="customFoodSaveBtn" class="btn btn-primary">
-                                <i class="fa fa-save mr-1"></i> Save
+                                <i class="fa fa-save mr-1"></i> Save Food Item
                             </button>
                             <button type="button" id="customFoodCancelBtn" class="btn btn-secondary">
                                 <i class="fa fa-arrow-left mr-1"></i> Back
@@ -415,7 +459,7 @@
         <a href="../index.html"><i data-lucide="home"></i><span>Home</span></a>
         <a href="diet_chart.html" class="is-active"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
         <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
-        <a href="#"><i data-lucide="dumbbell"></i><span>Training</span></a>
+        <a href="../training_plan.html"><i data-lucide="dumbbell"></i><span>Training</span></a>
         <a href="../profile.html"><i data-lucide="user"></i><span>Profile</span></a>
     </nav>
 

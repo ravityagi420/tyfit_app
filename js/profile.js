@@ -101,12 +101,12 @@ function bindShellInteractions() {
 
 function getStatusIcon(status) {
     if (status === "complete") {
-        return { className: "completed", icon: "check" };
+        return { className: "completed", icon: "circle-check" };
     }
     if (status === "incomplete") {
-        return { className: "incomplete", icon: "alert-circle" };
+        return { className: "incomplete", icon: "circle-x" };
     }
-    return { className: "needs_input", icon: "pencil" };
+    return { className: "needs_input", icon: "circle-alert" };
 }
 
 function renderProfileOverview(data) {
@@ -123,20 +123,20 @@ function renderProfileOverview(data) {
 
     if (avatarEl) {
         // Default TYFIT profile avatar fallback
-        avatarEl.src = data.profileImage || "assets/avatars/default-profile.png";
+        avatarEl.src = data.profileImage || "assets/avatars/avatar-1.svg";
         avatarEl.alt = `${data.name} profile avatar`;
     }
 
     if (metaRow) {
         const summary = [
-            { label: "Member Since", value: data.memberSince, icon: "calendar" },
-            { label: "Diet Plan", value: data.dietPlanStatus, icon: "check-circle" },
-            { label: "Goal", value: data.goal, icon: "flag" }
+            { label: "Member Since", value: data.memberSince, icon: "calendar-days", colorClass: "tyfit-meta-icon--calendar" },
+            { label: "Diet Plan", value: data.dietPlanStatus, icon: "utensils-crossed", colorClass: "tyfit-meta-icon--diet" },
+            { label: "Goal", value: data.goal, icon: "trophy", colorClass: "tyfit-meta-icon--goal" }
         ];
 
         metaRow.innerHTML = summary.map((item) => `
             <div class="tyfit-meta-item">
-                <span class="tyfit-meta-icon"><i data-lucide="${item.icon}"></i></span>
+                <span class="tyfit-meta-icon ${item.colorClass}"><i data-lucide="${item.icon}"></i></span>
                 <div>
                     <span>${item.label}</span>
                     <strong>${item.value}</strong>

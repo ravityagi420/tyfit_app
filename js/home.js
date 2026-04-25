@@ -2,19 +2,16 @@ const homeData = {
     name: "Ravikant",
     fullName: "Ravikant Tyagi",
     profileImage: "assets/avatars/avatar-1.svg",
-    motivationTitle: "Let's Stay Consistent",
-    motivationText: "Small Steps Every Day Build Real Results.",
+    motivationTitle: "Progress starts with a plan.",
+    motivationText: "Small steps today, stronger tomorrow.",
     notifications: [],
     tools: [
         { title: "Diet Chart", subtitle: "View your diet and nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
         { title: "Training Plan", subtitle: "Your workout made simple", href: "#", icon: "dumbbell", colorClass: "icon-training" },
-        { title: "Food Catalog", subtitle: "Explore foods, calories and nutrition details.", href: "portal/food_catalog.html", icon: "book-open", colorClass: "icon-food" },
-        { title: "Reminders", subtitle: "Set and manage your fitness reminders", href: "#", icon: "bell", colorClass: "icon-reminder" },
+        { title: "Food Catalog", subtitle: "Explore foods and nutrition", href: "portal/food_catalog.html", icon: "book-open", colorClass: "icon-food" },
         { title: "BMR Calculator", subtitle: "Calculate your daily BMR", href: "#", icon: "calculator", colorClass: "icon-bmr" },
-        { title: "Body Fat Calculator", subtitle: "Track your body fat percentage", href: "#", icon: "percent", colorClass: "icon-bodyfat" },
-        { title: "Macro Calculator", subtitle: "Calculate your macros", href: "#", icon: "pie-chart", colorClass: "icon-macro" },
-        { title: "Calorie Calculator", subtitle: "Know your daily calorie needs", href: "#", icon: "flame", colorClass: "icon-calorie" },
-        { title: "1RM Calculator", subtitle: "Find your one rep max", href: "#", icon: "gauge", colorClass: "icon-1rm" }
+        { title: "Macro Calculator", subtitle: "Track your macros easily", href: "#", icon: "pie-chart", colorClass: "icon-macro" },
+        { title: "Calorie Calculator", subtitle: "Count your calories", href: "#", icon: "flame", colorClass: "icon-calorie" }
     ]
 };
 
@@ -55,26 +52,18 @@ function renderHome(data) {
 
     const grid = byId("homeToolsGrid");
     if (grid) {
-        grid.innerHTML = data.tools.map((tool, index) => `
-            <a class="tyfit-tool-card tool-card${index >= 6 ? " tyfit-tool-card--extra" : ""}" href="${tool.href}" data-title="${tool.title}">
-                <span class="tyfit-tool-icon tool-icon-box ${tool.colorClass}">
+        grid.innerHTML = data.tools.map((tool) => `
+            <a class="tyfit-tool-card" href="${tool.href}" data-title="${tool.title}">
+                <span class="tyfit-tool-icon ${tool.colorClass}">
                     <i data-lucide="${tool.icon}"></i>
                 </span>
-                <div class="tyfit-tool-info">
-                    <h5 class="tool-card-title">${tool.title}</h5>
-                    <p class="tool-card-subtitle">${tool.subtitle}</p>
-                </div>
-                <i data-lucide="chevron-right" aria-hidden="true"></i>
+                <h5 class="tool-card-title">${tool.title}</h5>
             </a>
         `).join("");
 
-        grid.classList.toggle("is-expanded", quickAccessExpanded);
-
         const quickAccessToggle = byId("quickAccessToggle");
         if (quickAccessToggle) {
-            quickAccessToggle.style.display = data.tools.length > 6 ? "inline-flex" : "none";
-            quickAccessToggle.textContent = quickAccessExpanded ? "Show less" : "View all";
-            quickAccessToggle.setAttribute("aria-expanded", String(quickAccessExpanded));
+            quickAccessToggle.style.display = "none";
         }
 
         if (window.lucide?.createIcons) {
@@ -168,18 +157,6 @@ function bindShellInteractions() {
     if (quickAddBtn) quickAddBtn.addEventListener("click", openSheet);
     if (sheetClose) sheetClose.addEventListener("click", closeSheet);
     if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
-
-    if (quickAccessToggle) {
-        quickAccessToggle.addEventListener("click", () => {
-            quickAccessExpanded = !quickAccessExpanded;
-            const grid = byId("homeToolsGrid");
-            if (grid) {
-                grid.classList.toggle("is-expanded", quickAccessExpanded);
-            }
-            quickAccessToggle.textContent = quickAccessExpanded ? "Show less" : "View all";
-            quickAccessToggle.setAttribute("aria-expanded", String(quickAccessExpanded));
-        });
-    }
 
     if (desktopNotifBtn) desktopNotifBtn.addEventListener("click", () => toggleMenu(desktopNotifMenu));
     if (mobileNotifBtn) mobileNotifBtn.addEventListener("click", () => toggleMenu(mobileNotifMenu));
