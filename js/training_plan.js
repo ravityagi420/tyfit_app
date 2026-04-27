@@ -134,7 +134,7 @@ async function dbFetchPlans() {
     .from("training_plans")
     .select("*")
     .eq("user_id", TP.currentUserId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false });
   if (error) throw error;
   return data || [];
 }

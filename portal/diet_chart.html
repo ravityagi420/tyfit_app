@@ -19,7 +19,7 @@
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../css/style.css?v=20260422b" rel="stylesheet">
-    <link href="../css/admin.css?v=20260427c" rel="stylesheet">
+    <link href="../css/admin.css?v=20260427n" rel="stylesheet">
     <link href="../css/premium-ui.css" rel="stylesheet">
 </head>
 
@@ -172,6 +172,13 @@
                                 </span>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="diet-chart-switcher mb-3" id="dietChartSwitcher" hidden>
+                        <div class="diet-chart-switcher-head">
+                            <p class="diet-chart-switcher-label mb-0">Diet Charts</p>
+                        </div>
+                        <div class="diet-chart-strip" id="dietChartStrip"></div>
                     </div>
 
                     <div id="dietChartLoadingSpinner" class="diet-loading-spinner" style="display: none;">
@@ -498,6 +505,40 @@
         <button type="button" class="tyfit-sheet-action" data-action="meal"><i data-lucide="salad"></i> Add Meal</button>
         <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
     </section>
+
+    <div class="tp-modal-overlay diet-chart-input-overlay" id="dietChartInputOverlay" hidden aria-hidden="true">
+        <div class="tp-modal tp-input-dialog" role="dialog" aria-labelledby="dietChartInputTitle">
+            <div class="tp-modal-header">
+                <div class="tp-modal-header-main">
+                    <div class="tp-modal-badge" style="background:#eaf3ff;color:#0f6fea;">
+                        <i data-lucide="clipboard-list"></i>
+                    </div>
+                    <div>
+                        <h3 id="dietChartInputTitle">New Diet Chart</h3>
+                    </div>
+                </div>
+                <button class="tp-modal-close" id="dietChartInputClose" aria-label="Close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="tp-modal-body">
+                <div class="tp-form-group">
+                    <label id="dietChartInputLabel" for="dietChartInputField">Diet chart name</label>
+                    <input type="text" id="dietChartInputField" maxlength="60" placeholder="Enter diet chart name">
+                    <small class="diet-chart-input-helper" id="dietChartInputHelper">Maximum 12 characters</small>
+                    <small class="diet-chart-input-error" id="dietChartInputError" hidden></small>
+                </div>
+            </div>
+            <div class="tp-modal-footer">
+                <button class="tp-btn tp-btn-ghost" id="dietChartInputCancelBtn">Cancel</button>
+                <button class="tp-btn tp-btn-primary" id="dietChartInputConfirmBtn">
+                    <i data-lucide="check"></i>
+                    <span id="dietChartInputConfirmLabel">Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -516,6 +557,6 @@
     <script src="../js/supabase-client.js"></script>
     <script src="../js/login.js?v=20260427e"></script>
     <script src="../js/shell.js"></script>
-    <script src="../js/diet_chart.js?v=20260427c"></script>
+    <script src="../js/diet_chart.js?v=20260427n"></script>
 </body>
 </html>
