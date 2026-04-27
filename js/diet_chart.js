@@ -400,7 +400,7 @@ function renderDietChartSelector() {
             const iconName = planIcons[index % planIcons.length];
             const fullName = getDietChartName(chart, index);
             const accent = getDietPlanAccent(index);
-            const accentSoft = hexToRgba(accent, 0.16);
+            const accentSoft = hexToRgba(accent, 0.1);
             const accentLine = hexToRgba(accent, 0.24);
             return `<div class="tp-plan-card-wrap">
                 <button type="button" class="tp-plan-card ${active}" data-chart-id="${chart.id}" title="${escapeHtml(fullName)}" style="--diet-accent:${accent};--diet-accent-soft:${accentSoft};--diet-accent-line:${accentLine};">

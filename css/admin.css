@@ -1873,8 +1873,8 @@
     box-shadow: none;
     transition: all 0.2s ease;
     --diet-accent: #2f6fc7;
-    --diet-accent-soft: rgba(47, 111, 199, 0.16);
-    --diet-accent-line: rgba(47, 111, 199, 0.24);
+    --diet-accent-soft: rgba(47, 111, 199, 0.1);
+    --diet-accent-line: rgba(47, 111, 199, 0.2);
 }
 
 .tp-plan-card-menu-btn {
@@ -1886,7 +1886,7 @@
     border-radius: 6px;
     border: none;
     background: transparent;
-    color: #94a3b8;
+    color: #0f172a;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1989,7 +1989,6 @@
 
 .diet-chart-strip .tp-plan-card.is-active {
     border-color: none;
-    background: var(--diet-accent-soft);
     box-shadow: none;
     transform: translateY(-2px) scale(1.02);
 }
@@ -2354,13 +2353,13 @@
 
 .chart-stat-row .chart-stat-value {
     margin-left: auto;
-    font-weight: 700;
+    font-weight: 500;
     white-space: nowrap;
 }
 
 .chart-stat-label {
     color: #475569;
-    font-weight: 600;
+    font-weight: 500;
     white-space: nowrap;
 }
 
@@ -2828,7 +2827,7 @@
 }
 
 .diet-view-item-name {
-    font-weight: 700;
+    font-weight: 500;
     color: #0f172a;
     font-size: 15px;
     line-height: 1.2;
@@ -3160,7 +3159,7 @@
     }
 
     .chart-stat-label {
-        font-weight: 600;
+        font-weight: 500;
         flex: 1;
     }
 
@@ -3297,7 +3296,7 @@
     }
 
     .diet-view-item-name {
-        font-weight: 600;
+        font-weight: 500;
         color: #0f172a;
         font-size: 14px;
         line-height: 1.2;
