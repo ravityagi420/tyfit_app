@@ -16,9 +16,39 @@ const TP = {
   inputDialogResolve: null,
   confirmDialogResolve: null,
   editingExerciseId: null,
+  dayMenuOutsideBound: false,
+  daySwipeBound: false,
+  dayDetailMenuOutsideBound: false,
+  exerciseMenuOutsideBound: false,
+  exerciseSwipeBound: false,
+  exerciseSwipeSuppressUntil: 0,
 };
 
 const BODY_PARTS = ["All", "Chest", "Back", "Shoulders", "Arms", "Legs", "Core", "Full Body"];
+const MAX_TRAINING_PLANS = 3;
+const TRAINING_PLAN_ICONS = ["activity", "heart-plus", "footprints"];
+const EXERCISE_ICON_BASE_PATH = "assets/exercise-icons";
+const EXERCISE_ICON_FALLBACK_PATH = `${EXERCISE_ICON_BASE_PATH}/push-ups.svg`;
+const EXERCISE_CARD_ACCENTS = ["#22c55e", "#3b82f6", "#f59e0b", "#8b5cf6", "#14b8a6", "#ec4899"];
+const CATALOG_THEME_MAP = {
+  all: { icon: "sparkles", color: "#64748b" },
+  chest: { icon: "heart", color: "#3b82f6" },
+  back: { icon: "mountain", color: "#0ea5e9" },
+  shoulders: { icon: "dumbbell", color: "#8b5cf6" },
+  arms: { icon: "dumbbell", color: "#f97316" },
+  legs: { icon: "footprints", color: "#22c55e" },
+  core: { icon: "circle-dot", color: "#16a34a" },
+  "full body": { icon: "person-standing", color: "#e11d48" },
+  bodyweight: { icon: "person-standing", color: "#14b8a6" },
+  barbell: { icon: "dumbbell", color: "#f59e0b" },
+  dumbbell: { icon: "dumbbell", color: "#3b82f6" },
+  kettlebell: { icon: "disc-3", color: "#6366f1" },
+  cable: { icon: "link", color: "#10b981" },
+  machine: { icon: "cpu", color: "#ef4444" },
+  bands: { icon: "waveform", color: "#14b8a6" },
+  band: { icon: "waveform", color: "#14b8a6" },
+  cardio: { icon: "heart-pulse", color: "#f43f5e" },
+};
 
 function byId(id) { return document.getElementById(id); }
 function setIcons() { if (window.lucide?.createIcons) window.lucide.createIcons(); }
@@ -37,8 +67,14 @@ function showToast(msg) {
   clearTimeout(showToast._t);
   showToast._t = setTimeout(() => el.classList.remove("is-show"), 2600);
 }
-function titleOfPlan(plan) { return plan?.title ?? plan?.name ?? "Training Plan"; }
-function nameOfDay(day) { return day?.day_name ?? day?.name ?? "Training Day"; }
+function toTitleCaseWords(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\b([a-z])/g, (match) => match.toUpperCase());
+}
+function titleOfPlan(plan) { return toTitleCaseWords(plan?.title ?? plan?.name) || "Training Plan"; }
+function nameOfDay(day) { return toTitleCaseWords(day?.day_name ?? day?.name) || "Training Day"; }
 function capitalize(v) { return String(v || "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
 function compact(v) { return v ? String(v).trim() : ""; }
 function firstLine(v) {
@@ -48,7 +84,126 @@ function firstLine(v) {
 function instructionArray(v) {
   if (!v) return [];
   if (Array.isArray(v)) return v;
-  return String(v).split(/\n+/).filter(Boolean);
+
+  const value = String(v).trim();
+  if (!value) return [];
+
+  if (value.startsWith("[") && value.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => String(item ?? "").trim())
+          .filter(Boolean);
+      }
+    } catch (_error) {
+      // Fallback below handles non-JSON instruction strings.
+    }
+  }
+
+  return value
+    .split(/\n+|\s*\|\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+function hashText(value) {
+  let hash = 0;
+  const text = String(value || "");
+  for (let i = 0; i < text.length; i += 1) {
+    hash = ((hash << 5) - hash) + text.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+function slugifyExerciseName(name) {
+  return String(name || "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/['`]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+function getExerciseIconPath(exerciseName) {
+  const slug = slugifyExerciseName(exerciseName);
+  if (!slug) return EXERCISE_ICON_FALLBACK_PATH;
+  return `${EXERCISE_ICON_BASE_PATH}/${slug}.svg`;
+}
+function getExerciseAccent(exerciseName, index = 0) {
+  const mixedSeed = `${exerciseName || "exercise"}:${index}`;
+  const paletteIndex = hashText(mixedSeed) % EXERCISE_CARD_ACCENTS.length;
+  return EXERCISE_CARD_ACCENTS[paletteIndex];
+}
+function normalizeCatalogTag(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+function getCatalogTagTheme(value) {
+  const normalized = normalizeCatalogTag(value);
+  if (CATALOG_THEME_MAP[normalized]) return CATALOG_THEME_MAP[normalized];
+
+  const tokens = normalized.split(" ").filter(Boolean);
+  for (const token of tokens) {
+    if (CATALOG_THEME_MAP[token]) return CATALOG_THEME_MAP[token];
+  }
+
+  const fallbackPalette = ["#0ea5e9", "#22c55e", "#f97316", "#8b5cf6", "#e11d48", "#14b8a6"];
+  return {
+    icon: "tag",
+    color: fallbackPalette[hashText(normalized || "tag") % fallbackPalette.length],
+  };
+}
+function renderCatalogMetaPills(exercise) {
+  const labels = [capitalize(exercise.body_part), capitalize(exercise.equipment)].filter(Boolean);
+  if (!labels.length) return "";
+
+  return labels.map((label) => {
+    const theme = getCatalogTagTheme(label);
+    const soft = hexToRgba(theme.color, 0.14);
+    const line = hexToRgba(theme.color, 0.28);
+    return `<span class="tp-catalog-meta-pill" style="--tp-pill-accent:${theme.color};--tp-pill-soft:${soft};--tp-pill-line:${line};"><i data-lucide="${theme.icon}"></i>${escHtml(label)}</span>`;
+  }).join("");
+}
+function hexToRgba(hex, alpha) {
+  const normalized = String(hex || "").replace("#", "");
+  if (![3, 6].includes(normalized.length)) return `rgba(59, 130, 246, ${alpha})`;
+  const full = normalized.length === 3
+    ? normalized.split("").map((x) => `${x}${x}`).join("")
+    : normalized;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+function getTrainingPlanAccent(index) {
+  const accents = ["#22c55e", "#f59e0b", "#3b82f6"];
+  return accents[index % accents.length];
+}
+function getTrainingDayAccent(index) {
+  const accents = ["#22c55e", "#f59e0b", "#3b82f6", "#ec4899", "#06b6d4", "#8b5cf6", "#ef4444"];
+  return accents[index % accents.length];
+}
+function formatPlanCreatedLabel(createdAt) {
+  if (!createdAt) return "";
+  const d = new Date(createdAt);
+  if (Number.isNaN(d.getTime())) return "";
+  const now = new Date();
+  const isToday = d.getFullYear() === now.getFullYear()
+    && d.getMonth() === now.getMonth()
+    && d.getDate() === now.getDate();
+  if (isToday) return "Today";
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+function getAddDayCardMarkup() {
+  if (TP.days.length >= 7) return "";
+  const variant = TP.days.length === 0
+    ? "is-empty-state"
+    : "is-center-row";
+
+  return `<button type="button" class="tp-add-day-card ${variant}" id="addDayBtn"><i data-lucide="plus"></i>Add Day</button>`;
 }
 function dayIcon(dayName) {
   const n = String(dayName || "").toLowerCase();
@@ -260,18 +415,33 @@ function renderPlanSelector() {
   if (!strip) return;
   const html = TP.plans.map((plan, idx) => {
     const active = plan.id === TP.selectedPlanId;
-    const days = plan.day_count ?? "";
-    const label = active ? "Current" : days ? `${days} days` : idx === 0 ? "Current" : "Plan";
-    return `<button type="button" class="tp-plan-card ${active ? "is-active" : ""}" data-plan-id="${plan.id}">
-      <i data-lucide="calendar-days"></i>
-      <strong>${escHtml(titleOfPlan(plan))}</strong>
-      <span>${escHtml(label)}</span>
-    </button>`;
+    const createdLabel = formatPlanCreatedLabel(plan.created_at);
+    const iconName = TRAINING_PLAN_ICONS[idx % TRAINING_PLAN_ICONS.length];
+    const accent = getTrainingPlanAccent(idx);
+    const accentSoft = hexToRgba(accent, 0.1);
+    const accentLine = hexToRgba(accent, 0.24);
+
+    return `<div class="tp-plan-card-wrap"><button type="button" class="tp-plan-card ${active ? "is-active" : ""}" data-plan-id="${plan.id}" style="--diet-accent:${accent};--diet-accent-soft:${accentSoft};--diet-accent-line:${accentLine};">
+      <span class="diet-plan-icon" aria-hidden="true"><i data-lucide="${iconName}"></i></span>
+      <strong title="${escHtml(titleOfPlan(plan))}">${escHtml(titleOfPlan(plan))}</strong>
+      <span class="diet-plan-meta">${createdLabel ? `<small class="diet-plan-date"><i data-lucide="calendar-days" class="diet-plan-date-icon"></i>${escHtml(createdLabel)}</small>` : ""}</span>
+    </button></div>`;
   }).join("");
-  strip.innerHTML = html + `<button type="button" class="tp-plan-card tp-plan-create" id="addPlanBtn"><i data-lucide="plus"></i><strong>New Plan</strong></button>`;
+
+  const showCreateButton = TP.plans.length < MAX_TRAINING_PLANS;
+  const createAccent = getTrainingPlanAccent(TP.plans.length);
+  const createAccentSoft = hexToRgba(createAccent, 0.1);
+  const createAccentLine = hexToRgba(createAccent, 0.24);
+  const createButton = showCreateButton
+    ? `<button type="button" class="tp-plan-card tp-plan-create" id="addPlanBtn" style="--diet-accent:${createAccent};--diet-accent-soft:${createAccentSoft};--diet-accent-line:${createAccentLine};"><span class="diet-plan-icon" aria-hidden="true"><i data-lucide="plus"></i></span><strong>New Plan</strong></button>`
+    : "";
+
+  strip.innerHTML = html + createButton;
   setIcons();
   strip.querySelectorAll(".tp-plan-card[data-plan-id]").forEach(card => card.addEventListener("click", () => selectPlan(card.dataset.planId)));
-  byId("addPlanBtn")?.addEventListener("click", handleCreatePlan);
+  if (showCreateButton) {
+    byId("addPlanBtn")?.addEventListener("click", handleCreatePlan);
+  }
 }
 async function selectPlan(planId) {
   TP.selectedPlanId = planId;
@@ -294,37 +464,167 @@ function renderMainContent(loading = false) {
     el.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="dumbbell"></i></div><h4>No training plan yet</h4><p>Create your first workout routine and add up to seven training days.</p><button class="tp-btn tp-btn-primary" id="emptyCreatePlanBtn"><i data-lucide="plus"></i>Create Plan</button></div>`;
     setIcons(); byId("emptyCreatePlanBtn")?.addEventListener("click", handleCreatePlan); return;
   }
-  el.innerHTML = `<div class="tp-section-row"><h3>Your Days</h3><span>${TP.days.length}/7 Days</span></div><div class="tp-days-grid" id="daysGrid"></div><button type="button" class="tp-add-day-card" id="addDayBtn"><i data-lucide="plus"></i>Add Day</button>`;
+  el.innerHTML = `<div class="tp-section-row"><h3>Your Days</h3><span>${TP.days.length}/7 Days</span></div><div class="tp-days-grid" id="daysGrid"></div>`;
   renderDaysList();
-  byId("addDayBtn")?.addEventListener("click", handleCreateDay);
-  if (TP.days.length >= 7) byId("addDayBtn")?.setAttribute("disabled", "disabled");
 }
 function renderDaysList() {
   const grid = byId("daysGrid");
   if (!grid) return;
+  const addDayMarkup = getAddDayCardMarkup();
   if (TP.days.length === 0) {
-    grid.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="calendar-plus"></i></div><h4>No training days yet</h4><p>Add Push Day, Pull Day, Legs or any custom training day.</p></div>`;
-    setIcons(); return;
+    grid.innerHTML = addDayMarkup;
+    setIcons();
+    byId("addDayBtn")?.addEventListener("click", handleCreateDay);
+    return;
   }
-  grid.innerHTML = TP.days.map(day => {
+  grid.innerHTML = TP.days.map((day, idx) => {
     const count = (TP.exercisesByDay[day.id] || []).length;
-    return `<article class="tp-day-row" data-day-id="${day.id}">
+    const accent = getTrainingDayAccent(idx);
+    const accentSoft = hexToRgba(accent, 0.1);
+    const accentLine = hexToRgba(accent, 0.25);
+
+    return `<article class="tp-day-row" data-day-id="${day.id}" style="--tp-day-accent:${accent};--tp-day-accent-soft:${accentSoft};--tp-day-accent-line:${accentLine};">
       <div class="tp-day-icon"><i data-lucide="${dayIcon(nameOfDay(day))}"></i></div>
       <div class="tp-day-row-main" data-action="open-day" data-day-id="${day.id}">
         <p class="tp-day-title">${escHtml(nameOfDay(day))}</p>
         <p class="tp-day-sub">${count} exercise${count === 1 ? "" : "s"}</p>
       </div>
-      <div class="tp-day-menu">
-        <button class="tp-icon-action" data-action="rename-day" data-day-id="${day.id}" aria-label="Rename day"><i data-lucide="pencil-line"></i></button>
-        <button class="tp-icon-action tp-danger" data-action="delete-day" data-day-id="${day.id}" aria-label="Delete day"><i data-lucide="trash-2"></i></button>
+      <div class="tp-day-menu-wrap" data-day-id="${day.id}">
+        <button class="tp-day-menu-btn" data-action="toggle-day-menu" data-day-id="${day.id}" aria-label="Day actions" aria-expanded="false">
+          <i data-lucide="ellipsis-vertical"></i>
+        </button>
+        <div class="tp-day-menu-dropdown" data-day-id="${day.id}">
+          <button class="tp-day-menu-item" data-action="rename-day" data-day-id="${day.id}"><i data-lucide="pencil-line"></i> Rename</button>
+          <button class="tp-day-menu-item danger" data-action="delete-day" data-day-id="${day.id}"><i data-lucide="trash-2"></i> Delete</button>
+        </div>
       </div>
-      <i data-lucide="chevron-right" class="tp-day-chevron"></i>
+      <div class="tp-day-swipe-overlay"><i data-lucide="trash-2"></i></div>
     </article>`;
-  }).join("");
+  }).join("") + addDayMarkup;
   setIcons();
+  byId("addDayBtn")?.addEventListener("click", handleCreateDay);
   grid.querySelectorAll("[data-action='open-day']").forEach(x => x.addEventListener("click", () => openDayDetail(x.dataset.dayId)));
-  grid.querySelectorAll("[data-action='rename-day']").forEach(x => x.addEventListener("click", e => { e.stopPropagation(); handleRenameDay(x.dataset.dayId); }));
-  grid.querySelectorAll("[data-action='delete-day']").forEach(x => x.addEventListener("click", e => { e.stopPropagation(); handleDeleteDay(x.dataset.dayId); }));
+
+  const closeAllDayMenus = () => {
+    grid.querySelectorAll(".tp-day-menu-dropdown").forEach((menu) => menu.classList.remove("open"));
+    grid.querySelectorAll(".tp-day-menu-btn").forEach((btn) => btn.setAttribute("aria-expanded", "false"));
+  };
+
+  grid.querySelectorAll("[data-action='toggle-day-menu']").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const dayId = btn.dataset.dayId;
+      const menu = grid.querySelector(`.tp-day-menu-dropdown[data-day-id="${dayId}"]`);
+      if (!menu) return;
+
+      const willOpen = !menu.classList.contains("open");
+      closeAllDayMenus();
+      if (willOpen) {
+        menu.classList.add("open");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  grid.querySelectorAll("[data-action='rename-day']").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeAllDayMenus();
+      handleRenameDay(btn.dataset.dayId);
+    });
+  });
+
+  grid.querySelectorAll("[data-action='delete-day']").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeAllDayMenus();
+      handleDeleteDay(btn.dataset.dayId);
+    });
+  });
+
+  if (!TP.dayMenuOutsideBound) {
+    document.addEventListener("click", () => {
+      const currentGrid = byId("daysGrid");
+      if (!currentGrid) return;
+      currentGrid.querySelectorAll(".tp-day-menu-dropdown").forEach((menu) => menu.classList.remove("open"));
+      currentGrid.querySelectorAll(".tp-day-menu-btn").forEach((btn) => btn.setAttribute("aria-expanded", "false"));
+    });
+    TP.dayMenuOutsideBound = true;
+  }
+
+  bindDayRowSwipeDelete();
+}
+
+function bindDayRowSwipeDelete() {
+  if (TP.daySwipeBound) return;
+  TP.daySwipeBound = true;
+
+  let swipeRow = null;
+  let swipeOverlay = null;
+  let startX = 0;
+  let startY = 0;
+  let swiping = false;
+
+  document.addEventListener("touchstart", (event) => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    const row = event.target.closest(".tp-day-row");
+    if (!row || event.target.closest(".tp-day-menu-wrap")) return;
+
+    swipeRow = row;
+    swipeOverlay = row.querySelector(".tp-day-swipe-overlay");
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+    swiping = false;
+
+    swipeRow.classList.remove("is-swipe-ready");
+    if (swipeOverlay) swipeOverlay.style.width = "0";
+  });
+
+  document.addEventListener("touchmove", (event) => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    if (!swipeRow) return;
+
+    const currentX = event.touches[0].clientX;
+    const currentY = event.touches[0].clientY;
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX < -24) {
+      swiping = true;
+      const maxWidth = swipeRow.offsetWidth * 0.78;
+      const width = Math.min(Math.abs(deltaX), maxWidth);
+
+      if (swipeOverlay) swipeOverlay.style.width = `${width}px`;
+      swipeRow.classList.toggle("is-swipe-ready", width > (swipeRow.offsetWidth * 0.45));
+      event.preventDefault();
+    }
+  });
+
+  document.addEventListener("touchend", () => {
+    if (!window.matchMedia("(max-width: 767px)").matches) {
+      swipeRow = null;
+      return;
+    }
+
+    if (!swipeRow) return;
+
+    const shouldDelete = swiping && swipeRow.classList.contains("is-swipe-ready");
+    const dayId = swipeRow.dataset.dayId;
+
+    if (swipeOverlay) swipeOverlay.style.width = "0";
+    swipeRow.classList.remove("is-swipe-ready");
+
+    if (shouldDelete && dayId) {
+      handleDeleteDay(dayId);
+    }
+
+    swipeRow = null;
+    swipeOverlay = null;
+    swiping = false;
+  });
 }
 
 /* ── Day detail ────────────────────── */
@@ -335,12 +635,67 @@ function currentDay() { return TP.days.find(d => d.id === TP.selectedDayId); }
 function renderDayDetail() {
   const day = currentDay(); if (!day) return showMainScreen();
   const dayName = nameOfDay(day); const exercises = TP.exercisesByDay[day.id] || [];
-  byId("dayDetailTopTitle").textContent = dayName;
-  byId("dayExerciseCount").textContent = `${exercises.length} Exercise${exercises.length === 1 ? "" : "s"}`;
-  byId("daySummaryCard").innerHTML = `<div class="tp-day-icon"><i data-lucide="${dayIcon(dayName)}"></i></div><div><h3>${escHtml(dayName)}</h3><p>${escHtml(day.notes || `Focus on your ${dayName.toLowerCase()} routine.`)}</p></div><button type="button" class="tp-edit-day-btn" id="summaryEditDayBtn">Edit Day</button>`;
+  const dayIndex = Math.max(0, TP.days.findIndex((d) => d.id === day.id));
+  const accent = getTrainingDayAccent(dayIndex);
+  const accentSoft = hexToRgba(accent, 0.12);
+  const accentLine = hexToRgba(accent, 0.3);
+  const exerciseLabel = `${exercises.length} Exercise${exercises.length === 1 ? "" : "s"}`;
+
+  byId("daySummaryCard").innerHTML = `<div class="tp-day-icon"><i data-lucide="${dayIcon(dayName)}"></i></div><div><h3>${escHtml(dayName)}</h3><p>${escHtml(exerciseLabel)}</p></div>`;
+  byId("daySummaryCard").style.setProperty("--tp-day-accent", accent);
+  byId("daySummaryCard").style.setProperty("--tp-day-accent-soft", accentSoft);
+  byId("daySummaryCard").style.setProperty("--tp-day-accent-line", accentLine);
+
   renderDayExercises();
   setIcons();
-  byId("summaryEditDayBtn")?.addEventListener("click", () => handleRenameDay(day.id));
+
+  const menuBtn = byId("dayDetailMenuBtn");
+  const menu = byId("dayDetailMenuDropdown");
+  const closeMenu = () => {
+    if (!menu || !menuBtn) return;
+    menu.classList.remove("open");
+    menuBtn.setAttribute("aria-expanded", "false");
+  };
+
+  menuBtn.onclick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!menu || !menuBtn) return;
+    const willOpen = !menu.classList.contains("open");
+    closeMenu();
+    if (willOpen) {
+      menu.classList.add("open");
+      menuBtn.setAttribute("aria-expanded", "true");
+    }
+  };
+
+  const renameBtn = menu?.querySelector('[data-action="rename-day-detail"]');
+  if (renameBtn) {
+    renameBtn.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu();
+      handleRenameDay(day.id);
+    };
+  }
+
+  const deleteBtn = menu?.querySelector('[data-action="delete-day-detail"]');
+  if (deleteBtn) {
+    deleteBtn.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeMenu();
+      handleDeleteDay(day.id);
+    };
+  }
+
+  if (!TP.dayDetailMenuOutsideBound) {
+    document.addEventListener("click", () => {
+      byId("dayDetailMenuDropdown")?.classList.remove("open");
+      byId("dayDetailMenuBtn")?.setAttribute("aria-expanded", "false");
+    });
+    TP.dayDetailMenuOutsideBound = true;
+  }
 }
 function renderDayExercises() {
   const list = byId("dayExerciseList"); const day = currentDay(); if (!list || !day) return;
@@ -349,42 +704,199 @@ function renderDayExercises() {
     list.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="activity"></i></div><h4>No exercises added</h4><p>Add exercises from your catalog to build this day.</p></div>`;
     setIcons(); return;
   }
-  list.innerHTML = exercises.map(ex => {
-    const meta = `${ex.sets || 3} sets • ${escHtml(ex.reps || "8-12")} reps • ${ex.rest_seconds || 90}s rest`;
-    return `<article class="tp-exercise-row" data-exercise-id="${ex.id}" data-catalog-id="${ex.exercise_catalog_id || ""}">
-      <div>
-        <p class="tp-exercise-name">${escHtml(ex.exercise_name)}</p>
-        <p class="tp-exercise-meta">${meta}</p>
-        <div class="tp-exercise-subactions">
-          <button class="tp-text-action" data-action="edit-exercise" data-exercise-id="${ex.id}"><i data-lucide="pencil-line"></i>Edit</button>
-          <button class="tp-text-action tp-danger" data-action="remove-exercise" data-exercise-id="${ex.id}"><i data-lucide="trash-2"></i>Delete</button>
+  list.innerHTML = exercises.map((ex, index) => {
+    const accent = getExerciseAccent(ex.exercise_name, index);
+    const accentSoft = hexToRgba(accent, 0.14);
+    const accentLine = hexToRgba(accent, 0.3);
+    const iconPath = getExerciseIconPath(ex.exercise_name);
+    return `<article class="tp-exercise-row" data-exercise-id="${ex.id}" data-catalog-id="${ex.exercise_catalog_id || ""}" style="--tp-ex-accent:${accent};--tp-ex-accent-soft:${accentSoft};--tp-ex-accent-line:${accentLine};">
+      <div class="tp-exercise-swipe-action tp-exercise-swipe-edit" aria-hidden="true"><i data-lucide="pencil-line"></i></div>
+      <div class="tp-exercise-swipe-action tp-exercise-swipe-delete" aria-hidden="true"><i data-lucide="trash-2"></i></div>
+      <div class="tp-exercise-icon">
+        <img src="${escHtml(iconPath)}" alt="${escHtml(ex.exercise_name || "Exercise icon")}" loading="lazy" onerror="this.closest('.tp-exercise-icon')?.classList.add('is-fallback'); this.onerror=null; this.src='${EXERCISE_ICON_FALLBACK_PATH}';">
+        <span class="tp-exercise-icon-fallback"><i data-lucide="dumbbell"></i></span>
+      </div>
+      <div class="tp-exercise-main">
+        <div class="tp-exercise-head">
+          <p class="tp-exercise-name">${escHtml(ex.exercise_name)}</p>
+          <div class="tp-exercise-menu-wrap" data-exercise-id="${ex.id}">
+            <button type="button" class="tp-day-summary-menu-btn tp-exercise-menu-btn" data-action="toggle-exercise-menu" data-exercise-id="${ex.id}" aria-label="Exercise options" aria-expanded="false">
+              <i data-lucide="ellipsis-vertical"></i>
+            </button>
+            <div class="tp-day-summary-menu-dropdown tp-exercise-menu-dropdown" data-exercise-id="${ex.id}">
+              <button type="button" class="tp-day-summary-menu-item" data-action="edit-exercise" data-exercise-id="${ex.id}"><i data-lucide="pencil-line"></i> Edit</button>
+              <button type="button" class="tp-day-summary-menu-item danger" data-action="remove-exercise" data-exercise-id="${ex.id}"><i data-lucide="trash-2"></i> Delete</button>
+            </div>
+          </div>
+        </div>
+        <div class="tp-exercise-stat-chips">
+          <span class="tp-exercise-stat-chip"><i data-lucide="layers-3"></i>${ex.sets || 3} sets</span>
+          <span class="tp-exercise-stat-chip"><i data-lucide="repeat-2"></i>${escHtml(ex.reps || "8-12")} reps</span>
+          <span class="tp-exercise-stat-chip"><i data-lucide="timer"></i>${ex.rest_seconds || 90}s rest</span>
         </div>
       </div>
-      <div class="tp-exercise-actions"><span class="tp-prescription-chip">${escHtml(ex.body_part || "Exercise")}</span><div class="tp-exercise-menu"><button class="tp-icon-action" data-action="exercise-detail" data-catalog-id="${ex.exercise_catalog_id || ""}"><i data-lucide="ellipsis-vertical"></i></button></div></div>
+      <div class="tp-exercise-actions"></div>
     </article>`;
   }).join("");
   setIcons();
-  list.querySelectorAll("[data-action='edit-exercise']").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); openEditExercise(b.dataset.exerciseId); }));
-  list.querySelectorAll("[data-action='remove-exercise']").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); handleRemoveExercise(b.dataset.exerciseId); }));
-  list.querySelectorAll(".tp-exercise-row").forEach(card => card.addEventListener("click", e => { if (e.target.closest("[data-action]")) return; if (card.dataset.catalogId) openExerciseDetail(card.dataset.catalogId); }));
-  list.querySelectorAll("[data-action='exercise-detail']").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); if (b.dataset.catalogId) openExerciseDetail(b.dataset.catalogId); }));
+
+  const closeAllExerciseMenus = () => {
+    list.querySelectorAll(".tp-exercise-menu-dropdown").forEach((menu) => menu.classList.remove("open"));
+    list.querySelectorAll(".tp-exercise-menu-btn").forEach((btn) => btn.setAttribute("aria-expanded", "false"));
+  };
+
+  list.querySelectorAll("[data-action='toggle-exercise-menu']").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const exerciseId = btn.dataset.exerciseId;
+      const menu = list.querySelector(`.tp-exercise-menu-dropdown[data-exercise-id="${exerciseId}"]`);
+      if (!menu) return;
+
+      const willOpen = !menu.classList.contains("open");
+      closeAllExerciseMenus();
+      if (willOpen) {
+        menu.classList.add("open");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  list.querySelectorAll("[data-action='edit-exercise']").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeAllExerciseMenus();
+      openEditExercise(btn.dataset.exerciseId);
+    });
+  });
+
+  list.querySelectorAll("[data-action='remove-exercise']").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeAllExerciseMenus();
+      handleRemoveExercise(btn.dataset.exerciseId);
+    });
+  });
+
+  list.querySelectorAll(".tp-exercise-row").forEach(card => card.addEventListener("click", e => {
+    if (Date.now() < (TP.exerciseSwipeSuppressUntil || 0)) return;
+    if (e.target.closest("[data-action]")) return;
+    if (card.dataset.catalogId || card.dataset.exerciseId) openExerciseDetail(card.dataset.catalogId, card.dataset.exerciseId);
+  }));
+
+  if (!TP.exerciseMenuOutsideBound) {
+    document.addEventListener("click", () => {
+      const currentList = byId("dayExerciseList");
+      if (!currentList) return;
+      currentList.querySelectorAll(".tp-exercise-menu-dropdown").forEach((menu) => menu.classList.remove("open"));
+      currentList.querySelectorAll(".tp-exercise-menu-btn").forEach((btn) => btn.setAttribute("aria-expanded", "false"));
+    });
+    TP.exerciseMenuOutsideBound = true;
+  }
+
+  bindExerciseRowSwipeActions();
+}
+
+function bindExerciseRowSwipeActions() {
+  if (TP.exerciseSwipeBound) return;
+  TP.exerciseSwipeBound = true;
+
+  let swipeRow = null;
+  let startX = 0;
+  let startY = 0;
+  let deltaX = 0;
+  let swiping = false;
+
+  document.addEventListener("touchstart", (event) => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+
+    const row = event.target.closest(".tp-exercise-row");
+    if (!row || event.target.closest(".tp-exercise-menu-wrap")) return;
+
+    swipeRow = row;
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+    deltaX = 0;
+    swiping = false;
+
+    swipeRow.classList.remove("is-swiping", "is-swipe-left", "is-swipe-right");
+    swipeRow.style.transform = "";
+  });
+
+  document.addEventListener("touchmove", (event) => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    if (!swipeRow) return;
+
+    const currentX = event.touches[0].clientX;
+    const currentY = event.touches[0].clientY;
+    const moveX = currentX - startX;
+    const moveY = currentY - startY;
+
+    if (Math.abs(moveX) > Math.abs(moveY) && Math.abs(moveX) > 14) {
+      swiping = true;
+      deltaX = moveX;
+      const boundedX = Math.max(-88, Math.min(88, moveX));
+
+      swipeRow.classList.add("is-swiping");
+      swipeRow.classList.toggle("is-swipe-left", boundedX < 0);
+      swipeRow.classList.toggle("is-swipe-right", boundedX > 0);
+      swipeRow.style.transform = `translateX(${boundedX}px)`;
+      event.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener("touchend", () => {
+    if (!window.matchMedia("(max-width: 767px)").matches) {
+      swipeRow = null;
+      return;
+    }
+    if (!swipeRow) return;
+
+    const exerciseId = swipeRow.dataset.exerciseId;
+    const shouldTrigger = swiping && Math.abs(deltaX) >= 72 && exerciseId;
+    const isRightSwipe = deltaX > 0;
+
+    swipeRow.classList.remove("is-swiping", "is-swipe-left", "is-swipe-right");
+    swipeRow.style.transform = "";
+
+    if (shouldTrigger) {
+      TP.exerciseSwipeSuppressUntil = Date.now() + 350;
+      if (isRightSwipe) {
+        openEditExercise(exerciseId);
+      } else {
+        handleRemoveExercise(exerciseId);
+      }
+    }
+
+    swipeRow = null;
+    deltaX = 0;
+    swiping = false;
+  });
 }
 
 /* ── CRUD handlers ─────────────────── */
 async function handleCreatePlan() {
+  if (TP.plans.length >= MAX_TRAINING_PLANS) {
+    showToast("Maximum 3 training plans allowed.");
+    return;
+  }
   const title = await promptInput({ title: "Create Plan", label: "Plan name", placeholder: "e.g. Strength Plan", confirmLabel: "Create" });
-  if (!compact(title)) return;
-  try { const p = await dbCreatePlan(compact(title)); await fetchAndRenderPlans(); await selectPlan(p.id); showToast("Plan created."); } catch (e) { console.error(e); showToast("Error creating plan."); }
+  const normalizedTitle = toTitleCaseWords(title);
+  if (!normalizedTitle) return;
+  try { const p = await dbCreatePlan(normalizedTitle); await fetchAndRenderPlans(); await selectPlan(p.id); showToast("Plan created."); } catch (e) { console.error(e); showToast("Error creating plan."); }
 }
 async function handleRenamePlan() {
   const plan = TP.plans.find(p => p.id === TP.selectedPlanId); if (!plan) return;
-  const title = await promptInput({ title: "Rename Plan", label: "Plan name", defaultValue: titleOfPlan(plan), confirmLabel: "Save" });
-  if (!compact(title)) return;
-  try { await dbRenamePlan(plan.id, compact(title)); await fetchAndRenderPlans(); showToast("Plan renamed."); } catch(e) { console.error(e); showToast("Error renaming plan."); }
+  const title = await promptInput({ title: "Rename", label: "Plan name", defaultValue: titleOfPlan(plan), confirmLabel: "Save" });
+  const normalizedTitle = toTitleCaseWords(title);
+  if (!normalizedTitle) return;
+  try { await dbRenamePlan(plan.id, normalizedTitle); await fetchAndRenderPlans(); showToast("Plan renamed."); } catch(e) { console.error(e); showToast("Error renaming plan."); }
 }
 async function handleDeletePlan() {
   const plan = TP.plans.find(p => p.id === TP.selectedPlanId); if (!plan) return;
-  const ok = await promptConfirm(`Delete "${titleOfPlan(plan)}"? All days and exercises will be removed.`, "Delete Plan");
+  const ok = await promptConfirm(`Delete "${titleOfPlan(plan)}"? All days and exercises will be removed.`, "Delete");
   if (!ok) return;
   try { await dbDeletePlan(plan.id); TP.selectedPlanId = null; await fetchAndRenderPlans(); showToast("Plan deleted."); } catch(e) { console.error(e); showToast("Error deleting plan."); }
 }
@@ -392,24 +904,52 @@ async function handleCreateDay() {
   if (!TP.selectedPlanId) return handleCreatePlan();
   if (TP.days.length >= 7) return showToast("Maximum 7 days per plan.");
   const name = await promptInput({ title: "Add Training Day", label: "Day name", placeholder: "e.g. Push Day", confirmLabel: "Add" });
-  if (!compact(name)) return;
-  try { const d = await dbCreateDay(TP.selectedPlanId, compact(name)); TP.days.push(d); TP.exercisesByDay[d.id] = []; renderMainContent(); showToast("Training day added."); } catch(e) { console.error(e); showToast("Error adding day."); }
+  const normalizedName = toTitleCaseWords(name);
+  if (!normalizedName) return;
+  try { const d = await dbCreateDay(TP.selectedPlanId, normalizedName); TP.days.push(d); TP.exercisesByDay[d.id] = []; renderMainContent(); showToast("Training day added."); } catch(e) { console.error(e); showToast("Error adding day."); }
 }
 async function handleRenameDay(dayId = TP.selectedDayId) {
   const day = TP.days.find(d => d.id === dayId); if (!day) return;
-  const name = await promptInput({ title: "Rename Day", label: "Day name", defaultValue: nameOfDay(day), confirmLabel: "Save" });
-  if (!compact(name)) return;
-  try { await dbRenameDay(day.id, compact(name)); if (day.day_name !== undefined) day.day_name = compact(name); else day.name = compact(name); renderMainContent(); if (TP.selectedDayId === day.id) renderDayDetail(); showToast("Day renamed."); } catch(e) { console.error(e); showToast("Error renaming day."); }
+  const name = await promptInput({ title: "Rename", label: "Day name", defaultValue: nameOfDay(day), confirmLabel: "Save" });
+  const normalizedName = toTitleCaseWords(name);
+  if (!normalizedName) return;
+  try { await dbRenameDay(day.id, normalizedName); if (day.day_name !== undefined) day.day_name = normalizedName; else day.name = normalizedName; renderMainContent(); if (TP.selectedDayId === day.id) renderDayDetail(); showToast("Day renamed."); } catch(e) { console.error(e); showToast("Error renaming day."); }
 }
 async function handleDeleteDay(dayId = TP.selectedDayId) {
   const day = TP.days.find(d => d.id === dayId); if (!day) return;
-  const ok = await promptConfirm(`Delete "${nameOfDay(day)}"? Exercises in this day will be removed.`, "Delete Day");
+  const ok = await promptConfirm(`Delete "${nameOfDay(day)}"? Exercises in this day will be removed.`, "Delete");
   if (!ok) return;
   try { await dbDeleteDay(day.id); TP.days = TP.days.filter(d => d.id !== day.id); delete TP.exercisesByDay[day.id]; if (TP.selectedDayId === day.id) showMainScreen(); renderMainContent(); showToast("Day deleted."); } catch(e) { console.error(e); showToast("Error deleting day."); }
 }
 async function handleRemoveExercise(id) {
-  const ok = await promptConfirm("Remove this exercise from the day?", "Remove Exercise"); if (!ok) return;
+  const ok = await promptConfirm("Delete this exercise from the day?", "Delete"); if (!ok) return;
   try { await dbRemoveExercise(id); const dayId = TP.selectedDayId; TP.exercisesByDay[dayId] = (TP.exercisesByDay[dayId] || []).filter(e => e.id !== id); renderDayDetail(); showToast("Exercise removed."); } catch(e) { console.error(e); showToast("Error removing exercise."); }
+}
+
+async function handleRenameExercise(id) {
+  const dayId = TP.selectedDayId;
+  const list = TP.exercisesByDay[dayId] || [];
+  const ex = list.find((item) => String(item.id) === String(id));
+  if (!ex) return;
+
+  const nextName = await promptInput({
+    title: "Rename",
+    label: "Exercise name",
+    defaultValue: ex.exercise_name || "",
+    confirmLabel: "Save",
+  });
+  const normalizedName = toTitleCaseWords(nextName);
+  if (!normalizedName || normalizedName === ex.exercise_name) return;
+
+  try {
+    await dbUpdateExercise(id, { exercise_name: normalizedName });
+    ex.exercise_name = normalizedName;
+    renderDayDetail();
+    showToast("Exercise renamed.");
+  } catch (e) {
+    console.error(e);
+    showToast("Error renaming exercise.");
+  }
 }
 
 /* ── Catalog modal ─────────────────── */
@@ -427,8 +967,14 @@ async function openCatalogModal() {
 function closeCatalogModal() { closeModal("catalogModalOverlay"); TP.selectedCatalogIds.clear(); updateAddSelectedBtn(); }
 function renderCatalogFilters() {
   const el = byId("catalogBodyPartFilters"); if (!el) return;
-  el.innerHTML = BODY_PARTS.map(bp => `<button class="tp-filter-chip ${TP.catalogFilter.bodyPart === bp ? "is-active" : ""}" data-bp="${bp}">${bp}</button>`).join("");
+  el.innerHTML = BODY_PARTS.map((bp) => {
+    const theme = getCatalogTagTheme(bp);
+    const soft = hexToRgba(theme.color, 0.14);
+    const line = hexToRgba(theme.color, 0.3);
+    return `<button class="tp-filter-chip ${TP.catalogFilter.bodyPart === bp ? "is-active" : ""}" style="--tp-chip-accent:${theme.color};--tp-chip-soft:${soft};--tp-chip-line:${line};" data-bp="${bp}"><i data-lucide="${theme.icon}"></i><span>${escHtml(bp)}</span></button>`;
+  }).join("");
   el.querySelectorAll(".tp-filter-chip").forEach(ch => ch.addEventListener("click", () => { TP.catalogFilter.bodyPart = ch.dataset.bp; renderCatalogFilters(); renderCatalogList(); }));
+  setIcons();
 }
 function normalizedBodyPart(bp) { const v = String(bp || "").toLowerCase(); if (["biceps","triceps","forearms"].includes(v)) return "arms"; if (["glutes"].includes(v)) return "legs"; return v; }
 function getFilteredCatalog() {
@@ -446,10 +992,17 @@ function renderCatalogList() {
   if (rows.length === 0) { el.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="search-x"></i></div><h4>No exercises found</h4><p>Try another search or filter.</p></div>`; setIcons(); return; }
   el.innerHTML = `<div class="tp-catalog-list-head"><strong>Exercises (${rows.length})</strong><button class="tp-catalog-clear" id="catalogClearBtn">Clear</button></div>` + rows.slice(0, 250).map(ex => {
     const selected = TP.selectedCatalogIds.has(ex.id);
-    const meta = [capitalize(ex.body_part), ex.equipment].filter(Boolean).join(" • ");
+    const metaPills = renderCatalogMetaPills(ex);
+    const iconPath = getExerciseIconPath(ex.name || ex.exercise_name || "");
+    const iconTheme = getCatalogTagTheme(ex.body_part || ex.target_muscle || "all");
+    const iconSoft = hexToRgba(iconTheme.color, 0.14);
+    const iconLine = hexToRgba(iconTheme.color, 0.26);
     return `<div class="tp-catalog-card ${selected ? "is-selected" : ""}" data-id="${ex.id}">
-      <div class="tp-catalog-card-icon"><i data-lucide="${exerciseIcon(ex.body_part)}"></i></div>
-      <div class="tp-catalog-card-info"><p class="tp-catalog-card-name">${escHtml(ex.name)}</p><p class="tp-catalog-card-meta">${escHtml(meta)}</p></div>
+      <div class="tp-catalog-card-icon" style="--tp-cat-icon-accent:${iconTheme.color};--tp-cat-icon-soft:${iconSoft};--tp-cat-icon-line:${iconLine};">
+        <img src="${escHtml(iconPath)}" alt="${escHtml((ex.name || "Exercise") + " icon")}" loading="lazy" onerror="this.closest('.tp-catalog-card-icon')?.classList.add('is-fallback'); this.onerror=null; this.src='${EXERCISE_ICON_FALLBACK_PATH}';">
+        <span class="tp-catalog-card-icon-fallback"><i data-lucide="dumbbell"></i></span>
+      </div>
+      <div class="tp-catalog-card-info"><p class="tp-catalog-card-name">${escHtml(ex.name)}</p><div class="tp-catalog-card-meta">${metaPills}</div></div>
       <span class="tp-catalog-card-check"><i data-lucide="check"></i></span>
     </div>`;
   }).join("");
@@ -472,19 +1025,37 @@ async function handleAddSelected() {
 }
 
 /* ── Exercise detail ───────────────── */
-async function openExerciseDetail(catalogId) {
+async function openExerciseDetail(catalogId, dayExerciseId = null) {
+  const dayExercises = TP.exercisesByDay[TP.selectedDayId] || [];
+  const selectedDayExercise = dayExercises.find((item) => String(item.id) === String(dayExerciseId));
+  const dayExerciseIndex = selectedDayExercise
+    ? Math.max(0, dayExercises.findIndex((item) => String(item.id) === String(dayExerciseId)))
+    : 0;
+
   openModal("exerciseDetailOverlay");
   let ex = TP.catalog.find(x => String(x.id) === String(catalogId));
-  if (!ex) { try { ex = await dbFetchCatalogItem(catalogId); } catch(e) { console.error(e); } }
-  renderExerciseDetailContent(ex);
+  if (!ex && catalogId) { try { ex = await dbFetchCatalogItem(catalogId); } catch(e) { console.error(e); } }
+  const mergedExercise = {
+    ...(ex || {}),
+    name: ex?.name || selectedDayExercise?.exercise_name || "Exercise",
+    body_part: ex?.body_part || selectedDayExercise?.body_part || "full body",
+    equipment: ex?.equipment || selectedDayExercise?.equipment || "Any",
+  };
+  renderExerciseDetailContent(mergedExercise, dayExerciseIndex);
 }
-function renderExerciseDetailContent(ex) {
+function renderExerciseDetailContent(ex, dayExerciseIndex = 0) {
   if (!ex) return;
-  byId("exerciseDetailTitle").textContent = ex.name || "Exercise";
+  const exerciseName = ex.name || ex.exercise_name || "Exercise";
+  const accent = getExerciseAccent(exerciseName, dayExerciseIndex);
+  const accentSoft = hexToRgba(accent, 0.14);
+  const accentLine = hexToRgba(accent, 0.35);
+  const iconPath = getExerciseIconPath(exerciseName);
+
+  byId("exerciseDetailTitle").textContent = exerciseName;
   byId("exerciseDetailSubtitle").textContent = [capitalize(ex.body_part), ex.equipment].filter(Boolean).join(" · ") || "Exercise detail";
   const instructions = instructionArray(ex.instructions);
-  const imageHtml = ex.image_url ? `<img src="${escHtml(ex.image_url)}" alt="${escHtml(ex.name)}">` : `<div class="tp-detail-placeholder-icon"><i data-lucide="dumbbell"></i></div>`;
-  byId("exerciseDetailBody").innerHTML = `<div class="tp-detail-image-wrap">${imageHtml}</div><div class="tp-detail-facts"><div class="tp-detail-fact"><i data-lucide="target"></i><div><span>Primary Muscle</span><strong>${escHtml(capitalize(ex.target_muscle || ex.body_part || "Exercise"))}</strong></div></div><div class="tp-detail-fact"><i data-lucide="dumbbell"></i><div><span>Equipment</span><strong>${escHtml(ex.equipment || "Any")}</strong></div></div><div class="tp-detail-fact"><i data-lucide="activity"></i><div><span>Body Part</span><strong>${escHtml(capitalize(ex.body_part || "Full Body"))}</strong></div></div></div><h3 class="tp-detail-section-title">Instructions</h3><div class="tp-instruction-list">${instructions.length ? instructions.map((s,i) => `<div class="tp-instruction-step"><span class="tp-instruction-num">${i+1}</span><p>${escHtml(s)}</p></div>`).join("") : `<p style="margin:0;color:#667085;">No instructions available yet.</p>`}</div>`;
+  const imageHtml = `<div class="tp-detail-exercise-icon" style="--tp-detail-accent:${accent};--tp-detail-accent-soft:${accentSoft};--tp-detail-accent-line:${accentLine};"><img src="${escHtml(iconPath)}" alt="${escHtml(exerciseName)}" loading="lazy" onerror="this.closest('.tp-detail-exercise-icon')?.classList.add('is-fallback'); this.onerror=null; this.src='${EXERCISE_ICON_FALLBACK_PATH}';"><span class="tp-detail-placeholder-icon"><i data-lucide="dumbbell"></i></span></div>`;
+  byId("exerciseDetailBody").innerHTML = `<div class="tp-detail-image-wrap" style="--tp-detail-accent:${accent};--tp-detail-accent-soft:${accentSoft};--tp-detail-accent-line:${accentLine};">${imageHtml}</div><div class="tp-detail-facts"><div class="tp-detail-fact"><i data-lucide="target"></i><div><span>Primary Muscle</span><strong>${escHtml(capitalize(ex.target_muscle || ex.body_part || "Exercise"))}</strong></div></div><div class="tp-detail-fact"><i data-lucide="dumbbell"></i><div><span>Equipment</span><strong>${escHtml(ex.equipment || "Any")}</strong></div></div><div class="tp-detail-fact"><i data-lucide="activity"></i><div><span>Body Part</span><strong>${escHtml(capitalize(ex.body_part || "Full Body"))}</strong></div></div></div><h3 class="tp-detail-section-title">Instructions</h3><div class="tp-instruction-list">${instructions.length ? instructions.map((s,i) => `<div class="tp-instruction-step"><span class="tp-instruction-num">${i+1}</span><p>${escHtml(s)}</p></div>`).join("") : `<p style="margin:0;color:#667085;">No instructions available yet.</p>`}</div>`;
   setIcons();
 }
 function closeExerciseDetail() { closeModal("exerciseDetailOverlay"); }
@@ -536,7 +1107,6 @@ function bindStaticTrainingUI() {
   byId("backToPlansBtn")?.addEventListener("click", () => { TP.selectedDayId = null; showMainScreen(); renderMainContent(); });
   byId("detailAddExerciseBtn")?.addEventListener("click", openCatalogModal);
   byId("mainMoreBtn")?.addEventListener("click", async () => { if (!TP.selectedPlanId) return handleCreatePlan(); const action = await promptInput({ title: "Plan Options", label: "Type rename or delete", placeholder: "rename", confirmLabel: "Continue" }); if (String(action).toLowerCase().startsWith("del")) await handleDeletePlan(); else if (action) await handleRenamePlan(); });
-  byId("dayDetailMenuBtn")?.addEventListener("click", async () => { const action = await promptInput({ title: "Day Options", label: "Type rename or delete", placeholder: "rename", confirmLabel: "Continue" }); if (String(action).toLowerCase().startsWith("del")) await handleDeleteDay(); else if (action) await handleRenameDay(); });
   byId("catalogModalClose")?.addEventListener("click", closeCatalogModal);
   byId("catalogCancelBtn")?.addEventListener("click", closeCatalogModal);
   byId("catalogAddSelectedBtn")?.addEventListener("click", handleAddSelected);

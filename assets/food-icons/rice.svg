@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Rice">
+  <title>Rice</title>
+  
+  <path d="M14 34h36l-5 18H19z"/>
+  <path d="M18 34c4-8 24-8 28 0"/>
+  <path d="M24 27c2 2 4 2 6 0"/>
+  <path d="M34 27c2 2 4 2 6 0"/>
+
+</svg>

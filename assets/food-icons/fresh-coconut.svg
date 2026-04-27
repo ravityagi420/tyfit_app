@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Fresh coconut">
+  <title>Fresh coconut</title>
+  
+  <circle cx="32" cy="32" r="18"/>
+  <path d="M23 38c6 4 12 4 18 0"/>
+  <path d="M24 28h.01"/>
+  <path d="M40 28h.01"/>
+
+</svg>

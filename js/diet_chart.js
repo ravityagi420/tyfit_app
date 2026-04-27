@@ -90,8 +90,15 @@ function showDietConfirm(message, options = {}) {
     return Promise.resolve(window.confirm(message));
 }
 
+function toTitleCaseWords(value) {
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\b([a-z])/g, (match) => match.toUpperCase());
+}
+
 function normalizeDietChartName(value) {
-    return String(value || "").trim();
+    return toTitleCaseWords(value);
 }
 
 function formatDietChartDisplayName(name) {
@@ -372,7 +379,7 @@ function setDietUserToolbarVisible(isVisible) {
 }
 
 function getDietChartName(chart, index = 0) {
-    const title = String(chart?.title || "").trim();
+    const title = normalizeDietChartName(chart?.title || "");
     if (title) {
         return title;
     }
@@ -383,7 +390,7 @@ function getDietChartName(chart, index = 0) {
 function setSelectedDietChartName(name) {
     const titleEl = getEl("dietChartCurrentTitle");
     if (titleEl) {
-        titleEl.textContent = name || "Diet Chart";
+        titleEl.textContent = normalizeDietChartName(name) || "Diet Chart";
     }
 }
 
@@ -430,10 +437,10 @@ function renderDietChartSelector() {
                 </button>
                 <div class="tp-plan-card-menu tyfit-popover-menu" hidden data-menu-chart-id="${chart.id}">
                     <button type="button" class="diet-chart-actions-item tyfit-menu-action" data-card-action="rename-chart" data-chart-id="${chart.id}">
-                        <i data-lucide="pencil-line"></i> Edit Name
+                        <i data-lucide="pencil-line"></i> Rename
                     </button>
                     <button type="button" class="diet-chart-actions-item tyfit-menu-action danger" data-card-action="delete-chart" data-chart-id="${chart.id}">
-                        <i data-lucide="trash-2"></i> Delete Diet Chart
+                        <i data-lucide="trash-2"></i> Delete
                     </button>
                 </div>
             </div>`;
@@ -608,6 +615,7 @@ function renderDietChartView(chartData) {
 
         DIET_STATE.currentChartData = chartData;
         const chartTitle = getDietChartName(chartData?.chart) || "Diet Chart";
+        const chartHeading = `Diet Chart - ${chartTitle}`;
     setSelectedDietChartName(chartTitle);
 
         const meals = chartData?.meals || [];
@@ -616,6 +624,7 @@ function renderDietChartView(chartData) {
 
         const mealsHtml = meals.map((meal, mealIndex) => {
             let mealTotals = { carbs: 0, protein: 0, fats: 0, calories: 0 };
+            const mealLabel = toTitleCaseWords(meal.meal_name || `Meal ${mealIndex + 1}`) || `Meal ${mealIndex + 1}`;
 
             const itemCards = (meal.items || []).map((item, itemIndex) => {
                 const computed = getComputedFromItem(item);
@@ -680,9 +689,9 @@ function renderDietChartView(chartData) {
                 <div class="diet-view-meal-block">
                     <div class="diet-view-meal-header">
                         <div class="diet-view-meal-label-wrap">
-                            <span class="diet-view-meal-label js-meal-name-label" data-meal-index="${mealIndex}">${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}</span>
+                            <span class="diet-view-meal-label js-meal-name-label" data-meal-index="${mealIndex}">${escapeHtml(mealLabel)}</span>
                             <div class="diet-meal-name-edit-wrap" style="display: none;">
-                                <input type="text" class="form-control form-control-sm diet-meal-name-inline-input" data-meal-index="${mealIndex}" value="${escapeHtml(meal.meal_name || `Meal ${mealIndex + 1}`)}">
+                                <input type="text" class="form-control form-control-sm diet-meal-name-inline-input" data-meal-index="${mealIndex}" value="${escapeHtml(mealLabel)}">
                                 <button type="button" class="diet-meal-name-save-btn" data-meal-index="${mealIndex}" aria-label="Save meal name" title="Save meal name">
                                     <i class="fa fa-check"></i>
                                 </button>
@@ -698,10 +707,10 @@ function renderDietChartView(chartData) {
                                 </button>
                                 <div class="diet-meal-menu" data-meal-index="${mealIndex}">
                                     <button type="button" class="diet-meal-menu-item js-meal-action-edit" data-meal-index="${mealIndex}">
-                                        <i class="fa fa-pencil-alt"></i> Edit meal
+                                        <i class="fa fa-pencil-alt"></i> Rename
                                     </button>
                                     <button type="button" class="diet-meal-menu-item danger js-meal-action-delete" data-meal-index="${mealIndex}">
-                                        <i class="fa fa-trash-alt"></i> Delete meal
+                                        <i class="fa fa-trash-alt"></i> Delete
                                     </button>
                                 </div>
                             </div>
@@ -721,7 +730,7 @@ function renderDietChartView(chartData) {
         const chartSummarySection = `
             <div class="diet-view-chart-card">
                 <div class="diet-view-chart-title-wrap mb-3">
-                    <div class="diet-view-chart-title">${escapeHtml(chartTitle)}</div>
+                    <div class="diet-view-chart-title">${escapeHtml(chartHeading)}</div>
                 </div>
                 ${hasFoodItems
                     ? `<div class="diet-view-chart-container">
@@ -1198,12 +1207,37 @@ async function renderFoodCatalogModalList(searchTerm = "") {
         const customFoods = foods.filter((f) => f.is_custom && f.created_by_user_id === userId);
         const globalFoods = foods.filter((f) => !f.is_custom);
 
-        const getFoodIconClass = (foodName) => {
+        const getFoodIconMeta = (foodName) => {
             const name = String(foodName || "").toLowerCase();
-            if (name.includes("oil") || name.includes("ghee") || name.includes("butter")) return "food-oil";
-            if (name.includes("rice")) return "food-rice";
-            if (name.includes("lentil") || name.includes("dal") || name.includes("legume") || name.includes("bean") || name.includes("roti") || name.includes("wheat")) return "food-grain";
-            return "food-default";
+            const keywordMeta = [
+                { className: "food-oil", iconClass: "fa-tint", keywords: ["oil", "ghee", "butter", "fat", "rapsol", "rapeseed"] },
+                { className: "food-egg", iconClass: "fa-egg", keywords: ["egg", "yolk", "omelette", "omelet"] },
+                { className: "food-grain", iconClass: "fa-seedling", keywords: ["lentil", "dal", "legume", "bean", "roti", "wheat", "bread", "oats"] },
+                { className: "food-rice", iconClass: "fa-utensils", keywords: ["rice", "biryani", "pulao"] },
+                { className: "food-veg", iconClass: "fa-carrot", keywords: ["salad", "vegetable", "veggie", "carrot", "spinach", "broccoli"] },
+                { className: "food-fruit", iconClass: "fa-apple-alt", keywords: ["fruit", "apple", "banana", "orange", "mango", "berries"] },
+                { className: "food-protein", iconClass: "fa-drumstick-bite", keywords: ["chicken", "fish", "meat", "paneer", "tofu"] }
+            ];
+
+            const matched = keywordMeta.find((entry) => entry.keywords.some((keyword) => name.includes(keyword)));
+            if (matched) {
+                return matched;
+            }
+
+            const fallback = [
+                { className: "food-default", iconClass: "fa-utensils" },
+                { className: "food-plate", iconClass: "fa-utensils" },
+                { className: "food-rice", iconClass: "fa-utensils" },
+                { className: "food-veg", iconClass: "fa-leaf" }
+            ];
+
+            let hash = 0;
+            for (let i = 0; i < name.length; i += 1) {
+                hash = ((hash << 5) - hash) + name.charCodeAt(i);
+                hash |= 0;
+            }
+
+            return fallback[Math.abs(hash) % fallback.length];
         };
 
         const renderCard = (food) => {
@@ -1215,13 +1249,13 @@ async function renderFoodCatalogModalList(searchTerm = "") {
             const protein = toNumber(food.protein, 0);
             const fats = toNumber(food.fats, 0);
             const calories = (carbs * 4) + (protein * 4) + (fats * 9);
-            const iconClass = getFoodIconClass(food.food_name);
+            const iconMeta = getFoodIconMeta(food.food_name);
 
             return `
                 <div class="diet-catalog-pick-card" data-food-id="${foodId}">
                     <div class="diet-catalog-pick-main">
-                        <div class="food-icon ${iconClass}">
-                            <i class="fa fa-utensils" aria-hidden="true"></i>
+                        <div class="food-icon ${iconMeta.className}">
+                            <i class="fa ${iconMeta.iconClass}" aria-hidden="true"></i>
                         </div>
                         <div class="diet-catalog-pick-body">
                             <div class="diet-catalog-pick-title">
@@ -1229,9 +1263,9 @@ async function renderFoodCatalogModalList(searchTerm = "") {
                                 <span class="diet-catalog-ref-qty">${formatMacro(initialQty)}&thinsp;${unit}</span>
                             </div>
                             <div class="diet-catalog-pick-macros">
-                                <span class="diet-macro-text carbs">C ${formatMacro(carbs)}g</span>
-                                <span class="diet-macro-text protein">P ${formatMacro(protein)}g</span>
-                                <span class="diet-macro-text fats">F ${formatMacro(fats)}g</span>
+                                <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C: ${formatMacro(carbs)} g</span>
+                                <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P: ${formatMacro(protein)} g</span>
+                                <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F: ${formatMacro(fats)} g</span>
                             </div>
                         </div>
                         <div class="diet-catalog-pick-aside">
@@ -1240,14 +1274,18 @@ async function renderFoodCatalogModalList(searchTerm = "") {
                     </div>
                     <div class="diet-catalog-pick-footer">
                         <div class="diet-catalog-qty-row">
-                            <button type="button" class="diet-catalog-qty-btn js-catalog-qty-minus" data-food-id="${foodId}" aria-label="Decrease quantity">
-                                <i class="fa fa-minus"></i>
-                            </button>
-                            <input type="number" class="food-catalog-qty-input" value="${formatMacro(initialQty)}" min="0.01" step="0.01" data-food-id="${foodId}" aria-label="Quantity">
+                            <div class="diet-catalog-qty-control">
+                                <input type="number" class="food-catalog-qty-input" value="${formatMacro(initialQty)}" min="0.01" step="0.01" data-food-id="${foodId}" aria-label="Quantity">
+                                <div class="diet-catalog-qty-stepper" aria-hidden="true">
+                                    <button type="button" class="diet-catalog-qty-step-btn js-catalog-qty-up" data-food-id="${foodId}" tabindex="-1" aria-label="Increase quantity">
+                                        <i class="fa fa-chevron-up"></i>
+                                    </button>
+                                    <button type="button" class="diet-catalog-qty-step-btn js-catalog-qty-down" data-food-id="${foodId}" tabindex="-1" aria-label="Decrease quantity">
+                                        <i class="fa fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                            </div>
                             <span class="diet-catalog-unit-pill">${unit}</span>
-                            <button type="button" class="diet-catalog-qty-btn js-catalog-qty-plus" data-food-id="${foodId}" aria-label="Increase quantity">
-                                <i class="fa fa-plus"></i>
-                            </button>
                         </div>
                         <button type="button" class="diet-catalog-add-btn js-add-food-catalog-item" data-food-id="${foodId}">
                             <i class="fa fa-plus mr-1"></i> Add
@@ -1473,7 +1511,7 @@ function addMealToViewChart() {
         DIET_STATE.currentChartData.meals = [];
     }
     const nextNum = DIET_STATE.currentChartData.meals.length + 1;
-    DIET_STATE.currentChartData.meals.push({ meal_name: `Meal ${nextNum}`, sort_order: nextNum, items: [] });
+    DIET_STATE.currentChartData.meals.push({ meal_name: toTitleCaseWords(`Meal ${nextNum}`), sort_order: nextNum, items: [] });
     setDietDirty(true);
     renderDietChartView(DIET_STATE.currentChartData);
     syncViewChartToSupabase();
@@ -1510,7 +1548,7 @@ async function renameMealInViewChart(mealIndex, newName) {
         return;
     }
 
-    const normalized = (newName || '').trim();
+    const normalized = toTitleCaseWords(newName || '');
     if (!normalized) {
         return;
     }
@@ -2630,7 +2668,7 @@ function collectDietChartFormData() {
         throw new Error("Please select a user first.");
     }
 
-    const title = (getEl("dietChartTitle")?.value || "").trim();
+    const title = normalizeDietChartName(getEl("dietChartTitle")?.value || "");
     const notes = (getEl("dietChartNotes")?.value || "").trim();
 
     if (!title) {
@@ -2643,7 +2681,7 @@ function collectDietChartFormData() {
     }
 
     const meals = mealElements.map((mealEl, mealIndex) => {
-        const mealName = (mealEl.querySelector(".diet-meal-name")?.value || "").trim();
+        const mealName = toTitleCaseWords(mealEl.querySelector(".diet-meal-name")?.value || "");
         if (!mealName) {
             throw new Error(`Meal ${mealIndex + 1} name is required.`);
         }
@@ -2858,7 +2896,7 @@ async function deleteDietChart(chartId) {
     }
 
     const confirmed = await showDietConfirm("Delete this diet chart and all related meals/items?", {
-        title: "Delete Diet Chart",
+        title: "Delete",
         confirmText: "Delete",
         confirmClass: "btn-danger"
     });
@@ -3041,7 +3079,7 @@ async function renameSelectedDietChart() {
     const selectedChart = (DIET_STATE.dietCharts || []).find((chart) => String(chart.id) === String(DIET_STATE.selectedChartId));
     const currentName = getDietChartName(selectedChart);
     const nextName = await promptDietChartName(currentName, {
-        title: "Rename Diet Chart",
+        title: "Rename",
         confirmLabel: "Save"
     });
     if (!nextName || nextName === currentName) {
@@ -3644,16 +3682,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         foodCatalogList.addEventListener("click", async (event) => {
-            // Handle +/- qty buttons
-            const minusBtn = event.target.closest(".js-catalog-qty-minus");
-            const plusBtn = event.target.closest(".js-catalog-qty-plus");
-            if (minusBtn || plusBtn) {
-                const card = (minusBtn || plusBtn).closest(".diet-catalog-pick-card");
+            const qtyUpBtn = event.target.closest(".js-catalog-qty-up");
+            const qtyDownBtn = event.target.closest(".js-catalog-qty-down");
+            if (qtyUpBtn || qtyDownBtn) {
+                const card = (qtyUpBtn || qtyDownBtn).closest(".diet-catalog-pick-card");
                 const qtyInput = card ? card.querySelector(".food-catalog-qty-input") : null;
                 if (qtyInput) {
-                    const step = parseFloat(qtyInput.step) || 1;
-                    let val = toNumber(qtyInput.value, step);
-                    val = minusBtn ? Math.max(step, parseFloat((val - step).toFixed(2))) : parseFloat((val + step).toFixed(2));
+                    const step = parseFloat(qtyInput.step) || 0.01;
+                    const min = parseFloat(qtyInput.min) || step;
+                    let val = toNumber(qtyInput.value, min);
+                    val = qtyDownBtn
+                        ? Math.max(min, parseFloat((val - step).toFixed(2)))
+                        : parseFloat((val + step).toFixed(2));
                     qtyInput.value = formatMacro(val);
                 }
                 return;

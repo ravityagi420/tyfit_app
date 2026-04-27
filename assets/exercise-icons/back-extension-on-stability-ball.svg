@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Back Extension on Stability Ball">
+  <title>Back Extension on Stability Ball</title>
+  
+  <circle cx="34" cy="38" r="14"/>
+  <circle cx="22" cy="20" r="4"/>
+  <path d="M24 24 L34 34"/>
+  <path d="M31 36 L18 46"/>
+  <path d="M37 33 L50 25"/>
+
+</svg>

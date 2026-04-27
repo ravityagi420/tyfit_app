@@ -515,7 +515,7 @@ async function deleteFoodItem(foodId) {
     }
 
     const isConfirmed = await showDialogConfirm(`Delete ${item.food_name}? This action cannot be undone.`, {
-        title: "Delete Food Item",
+        title: "Delete",
         confirmText: "Delete",
         confirmClass: "btn-danger"
     });
@@ -598,7 +598,7 @@ function renderFoodCatalogTable(items) {
                                             <i class="fa fa-pen"></i> Edit item
                                         </button>
                                         <button type="button" class="food-item-menu-item danger js-food-action-delete" data-food-id="${foodId}">
-                                            <i class="fa fa-trash"></i> Delete item
+                                            <i class="fa fa-trash"></i> Delete
                                         </button>
                                     </div>
                                 </div>

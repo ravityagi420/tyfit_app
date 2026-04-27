@@ -157,10 +157,15 @@
                         <button type="button" class="tp-back-btn" id="backToPlansBtn" aria-label="Back to training plans">
                             <i data-lucide="chevron-left"></i>
                         </button>
-                        <h2 id="dayDetailTopTitle">Training Day</h2>
-                        <button type="button" class="tp-round-action" id="dayDetailMenuBtn" aria-label="Day options">
-                            <i data-lucide="ellipsis"></i>
-                        </button>
+                        <div class="tp-day-summary-menu-wrap tp-day-top-menu-wrap">
+                            <button type="button" class="tp-day-summary-menu-btn" id="dayDetailMenuBtn" aria-label="Day options" aria-expanded="false">
+                                <i data-lucide="ellipsis-vertical"></i>
+                            </button>
+                            <div class="tp-day-summary-menu-dropdown" id="dayDetailMenuDropdown">
+                                <button type="button" class="tp-day-summary-menu-item" data-action="rename-day-detail"><i data-lucide="pencil-line"></i> Rename</button>
+                                <button type="button" class="tp-day-summary-menu-item danger" data-action="delete-day-detail"><i data-lucide="trash-2"></i> Delete</button>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="tp-day-summary-card" id="daySummaryCard">
@@ -170,7 +175,6 @@
                     <section class="tp-exercises-panel">
                         <div class="tp-section-row">
                             <h3>Exercises</h3>
-                            <span id="dayExerciseCount">0 Exercises</span>
                         </div>
                         <div class="tp-day-exercise-list" id="dayExerciseList">
                             <!-- rendered by JS -->

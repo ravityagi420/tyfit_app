@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Barbell Shrugs">
+  <title>Barbell Shrugs</title>
+  
+  <circle cx="22" cy="20" r="4"/>
+  <path d="M24 24 L34 34"/>
+  <path d="M34 34 L49 29"/>
+  <path d="M48 26 L52 32"/>
+  <path d="M30 32 L20 47"/>
+  <path d="M36 37 L44 50"/>
+
+</svg>

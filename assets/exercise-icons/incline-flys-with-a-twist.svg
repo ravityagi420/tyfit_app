@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Incline Fly&#x27;s with a Twist">
+  <title>Incline Fly&#x27;s with a Twist</title>
+  
+  <circle cx="32" cy="18" r="4"/>
+  <path d="M32 22 V38"/>
+  <path d="M24 28 C15 30 11 36 10 44"/>
+  <path d="M40 28 C49 30 53 36 54 44"/>
+  <path d="M9 44 H16"/>
+  <path d="M48 44 H55"/>
+
+</svg>
