@@ -18,6 +18,7 @@ const DIET_STATE = {
     skipChartMetaUpdate: false,
     currentChartData: null,
     chartInstance: null,
+    pageStatusTimer: null,
     chartActionMenuOutsideBound: false,
     selectedUserMeta: {
         bmr: null,
@@ -119,7 +120,7 @@ function hexToRgba(hexColor, alpha = 1) {
 }
 
 function getDietPlanAccent(index) {
-    const accents = ["#ef4444", "#f97316", "#22c55e", "#8b5cf6", "#0ea5e9"];
+    const accents = ["#22c55e", "#f59e0b", "#3b82f6"];
     return accents[index % accents.length];
 }
 
@@ -310,15 +311,29 @@ function showPageStatus(message, type = "info") {
         return;
     }
 
+    if (DIET_STATE.pageStatusTimer) {
+        window.clearTimeout(DIET_STATE.pageStatusTimer);
+        DIET_STATE.pageStatusTimer = null;
+    }
+
     statusEl.className = `alert alert-${type}`;
     statusEl.textContent = message;
     statusEl.style.display = "block";
+
+    DIET_STATE.pageStatusTimer = window.setTimeout(() => {
+        hidePageStatus();
+    }, 10000);
 }
 
 function hidePageStatus() {
     const statusEl = getEl("dietChartPageStatus");
     if (!statusEl) {
         return;
+    }
+
+    if (DIET_STATE.pageStatusTimer) {
+        window.clearTimeout(DIET_STATE.pageStatusTimer);
+        DIET_STATE.pageStatusTimer = null;
     }
 
     statusEl.style.display = "none";
@@ -329,7 +344,7 @@ function hidePageStatus() {
 function showLoadingSpinner() {
     const spinnerEl = getEl("dietChartLoadingSpinner");
     if (spinnerEl) {
-        spinnerEl.style.display = "none";
+        spinnerEl.style.display = "flex";
     }
 }
 
@@ -415,10 +430,10 @@ function renderDietChartSelector() {
                 </button>
                 <div class="tp-plan-card-menu tyfit-popover-menu" hidden data-menu-chart-id="${chart.id}">
                     <button type="button" class="diet-chart-actions-item tyfit-menu-action" data-card-action="rename-chart" data-chart-id="${chart.id}">
-                        <i data-lucide="pencil-line"></i> Edit
+                        <i data-lucide="pencil-line"></i> Edit Name
                     </button>
                     <button type="button" class="diet-chart-actions-item tyfit-menu-action danger" data-card-action="delete-chart" data-chart-id="${chart.id}">
-                        <i data-lucide="trash-2"></i> Delete
+                        <i data-lucide="trash-2"></i> Delete Diet Chart
                     </button>
                 </div>
             </div>`;
@@ -450,8 +465,31 @@ function closeDietChartActionsMenu() {
     const strip = getEl("dietChartStrip");
     if (strip) {
         strip.querySelectorAll(".tp-plan-card-menu").forEach((menu) => {
+            menu.classList.remove("is-open");
             menu.hidden = true;
         });
+    }
+}
+
+async function resolveActorUserId() {
+    if (DIET_STATE.activeAdminId) {
+        return DIET_STATE.activeAdminId;
+    }
+
+    if (DIET_STATE.currentUserId) {
+        return DIET_STATE.currentUserId;
+    }
+
+    try {
+        const { data, error } = await window.supabaseClient.auth.getUser();
+        if (error) {
+            return "";
+        }
+
+        return data?.user?.id || "";
+    } catch (error) {
+        console.warn("resolveActorUserId warning:", error?.message || error);
+        return "";
     }
 }
 
@@ -569,10 +607,11 @@ function renderDietChartView(chartData) {
         }
 
         DIET_STATE.currentChartData = chartData;
-    const chartTitle = getDietChartName(chartData?.chart);
+        const chartTitle = getDietChartName(chartData?.chart) || "Diet Chart";
     setSelectedDietChartName(chartTitle);
 
         const meals = chartData?.meals || [];
+        const hasFoodItems = meals.some((meal) => Array.isArray(meal?.items) && meal.items.length > 0);
         let overall = { carbs: 0, protein: 0, fats: 0, calories: 0 };
 
         const mealsHtml = meals.map((meal, mealIndex) => {
@@ -679,13 +718,13 @@ function renderDietChartView(chartData) {
             `;
         }).join("");
 
-        viewEl.innerHTML = `
-            <div class="diet-view-container">
-                <div class="diet-view-chart-card">
-                    <div class="diet-view-chart-title-wrap mb-3">
-                        <div class="diet-view-chart-title">${escapeHtml(chartTitle)}</div>
-                    </div>
-                    <div class="diet-view-chart-container">
+        const chartSummarySection = `
+            <div class="diet-view-chart-card">
+                <div class="diet-view-chart-title-wrap mb-3">
+                    <div class="diet-view-chart-title">${escapeHtml(chartTitle)}</div>
+                </div>
+                ${hasFoodItems
+                    ? `<div class="diet-view-chart-container">
                         <div class="diet-chart-wrapper">
                             <canvas id="dietMacroChart"></canvas>
                         </div>
@@ -711,11 +750,16 @@ function renderDietChartView(chartData) {
                                 <span class="chart-stat-value calories">${formatMacro(overall.calories)} kcal</span>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div>`
+                    : ""}
+            </div>
+        `;
 
+        viewEl.innerHTML = `
+            <div class="diet-view-container">
+                ${chartSummarySection}
                 <div class="diet-view-meals">
-                    ${mealsHtml || '<p class="text-muted mb-0">No meals in this diet chart.</p>'}
+                    ${mealsHtml}
                 </div>
                 <div class="diet-view-add-meal-row">
                     <button type="button" id="dietViewAddMealBtn" class="diet-view-add-meal-btn">
@@ -725,9 +769,11 @@ function renderDietChartView(chartData) {
             </div>
         `;
 
-        setTimeout(() => {
-            renderMacroPieChart(overall);
-        }, 100);
+        if (hasFoodItems) {
+            setTimeout(() => {
+                renderMacroPieChart(overall);
+            }, 100);
+        }
 
         setTimeout(() => {
             setupViewModeEventHandlers();
@@ -1683,11 +1729,6 @@ function renderMacroPieChart(macros) {
     };
 
     const baseColors = [colors.carbs, colors.protein, colors.fats];
-    const fadedColors = [
-        "rgba(217,119,6,0.24)",
-        "rgba(22,163,74,0.24)",
-        "rgba(37,99,235,0.24)"
-    ];
 
     DIET_STATE.chartInstance = new Chart(canvasEl, {
         type: "doughnut",
@@ -1702,7 +1743,7 @@ function renderMacroPieChart(macros) {
                 backgroundColor: baseColors,
                 borderColor: ["transparent", "transparent", "transparent"],
                 borderWidth: 0,
-                hoverOffset: 14
+                hoverOffset: 0
             }]
         },
         options: {
@@ -1724,20 +1765,7 @@ function renderMacroPieChart(macros) {
                     }
                 }
             },
-            cutout: "50%",
-            onHover: function (event, activeElements) {
-                const dataset = DIET_STATE.chartInstance.data.datasets[0];
-                if (activeElements.length > 0) {
-                    const activeIndex = activeElements[0].index;
-                    dataset.backgroundColor = baseColors.map((color, index) => index === activeIndex ? color : fadedColors[index]);
-                    canvasEl.style.cursor = "pointer";
-                } else {
-                    dataset.backgroundColor = baseColors;
-                    canvasEl.style.cursor = "default";
-                }
-
-                DIET_STATE.chartInstance.update("none");
-            }
+            cutout: "50%"
         }
     });
 }
@@ -2870,13 +2898,18 @@ async function deleteDietChart(chartId) {
             throw new Error(deleteMealsError.message);
         }
 
-        const { error: deleteChartError } = await window.supabaseClient
+        const { data: deletedCharts, error: deleteChartError } = await window.supabaseClient
             .from("diet_charts")
             .delete()
-            .eq("id", chartId);
+            .eq("id", chartId)
+            .select("id");
 
         if (deleteChartError) {
             throw new Error(deleteChartError.message);
+        }
+
+        if (!Array.isArray(deletedCharts) || deletedCharts.length === 0) {
+            throw new Error("Delete was blocked by permissions (RLS). Please check Supabase policy for diet_charts delete.");
         }
 
         DIET_STATE.selectedChartId = "";
@@ -2968,7 +3001,10 @@ async function createDietChartFromPrompt() {
     hidePageStatus();
 
     try {
-        const createdBy = DIET_STATE.activeAdminId || DIET_STATE.currentUserId || DIET_STATE.selectedUserId || null;
+        const createdBy = await resolveActorUserId();
+        if (!createdBy) {
+            throw new Error("Please login again and retry.");
+        }
         const { data, error } = await window.supabaseClient
             .from("diet_charts")
             .insert({
@@ -3020,16 +3056,22 @@ async function renameSelectedDietChart() {
     hidePageStatus();
     showLoadingSpinner();
     try {
-        const { error } = await window.supabaseClient
+        const { data: updatedChart, error } = await window.supabaseClient
             .from("diet_charts")
             .update({
                 title: nextName,
                 updated_at: new Date().toISOString()
             })
-            .eq("id", DIET_STATE.selectedChartId);
+            .eq("id", DIET_STATE.selectedChartId)
+            .select("id")
+            .maybeSingle();
 
         if (error) {
             throw new Error(error.message || "Failed to rename diet chart.");
+        }
+
+        if (!updatedChart?.id) {
+            throw new Error("Rename was blocked by permissions (RLS). Please check Supabase policy for diet_charts update.");
         }
 
         if (DIET_STATE.currentChartData?.chart) {
@@ -3125,10 +3167,22 @@ function bindDietChartEvents() {
                 const chartId = menuBtn.getAttribute("data-chart-id");
                 const menu = chartStrip.querySelector(`.tp-plan-card-menu[data-menu-chart-id="${chartId}"]`);
                 chartStrip.querySelectorAll(".tp-plan-card-menu").forEach((m) => {
-                    if (m !== menu) { m.hidden = true; }
+                    if (m !== menu) {
+                        m.classList.remove("is-open");
+                        m.hidden = true;
+                    }
                 });
                 if (menu) {
-                    menu.hidden = !menu.hidden;
+                    const shouldOpen = menu.hidden || !menu.classList.contains("is-open");
+                    if (!shouldOpen) {
+                        menu.classList.remove("is-open");
+                        menu.hidden = true;
+                    } else {
+                        menu.hidden = false;
+                        requestAnimationFrame(() => {
+                            menu.classList.add("is-open");
+                        });
+                    }
                 }
                 return;
             }
@@ -3160,6 +3214,9 @@ function bindDietChartEvents() {
                 return;
             }
 
+            // Immediately reflect selection for snappier UI, then load chart data.
+            DIET_STATE.selectedChartId = nextChartId;
+            renderDietChartSelector();
             closeDietChartActionsMenu();
             hidePageStatus();
             showLoadingSpinner();
@@ -3188,6 +3245,9 @@ function bindDietChartEvents() {
                 closeDietChartActionsMenu();
                 if (menu) {
                     menu.hidden = false;
+                    requestAnimationFrame(() => {
+                        menu.classList.add("is-open");
+                    });
                 }
             }, 500);
         }, { passive: true });

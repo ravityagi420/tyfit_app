@@ -1833,6 +1833,13 @@
     gap: 10px;
 }
 
+#dietChartPageStatus {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
 .diet-chart-switcher-head {
     display: flex;
     align-items: center;
@@ -1988,15 +1995,30 @@
 }
 
 .diet-chart-strip .tp-plan-card.is-active {
-    border-color: none;
+    border-color: var(--diet-accent-line);
+    background: var(--diet-accent-soft);
     box-shadow: none;
-    transform: translateY(-2px) scale(1.02);
+    transform: translateY(-2px) scale(1.03);
 }
 
 .diet-chart-strip .tp-plan-card.tp-plan-create {
     border: none;
     color: #334155;
     background: transparent;
+    padding-left: 8px;
+    padding-right: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.diet-chart-strip .tp-plan-card.tp-plan-create .diet-plan-icon {
+    margin: 0;
+}
+
+.diet-chart-strip .tp-plan-card.tp-plan-create strong {
+    line-height: 1;
 }
 
 .diet-chart-strip .tp-plan-card.tp-plan-create strong {
@@ -2247,7 +2269,30 @@
    ============================================ */
 
 #dietChartLoadingSpinner {
-    display: none !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 12px;
+    margin: 0 8px 12px 8px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    background: rgba(248, 250, 252, 0.82);
+    color: #475569;
+}
+
+#dietChartLoadingSpinner .spinner-border {
+    width: 18px;
+    height: 18px;
+    border-width: 0.14em;
+    color: #60a5fa;
+}
+
+#dietChartLoadingSpinner p {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .diet-view-container {
@@ -2590,13 +2635,12 @@
 .diet-view-meal-label {
     display: block;
     font-size: 19px;
-    font-weight: 800;
+    font-weight: 600;
     color: #0f172a;
     line-height: 1.2;
     margin-bottom: 0;
 }
-    text-align: center;
-    justify-items: center;
+
 .diet-view-meal-label-wrap {
     display: flex;
     align-items: center;
@@ -3427,6 +3471,55 @@
    ============================================ */
 
 @media (max-width: 768px) {
+    .diet-chart-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        overflow-x: visible;
+        padding-bottom: 0;
+    }
+
+    .tp-plan-card-wrap {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .diet-chart-strip .tp-plan-card {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 8px;
+        border-radius: 12px;
+    }
+
+    .diet-chart-strip .tp-plan-card strong {
+        font-size: 11px;
+    }
+
+    .diet-chart-strip .tp-plan-card.tp-plan-create {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .diet-plan-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .diet-plan-icon svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .diet-plan-date {
+        font-size: 10px;
+        gap: 3px;
+    }
+
+    .diet-chart-strip .tp-plan-card.tp-plan-create {
+        width: 100%;
+        padding: 10px 8px;
+    }
+
     .admin-tab-bar .nav-link {
         padding: 12px 15px;
         font-size: 14px;
@@ -3577,20 +3670,6 @@
 
     .diet-chart-switcher-head {
         align-items: center;
-    }
-
-    .diet-chart-strip {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 4px;
-    }
-
-    .diet-chart-strip .tp-plan-card {
-        width: auto;
-        min-width: 164px;
-        flex: 0 0 auto;
     }
 
     .diet-view-chart-stats {
