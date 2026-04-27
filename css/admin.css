@@ -1988,7 +1988,7 @@
 }
 
 .diet-chart-strip .tp-plan-card.is-active {
-    border-color: var(--diet-accent-line);
+    border-color: none;
     background: var(--diet-accent-soft);
     box-shadow: none;
     transform: translateY(-2px) scale(1.02);
