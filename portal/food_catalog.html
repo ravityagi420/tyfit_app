@@ -19,11 +19,11 @@
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../css/style.css?v=20260422b" rel="stylesheet">
-    <link href="../css/admin.css?v=20260422b" rel="stylesheet">
+    <link href="../css/admin.css?v=20260427c" rel="stylesheet">
     <link href="../css/premium-ui.css" rel="stylesheet">
 </head>
 
-<body class="tyfit-app" data-page="food-catalog">
+<body class="tyfit-app food-auth-pending" data-page="food-catalog">
     <header class="tyfit-mobile-topbar">
         <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu">
             <i data-lucide="menu"></i>
@@ -62,17 +62,10 @@
                 <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
                 <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
                 <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
-                <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
-                <a href="#" class="sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
                 <hr class="sidebar-divider">
                 <p class="sidebar-section-label">ACCOUNT</p>
                 <a href="../profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
                 <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
-            </div>
-            <div class="sidebar-footer">
-                <button type="button" class="sidebar-logout" data-action="logout">
-                    <i data-lucide="log-out"></i><span>Log Out</span>
-                </button>
             </div>
         </div>
     </aside>
@@ -91,25 +84,18 @@
                     <p class="sidebar-section-label">MAIN</p>
                     <a href="../index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
                     <a href="diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-                    <a href="food_catalog.html" class="sidebar-nav-item active"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+                    <a href="../training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
                     <hr class="sidebar-divider">
                     <p class="sidebar-section-label">TOOLS</p>
-                    <a href="../training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
-                    <a href="#" class="sidebar-nav-item"><i data-lucide="bell"></i><span>Reminder</span></a>
                     <hr class="sidebar-divider">
                     <p class="sidebar-section-label">ACCOUNT</p>
                     <a href="../profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
-                </div>
-                <div class="sidebar-footer">
-                    <button type="button" class="sidebar-logout" data-action="logout">
-                        <i data-lucide="log-out"></i><span>Log Out</span>
-                    </button>
                 </div>
             </div>
         </aside>
@@ -119,6 +105,40 @@
         </button>
 
         <main class="tyfit-main">
+            <div class="tyfit-desktop-actions">
+                <div class="tyfit-dropdown-wrap">
+                    <button class="tyfit-icon-btn tyfit-notif-btn" id="desktopNotifBtn" aria-label="Notifications">
+                        <i data-lucide="bell"></i>
+                        <span class="tyfit-dot" id="desktopNotifDot" hidden></span>
+                    </button>
+                    <div class="tyfit-popover-menu" id="desktopNotifMenu" aria-hidden="true">
+                        <p class="tyfit-popover-empty">No new notification</p>
+                    </div>
+                </div>
+
+                <span class="tyfit-desktop-separator" aria-hidden="true"></span>
+
+                <div class="tyfit-dropdown-wrap" id="desktopAccountWrap">
+                    <button class="tyfit-account-btn" id="desktopAccountBtn" aria-label="Account menu">
+                        <img id="desktopProfileAvatar" class="tyfit-account-avatar" src="../assets/avatars/avatar-1.svg" alt="Profile">
+                        <span id="desktopProfileName">Account</span>
+                        <i data-lucide="chevron-down"></i>
+                    </button>
+                    <div class="tyfit-popover-menu tyfit-popover-menu--account" id="desktopAccountMenu" aria-hidden="true">
+                        <button type="button" class="tyfit-menu-action" data-action="account">My Account</button>
+                        <button type="button" class="tyfit-menu-action" data-action="logout">Logout</button>
+                    </div>
+                </div>
+            </div>
+
+    <section class="food-page-skeleton" id="foodPageSkeleton" aria-hidden="true">
+        <div class="food-page-skeleton__inner">
+            <div class="food-page-skeleton__hero shimmer"></div>
+            <div class="food-page-skeleton__toolbar shimmer"></div>
+            <div class="food-page-skeleton__table shimmer"></div>
+            <div class="food-page-skeleton__table shimmer"></div>
+        </div>
+    </section>
 
     <div class="admin-section diet-page-shell" style="padding: 80px 0;">
         <div class="container">
@@ -130,39 +150,41 @@
             <div class="row">
                 <div class="col-12">
                     <div class="bg-white rounded shadow p-4 wow zoomIn food-list-card" data-wow-delay="0.2s">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 12px;">
-                            <div>
-                                <h5 class="mb-1">Catalog Items</h5>
-                            </div>
-                            <div class="food-list-actions">
-                                <div class="food-table-toolbar">
-                                    <div class="food-table-search">
-                                        <i class="fa fa-search"></i>
-                                        <input type="text" id="foodSearchInput" class="form-control form-control-sm" placeholder="Search food name" autocomplete="off">
-                                        <div id="foodSearchSuggestions" class="food-search-suggestions" style="display: none;"></div>
-                                    </div>
-                                    <div class="dropdown food-sort-dropdown">
-                                        <button class="btn btn-outline-secondary btn-sm food-sort-icon-btn" type="button" id="foodSortMenuBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Sort">
-                                            <i class="fa fa-sort-amount-down"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="foodSortMenuBtn" id="foodSortMenu">
-                                            <button type="button" class="dropdown-item js-sort-option" data-sort="date_desc">Newest First</button>
-                                            <button type="button" class="dropdown-item js-sort-option" data-sort="name_asc">Name: A-Z</button>
-                                            <button type="button" class="dropdown-item js-sort-option" data-sort="name_desc">Name: Z-A</button>
-                                            <button type="button" class="dropdown-item js-sort-option" data-sort="calories_asc">Calories: Low to High</button>
-                                            <button type="button" class="dropdown-item js-sort-option" data-sort="calories_desc">Calories: High to Low</button>
+                        <div class="food-catalog-sticky-controls">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap: 12px;">
+                                <div>
+                                    <h5 class="mb-1">Catalog Items</h5>
+                                </div>
+                                <div class="food-list-actions">
+                                    <div class="food-table-toolbar">
+                                        <div class="food-table-search">
+                                            <i class="fa fa-search"></i>
+                                            <input type="text" id="foodSearchInput" class="form-control form-control-sm" placeholder="Search food name" autocomplete="off">
+                                            <div id="foodSearchSuggestions" class="food-search-suggestions" style="display: none;"></div>
+                                        </div>
+                                        <div class="dropdown food-sort-dropdown">
+                                            <button class="btn btn-outline-secondary btn-sm food-sort-icon-btn" type="button" id="foodSortMenuBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Sort">
+                                                <i class="fa fa-sort-amount-down"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="foodSortMenuBtn" id="foodSortMenu">
+                                                <button type="button" class="dropdown-item js-sort-option" data-sort="date_desc">Newest First</button>
+                                                <button type="button" class="dropdown-item js-sort-option" data-sort="name_asc">Name: A-Z</button>
+                                                <button type="button" class="dropdown-item js-sort-option" data-sort="name_desc">Name: Z-A</button>
+                                                <button type="button" class="dropdown-item js-sort-option" data-sort="calories_asc">Calories: Low to High</button>
+                                                <button type="button" class="dropdown-item js-sort-option" data-sort="calories_desc">Calories: High to Low</button>
+                                            </div>
                                         </div>
                                     </div>
+                                    <button type="button" id="foodRefreshBtn" class="btn btn-outline-primary btn-sm food-refresh-btn" title="Refresh" aria-label="Refresh">
+                                        <i class="fa fa-sync-alt"></i>
+                                    </button>
                                 </div>
-                                <button type="button" id="foodRefreshBtn" class="btn btn-outline-primary btn-sm food-refresh-btn" title="Refresh" aria-label="Refresh">
-                                    <i class="fa fa-sync-alt"></i>
-                                </button>
                             </div>
-                        </div>
 
-                        <button type="button" id="foodAddNewBtn" class="food-add-row-btn mb-3">
-                            <i class="fa fa-plus"></i> Add Custom Food Item
-                        </button>
+                            <button type="button" id="foodAddNewBtn" class="food-add-row-btn mb-3">
+                                <i class="fa fa-plus"></i> Add Custom Food Item
+                            </button>
+                        </div>
 
                         <div class="food-table-wrapper" id="foodTableWrapper">
                             <div id="foodCatalogTableContainer"></div>
@@ -294,8 +316,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
-    <script src="../js/login.js?v=20260423a"></script>
+    <script src="../js/login.js?v=20260427e"></script>
     <script src="../js/shell.js"></script>
-    <script src="../js/food_catalog.js?v=20260422b"></script>
+    <script src="../js/food_catalog.js?v=20260427a"></script>
 </body>
 </html>

@@ -17,7 +17,7 @@ window.supabaseClient = supabase.createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false,
+      detectSessionInUrl: true,
       flowType: "pkce",
       storageKey: "tyfit-auth",
       storage: supabaseStorage

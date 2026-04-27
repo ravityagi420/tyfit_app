@@ -1,0 +1,27 @@
+{
+  "name": "tyfit_app",
+  "version": "1.0.0",
+  "description": "Tyfit_app",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ravityagi420/tyfit_app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/ravityagi420/tyfit_app/issues"
+  },
+  "homepage": "https://github.com/ravityagi420/tyfit_app#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.104.1"
+  }
+}

@@ -1,13 +1,13 @@
 const homeData = {
-    name: "Ravikant",
-    fullName: "Ravikant Tyagi",
+    name: "",
+    fullName: "",
     profileImage: "assets/avatars/avatar-1.svg",
     motivationTitle: "Progress starts with a plan.",
     motivationText: "Small steps today, stronger tomorrow.",
     notifications: [],
     tools: [
         { title: "Diet Chart", subtitle: "View your diet and nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
-        { title: "Training Plan", subtitle: "Your workout made simple", href: "#", icon: "dumbbell", colorClass: "icon-training" },
+        { title: "Training Plan", subtitle: "Your workout made simple", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
         { title: "Food Catalog", subtitle: "Explore foods and nutrition", href: "portal/food_catalog.html", icon: "book-open", colorClass: "icon-food" },
         { title: "BMR Calculator", subtitle: "Calculate your daily BMR", href: "#", icon: "calculator", colorClass: "icon-bmr" },
         { title: "Macro Calculator", subtitle: "Track your macros easily", href: "#", icon: "pie-chart", colorClass: "icon-macro" },
@@ -40,14 +40,14 @@ function renderHome(data) {
     const heroTitle = byId("heroTitle");
     const heroText = byId("heroText");
 
-    if (greeting) greeting.textContent = `Hello, ${data.name} 👋`;
+    if (greeting) greeting.textContent = `Hello${data.name ? `, ${data.name}` : ""} 👋`;
     if (subtitle) subtitle.textContent = "Let’s build consistency today";
     if (heroTitle) heroTitle.textContent = data.motivationTitle;
     if (heroText) heroText.textContent = data.motivationText;
 
     const desktopName = byId("desktopProfileName");
     const desktopAvatar = byId("desktopProfileAvatar");
-    if (desktopName) desktopName.textContent = data.fullName || data.name;
+    if (desktopName) desktopName.textContent = data.fullName || data.name || "Account";
     if (desktopAvatar) desktopAvatar.src = data.profileImage || "assets/avatars/avatar-1.svg";
 
     const grid = byId("homeToolsGrid");
@@ -70,6 +70,17 @@ function renderHome(data) {
             window.lucide.createIcons();
         }
     }
+}
+
+async function performLogout() {
+    try {
+        if (window.supabaseClient?.auth) {
+            await window.supabaseClient.auth.signOut();
+        }
+    } catch (error) {
+        console.warn("Logout warning:", error?.message || error);
+    }
+    window.location.href = "login.html";
 }
 
 function bindShellInteractions() {
@@ -217,17 +228,19 @@ function bindShellInteractions() {
                 return;
             }
             if (action === "logout") {
-                try {
-                    if (window.supabaseClient?.auth) {
-                        await window.supabaseClient.auth.signOut();
-                    }
-                } catch (error) {
-                    console.warn("Logout warning:", error?.message || error);
-                }
-                window.location.href = "login.html";
+                await performLogout();
             }
         });
     }
+
+    document.querySelectorAll("[data-action='logout'], .sidebar-logout, #logoutAction, #logoutBtn").forEach((btn) => {
+        if (btn.dataset.logoutBound === "true") return;
+        btn.dataset.logoutBound = "true";
+        btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+            await performLogout();
+        });
+    });
 
     document.addEventListener("click", (event) => {
         const withinDropdown = event.target.closest(".tyfit-dropdown-wrap");
@@ -257,7 +270,7 @@ async function hydrateNameFromProfile() {
             window.tyfitProfile.fetchProfile(user.id),
             window.tyfitProfile.fetchUserAbout(user.id)
         ]);
-        const firstName = profile?.first_name || user?.user_metadata?.given_name || user?.user_metadata?.name || homeData.name;
+        const firstName = profile?.first_name || user?.user_metadata?.given_name || user?.user_metadata?.name || user?.email?.split("@")[0] || "";
         const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || profile?.full_name || firstName;
         const profileImage = window.tyfitProfile.resolveProfileImage(profile, userAbout) || homeData.profileImage;
         renderHome({

@@ -9,6 +9,9 @@ const foodCatalogState = {
     currentUserId: "",
     sortBy: "date_desc",
     searchTerm: "",
+    pageSize: 15,
+    loadStep: 10,
+    visibleCount: 15,
     menuOutsideBound: false,
     swipeHandlersBound: false,
     isAdmin: false
@@ -19,17 +22,55 @@ function getEl(id) {
 }
 
 function showDialogAlert(message, options = {}) {
-    return window.tyfitDialog.alert({
-        message,
-        ...options
-    });
+    if (window.tyfitDialog?.alert) {
+        return window.tyfitDialog.alert({
+            message,
+            ...options
+        });
+    }
+
+    window.alert(message);
+    return Promise.resolve(true);
 }
 
 function showDialogConfirm(message, options = {}) {
-    return window.tyfitDialog.confirm({
-        message,
-        ...options
+    if (window.tyfitDialog?.confirm) {
+        return window.tyfitDialog.confirm({
+            message,
+            ...options
+        });
+    }
+
+    return Promise.resolve(window.confirm(message));
+}
+
+function setFoodPagePending(isPending) {
+    document.body.classList.toggle("food-auth-pending", Boolean(isPending));
+    if (isPending) {
+        document.body.classList.remove("food-page-ready");
+        return;
+    }
+
+    window.requestAnimationFrame(() => {
+        document.body.classList.add("food-page-ready");
     });
+}
+
+function setFoodCatalogLoading(isLoading) {
+    const container = getEl("foodCatalogTableContainer");
+    if (!container) {
+        return;
+    }
+
+    if (isLoading) {
+        container.innerHTML = `
+            <div class="food-table-skeleton-wrap" aria-hidden="true">
+                <div class="food-table-skeleton"></div>
+                <div class="food-table-skeleton"></div>
+                <div class="food-table-skeleton"></div>
+            </div>
+        `;
+    }
 }
 
 function setInputValue(id, value) {
@@ -152,6 +193,7 @@ function renderSearchSuggestions(query) {
                 inputEl.value = value;
             }
             foodCatalogState.searchTerm = value;
+            foodCatalogState.visibleCount = foodCatalogState.pageSize;
             suggestionEl.style.display = "none";
             renderFoodCatalogTable(foodCatalogState.items);
         });
@@ -213,11 +255,7 @@ async function waitForStableSession(timeoutMs = 4000, intervalMs = 250) {
 }
 
 async function requireLoginOrRedirect() {
-    if (typeof window.requireLoginWithModal === "function") {
-        return window.requireLoginWithModal();
-    }
-
-    const { session, error } = await waitForStableSession();
+    const { session, error } = await waitForStableSession(8000, 250);
 
     if (error) {
         await showDialogAlert("Session error: " + error.message, { title: "Session Error" });
@@ -225,10 +263,18 @@ async function requireLoginOrRedirect() {
     }
 
     if (!session) {
+        if (typeof window.requireLoginWithModal === "function") {
+            return window.requireLoginWithModal();
+        }
+
         if (typeof window.openAuthModal === "function") {
             window.openAuthModal({ locked: true });
         }
         return null;
+    }
+
+    if (typeof window.closeAuthModal === "function") {
+        window.closeAuthModal();
     }
 
     return session.user;
@@ -236,9 +282,22 @@ async function requireLoginOrRedirect() {
 
 async function requireAdminOrRedirect(user) {
     if (typeof window.getAccessState === "function") {
-        const accessState = await window.getAccessState({ user });
-        if (accessState?.isAdmin) {
-            return true;
+        try {
+            const accessState = await window.getAccessState();
+            if (accessState?.isAdmin) {
+                return true;
+            }
+        } catch (error) {
+            console.warn("food catalog access state lookup warning:", error?.message || error);
+        }
+
+        try {
+            const fallbackAccessState = await window.getAccessState({ user });
+            if (fallbackAccessState?.isAdmin) {
+                return true;
+            }
+        } catch (error) {
+            console.warn("food catalog access state fallback warning:", error?.message || error);
         }
     }
 
@@ -333,6 +392,8 @@ function validateFoodForm(values) {
 }
 
 async function loadFoodCatalog() {
+    setFoodCatalogLoading(true);
+
     const userId = foodCatalogState.currentUserId;
 
     const [globalResult, customResult] = await Promise.all([
@@ -498,6 +559,7 @@ function renderFoodCatalogTable(items) {
     }
 
     const allVisible = getVisibleFoodCatalogItems(items);
+    const visibleItems = allVisible.slice(0, foodCatalogState.visibleCount);
 
     if (!allVisible || allVisible.length === 0) {
         container.innerHTML = foodCatalogState.searchTerm
@@ -506,8 +568,8 @@ function renderFoodCatalogTable(items) {
         return;
     }
 
-    const customVisible = allVisible.filter((item) => item.is_custom && item.created_by_user_id === foodCatalogState.currentUserId);
-    const globalVisible = allVisible.filter((item) => !item.is_custom);
+    const customVisible = visibleItems.filter((item) => item.is_custom && item.created_by_user_id === foodCatalogState.currentUserId);
+    const globalVisible = visibleItems.filter((item) => !item.is_custom);
 
     function buildRows(sectionItems) {
         return sectionItems.map((item) => {
@@ -579,6 +641,16 @@ function renderFoodCatalogTable(items) {
         }
         html += buildRows(globalVisible);
     }
+
+    if (allVisible.length > visibleItems.length) {
+        const remaining = allVisible.length - visibleItems.length;
+        html += `
+            <div class="food-load-more-wrap">
+                <button type="button" class="food-load-more-btn" id="foodLoadMoreBtn">Load more</button>
+            </div>
+        `;
+    }
+
     html += '</div>';
 
     container.innerHTML = html;
@@ -596,6 +668,14 @@ function renderFoodCatalogTable(items) {
             await deleteFoodItem(button.dataset.foodId);
         });
     });
+
+    const loadMoreBtn = container.querySelector("#foodLoadMoreBtn");
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener("click", () => {
+            foodCatalogState.visibleCount += foodCatalogState.loadStep;
+            renderFoodCatalogTable(foodCatalogState.items);
+        });
+    }
 
     setupFoodCatalogMobileInteractions(container);
 }
@@ -875,6 +955,7 @@ function bindFoodCatalogEvents() {
         sortMenu.querySelectorAll(".js-sort-option").forEach((sortBtn) => {
             sortBtn.addEventListener("click", () => {
                 foodCatalogState.sortBy = sortBtn.dataset.sort || "date_desc";
+                foodCatalogState.visibleCount = foodCatalogState.pageSize;
                 renderFoodCatalogTable(foodCatalogState.items);
             });
         });
@@ -883,6 +964,7 @@ function bindFoodCatalogEvents() {
     if (searchInput) {
         searchInput.addEventListener("input", () => {
             foodCatalogState.searchTerm = searchInput.value;
+            foodCatalogState.visibleCount = foodCatalogState.pageSize;
             renderSearchSuggestions(searchInput.value);
             renderFoodCatalogTable(foodCatalogState.items);
         });
@@ -909,41 +991,66 @@ function bindFoodCatalogEvents() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const user = await requireLoginOrRedirect();
-    if (!user) return;
-
-    // Determine role — admins can create/edit/delete; clients view only
-    const accessState = await window.getAccessState({ user });
-    foodCatalogState.isAdmin = Boolean(accessState?.isAdmin);
-    foodCatalogState.currentUserId = user.id || "";
-
-    // Keep add action available for all users; non-admin saves create custom foods.
-    const addNewBtn = getEl("foodAddNewBtn");
-    if (addNewBtn) {
-        addNewBtn.innerHTML = '<i class="fa fa-plus"></i> Add Custom Food Item';
-    }
-
-    if (!foodCatalogState.isAdmin) {
-        const pageTitle = document.querySelector(".diet-page-title");
-        if (pageTitle) {
-            pageTitle.textContent = "Food Catalog";
+    try {
+        const user = await requireLoginOrRedirect();
+        if (!user) {
+            setFoodPagePending(false);
+            return;
         }
 
-        document.querySelectorAll(".food-catalog-admin-only").forEach((el) => {
-            if (el !== addNewBtn) {
-                el.style.display = "none";
+        let accessState = null;
+        if (typeof window.getAccessState === "function") {
+            try {
+                accessState = await window.getAccessState();
+            } catch (error) {
+                console.warn("food bootstrap access state warning:", error?.message || error);
             }
-        });
-    }
 
-    bindFoodCatalogEvents();
-    resetFoodForm();
+            if (!accessState) {
+                try {
+                    accessState = await window.getAccessState({ user });
+                } catch (error) {
+                    console.warn("food bootstrap access fallback warning:", error?.message || error);
+                }
+            }
+        }
 
-    try {
-        await loadFoodCatalog();
+        foodCatalogState.isAdmin = Boolean(accessState?.isAdmin || (typeof window.isAdminUser === "function" && window.isAdminUser(user)));
+        foodCatalogState.currentUserId = user.id || "";
+
+        const addNewBtn = getEl("foodAddNewBtn");
+        if (addNewBtn) {
+            addNewBtn.innerHTML = '<i class="fa fa-plus"></i> Add Custom Food Item';
+        }
+
+        if (!foodCatalogState.isAdmin) {
+            const pageTitle = document.querySelector(".diet-page-title");
+            if (pageTitle) {
+                pageTitle.textContent = "Food Catalog";
+            }
+
+            document.querySelectorAll(".food-catalog-admin-only").forEach((el) => {
+                if (el !== addNewBtn) {
+                    el.style.display = "none";
+                }
+            });
+        }
+
+        bindFoodCatalogEvents();
+        resetFoodForm();
+
+        try {
+            await loadFoodCatalog();
+        } catch (error) {
+            console.error("initial loadFoodCatalog error:", error);
+            await showDialogAlert(error.message || "Failed to load food catalog.", { title: "Load Failed" });
+        }
+
+        setFoodPagePending(false);
     } catch (error) {
-        console.error("initial loadFoodCatalog error:", error);
-        await showDialogAlert(error.message || "Failed to load food catalog.", { title: "Load Failed" });
+        console.error("food catalog bootstrap error:", error);
+        setFoodPagePending(false);
+        await showDialogAlert(error.message || "Failed to initialize page.", { title: "Initialization Error" });
     }
 });
 

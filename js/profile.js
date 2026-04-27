@@ -1,6 +1,6 @@
 const profileData = {
-    name: "Ravikant Tyagi",
-    email: "ravityagi2104@gmail.com",
+    name: "",
+    email: "",
     profileImage: "",
     memberSince: "May 2024",
     dietPlanStatus: "Active",
@@ -41,6 +41,10 @@ function bindShellInteractions() {
     const sheet = byId("quickSheet");
     const sheetBackdrop = byId("quickSheetBackdrop");
     const sheetClose = byId("quickSheetClose");
+    const desktopNotifBtn = byId("desktopNotifBtn");
+    const desktopNotifMenu = byId("desktopNotifMenu");
+    const desktopAccountBtn = byId("desktopAccountBtn");
+    const desktopAccountMenu = byId("desktopAccountMenu");
 
     function toggleSidebar() {
         document.body.classList.toggle("sidebar-collapsed");
@@ -76,6 +80,20 @@ function bindShellInteractions() {
         sheetBackdrop.hidden = true;
     }
 
+    function togglePopover(menuEl) {
+        if (!menuEl) return;
+        document.querySelectorAll(".tyfit-popover-menu.is-open").forEach((menu) => {
+            if (menu !== menuEl) {
+                menu.classList.remove("is-open");
+                menu.setAttribute("aria-hidden", "true");
+            }
+        });
+
+        const shouldOpen = !menuEl.classList.contains("is-open");
+        menuEl.classList.toggle("is-open", shouldOpen);
+        menuEl.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+    }
+
     if (desktopMenuBtn) desktopMenuBtn.addEventListener("click", toggleSidebar);
     if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener("click", toggleSidebar);
     if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openMobileDrawer);
@@ -84,6 +102,30 @@ function bindShellInteractions() {
     if (quickAddBtn) quickAddBtn.addEventListener("click", openSheet);
     if (sheetClose) sheetClose.addEventListener("click", closeSheet);
     if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
+    if (desktopNotifBtn) desktopNotifBtn.addEventListener("click", () => togglePopover(desktopNotifMenu));
+    if (desktopAccountBtn) desktopAccountBtn.addEventListener("click", () => togglePopover(desktopAccountMenu));
+
+    if (desktopAccountMenu) {
+        desktopAccountMenu.addEventListener("click", async (event) => {
+            const actionBtn = event.target.closest(".tyfit-menu-action");
+            if (!actionBtn) return;
+            const action = actionBtn.dataset.action;
+            if (action === "account") {
+                window.location.href = "profile.html";
+                return;
+            }
+            if (action === "logout") {
+                try {
+                    if (window.supabaseClient?.auth) {
+                        await window.supabaseClient.auth.signOut();
+                    }
+                } catch (error) {
+                    console.warn("Logout warning:", error?.message || error);
+                }
+                window.location.href = "login.html";
+            }
+        });
+    }
 
     document.querySelectorAll(".tyfit-sheet-action").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -97,6 +139,15 @@ function bindShellInteractions() {
     const upgradeNowBtn = byId("upgradeNowBtn");
     if (mobileSettingsBtn) mobileSettingsBtn.addEventListener("click", () => showToast("Settings screen coming soon."));
     if (upgradeNowBtn) upgradeNowBtn.addEventListener("click", () => showToast("Premium flow will be connected soon."));
+
+    document.addEventListener("click", (event) => {
+        const withinDropdown = event.target.closest(".tyfit-dropdown-wrap");
+        if (withinDropdown) return;
+        document.querySelectorAll(".tyfit-popover-menu.is-open").forEach((menu) => {
+            menu.classList.remove("is-open");
+            menu.setAttribute("aria-hidden", "true");
+        });
+    });
 }
 
 function getStatusIcon(status) {
@@ -117,14 +168,14 @@ function renderProfileOverview(data) {
     const metaRow = byId("profileMetaRow");
     const sectionsList = byId("profileSectionsList");
 
-    if (nameEl) nameEl.textContent = data.name;
+    if (nameEl) nameEl.textContent = data.name || "Profile";
     if (emailEl) emailEl.textContent = data.email;
-    if (chipNameEl) chipNameEl.textContent = data.name.split(" ")[0] || "Profile";
+    if (chipNameEl) chipNameEl.textContent = (data.name.split(" ")[0] || "Profile");
 
     if (avatarEl) {
         // Default TYFIT profile avatar fallback
         avatarEl.src = data.profileImage || "assets/avatars/avatar-1.svg";
-        avatarEl.alt = `${data.name} profile avatar`;
+        avatarEl.alt = `${data.name || "Profile"} profile avatar`;
     }
 
     if (metaRow) {
@@ -214,10 +265,33 @@ function bindProfileInteractions() {
     }
 
     if (logoutAction) {
-        logoutAction.addEventListener("click", () => {
-            showToast("Logout flow placeholder.");
+        logoutAction.addEventListener("click", async () => {
+            try {
+                if (window.supabaseClient?.auth) {
+                    await window.supabaseClient.auth.signOut();
+                }
+            } catch (error) {
+                console.warn("Logout warning:", error?.message || error);
+            }
+            window.location.href = "login.html";
         });
     }
+
+    document.querySelectorAll("[data-action='logout'], .sidebar-logout, #logoutBtn").forEach((btn) => {
+        if (btn.dataset.logoutBound === "true") return;
+        btn.dataset.logoutBound = "true";
+        btn.addEventListener("click", async (event) => {
+            event.preventDefault();
+            try {
+                if (window.supabaseClient?.auth) {
+                    await window.supabaseClient.auth.signOut();
+                }
+            } catch (error) {
+                console.warn("Logout warning:", error?.message || error);
+            }
+            window.location.href = "login.html";
+        });
+    });
 
     if (sectionsList) {
         sectionsList.addEventListener("click", (event) => {
@@ -263,14 +337,12 @@ async function hydrateProfile() {
         const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ")
             || profile?.full_name
             || user?.user_metadata?.full_name
-            || profileData.name;
+            || user?.email?.split("@")[0]
+            || "Profile";
 
         const email = profile?.email || user?.email || profileData.email;
 
-        let profileImage = "";
-        if (profile?.profile_picture_url) {
-            profileImage = window.tyfitProfile.resolveProfileImage(profile, userAbout);
-        }
+        const profileImage = window.tyfitProfile.resolveProfileImage(profile, userAbout);
 
         return {
             ...profileData,

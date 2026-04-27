@@ -1073,6 +1073,10 @@ body[data-page="home"] .tyfit-motivation-right {
     overflow: hidden;
 }
 
+.tyfit-mobile-drawer.sidebar {
+    margin-top: 0 !important;
+}
+
 .tyfit-mobile-drawer.is-open {
     left: 0;
 }
@@ -1662,8 +1666,15 @@ body[data-page="home"] .tyfit-motivation-right {
         align-items: center;
         justify-content: flex-end;
         gap: 10px;
-        width: min(980px, 100%);
-        margin: 20px auto 12px;
+        width: min(980px, calc(100% - 24px));
+        margin: 0 auto 12px;
+        padding: 0 0 10px;
+        position: sticky;
+        top: 0;
+        z-index: 45;
+        background: linear-gradient(180deg, rgba(247, 249, 252, 0.98) 78%, rgba(247, 249, 252, 0));
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 
     .tyfit-desktop-separator {

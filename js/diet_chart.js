@@ -65,17 +65,26 @@ function updateCustomFoodScopeUi() {
 }
 
 function showDietAlert(message, options = {}) {
-    return window.tyfitDialog.alert({
-        message,
-        ...options
-    });
+    if (window.tyfitDialog?.alert) {
+        return window.tyfitDialog.alert({
+            message,
+            ...options
+        });
+    }
+
+    window.alert(message);
+    return Promise.resolve(true);
 }
 
 function showDietConfirm(message, options = {}) {
-    return window.tyfitDialog.confirm({
-        message,
-        ...options
-    });
+    if (window.tyfitDialog?.confirm) {
+        return window.tyfitDialog.confirm({
+            message,
+            ...options
+        });
+    }
+
+    return Promise.resolve(window.confirm(message));
 }
 
 function toNumber(value, defaultValue = 0) {
@@ -134,6 +143,27 @@ function hideLoadingSpinner() {
     if (spinnerEl) {
         spinnerEl.style.display = "none";
     }
+}
+
+function setDietPagePending(isPending) {
+    document.body.classList.toggle("diet-auth-pending", Boolean(isPending));
+    if (isPending) {
+        document.body.classList.remove("diet-page-ready");
+        return;
+    }
+
+    window.requestAnimationFrame(() => {
+        document.body.classList.add("diet-page-ready");
+    });
+}
+
+function setDietUserToolbarVisible(isVisible) {
+    const toolbar = getEl("dietUserToolbar");
+    if (!toolbar) {
+        return;
+    }
+
+    toolbar.hidden = !isVisible;
 }
 
 function setEditorVisibility(showEditor) {
@@ -1309,11 +1339,7 @@ async function waitForStableSession(timeoutMs = 4000, intervalMs = 250) {
 }
 
 async function requireLoginOrRedirect() {
-    if (typeof window.requireLoginWithModal === "function") {
-        return window.requireLoginWithModal();
-    }
-
-    const { session, error } = await waitForStableSession();
+    const { session, error } = await waitForStableSession(8000, 250);
 
     if (error) {
         await showDietAlert("Session error: " + error.message, { title: "Session Error" });
@@ -1321,10 +1347,18 @@ async function requireLoginOrRedirect() {
     }
 
     if (!session) {
+        if (typeof window.requireLoginWithModal === "function") {
+            return window.requireLoginWithModal();
+        }
+
         if (typeof window.openAuthModal === "function") {
             window.openAuthModal({ locked: true });
         }
         return null;
+    }
+
+    if (typeof window.closeAuthModal === "function") {
+        window.closeAuthModal();
     }
 
     return session.user;
@@ -1332,9 +1366,22 @@ async function requireLoginOrRedirect() {
 
 async function requireAdminOrRedirect(user) {
     if (typeof window.getAccessState === "function") {
-        const accessState = await window.getAccessState({ user });
-        if (accessState?.isAdmin) {
-            return true;
+        try {
+            const accessState = await window.getAccessState();
+            if (accessState?.isAdmin) {
+                return true;
+            }
+        } catch (error) {
+            console.warn("getAccessState() admin check warning:", error?.message || error);
+        }
+
+        try {
+            const fallbackAccessState = await window.getAccessState({ user });
+            if (fallbackAccessState?.isAdmin) {
+                return true;
+            }
+        } catch (error) {
+            console.warn("getAccessState({ user }) admin check warning:", error?.message || error);
         }
     }
 
@@ -1343,7 +1390,7 @@ async function requireAdminOrRedirect(user) {
     }
 
     await showDietAlert("You do not have access to the admin portal.", { title: "Access Restricted" });
-    window.location.href = "../index.html";
+    window.location.replace("../index.html");
     return false;
 }
 
@@ -2648,80 +2695,90 @@ function bindDietChartEvents() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const user = await requireLoginOrRedirect();
-    if (!user) {
-        return;
-    }
-
-    // Determine role — admins get full user-selector; clients load own chart only
-    const accessState = await window.getAccessState({ user });
-    const isAdmin = Boolean(accessState?.isAdmin);
-
-    DIET_STATE.activeAdminId = user.id;
-    DIET_STATE.currentUserId = user.id;
-    DIET_STATE.isAdmin = isAdmin;
-
-    if (!isAdmin) {
-        // Client: hide the user selector section
-        const userToolbar = document.querySelector('.diet-user-toolbar');
-        if (userToolbar) userToolbar.style.display = 'none';
-
-        // Remove admin-oriented management wording for client view.
-        const pageTitle = document.querySelector('.diet-page-title');
-        if (pageTitle) pageTitle.textContent = 'Diet Chart';
-
-        // Use one add-food action in catalog modal footer
-        const addNewFoodBtn = getEl('openAddFoodFromCatalogModalBtn');
-        if (addNewFoodBtn) {
-            addNewFoodBtn.style.display = '';
-            addNewFoodBtn.innerHTML = '<i class="fa fa-plus mr-1"></i> Add Custom Food Item';
+    try {
+        const user = await requireLoginOrRedirect();
+        if (!user) {
+            setDietPagePending(false);
+            return;
         }
 
-        // Update page subtitle
-        const subtitle = document.querySelector('.diet-page-subtitle');
-        if (subtitle) subtitle.textContent = 'My Diet Chart';
-        const copy = document.querySelector('.diet-page-copy');
-        if (copy) copy.textContent = 'View and manage your personal meal plan.';
-
-        try {
-            await loadFoodCatalogOptions();
-            // Auto-load the current user's own diet chart
-            DIET_STATE.selectedUserId = user.id;
-            await loadSelectedUserMeta(user.id);
-            showLoadingSpinner();
-            const existingChart = await checkExistingDietChart(user.id);
-            if (existingChart) {
-                DIET_STATE.selectedChartId = existingChart.id;
-                const chartData = await loadDietChart(existingChart.id);
-                DIET_STATE.currentChartData = chartData;
-                DIET_STATE.isEditMode = false;
-                setDietDirty(false);
-                renderDietChartView(chartData);
-                setEditorVisibility(true);
-            } else {
-                // No chart yet — start a blank one so client can create
-                createEmptyDietChart(user.id);
+        let accessState = null;
+        if (typeof window.getAccessState === "function") {
+            try {
+                accessState = await window.getAccessState();
+            } catch (error) {
+                console.warn("diet access state lookup warning:", error?.message || error);
             }
-            hideLoadingSpinner();
-        } catch (error) {
-            hideLoadingSpinner();
-            console.error("diet chart client init error:", error);
-            await showDietAlert(error.message || "Failed to load your diet chart.", { title: "Initialization Error" });
-        }
-    } else {
-        // Admin: existing behavior
-        try {
-            await loadFoodCatalogOptions();
-            await loadUsersList();
-        } catch (error) {
-            console.error("diet chart admin init error:", error);
-            await showDietAlert(error.message || "Failed to initialize page.", { title: "Initialization Error" });
-        }
-    }
 
-    bindDietChartEvents();
-    if (isAdmin) {
-        resetDietChartPage();
+            if (!accessState) {
+                try {
+                    accessState = await window.getAccessState({ user });
+                } catch (error) {
+                    console.warn("diet access state fallback warning:", error?.message || error);
+                }
+            }
+        }
+
+        const isAdmin = Boolean(accessState?.isAdmin || (typeof window.isAdminUser === "function" && window.isAdminUser(user)));
+
+        DIET_STATE.activeAdminId = user.id;
+        DIET_STATE.currentUserId = user.id;
+        DIET_STATE.isAdmin = isAdmin;
+
+        bindDietChartEvents();
+
+        if (isAdmin) {
+            try {
+                await loadFoodCatalogOptions();
+                await loadUsersList();
+                setDietUserToolbarVisible(true);
+                resetDietChartPage();
+            } catch (error) {
+                console.error("diet chart admin init error:", error);
+                await showDietAlert(error.message || "Failed to initialize page.", { title: "Initialization Error" });
+            }
+        } else {
+            setDietUserToolbarVisible(false);
+
+            const pageTitle = document.querySelector('.diet-page-title');
+            if (pageTitle) pageTitle.textContent = 'Diet Chart';
+
+            const subtitle = document.querySelector('.diet-page-subtitle');
+            if (subtitle) subtitle.textContent = 'My Diet Chart';
+
+            try {
+                await loadFoodCatalogOptions();
+                DIET_STATE.selectedUserId = user.id;
+                await loadSelectedUserMeta(user.id);
+                showLoadingSpinner();
+
+                const existingChart = await checkExistingDietChart(user.id);
+                if (existingChart) {
+                    DIET_STATE.selectedChartId = existingChart.id;
+                    const chartData = await loadDietChart(existingChart.id);
+                    DIET_STATE.currentChartData = chartData;
+                    DIET_STATE.isEditMode = false;
+                    setDietDirty(false);
+                    renderDietChartView(chartData);
+                    setEditorVisibility(true);
+                } else {
+                    createEmptyDietChart(user.id);
+                }
+
+                hideLoadingSpinner();
+            } catch (error) {
+                hideLoadingSpinner();
+                console.error("diet chart client init error:", error);
+                await showDietAlert(error.message || "Failed to load your diet chart.", { title: "Initialization Error" });
+            }
+        }
+
+        setDietPagePending(false);
+    } catch (error) {
+        console.error("diet chart bootstrap error:", error);
+        setDietPagePending(false);
+        await showDietAlert(error.message || "Failed to initialize page.", { title: "Initialization Error" });
+        return;
     }
 
     // Add event listener for delete confirmation modal

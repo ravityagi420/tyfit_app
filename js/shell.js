@@ -47,6 +47,21 @@
         backdrop.hidden = true;
     }
 
+    function togglePopover(menuEl) {
+        if (!menuEl) return;
+
+        document.querySelectorAll('.tyfit-popover-menu.is-open').forEach((menu) => {
+            if (menu !== menuEl) {
+                menu.classList.remove('is-open');
+                menu.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        const shouldOpen = !menuEl.classList.contains('is-open');
+        menuEl.classList.toggle('is-open', shouldOpen);
+        menuEl.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+    }
+
     function showToast(msg) {
         const toast = byId('appToast');
         if (!toast) return;
@@ -65,6 +80,10 @@
         const sheetClose        = byId('quickSheetClose');
         const sheetBackdrop     = byId('quickSheetBackdrop');
         const upgradeNowBtn     = byId('upgradeNowBtn');
+        const desktopNotifBtn   = byId('desktopNotifBtn');
+        const desktopNotifMenu  = byId('desktopNotifMenu');
+        const desktopAccountBtn = byId('desktopAccountBtn');
+        const desktopAccountMenu = byId('desktopAccountMenu');
 
         if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener('click', toggleSidebar);
         if (mobileMenuBtn)      mobileMenuBtn.addEventListener('click', openMobileDrawer);
@@ -74,9 +93,43 @@
         if (sheetClose)         sheetClose.addEventListener('click', closeSheet);
         if (sheetBackdrop)      sheetBackdrop.addEventListener('click', closeSheet);
         if (upgradeNowBtn)      upgradeNowBtn.addEventListener('click', () => showToast('Premium flow coming soon.'));
+        if (desktopNotifBtn)    desktopNotifBtn.addEventListener('click', () => togglePopover(desktopNotifMenu));
+        if (desktopAccountBtn)  desktopAccountBtn.addEventListener('click', () => togglePopover(desktopAccountMenu));
+
+        if (desktopAccountMenu) {
+            desktopAccountMenu.addEventListener('click', async (event) => {
+                const actionBtn = event.target.closest('.tyfit-menu-action');
+                if (!actionBtn) return;
+                const action = actionBtn.dataset.action;
+                if (action === 'account') {
+                    window.location.href = window.location.pathname.includes('/portal/') ? '../profile.html' : 'profile.html';
+                    return;
+                }
+                if (action === 'logout') {
+                    try {
+                        if (window.supabaseClient && window.supabaseClient.auth) {
+                            await window.supabaseClient.auth.signOut();
+                        }
+                    } catch (err) {
+                        console.warn('Logout error:', err);
+                    }
+                    window.location.href = '/login.html';
+                }
+            });
+        }
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeMobileDrawer();
+        });
+
+        document.addEventListener('click', function (event) {
+            const insideDropdown = event.target.closest('.tyfit-dropdown-wrap');
+            if (insideDropdown) return;
+
+            document.querySelectorAll('.tyfit-popover-menu.is-open').forEach((menu) => {
+                menu.classList.remove('is-open');
+                menu.setAttribute('aria-hidden', 'true');
+            });
         });
 
         document.querySelectorAll('.sidebar-logout').forEach(function (btn) {

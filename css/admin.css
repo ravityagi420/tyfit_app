@@ -3183,3 +3183,247 @@
         padding-top: 20px !important;
     }
 }
+
+body.diet-auth-pending .tyfit-main > *:not(.diet-page-skeleton):not(.tyfit-desktop-actions) {
+    display: none !important;
+}
+
+body:not(.diet-auth-pending) .diet-page-skeleton {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+body.diet-auth-pending .diet-page-skeleton {
+    opacity: 1;
+    visibility: visible;
+}
+
+.diet-page-skeleton {
+    position: absolute;
+    inset: 24px 24px auto;
+    z-index: 2;
+    transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.diet-page-skeleton__inner {
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+.diet-page-skeleton__hero,
+.diet-page-skeleton__toolbar,
+.diet-page-skeleton__chart,
+.diet-page-skeleton__card {
+    background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(248, 250, 252, 1) 50%, rgba(226, 232, 240, 0.9) 75%);
+    background-size: 200% 100%;
+    border-radius: 24px;
+}
+
+.diet-page-skeleton__hero {
+    height: 76px;
+    width: min(420px, 100%);
+    margin: 18px auto 24px;
+}
+
+.diet-page-skeleton__toolbar {
+    height: 72px;
+    margin-bottom: 24px;
+}
+
+.diet-page-skeleton__chart {
+    height: 240px;
+    margin-bottom: 24px;
+}
+
+.diet-page-skeleton__cards {
+    display: grid;
+    gap: 18px;
+}
+
+.diet-page-skeleton__card {
+    height: 124px;
+}
+
+.shimmer {
+    animation: dietPageShimmer 1.35s linear infinite;
+}
+
+body.diet-page-ready .admin-section.diet-page-shell,
+body.diet-page-ready .tyfit-mobile-topbar,
+body.diet-page-ready .tyfit-sidebar,
+body.diet-page-ready .tyfit-sidebar-toggle-floating {
+    animation: dietPageReveal 280ms ease-out both;
+}
+
+@keyframes dietPageShimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes dietPageReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 991.98px) {
+    .diet-page-skeleton {
+        inset: 16px 16px auto;
+    }
+
+    .diet-page-skeleton__hero {
+        height: 64px;
+        margin-top: 8px;
+    }
+
+    .diet-page-skeleton__toolbar {
+        height: 64px;
+    }
+
+    .diet-page-skeleton__chart {
+        height: 200px;
+    }
+
+    .diet-page-skeleton__card {
+        height: 108px;
+    }
+}
+
+body.food-auth-pending .tyfit-main > *:not(.food-page-skeleton):not(.tyfit-desktop-actions) {
+    display: none !important;
+}
+
+body:not(.food-auth-pending) .food-page-skeleton {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+body.food-auth-pending .food-page-skeleton {
+    opacity: 1;
+    visibility: visible;
+}
+
+.food-page-skeleton {
+    position: absolute;
+    inset: 24px 24px auto;
+    z-index: 2;
+    transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.food-page-skeleton__inner {
+    max-width: 1180px;
+    margin: 0 auto;
+}
+
+.food-page-skeleton__hero,
+.food-page-skeleton__toolbar,
+.food-page-skeleton__table,
+.food-table-skeleton {
+    background: linear-gradient(90deg, rgba(226, 232, 240, 0.9) 25%, rgba(248, 250, 252, 1) 50%, rgba(226, 232, 240, 0.9) 75%);
+    background-size: 200% 100%;
+    border-radius: 20px;
+}
+
+.food-page-skeleton__hero {
+    height: 76px;
+    width: min(420px, 100%);
+    margin: 18px auto 24px;
+}
+
+.food-page-skeleton__toolbar {
+    height: 72px;
+    margin-bottom: 24px;
+}
+
+.food-page-skeleton__table {
+    height: 180px;
+    margin-bottom: 18px;
+}
+
+.food-catalog-sticky-controls {
+    position: sticky;
+    top: 56px;
+    z-index: 26;
+    background: #fff;
+    padding: 8px 0 6px;
+    margin-bottom: 10px;
+}
+
+.food-load-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.food-load-more-btn {
+    border: 1px solid #d5deef;
+    background: #fff;
+    color: #334155;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.food-load-more-btn:hover {
+    background: #f8fafc;
+    border-color: #b7c6e4;
+}
+
+.food-table-skeleton-wrap {
+    display: grid;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.food-table-skeleton {
+    height: 88px;
+    animation: dietPageShimmer 1.35s linear infinite;
+}
+
+body.food-page-ready .admin-section.diet-page-shell,
+body.food-page-ready .tyfit-mobile-topbar,
+body.food-page-ready .tyfit-sidebar,
+body.food-page-ready .tyfit-sidebar-toggle-floating {
+    animation: dietPageReveal 280ms ease-out both;
+}
+
+@media (max-width: 991.98px) {
+    .food-page-skeleton {
+        inset: 16px 16px auto;
+    }
+
+    .food-page-skeleton__hero {
+        height: 64px;
+        margin-top: 8px;
+    }
+
+    .food-page-skeleton__toolbar {
+        height: 64px;
+    }
+
+    .food-page-skeleton__table {
+        height: 150px;
+    }
+
+    .food-table-skeleton {
+        height: 78px;
+    }
+
+    .food-catalog-sticky-controls {
+        top: 0;
+    }
+}

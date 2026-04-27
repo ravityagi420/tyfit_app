@@ -125,16 +125,24 @@
             return window.requireLoginWithModal();
         }
 
-        const {
-            data: { session },
-            error
-        } = await window.supabaseClient.auth.getSession();
+        for (let i = 0; i < 8; i += 1) {
+            const {
+                data: { session },
+                error
+            } = await window.supabaseClient.auth.getSession();
 
-        if (error) {
-            throw error;
+            if (error) {
+                throw error;
+            }
+
+            if (session?.user) {
+                return session.user;
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 150));
         }
 
-        return session?.user || null;
+        return null;
     }
 
     async function fetchProfile(userId) {
