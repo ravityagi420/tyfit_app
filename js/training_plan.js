@@ -22,10 +22,12 @@ const TP = {
   exerciseMenuOutsideBound: false,
   exerciseSwipeBound: false,
   exerciseSwipeSuppressUntil: 0,
+  historyBound: false,
 };
 
 const BODY_PARTS = ["All", "Chest", "Back", "Shoulders", "Arms", "Legs", "Core", "Full Body"];
 const MAX_TRAINING_PLANS = 3;
+const TP_HISTORY_MARKER = "training-plan";
 const TRAINING_PLAN_ICONS = ["activity", "heart-plus", "footprints"];
 const EXERCISE_ICON_BASE_PATH = "assets/exercise-icons";
 const EXERCISE_ICON_FALLBACK_PATH = `${EXERCISE_ICON_BASE_PATH}/push-ups.svg`;
@@ -249,10 +251,74 @@ async function init() {
     bindShell();
     bindStaticTrainingUI();
     await fetchAndRenderPlans();
+    bindTrainingHistory();
+    applyHistoryState();
   } catch (err) {
     console.error(err);
     showToast("Failed to load training plan.");
   }
+}
+
+function ensureHistoryMainState() {
+  const current = window.history.state || {};
+  if (current.tpPage === TP_HISTORY_MARKER && current.tpScreen === "main") return;
+  window.history.replaceState({ ...current, tpPage: TP_HISTORY_MARKER, tpScreen: "main", dayId: null }, "");
+}
+
+function pushHistoryDayState(dayId) {
+  const current = window.history.state || {};
+  if (current.tpPage === TP_HISTORY_MARKER && current.tpScreen === "day" && String(current.dayId) === String(dayId)) return;
+  window.history.pushState({ ...current, tpPage: TP_HISTORY_MARKER, tpScreen: "day", dayId: String(dayId) }, "");
+}
+
+function applyHistoryState() {
+  const state = window.history.state || {};
+  if (state.tpPage === TP_HISTORY_MARKER && state.tpScreen === "day" && state.dayId) {
+    const exists = TP.days.some((day) => String(day.id) === String(state.dayId));
+    if (exists) {
+      openDayDetail(state.dayId, { pushHistory: false, scroll: false });
+      return;
+    }
+  }
+  TP.selectedDayId = null;
+  showMainScreen();
+}
+
+function bindTrainingHistory() {
+  if (TP.historyBound) return;
+  TP.historyBound = true;
+  ensureHistoryMainState();
+
+  window.addEventListener("popstate", () => {
+    const state = window.history.state || {};
+    if (state.tpPage === TP_HISTORY_MARKER && state.tpScreen === "day" && state.dayId) {
+      const exists = TP.days.some((day) => String(day.id) === String(state.dayId));
+      if (exists) {
+        openDayDetail(state.dayId, { pushHistory: false, scroll: false });
+        return;
+      }
+    }
+
+    TP.selectedDayId = null;
+    showMainScreen();
+    renderMainContent();
+    ensureHistoryMainState();
+  });
+}
+
+function goBackToTrainingMain() {
+  if (!TP.selectedDayId) return;
+
+  const current = window.history.state || {};
+  if (current.tpPage === TP_HISTORY_MARKER && current.tpScreen === "day") {
+    window.history.back();
+    return;
+  }
+
+  TP.selectedDayId = null;
+  showMainScreen();
+  renderMainContent();
+  ensureHistoryMainState();
 }
 
 async function hydrateDesktopHeader(user) {
@@ -454,6 +520,10 @@ async function selectPlan(planId) {
   await Promise.all(TP.days.map(async d => { TP.exercisesByDay[d.id] = await dbFetchExercisesForDay(d.id); }));
   renderPlanSelector();
   renderMainContent(false);
+  const state = window.history.state || {};
+  if (!(state.tpPage === TP_HISTORY_MARKER && state.tpScreen === "day")) {
+    ensureHistoryMainState();
+  }
 }
 function renderMainContent(loading = false) {
   showMainScreen();
@@ -630,7 +700,14 @@ function bindDayRowSwipeDelete() {
 /* ── Day detail ────────────────────── */
 function showMainScreen() { byId("trainingMainScreen")?.removeAttribute("hidden"); byId("trainingMainScreen")?.classList.add("is-active"); byId("trainingDayScreen")?.setAttribute("hidden", "hidden"); }
 function showDayScreen() { byId("trainingMainScreen")?.setAttribute("hidden", "hidden"); byId("trainingDayScreen")?.removeAttribute("hidden"); byId("trainingDayScreen")?.classList.add("is-active"); }
-function openDayDetail(dayId) { TP.selectedDayId = dayId; showDayScreen(); renderDayDetail(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+function openDayDetail(dayId, options = {}) {
+  const { pushHistory = true, scroll = true } = options;
+  TP.selectedDayId = dayId;
+  showDayScreen();
+  renderDayDetail();
+  if (pushHistory) pushHistoryDayState(dayId);
+  if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+}
 function currentDay() { return TP.days.find(d => d.id === TP.selectedDayId); }
 function renderDayDetail() {
   const day = currentDay(); if (!day) return showMainScreen();
@@ -700,6 +777,12 @@ function renderDayDetail() {
 function renderDayExercises() {
   const list = byId("dayExerciseList"); const day = currentDay(); if (!list || !day) return;
   const exercises = TP.exercisesByDay[day.id] || [];
+  const sectionAddBtn = byId("dayHeaderAddExerciseBtn");
+  const wideAddBtn = byId("detailAddExerciseBtn");
+
+  if (sectionAddBtn) sectionAddBtn.hidden = exercises.length === 0;
+  if (wideAddBtn) wideAddBtn.hidden = exercises.length > 0;
+
   if (!exercises.length) {
     list.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="activity"></i></div><h4>No exercises added</h4><p>Add exercises from your catalog to build this day.</p></div>`;
     setIcons(); return;
@@ -919,7 +1002,18 @@ async function handleDeleteDay(dayId = TP.selectedDayId) {
   const day = TP.days.find(d => d.id === dayId); if (!day) return;
   const ok = await promptConfirm(`Delete "${nameOfDay(day)}"? Exercises in this day will be removed.`, "Delete");
   if (!ok) return;
-  try { await dbDeleteDay(day.id); TP.days = TP.days.filter(d => d.id !== day.id); delete TP.exercisesByDay[day.id]; if (TP.selectedDayId === day.id) showMainScreen(); renderMainContent(); showToast("Day deleted."); } catch(e) { console.error(e); showToast("Error deleting day."); }
+  try {
+    await dbDeleteDay(day.id);
+    TP.days = TP.days.filter(d => d.id !== day.id);
+    delete TP.exercisesByDay[day.id];
+    if (TP.selectedDayId === day.id) {
+      TP.selectedDayId = null;
+      showMainScreen();
+      ensureHistoryMainState();
+    }
+    renderMainContent();
+    showToast("Day deleted.");
+  } catch(e) { console.error(e); showToast("Error deleting day."); }
 }
 async function handleRemoveExercise(id) {
   const ok = await promptConfirm("Delete this exercise from the day?", "Delete"); if (!ok) return;
@@ -1104,8 +1198,9 @@ function closeConfirmDialog(value = false) { closeModal("confirmDialogOverlay");
 
 /* ── Shell + events ────────────────── */
 function bindStaticTrainingUI() {
-  byId("backToPlansBtn")?.addEventListener("click", () => { TP.selectedDayId = null; showMainScreen(); renderMainContent(); });
+  byId("backToPlansBtn")?.addEventListener("click", goBackToTrainingMain);
   byId("detailAddExerciseBtn")?.addEventListener("click", openCatalogModal);
+  byId("dayHeaderAddExerciseBtn")?.addEventListener("click", openCatalogModal);
   byId("mainMoreBtn")?.addEventListener("click", async () => { if (!TP.selectedPlanId) return handleCreatePlan(); const action = await promptInput({ title: "Plan Options", label: "Type rename or delete", placeholder: "rename", confirmLabel: "Continue" }); if (String(action).toLowerCase().startsWith("del")) await handleDeletePlan(); else if (action) await handleRenamePlan(); });
   byId("catalogModalClose")?.addEventListener("click", closeCatalogModal);
   byId("catalogCancelBtn")?.addEventListener("click", closeCatalogModal);
@@ -1129,6 +1224,69 @@ function bindShell() {
   byId("mobileDrawerClose")?.addEventListener("click", closeDrawer);
   byId("mobileDrawerBackdrop")?.addEventListener("click", closeDrawer);
   byId("sidebarCollapseBtn")?.addEventListener("click", () => byId("tyfitLayout")?.classList.toggle("sidebar-collapsed"));
+
+  const togglePopover = (menuEl) => {
+    if (!menuEl) return;
+    document.querySelectorAll(".tyfit-popover-menu.is-open").forEach((menu) => {
+      if (menu !== menuEl) {
+        menu.classList.remove("is-open");
+        menu.setAttribute("aria-hidden", "true");
+      }
+    });
+    const shouldOpen = !menuEl.classList.contains("is-open");
+    menuEl.classList.toggle("is-open", shouldOpen);
+    menuEl.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+  };
+
+  const desktopAccountBtn = byId("desktopAccountBtn");
+  const desktopAccountMenu = byId("desktopAccountMenu");
+  const desktopAccountWrap = byId("desktopAccountWrap") || desktopAccountBtn?.closest(".tyfit-dropdown-wrap");
+  if (desktopAccountBtn) {
+    desktopAccountBtn.addEventListener("click", () => togglePopover(desktopAccountMenu));
+  }
+  if (desktopAccountWrap && desktopAccountMenu) {
+    desktopAccountWrap.addEventListener("mouseenter", () => {
+      if (window.matchMedia("(min-width: 1024px)").matches) {
+        desktopAccountMenu.classList.add("is-open");
+        desktopAccountMenu.setAttribute("aria-hidden", "false");
+      }
+    });
+    desktopAccountWrap.addEventListener("mouseleave", () => {
+      if (window.matchMedia("(min-width: 1024px)").matches) {
+        desktopAccountMenu.classList.remove("is-open");
+        desktopAccountMenu.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.target.closest(".tyfit-dropdown-wrap")) return;
+    document.querySelectorAll(".tyfit-popover-menu.is-open").forEach((menu) => {
+      menu.classList.remove("is-open");
+      menu.setAttribute("aria-hidden", "true");
+    });
+  });
+
+  if (desktopAccountMenu) {
+    desktopAccountMenu.addEventListener("click", async (event) => {
+      const actionBtn = event.target.closest(".tyfit-menu-action");
+      if (!actionBtn) return;
+      const action = actionBtn.dataset.action;
+      if (action === "account") {
+        window.location.href = "profile.html";
+        return;
+      }
+      if (action === "logout") {
+        try {
+          if (window.supabaseClient?.auth) await window.supabaseClient.auth.signOut();
+        } catch (error) {
+          console.warn("Logout warning:", error?.message || error);
+        }
+        window.location.href = "login.html";
+      }
+    });
+  }
+
   setIcons();
 }
 

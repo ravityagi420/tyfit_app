@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260425a" rel="stylesheet">
-    <link href="css/training.css?v=20260425-redesign" rel="stylesheet">
+    <link href="css/training.css?v=20260428c" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="training-plan">
 
@@ -175,6 +175,9 @@
                     <section class="tp-exercises-panel">
                         <div class="tp-section-row">
                             <h3>Exercises</h3>
+                            <button type="button" class="tp-section-add-btn" id="dayHeaderAddExerciseBtn" aria-label="Add exercise" hidden>
+                                <i data-lucide="plus"></i>
+                            </button>
                         </div>
                         <div class="tp-day-exercise-list" id="dayExerciseList">
                             <!-- rendered by JS -->
@@ -384,6 +387,6 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260427c"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/training_plan.js?v=20260427b"></script>
+    <script src="js/training_plan.js?v=20260428b"></script>
 </body>
 </html>

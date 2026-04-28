@@ -6,6 +6,8 @@
     function byId(id) { return document.getElementById(id); }
 
     function toggleSidebar() {
+        const layout = byId('tyfitLayout');
+        if (layout) layout.classList.toggle('sidebar-collapsed');
         document.body.classList.toggle('sidebar-collapsed');
     }
 
@@ -84,6 +86,7 @@
         const desktopNotifMenu  = byId('desktopNotifMenu');
         const desktopAccountBtn = byId('desktopAccountBtn');
         const desktopAccountMenu = byId('desktopAccountMenu');
+        const desktopAccountWrap = byId('desktopAccountWrap') || desktopAccountBtn?.closest('.tyfit-dropdown-wrap');
 
         if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener('click', toggleSidebar);
         if (mobileMenuBtn)      mobileMenuBtn.addEventListener('click', openMobileDrawer);
@@ -95,6 +98,22 @@
         if (upgradeNowBtn)      upgradeNowBtn.addEventListener('click', () => showToast('Premium flow coming soon.'));
         if (desktopNotifBtn)    desktopNotifBtn.addEventListener('click', () => togglePopover(desktopNotifMenu));
         if (desktopAccountBtn)  desktopAccountBtn.addEventListener('click', () => togglePopover(desktopAccountMenu));
+
+        if (desktopAccountWrap && desktopAccountMenu) {
+            desktopAccountWrap.addEventListener('mouseenter', () => {
+                if (window.matchMedia('(min-width: 1024px)').matches) {
+                    desktopAccountMenu.classList.add('is-open');
+                    desktopAccountMenu.setAttribute('aria-hidden', 'false');
+                }
+            });
+
+            desktopAccountWrap.addEventListener('mouseleave', () => {
+                if (window.matchMedia('(min-width: 1024px)').matches) {
+                    desktopAccountMenu.classList.remove('is-open');
+                    desktopAccountMenu.setAttribute('aria-hidden', 'true');
+                }
+            });
+        }
 
         if (desktopAccountMenu) {
             desktopAccountMenu.addEventListener('click', async (event) => {
