@@ -20,6 +20,8 @@ function byId(id) {
 }
 
 let quickAccessExpanded = false;
+let isHomeUserLoggedIn = false;
+let activeCalculatorName = "BMR Calculator";
 
 function showToast(message) {
     const toast = byId("appToast");
@@ -53,7 +55,7 @@ function renderHome(data) {
     const grid = byId("homeToolsGrid");
     if (grid) {
         grid.innerHTML = data.tools.map((tool) => `
-            <a class="tyfit-tool-card" href="${tool.href}" data-title="${tool.title}">
+            <a class="tyfit-tool-card" href="${tool.href}" data-title="${tool.title}"${tool.href === "#" ? ` data-calculator="${tool.title}"` : ""}>
                 <span class="tyfit-tool-icon ${tool.colorClass}">
                     <i data-lucide="${tool.icon}"></i>
                 </span>
@@ -70,6 +72,114 @@ function renderHome(data) {
             window.lucide.createIcons();
         }
     }
+}
+
+function applySidebarTooltipData() {
+    document.querySelectorAll(".tyfit-sidebar .sidebar-nav-item").forEach((item) => {
+        const label = item.querySelector("span")?.textContent?.trim();
+        if (!label) return;
+        item.setAttribute("data-tooltip", label);
+        item.setAttribute("data-tool-tip", label);
+        item.setAttribute("title", label);
+        item.setAttribute("aria-label", label);
+    });
+}
+
+function openCalculatorComingSoon(name) {
+    const modal = byId("calculatorComingSoonModal");
+    const textEl = byId("calculatorComingSoonText");
+    const titleEl = byId("calculatorComingSoonTitle");
+    if (!modal) return;
+
+    activeCalculatorName = name || "Calculator";
+    if (textEl) textEl.textContent = activeCalculatorName;
+    if (titleEl) titleEl.textContent = activeCalculatorName;
+
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("tyfit-calc-modal-open");
+    setTimeout(() => {
+        if (window.lucide?.createIcons) window.lucide.createIcons();
+    }, 0);
+}
+
+function closeCalculatorComingSoon() {
+    const modal = byId("calculatorComingSoonModal");
+    if (!modal) return;
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("tyfit-calc-modal-open");
+}
+
+function applyGuestHomeIntro(isLoggedIn) {
+    const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+    if (!isMobile) return;
+
+    const greeting = byId("homeGreeting");
+    const subtitle = byId("homeSubtitle");
+    if (!greeting || !subtitle) return;
+
+    if (isLoggedIn) {
+        if (subtitle.querySelector("#homeSubtitleLoginLink")) {
+            subtitle.textContent = "Let’s build consistency today";
+        }
+        return;
+    }
+
+    greeting.textContent = "Guest";
+    subtitle.innerHTML = '<a href="#" id="homeSubtitleLoginLink" class="tyfit-home-login-link">Log in</a>. Stay consistent.';
+}
+
+function syncDesktopAccountButton(isLoggedIn) {
+    isHomeUserLoggedIn = Boolean(isLoggedIn);
+    const desktopAccountBtn = byId("desktopAccountBtn");
+    const desktopAccountMenu = byId("desktopAccountMenu");
+    const desktopNotifBtn = byId("desktopNotifBtn");
+    const mobileNotifBtn = byId("mobileNotifBtn");
+    const avatar = byId("desktopProfileAvatar");
+    const nameEl = byId("desktopProfileName");
+
+    if (desktopNotifBtn) desktopNotifBtn.style.display = isHomeUserLoggedIn ? "" : "none";
+    if (mobileNotifBtn) mobileNotifBtn.style.display = isHomeUserLoggedIn ? "" : "none";
+
+    if (!desktopAccountBtn) return;
+
+    if (!isHomeUserLoggedIn) {
+        desktopAccountBtn.classList.add("tyfit-account-btn--guest");
+        desktopAccountBtn.setAttribute("aria-label", "Login");
+        if (avatar) avatar.style.display = "none";
+        const chevron = desktopAccountBtn.querySelector("[data-lucide='chevron-down'], svg");
+        if (chevron) chevron.style.display = "none";
+        if (nameEl) nameEl.textContent = "Login";
+        if (desktopAccountMenu) {
+            desktopAccountMenu.classList.remove("is-open");
+            desktopAccountMenu.setAttribute("aria-hidden", "true");
+            desktopAccountMenu.style.display = "none";
+        }
+        applyGuestHomeIntro(false);
+        return;
+    }
+
+    desktopAccountBtn.classList.remove("tyfit-account-btn--guest");
+    desktopAccountBtn.setAttribute("aria-label", "Account menu");
+    if (avatar) avatar.style.display = "";
+    const chevron = desktopAccountBtn.querySelector("[data-lucide='chevron-down'], svg");
+    if (chevron) chevron.style.display = "";
+    if (desktopAccountMenu) desktopAccountMenu.style.display = "";
+    applyGuestHomeIntro(true);
+}
+
+async function refreshHomeAuthState() {
+    try {
+        if (typeof window.getAccessState === "function") {
+            const accessState = await window.getAccessState();
+            syncDesktopAccountButton(Boolean(accessState?.isLoggedIn));
+            return;
+        }
+    } catch (error) {
+        console.warn("Auth state refresh warning:", error?.message || error);
+    }
+    syncDesktopAccountButton(false);
 }
 
 async function performLogout() {
@@ -106,6 +216,7 @@ function bindShellInteractions() {
     const sheetClose = byId("quickSheetClose");
 
     function toggleSidebar() {
+        if (layout) layout.classList.toggle("sidebar-collapsed");
         document.body.classList.toggle("sidebar-collapsed");
     }
 
@@ -151,15 +262,39 @@ function bindShellInteractions() {
         sheetBackdrop.hidden = true;
     }
 
-    if (layout) {
-        layout.addEventListener("click", (event) => {
-            const card = event.target.closest(".tyfit-tool-card");
-            if (card && card.getAttribute("href") === "#") {
-                event.preventDefault();
-                showToast(`${card.dataset.title} will be connected soon.`);
+    document.addEventListener("click", (event) => {
+        const subtitleLogin = event.target.closest("#homeSubtitleLoginLink");
+        if (subtitleLogin) {
+            event.preventDefault();
+            if (typeof window.openAuthModal === "function") {
+                window.openAuthModal({ locked: false });
             }
-        });
-    }
+            return;
+        }
+
+        const calcTrigger = event.target.closest("[data-calculator]");
+        if (calcTrigger) {
+            event.preventDefault();
+            openCalculatorComingSoon(calcTrigger.dataset.calculator || calcTrigger.dataset.title || "Calculator");
+            return;
+        }
+
+        const link = event.target.closest("a[href]");
+        if (!link || isHomeUserLoggedIn) return;
+
+        if (window.matchMedia("(max-width: 1023px)").matches) {
+            return;
+        }
+
+        const href = (link.getAttribute("href") || "").trim();
+        if (!href || href === "#" || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+        if (href === "index.html" || href === "/" || href.endsWith("/index.html")) return;
+
+        event.preventDefault();
+        if (typeof window.openAuthModal === "function") {
+            window.openAuthModal({ locked: false });
+        }
+    });
 
     if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener("click", toggleSidebar);
     if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openMobileDrawer);
@@ -171,7 +306,18 @@ function bindShellInteractions() {
 
     if (desktopNotifBtn) desktopNotifBtn.addEventListener("click", () => toggleMenu(desktopNotifMenu));
     if (mobileNotifBtn) mobileNotifBtn.addEventListener("click", () => toggleMenu(mobileNotifMenu));
-    if (desktopAccountBtn) desktopAccountBtn.addEventListener("click", () => toggleMenu(desktopAccountMenu));
+    if (desktopAccountBtn) {
+        desktopAccountBtn.addEventListener("click", (event) => {
+            if (!isHomeUserLoggedIn) {
+                event.preventDefault();
+                if (typeof window.openAuthModal === "function") {
+                    window.openAuthModal({ locked: false });
+                }
+                return;
+            }
+            toggleMenu(desktopAccountMenu);
+        });
+    }
 
     if (desktopAccountWrap && desktopAccountMenu) {
         desktopAccountWrap.addEventListener("mouseenter", () => {
@@ -251,6 +397,14 @@ function bindShellInteractions() {
             });
         }
     });
+
+    byId("calculatorComingSoonClose")?.addEventListener("click", closeCalculatorComingSoon);
+    byId("calculatorComingSoonModal")?.addEventListener("click", (event) => {
+        if (event.target.matches("[data-calc-close]")) closeCalculatorComingSoon();
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeCalculatorComingSoon();
+    });
 }
 
 async function hydrateNameFromProfile() {
@@ -288,6 +442,15 @@ async function hydrateNameFromProfile() {
 document.addEventListener("DOMContentLoaded", async () => {
     bindShellInteractions();
     await hydrateNameFromProfile();
+    await refreshHomeAuthState();
+    applySidebarTooltipData();
+
+    if (window.supabaseClient?.auth) {
+        window.supabaseClient.auth.onAuthStateChange((_event, session) => {
+            syncDesktopAccountButton(Boolean(session?.user));
+        });
+    }
+
     if (window.lucide?.createIcons) {
         window.lucide.createIcons();
     }

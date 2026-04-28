@@ -20,6 +20,7 @@ const TP = {
   daySwipeBound: false,
   dayDetailMenuOutsideBound: false,
   exerciseMenuOutsideBound: false,
+  planActionMenuOutsideBound: false,
   exerciseSwipeBound: false,
   exerciseSwipeSuppressUntil: 0,
   historyBound: false,
@@ -28,7 +29,7 @@ const TP = {
 const BODY_PARTS = ["All", "Chest", "Back", "Shoulders", "Arms", "Legs", "Core", "Full Body"];
 const MAX_TRAINING_PLANS = 3;
 const TP_HISTORY_MARKER = "training-plan";
-const TRAINING_PLAN_ICONS = ["activity", "heart-plus", "footprints"];
+const TRAINING_PLAN_ICONS = ["sport-shoe", "square-activity", "biceps-flexed"];
 const EXERCISE_ICON_BASE_PATH = "assets/exercise-icons";
 const EXERCISE_ICON_FALLBACK_PATH = `${EXERCISE_ICON_BASE_PATH}/push-ups.svg`;
 const EXERCISE_CARD_ACCENTS = ["#22c55e", "#3b82f6", "#f59e0b", "#8b5cf6", "#14b8a6", "#ec4899"];
@@ -491,7 +492,18 @@ function renderPlanSelector() {
       <span class="diet-plan-icon" aria-hidden="true"><i data-lucide="${iconName}"></i></span>
       <strong title="${escHtml(titleOfPlan(plan))}">${escHtml(titleOfPlan(plan))}</strong>
       <span class="diet-plan-meta">${createdLabel ? `<small class="diet-plan-date"><i data-lucide="calendar-days" class="diet-plan-date-icon"></i>${escHtml(createdLabel)}</small>` : ""}</span>
-    </button></div>`;
+    </button>
+    <button type="button" class="tp-plan-card-menu-btn js-plan-card-menu-btn" data-plan-id="${plan.id}" aria-label="Plan options">
+      <i data-lucide="ellipsis-vertical"></i>
+    </button>
+    <div class="tp-plan-card-menu" hidden data-menu-plan-id="${plan.id}">
+      <button type="button" class="tp-plan-card-menu-item" data-card-action="rename-plan" data-plan-id="${plan.id}">
+        <i data-lucide="pencil-line"></i> Rename
+      </button>
+      <button type="button" class="tp-plan-card-menu-item danger" data-card-action="delete-plan" data-plan-id="${plan.id}">
+        <i data-lucide="trash-2"></i> Delete
+      </button>
+    </div></div>`;
   }).join("");
 
   const showCreateButton = TP.plans.length < MAX_TRAINING_PLANS;
@@ -504,7 +516,75 @@ function renderPlanSelector() {
 
   strip.innerHTML = html + createButton;
   setIcons();
+  const closePlanMenus = () => {
+    strip.querySelectorAll(".tp-plan-card-menu").forEach((menu) => {
+      menu.classList.remove("is-open");
+      menu.hidden = true;
+    });
+  };
+
   strip.querySelectorAll(".tp-plan-card[data-plan-id]").forEach(card => card.addEventListener("click", () => selectPlan(card.dataset.planId)));
+  strip.querySelectorAll(".js-plan-card-menu-btn").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const planId = btn.dataset.planId;
+      if (!planId) return;
+
+      if (isTrainingPlanMobileMenuMode()) {
+        openTrainingPlanActionSheet(planId);
+        return;
+      }
+
+      const menu = strip.querySelector(`.tp-plan-card-menu[data-menu-plan-id="${planId}"]`);
+      strip.querySelectorAll(".tp-plan-card-menu").forEach((item) => {
+        if (item !== menu) {
+          item.classList.remove("is-open");
+          item.hidden = true;
+        }
+      });
+      if (!menu) return;
+
+      const shouldOpen = menu.hidden || !menu.classList.contains("is-open");
+      if (!shouldOpen) {
+        menu.classList.remove("is-open");
+        menu.hidden = true;
+      } else {
+        menu.hidden = false;
+        requestAnimationFrame(() => {
+          menu.classList.add("is-open");
+        });
+      }
+    });
+  });
+  strip.querySelectorAll("[data-card-action]").forEach((btn) => {
+    btn.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const action = btn.dataset.cardAction;
+      const planId = btn.dataset.planId;
+      closePlanMenus();
+      if (!planId) return;
+      if (action === "rename-plan") {
+        await handleRenamePlan(planId);
+      } else if (action === "delete-plan") {
+        await handleDeletePlan(planId);
+      }
+    });
+  });
+
+  if (!TP.planActionMenuOutsideBound) {
+    document.addEventListener("click", () => {
+      const currentStrip = byId("planStrip");
+      if (!currentStrip) return;
+      currentStrip.querySelectorAll(".tp-plan-card-menu").forEach((menu) => {
+        menu.classList.remove("is-open");
+        menu.hidden = true;
+      });
+    });
+    TP.planActionMenuOutsideBound = true;
+  }
+
   if (showCreateButton) {
     byId("addPlanBtn")?.addEventListener("click", handleCreatePlan);
   }
@@ -585,6 +665,13 @@ function renderDaysList() {
       event.preventDefault();
       event.stopPropagation();
       const dayId = btn.dataset.dayId;
+
+      if (isTrainingPlanMobileMenuMode()) {
+        closeAllDayMenus();
+        openTrainingDayActionSheet(dayId);
+        return;
+      }
+
       const menu = grid.querySelector(`.tp-day-menu-dropdown[data-day-id="${dayId}"]`);
       if (!menu) return;
 
@@ -737,6 +824,12 @@ function renderDayDetail() {
   menuBtn.onclick = (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (isTrainingPlanMobileMenuMode()) {
+      openTrainingDayActionSheet(day.id);
+      return;
+    }
+
     if (!menu || !menuBtn) return;
     const willOpen = !menu.classList.contains("open");
     closeMenu();
@@ -833,6 +926,13 @@ function renderDayExercises() {
       event.preventDefault();
       event.stopPropagation();
       const exerciseId = btn.dataset.exerciseId;
+
+      if (isTrainingPlanMobileMenuMode()) {
+        closeAllExerciseMenus();
+        openTrainingExerciseActionSheet(exerciseId);
+        return;
+      }
+
       const menu = list.querySelector(`.tp-exercise-menu-dropdown[data-exercise-id="${exerciseId}"]`);
       if (!menu) return;
 
@@ -887,6 +987,8 @@ function bindExerciseRowSwipeActions() {
   TP.exerciseSwipeBound = true;
 
   let swipeRow = null;
+  let swipeEditOverlay = null;
+  let swipeDeleteOverlay = null;
   let startX = 0;
   let startY = 0;
   let deltaX = 0;
@@ -899,13 +1001,16 @@ function bindExerciseRowSwipeActions() {
     if (!row || event.target.closest(".tp-exercise-menu-wrap")) return;
 
     swipeRow = row;
+    swipeEditOverlay = row.querySelector(".tp-exercise-swipe-edit");
+    swipeDeleteOverlay = row.querySelector(".tp-exercise-swipe-delete");
     startX = event.touches[0].clientX;
     startY = event.touches[0].clientY;
     deltaX = 0;
     swiping = false;
 
     swipeRow.classList.remove("is-swiping", "is-swipe-left", "is-swipe-right");
-    swipeRow.style.transform = "";
+    if (swipeEditOverlay) swipeEditOverlay.style.width = "0";
+    if (swipeDeleteOverlay) swipeDeleteOverlay.style.width = "0";
   });
 
   document.addEventListener("touchmove", (event) => {
@@ -921,11 +1026,18 @@ function bindExerciseRowSwipeActions() {
       swiping = true;
       deltaX = moveX;
       const boundedX = Math.max(-88, Math.min(88, moveX));
+      const revealWidth = `${Math.abs(boundedX)}px`;
 
       swipeRow.classList.add("is-swiping");
       swipeRow.classList.toggle("is-swipe-left", boundedX < 0);
       swipeRow.classList.toggle("is-swipe-right", boundedX > 0);
-      swipeRow.style.transform = `translateX(${boundedX}px)`;
+      if (boundedX > 0) {
+        if (swipeEditOverlay) swipeEditOverlay.style.width = revealWidth;
+        if (swipeDeleteOverlay) swipeDeleteOverlay.style.width = "0";
+      } else {
+        if (swipeDeleteOverlay) swipeDeleteOverlay.style.width = revealWidth;
+        if (swipeEditOverlay) swipeEditOverlay.style.width = "0";
+      }
       event.preventDefault();
     }
   }, { passive: false });
@@ -942,7 +1054,8 @@ function bindExerciseRowSwipeActions() {
     const isRightSwipe = deltaX > 0;
 
     swipeRow.classList.remove("is-swiping", "is-swipe-left", "is-swipe-right");
-    swipeRow.style.transform = "";
+    if (swipeEditOverlay) swipeEditOverlay.style.width = "0";
+    if (swipeDeleteOverlay) swipeDeleteOverlay.style.width = "0";
 
     if (shouldTrigger) {
       TP.exerciseSwipeSuppressUntil = Date.now() + 350;
@@ -954,6 +1067,8 @@ function bindExerciseRowSwipeActions() {
     }
 
     swipeRow = null;
+    swipeEditOverlay = null;
+    swipeDeleteOverlay = null;
     deltaX = 0;
     swiping = false;
   });
@@ -970,18 +1085,32 @@ async function handleCreatePlan() {
   if (!normalizedTitle) return;
   try { const p = await dbCreatePlan(normalizedTitle); await fetchAndRenderPlans(); await selectPlan(p.id); showToast("Plan created."); } catch (e) { console.error(e); showToast("Error creating plan."); }
 }
-async function handleRenamePlan() {
-  const plan = TP.plans.find(p => p.id === TP.selectedPlanId); if (!plan) return;
+async function handleRenamePlan(planId = TP.selectedPlanId) {
+  const plan = TP.plans.find((p) => String(p.id) === String(planId)); if (!plan) return;
   const title = await promptInput({ title: "Rename", label: "Plan name", defaultValue: titleOfPlan(plan), confirmLabel: "Save" });
   const normalizedTitle = toTitleCaseWords(title);
   if (!normalizedTitle) return;
-  try { await dbRenamePlan(plan.id, normalizedTitle); await fetchAndRenderPlans(); showToast("Plan renamed."); } catch(e) { console.error(e); showToast("Error renaming plan."); }
+  try {
+    await dbRenamePlan(plan.id, normalizedTitle);
+    if (String(TP.selectedPlanId) !== String(plan.id)) {
+      TP.selectedPlanId = plan.id;
+    }
+    await fetchAndRenderPlans();
+    showToast("Plan renamed.");
+  } catch(e) { console.error(e); showToast("Error renaming plan."); }
 }
-async function handleDeletePlan() {
-  const plan = TP.plans.find(p => p.id === TP.selectedPlanId); if (!plan) return;
+async function handleDeletePlan(planId = TP.selectedPlanId) {
+  const plan = TP.plans.find((p) => String(p.id) === String(planId)); if (!plan) return;
   const ok = await promptConfirm(`Delete "${titleOfPlan(plan)}"? All days and exercises will be removed.`, "Delete");
   if (!ok) return;
-  try { await dbDeletePlan(plan.id); TP.selectedPlanId = null; await fetchAndRenderPlans(); showToast("Plan deleted."); } catch(e) { console.error(e); showToast("Error deleting plan."); }
+  try {
+    await dbDeletePlan(plan.id);
+    if (String(TP.selectedPlanId) === String(plan.id)) {
+      TP.selectedPlanId = null;
+    }
+    await fetchAndRenderPlans();
+    showToast("Plan deleted.");
+  } catch(e) { console.error(e); showToast("Error deleting plan."); }
 }
 async function handleCreateDay() {
   if (!TP.selectedPlanId) return handleCreatePlan();
@@ -1196,12 +1325,219 @@ function promptConfirm(message, title = "Confirm") {
 }
 function closeConfirmDialog(value = false) { closeModal("confirmDialogOverlay"); const r = TP.confirmDialogResolve; TP.confirmDialogResolve = null; if (r) r(value); }
 
+function isTrainingPlanMobileMenuMode() {
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function ensureTrainingDayActionSheet() {
+  if (byId("trainingDayActionSheet")) return;
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="tp-plan-card-sheet" id="trainingDayActionSheet" hidden aria-hidden="true" data-day-id="">
+      <button type="button" class="tp-plan-card-sheet-backdrop" data-day-sheet-close aria-label="Close day actions"></button>
+      <section class="tp-plan-card-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="trainingDayActionSheetTitle">
+        <div class="tp-plan-card-sheet-head">
+          <p class="tp-plan-card-sheet-title" id="trainingDayActionSheetTitle">Day options</p>
+          <button type="button" class="tp-plan-card-sheet-close" data-day-sheet-close aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="tp-plan-card-sheet-actions">
+          <button type="button" class="tp-plan-card-sheet-btn" data-day-sheet-action="rename"><i data-lucide="pencil-line"></i> Rename</button>
+          <button type="button" class="tp-plan-card-sheet-btn tp-plan-card-sheet-btn--danger" data-day-sheet-action="delete"><i data-lucide="trash-2"></i> Delete</button>
+        </div>
+      </section>
+    </div>
+  `);
+
+  const sheet = byId("trainingDayActionSheet");
+  if (!sheet) return;
+
+  sheet.addEventListener("click", async (event) => {
+    const closeTrigger = event.target.closest("[data-day-sheet-close]");
+    if (closeTrigger) {
+      closeTrainingDayActionSheet();
+      return;
+    }
+
+    const actionBtn = event.target.closest("[data-day-sheet-action]");
+    if (!actionBtn) return;
+
+    const dayId = sheet.getAttribute("data-day-id");
+    if (!dayId) {
+      closeTrainingDayActionSheet();
+      return;
+    }
+
+    closeTrainingDayActionSheet();
+
+    if (actionBtn.getAttribute("data-day-sheet-action") === "rename") {
+      await handleRenameDay(dayId);
+      return;
+    }
+
+    if (actionBtn.getAttribute("data-day-sheet-action") === "delete") {
+      await handleDeleteDay(dayId);
+    }
+  });
+
+  setIcons();
+}
+
+function openTrainingDayActionSheet(dayId) {
+  if (!dayId) return;
+
+  ensureTrainingDayActionSheet();
+  const sheet = byId("trainingDayActionSheet");
+  if (!sheet) return;
+
+  const day = TP.days.find((item) => String(item.id) === String(dayId));
+  const titleEl = byId("trainingDayActionSheetTitle");
+  if (titleEl) {
+    titleEl.textContent = day ? `${nameOfDay(day)} options` : "Day options";
+  }
+
+  sheet.setAttribute("data-day-id", String(dayId));
+  sheet.hidden = false;
+  sheet.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setIcons();
+}
+
+function closeTrainingDayActionSheet() {
+  const sheet = byId("trainingDayActionSheet");
+  if (!sheet) return;
+  sheet.removeAttribute("data-day-id");
+  sheet.hidden = true;
+  sheet.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+function ensureTrainingExerciseActionSheet() {
+  if (byId("trainingExerciseActionSheet")) return;
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="tp-plan-card-sheet" id="trainingExerciseActionSheet" hidden aria-hidden="true" data-exercise-id="">
+      <button type="button" class="tp-plan-card-sheet-backdrop" data-exercise-sheet-close aria-label="Close exercise actions"></button>
+      <section class="tp-plan-card-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="trainingExerciseActionSheetTitle">
+        <div class="tp-plan-card-sheet-head">
+          <p class="tp-plan-card-sheet-title" id="trainingExerciseActionSheetTitle">Exercise options</p>
+          <button type="button" class="tp-plan-card-sheet-close" data-exercise-sheet-close aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="tp-plan-card-sheet-actions">
+          <button type="button" class="tp-plan-card-sheet-btn" data-exercise-sheet-action="edit"><i data-lucide="pencil-line"></i> Edit</button>
+          <button type="button" class="tp-plan-card-sheet-btn tp-plan-card-sheet-btn--danger" data-exercise-sheet-action="delete"><i data-lucide="trash-2"></i> Delete</button>
+        </div>
+      </section>
+    </div>
+  `);
+
+  const sheet = byId("trainingExerciseActionSheet");
+  if (!sheet) return;
+
+  sheet.addEventListener("click", async (event) => {
+    const closeTrigger = event.target.closest("[data-exercise-sheet-close]");
+    if (closeTrigger) {
+      closeTrainingExerciseActionSheet();
+      return;
+    }
+
+    const actionBtn = event.target.closest("[data-exercise-sheet-action]");
+    if (!actionBtn) return;
+
+    const exerciseId = sheet.getAttribute("data-exercise-id");
+    if (!exerciseId) {
+      closeTrainingExerciseActionSheet();
+      return;
+    }
+
+    closeTrainingExerciseActionSheet();
+
+    if (actionBtn.getAttribute("data-exercise-sheet-action") === "edit") {
+      openEditExercise(exerciseId);
+      return;
+    }
+
+    if (actionBtn.getAttribute("data-exercise-sheet-action") === "delete") {
+      await handleRemoveExercise(exerciseId);
+    }
+  });
+
+  setIcons();
+}
+
+function openTrainingExerciseActionSheet(exerciseId) {
+  if (!exerciseId) return;
+
+  ensureTrainingExerciseActionSheet();
+  const sheet = byId("trainingExerciseActionSheet");
+  if (!sheet) return;
+
+  const dayExercises = TP.exercisesByDay[TP.selectedDayId] || [];
+  const exercise = dayExercises.find((item) => String(item.id) === String(exerciseId));
+  const titleEl = byId("trainingExerciseActionSheetTitle");
+  if (titleEl) {
+    titleEl.textContent = exercise?.exercise_name ? `${exercise.exercise_name} options` : "Exercise options";
+  }
+
+  sheet.setAttribute("data-exercise-id", String(exerciseId));
+  sheet.hidden = false;
+  sheet.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setIcons();
+}
+
+function closeTrainingExerciseActionSheet() {
+  const sheet = byId("trainingExerciseActionSheet");
+  if (!sheet) return;
+  sheet.removeAttribute("data-exercise-id");
+  sheet.hidden = true;
+  sheet.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+function openTrainingPlanActionSheet(planId) {
+  const sheet = byId("trainingPlanActionSheet");
+  if (!sheet) return;
+  const targetPlan = TP.plans.find((plan) => String(plan.id) === String(planId));
+  if (!targetPlan) return;
+  const titleEl = byId("trainingPlanActionSheetTitle");
+  if (titleEl) {
+    titleEl.textContent = `${titleOfPlan(targetPlan)} options`;
+  }
+  sheet.setAttribute("data-plan-id", String(planId));
+  sheet.hidden = false;
+  sheet.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setIcons();
+}
+
+function closeTrainingPlanActionSheet() {
+  const sheet = byId("trainingPlanActionSheet");
+  if (!sheet) return;
+  sheet.removeAttribute("data-plan-id");
+  sheet.hidden = true;
+  sheet.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
 /* ── Shell + events ────────────────── */
 function bindStaticTrainingUI() {
   byId("backToPlansBtn")?.addEventListener("click", goBackToTrainingMain);
   byId("detailAddExerciseBtn")?.addEventListener("click", openCatalogModal);
   byId("dayHeaderAddExerciseBtn")?.addEventListener("click", openCatalogModal);
-  byId("mainMoreBtn")?.addEventListener("click", async () => { if (!TP.selectedPlanId) return handleCreatePlan(); const action = await promptInput({ title: "Plan Options", label: "Type rename or delete", placeholder: "rename", confirmLabel: "Continue" }); if (String(action).toLowerCase().startsWith("del")) await handleDeletePlan(); else if (action) await handleRenamePlan(); });
+
+  byId("trainingPlanActionSheetClose")?.addEventListener("click", closeTrainingPlanActionSheet);
+  byId("trainingPlanActionSheetBackdrop")?.addEventListener("click", closeTrainingPlanActionSheet);
+  byId("trainingPlanRenameBtn")?.addEventListener("click", async () => {
+    const planId = byId("trainingPlanActionSheet")?.getAttribute("data-plan-id");
+    closeTrainingPlanActionSheet();
+    if (planId) await handleRenamePlan(planId);
+  });
+  byId("trainingPlanDeleteBtn")?.addEventListener("click", async () => {
+    const planId = byId("trainingPlanActionSheet")?.getAttribute("data-plan-id");
+    closeTrainingPlanActionSheet();
+    if (planId) await handleDeletePlan(planId);
+  });
+
   byId("catalogModalClose")?.addEventListener("click", closeCatalogModal);
   byId("catalogCancelBtn")?.addEventListener("click", closeCatalogModal);
   byId("catalogAddSelectedBtn")?.addEventListener("click", handleAddSelected);
@@ -1219,11 +1555,21 @@ function bindStaticTrainingUI() {
   document.addEventListener("keydown", e => { if (e.key === "Escape") { ["catalogModalOverlay", "exerciseDetailOverlay", "editExerciseOverlay", "inputDialogOverlay", "confirmDialogOverlay"].forEach(closeModal); } });
 }
 function bindShell() {
+  document.querySelectorAll(".tyfit-sidebar .sidebar-nav-item").forEach((item) => {
+    const label = item.querySelector("span")?.textContent?.trim();
+    if (!label) return;
+    item.setAttribute("data-tooltip", label);
+    item.setAttribute("aria-label", label);
+  });
+
   byId("mobileMenuBtn")?.addEventListener("click", () => { byId("mobileDrawer")?.classList.add("is-open"); byId("mobileDrawer")?.setAttribute("aria-hidden", "false"); const b = byId("mobileDrawerBackdrop"); if (b) b.hidden = false; document.body.style.overflow = "hidden"; });
   const closeDrawer = () => { byId("mobileDrawer")?.classList.remove("is-open"); byId("mobileDrawer")?.setAttribute("aria-hidden", "true"); const b = byId("mobileDrawerBackdrop"); if (b) b.hidden = true; document.body.style.overflow = ""; };
   byId("mobileDrawerClose")?.addEventListener("click", closeDrawer);
   byId("mobileDrawerBackdrop")?.addEventListener("click", closeDrawer);
-  byId("sidebarCollapseBtn")?.addEventListener("click", () => byId("tyfitLayout")?.classList.toggle("sidebar-collapsed"));
+  byId("sidebarCollapseBtn")?.addEventListener("click", () => {
+    byId("tyfitLayout")?.classList.toggle("sidebar-collapsed");
+    document.body.classList.toggle("sidebar-collapsed");
+  });
 
   const togglePopover = (menuEl) => {
     if (!menuEl) return;

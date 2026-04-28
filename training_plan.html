@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260425a" rel="stylesheet">
-    <link href="css/training.css?v=20260428c" rel="stylesheet">
+    <link href="css/training.css?v=20260428d" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="training-plan">
 
@@ -135,9 +135,6 @@
                             <h2 class="tp-page-title">Training Plan</h2>
                             <p class="tp-page-subtitle">Plan your workouts. Stay consistent.</p>
                         </div>
-                        <button type="button" class="tp-round-action" id="mainMoreBtn" aria-label="Training plan options">
-                            <i data-lucide="ellipsis"></i>
-                        </button>
                     </section>
 
                     <section class="tp-plan-selector-wrap" aria-label="Your plans">
@@ -379,14 +376,36 @@
         </div>
     </div>
 
+    <div class="tp-plan-card-sheet" id="trainingPlanActionSheet" hidden aria-hidden="true">
+        <button type="button" class="tp-plan-card-sheet-backdrop" id="trainingPlanActionSheetBackdrop" aria-label="Close plan actions"></button>
+        <section class="tp-plan-card-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="trainingPlanActionSheetTitle">
+            <div class="tp-plan-card-sheet-head">
+                <p class="tp-plan-card-sheet-title" id="trainingPlanActionSheetTitle">Plan Options</p>
+                <button type="button" class="tp-plan-card-sheet-close" id="trainingPlanActionSheetClose" aria-label="Close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="tp-plan-card-sheet-actions">
+                <button type="button" class="tp-plan-card-sheet-btn" id="trainingPlanRenameBtn">
+                    <i data-lucide="pencil-line"></i>
+                    Rename
+                </button>
+                <button type="button" class="tp-plan-card-sheet-btn tp-plan-card-sheet-btn--danger" id="trainingPlanDeleteBtn">
+                    <i data-lucide="trash-2"></i>
+                    Delete
+                </button>
+            </div>
+        </section>
+    </div>
+
     <!-- Toast -->
     <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260427c"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/training_plan.js?v=20260428b"></script>
+    <script src="js/training_plan.js?v=20260428c"></script>
 </body>
 </html>

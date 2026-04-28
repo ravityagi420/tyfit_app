@@ -12,7 +12,7 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260424f" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260428d" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="home">
     <header class="tyfit-mobile-topbar">
@@ -53,10 +53,10 @@
                 <hr class="sidebar-divider">
                 <p class="sidebar-section-label">TOOLS</p>
                 <a href="training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
-                <a href="#" class="sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                <a href="#" class="sidebar-nav-item" data-calculator="BMR Calculator"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
                 <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
-                <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
-                <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+                <a href="#" class="sidebar-nav-item" data-calculator="Macro Calculator"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                <a href="#" class="sidebar-nav-item" data-calculator="Calorie Calculator"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
                 
                 <hr class="sidebar-divider">
                 <p class="sidebar-section-label">ACCOUNT</p>
@@ -85,10 +85,10 @@
                     <hr class="sidebar-divider">
                     <p class="sidebar-section-label">TOOLS</p>
                     
-                    <a href="#" class="sidebar-nav-item"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item" data-calculator="BMR Calculator"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
-                    <a href="#" class="sidebar-nav-item"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
-                    <a href="#" class="sidebar-nav-item"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item" data-calculator="Macro Calculator"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item" data-calculator="Calorie Calculator"><i data-lucide="flame"></i><span>Calorie Calculator</span></a>
                     <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
                     
                     <hr class="sidebar-divider">
@@ -209,11 +209,26 @@
 
     <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
 
+    <div class="tyfit-calc-modal" id="calculatorComingSoonModal" hidden aria-hidden="true">
+        <div class="tyfit-calc-modal-backdrop" data-calc-close></div>
+        <section class="tyfit-calc-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="calculatorComingSoonTitle">
+            <header class="tyfit-calc-modal-header">
+                <h4 id="calculatorComingSoonTitle">Calculator</h4>
+                <button type="button" class="tyfit-icon-btn" id="calculatorComingSoonClose" aria-label="Close calculator modal">
+                    <i data-lucide="x"></i>
+                </button>
+            </header>
+            <div class="tyfit-calc-modal-body">
+                <p id="calculatorComingSoonText">BMR Calculator</p>
+            </div>
+        </section>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/login.js?v=20260427c"></script>
-    <script src="js/home.js?v=20260427a"></script>
+    <script src="js/home.js?v=20260428b"></script>
 </body>
 </html>

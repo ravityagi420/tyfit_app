@@ -74,6 +74,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.tyfit-sidebar .sidebar-nav-item').forEach((item) => {
+            const label = item.querySelector('span')?.textContent?.trim();
+            if (!label) return;
+            item.setAttribute('data-tooltip', label);
+            item.setAttribute('aria-label', label);
+        });
+
         const sidebarCollapseBtn = byId('sidebarCollapseBtn');
         const mobileMenuBtn     = byId('mobileMenuBtn');
         const mobileDrawerClose = byId('mobileDrawerClose');

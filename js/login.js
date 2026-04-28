@@ -47,7 +47,9 @@ function isLoginPage() {
 }
 
 function shouldRequireAuthOnCurrentPage() {
-  return !isLoginPage();
+  const pathname = window.location.pathname.toLowerCase();
+  const isHome = pathname === "/" || pathname === "/index.html" || pathname.endsWith("/index.html");
+  return !isLoginPage() && !isHome;
 }
 
 function getPostLoginRedirect() {
@@ -290,6 +292,84 @@ function updateMobileSettingsAction(accessState) {
     : '<i class="fa fa-sign-in-alt"></i><span>Login</span>';
 }
 
+function applyCollapsedSidebarTooltips() {
+  document.querySelectorAll(".tyfit-sidebar .sidebar-nav-item").forEach((item) => {
+    const label = item.querySelector("span")?.textContent?.trim();
+    if (!label) {
+      return;
+    }
+
+    item.setAttribute("data-tooltip", label);
+    item.setAttribute("data-tool-tip", label);
+    item.setAttribute("title", label);
+    item.setAttribute("aria-label", label);
+  });
+}
+
+function updateTopbarGuestState(accessState) {
+  const isLoggedIn = Boolean(accessState?.isLoggedIn);
+  const desktopNotifBtn = document.getElementById("desktopNotifBtn");
+  const mobileNotifBtn = document.getElementById("mobileNotifBtn");
+  const desktopAccountBtn = document.getElementById("desktopAccountBtn");
+  const desktopAccountMenu = document.getElementById("desktopAccountMenu");
+  const desktopAvatar = document.getElementById("desktopProfileAvatar");
+  const desktopName = document.getElementById("desktopProfileName");
+
+  if (desktopNotifBtn) {
+    desktopNotifBtn.style.display = isLoggedIn ? "" : "none";
+  }
+
+  if (mobileNotifBtn) {
+    mobileNotifBtn.style.display = isLoggedIn ? "" : "none";
+  }
+
+  if (!desktopAccountBtn) {
+    return;
+  }
+
+  desktopAccountBtn.classList.toggle("tyfit-account-btn--guest", !isLoggedIn);
+
+  if (!isLoggedIn) {
+    if (desktopAvatar) {
+      desktopAvatar.style.display = "none";
+    }
+
+    const chevronIcon = desktopAccountBtn.querySelector("svg");
+    if (chevronIcon) {
+      chevronIcon.style.display = "none";
+    }
+
+    if (desktopName) {
+      desktopName.textContent = "Login";
+    }
+
+    desktopAccountBtn.setAttribute("aria-label", "Login");
+
+    if (desktopAccountMenu) {
+      desktopAccountMenu.classList.remove("is-open");
+      desktopAccountMenu.setAttribute("aria-hidden", "true");
+      desktopAccountMenu.style.display = "none";
+    }
+
+    return;
+  }
+
+  if (desktopAvatar) {
+    desktopAvatar.style.display = "";
+  }
+
+  const chevronIcon = desktopAccountBtn.querySelector("svg");
+  if (chevronIcon) {
+    chevronIcon.style.display = "";
+  }
+
+  desktopAccountBtn.setAttribute("aria-label", "Account menu");
+
+  if (desktopAccountMenu) {
+    desktopAccountMenu.style.display = "";
+  }
+}
+
 function ensureAuthModalStyles() {
   if (document.getElementById("tyfitAuthModalStyles")) {
     return;
@@ -316,7 +396,7 @@ function ensureAuthModalStyles() {
       position: absolute;
       inset: 0;
       background: rgba(15, 23, 42, 0.62);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(16px);
     }
 
     #tyfitAuthModal .tyfit-auth-modal-dialog {
@@ -421,6 +501,30 @@ function ensureAuthModalStyles() {
     body.tyfit-auth-locked #tyfitAuthModal * {
       pointer-events: auto;
       user-select: auto;
+    }
+
+    @media (max-width: 767px) {
+      #tyfitAuthModal {
+        padding: 16px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #tyfitAuthModal .tyfit-auth-modal-dialog {
+        width: min(100%, 420px);
+      }
+
+      #tyfitAuthModal .tyfit-auth-modal-content {
+        border-radius: 24px;
+      }
+
+      #tyfitAuthModal .tyfit-auth-modal-header {
+        padding: 16px 16px 0;
+      }
+
+      #tyfitAuthModal .tyfit-auth-modal-body {
+        padding: 8px 22px 24px;
+      }
     }
   `;
 
@@ -586,6 +690,7 @@ function bindAuthUi() {
   const mobileSettingsBtn = document.getElementById("mobileSettingsBtn");
   const mobileSettingsMenu = document.getElementById("mobileSettingsMenu");
   const mobileSettingsAction = document.getElementById("mobileSettingsAction");
+  const desktopAccountBtn = document.getElementById("desktopAccountBtn");
 
   bindGlobalLogoutActions();
 
@@ -637,6 +742,20 @@ function bindAuthUi() {
     });
   }
 
+  if (desktopAccountBtn && desktopAccountBtn.dataset.authBound !== "true") {
+    desktopAccountBtn.dataset.authBound = "true";
+    desktopAccountBtn.addEventListener("click", async (event) => {
+      const accessState = await getAccessState();
+      if (accessState?.isLoggedIn) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      openAuthModal({ locked: false });
+    });
+  }
+
   if (document.body && document.body.dataset.mobileSettingsBound !== "true") {
     document.body.dataset.mobileSettingsBound = "true";
     const closeMobileSettingsOnOutsideInteraction = (event) => {
@@ -679,6 +798,8 @@ async function syncAuthUi(sessionArg) {
   updateAdminLinkState(accessState);
   updatePrimaryNavLinks(accessState);
   updateMobileSettingsAction(accessState);
+  applyCollapsedSidebarTooltips();
+  updateTopbarGuestState(accessState);
   await showUser(session);
   updateLoginPageState(session);
 

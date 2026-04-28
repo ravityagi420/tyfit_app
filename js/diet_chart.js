@@ -97,6 +97,58 @@ function toTitleCaseWords(value) {
         .replace(/\b([a-z])/g, (match) => match.toUpperCase());
 }
 
+function hashText(value) {
+    const text = String(value || "");
+    let hash = 0;
+    for (let i = 0; i < text.length; i += 1) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash);
+}
+
+function resolveMealIcon(mealName, mealIndex, totalMeals) {
+    const normalizedName = String(mealName || "").trim().toLowerCase();
+
+    if (normalizedName.includes("breakfast")) return "sun";
+    if (normalizedName.includes("lunch")) return "cooking-pot";
+    if (normalizedName.includes("dinner")) return "moon-star";
+    if (normalizedName.includes("snack")) return "donut";
+
+    if (mealIndex === 0) return "sun";
+    if (mealIndex === totalMeals - 1) return "moon-star";
+
+    const randomPool = ["sandwich", "donut", "hamburger", "salad", "leafy-green"];
+    const seed = `${normalizedName}:${mealIndex}:${totalMeals}`;
+    return randomPool[hashText(seed) % randomPool.length];
+}
+
+function getViewMealLabelText(labelEl) {
+    if (!labelEl) return "";
+    const textEl = labelEl.querySelector(".diet-view-meal-label-text");
+    if (textEl) return (textEl.textContent || "").trim();
+    return (labelEl.textContent || "").trim();
+}
+
+function renderEditorMealIcons() {
+    const mealCards = Array.from(document.querySelectorAll("#dietMealsContainer .meal-card"));
+    const total = mealCards.length;
+
+    mealCards.forEach((mealCard, index) => {
+        const mealName = mealCard.querySelector(".diet-meal-name")?.value || `Meal ${index + 1}`;
+        const iconName = resolveMealIcon(mealName, index, total);
+        const iconWrap = mealCard.querySelector(".diet-meal-name-icon");
+        if (!iconWrap) return;
+
+        iconWrap.setAttribute("data-meal-icon", iconName);
+        iconWrap.innerHTML = `<i data-lucide="${iconName}"></i>`;
+    });
+
+    if (window.lucide?.createIcons) {
+        window.lucide.createIcons();
+    }
+}
+
 function normalizeDietChartName(value) {
     return toTitleCaseWords(value);
 }
@@ -413,7 +465,7 @@ function renderDietChartSelector() {
         return;
     }
 
-    const planIcons = ["utensils-crossed", "leafy-green", "croissant"];
+    const planIcons = ["cookie", "utensils-crossed", "cooking-pot"];
 
     strip.innerHTML = charts.length > 0
         ? charts.map((chart, index) => {
@@ -476,6 +528,401 @@ function closeDietChartActionsMenu() {
             menu.hidden = true;
         });
     }
+
+    closeDietChartCardActionSheet();
+}
+
+function isDietChartMobileMenuMode() {
+    return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function ensureDietChartCardActionSheet() {
+    if (getEl("dietChartCardActionSheet")) {
+        return;
+    }
+
+    document.body.insertAdjacentHTML("beforeend", `
+        <div class="tp-plan-card-sheet" id="dietChartCardActionSheet" hidden aria-hidden="true" data-chart-id="">
+            <button type="button" class="tp-plan-card-sheet-backdrop" data-sheet-close aria-label="Close chart actions"></button>
+            <section class="tp-plan-card-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="dietChartCardSheetTitle">
+                <div class="tp-plan-card-sheet-head">
+                    <p class="tp-plan-card-sheet-title" id="dietChartCardSheetTitle">Chart options</p>
+                    <button type="button" class="tp-plan-card-sheet-close" data-sheet-close aria-label="Close"><i data-lucide="x"></i></button>
+                </div>
+                <div class="tp-plan-card-sheet-actions">
+                    <button type="button" class="tp-plan-card-sheet-btn" data-sheet-action="rename"><i data-lucide="pencil-line"></i> Rename</button>
+                    <button type="button" class="tp-plan-card-sheet-btn tp-plan-card-sheet-btn--danger" data-sheet-action="delete"><i data-lucide="trash-2"></i> Delete</button>
+                </div>
+            </section>
+        </div>
+    `);
+
+    const sheet = getEl("dietChartCardActionSheet");
+    if (!sheet) {
+        return;
+    }
+
+    sheet.addEventListener("click", async (event) => {
+        const closeTrigger = event.target.closest("[data-sheet-close]");
+        if (closeTrigger) {
+            closeDietChartCardActionSheet();
+            return;
+        }
+
+        const actionBtn = event.target.closest("[data-sheet-action]");
+        if (!actionBtn) {
+            return;
+        }
+
+        const chartId = sheet.getAttribute("data-chart-id");
+        if (!chartId) {
+            closeDietChartCardActionSheet();
+            return;
+        }
+
+        DIET_STATE.selectedChartId = chartId;
+        closeDietChartCardActionSheet();
+
+        if (actionBtn.getAttribute("data-sheet-action") === "rename") {
+            await renameSelectedDietChart();
+            return;
+        }
+
+        if (actionBtn.getAttribute("data-sheet-action") === "delete") {
+            await deleteDietChart(chartId);
+        }
+    });
+
+    if (window.lucide?.createIcons) {
+        window.lucide.createIcons();
+    }
+}
+
+function openDietChartCardActionSheet(chartId) {
+    if (!chartId) {
+        return;
+    }
+
+    ensureDietChartCardActionSheet();
+    const sheet = getEl("dietChartCardActionSheet");
+    if (!sheet) {
+        return;
+    }
+
+    const chart = (DIET_STATE.dietCharts || []).find((item) => String(item.id) === String(chartId));
+    const titleEl = getEl("dietChartCardSheetTitle");
+    if (titleEl) {
+        titleEl.textContent = chart ? `${getDietChartName(chart)} options` : "Chart options";
+    }
+
+    sheet.setAttribute("data-chart-id", String(chartId));
+    sheet.hidden = false;
+    sheet.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+}
+
+function closeDietChartCardActionSheet() {
+    const sheet = getEl("dietChartCardActionSheet");
+    if (!sheet) {
+        return;
+    }
+
+    sheet.hidden = true;
+    sheet.setAttribute("aria-hidden", "true");
+    sheet.setAttribute("data-chart-id", "");
+    document.body.style.overflow = "";
+}
+
+function isDietQtySheetMode() {
+    return window.matchMedia("(max-width: 991px)").matches;
+}
+
+function ensureDietQtyActionSheet() {
+    if (getEl("dietQtyActionSheet")) {
+        return;
+    }
+
+    document.body.insertAdjacentHTML("beforeend", `
+        <div class="diet-qty-sheet" id="dietQtyActionSheet" hidden aria-hidden="true" data-meal-index="" data-item-index="">
+            <button type="button" class="diet-qty-sheet-backdrop" data-qty-sheet-close aria-label="Close quantity editor"></button>
+            <section class="diet-qty-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="dietQtySheetTitle">
+                <div class="diet-qty-sheet-head">
+                    <p class="diet-qty-sheet-title" id="dietQtySheetTitle">Edit quantity</p>
+                    <button type="button" class="diet-qty-sheet-close" data-qty-sheet-close aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="diet-qty-sheet-body">
+                    <label class="diet-qty-sheet-label" for="dietQtySheetInput">Quantity</label>
+                    <div class="diet-qty-sheet-input-row">
+                        <input type="number" id="dietQtySheetInput" class="diet-qty-sheet-input" min="0.01" step="0.01" inputmode="decimal" />
+                        <span class="diet-qty-sheet-unit" id="dietQtySheetUnit"></span>
+                    </div>
+                </div>
+                <div class="diet-qty-sheet-actions">
+                    <button type="button" class="diet-qty-sheet-btn diet-qty-sheet-btn--ghost" data-qty-sheet-close>Cancel</button>
+                    <button type="button" class="diet-qty-sheet-btn diet-qty-sheet-btn--primary" data-qty-sheet-save>Save</button>
+                </div>
+            </section>
+        </div>
+    `);
+
+    const sheet = getEl("dietQtyActionSheet");
+    const inputEl = getEl("dietQtySheetInput");
+    if (!sheet || !inputEl) {
+        return;
+    }
+
+    sheet.addEventListener("click", async (event) => {
+        const closeTrigger = event.target.closest("[data-qty-sheet-close]");
+        if (closeTrigger) {
+            closeDietQtyActionSheet();
+            return;
+        }
+
+        const saveTrigger = event.target.closest("[data-qty-sheet-save]");
+        if (!saveTrigger) {
+            return;
+        }
+
+        await saveDietQtyActionSheet();
+    });
+
+    inputEl.addEventListener("keydown", async (event) => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeDietQtyActionSheet();
+            return;
+        }
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            await saveDietQtyActionSheet();
+        }
+    });
+}
+
+function openDietQtyActionSheet(details = {}) {
+    ensureDietQtyActionSheet();
+
+    const sheet = getEl("dietQtyActionSheet");
+    const titleEl = getEl("dietQtySheetTitle");
+    const inputEl = getEl("dietQtySheetInput");
+    const unitEl = getEl("dietQtySheetUnit");
+    if (!sheet || !titleEl || !inputEl || !unitEl) {
+        return;
+    }
+
+    const mealIndex = Number(details.mealIndex);
+    const itemIndex = Number(details.itemIndex);
+    if (!Number.isFinite(mealIndex) || !Number.isFinite(itemIndex)) {
+        return;
+    }
+
+    const foodName = String(details.foodName || "").trim();
+    const qty = toNumber(details.currentQuantity, 0);
+    const unit = String(details.unit || "").trim();
+
+    sheet.setAttribute("data-meal-index", String(mealIndex));
+    sheet.setAttribute("data-item-index", String(itemIndex));
+    titleEl.textContent = foodName ? `Edit quantity - ${foodName}` : "Edit quantity";
+    inputEl.value = qty > 0 ? formatMacro(qty) : "";
+    unitEl.textContent = unit;
+    unitEl.style.display = unit ? "inline-flex" : "none";
+
+    sheet.hidden = false;
+    sheet.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    window.setTimeout(() => {
+        inputEl.focus();
+        inputEl.select();
+    }, 30);
+}
+
+function closeDietQtyActionSheet() {
+    const sheet = getEl("dietQtyActionSheet");
+    if (!sheet) {
+        return;
+    }
+
+    sheet.hidden = true;
+    sheet.setAttribute("aria-hidden", "true");
+    sheet.setAttribute("data-meal-index", "");
+    sheet.setAttribute("data-item-index", "");
+    document.body.style.overflow = "";
+}
+
+async function saveDietQtyActionSheet() {
+    const sheet = getEl("dietQtyActionSheet");
+    const inputEl = getEl("dietQtySheetInput");
+    if (!sheet || !inputEl) {
+        return;
+    }
+
+    const mealIndex = parseInt(sheet.getAttribute("data-meal-index") || "", 10);
+    const itemIndex = parseInt(sheet.getAttribute("data-item-index") || "", 10);
+    const nextQty = toNumber(inputEl.value, 0);
+
+    if (!Number.isFinite(mealIndex) || !Number.isFinite(itemIndex)) {
+        return;
+    }
+
+    if (nextQty <= 0) {
+        await showDietAlert("Quantity must be greater than 0.", { title: "Invalid Quantity" });
+        inputEl.focus();
+        inputEl.select();
+        return;
+    }
+
+    await updateFoodItemQuantity(mealIndex, itemIndex, nextQty);
+    closeDietQtyActionSheet();
+}
+
+function isCatalogQtySheetMode() {
+    return window.matchMedia("(max-width: 991px)").matches;
+}
+
+function ensureCatalogQtyActionSheet() {
+    if (getEl("catalogQtyActionSheet")) {
+        return;
+    }
+
+    document.body.insertAdjacentHTML("beforeend", `
+        <div class="diet-catalog-qty-sheet" id="catalogQtyActionSheet" hidden aria-hidden="true" data-food-id="">
+            <button type="button" class="diet-catalog-qty-sheet-backdrop" data-catalog-qty-sheet-close aria-label="Close quantity editor"></button>
+            <section class="diet-catalog-qty-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="catalogQtySheetTitle">
+                <div class="diet-catalog-qty-sheet-head">
+                    <p class="diet-catalog-qty-sheet-title" id="catalogQtySheetTitle">Set quantity</p>
+                    <button type="button" class="diet-catalog-qty-sheet-close" data-catalog-qty-sheet-close aria-label="Close">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+                <div class="diet-catalog-qty-sheet-body">
+                    <label class="diet-catalog-qty-sheet-label" for="catalogQtySheetInput">Quantity</label>
+                    <div class="diet-catalog-qty-sheet-input-row">
+                        <input type="number" id="catalogQtySheetInput" class="diet-catalog-qty-sheet-input" min="0.01" step="0.01" inputmode="decimal" />
+                        <span class="diet-catalog-qty-sheet-unit" id="catalogQtySheetUnit"></span>
+                    </div>
+                </div>
+                <div class="diet-catalog-qty-sheet-actions">
+                    <button type="button" class="diet-catalog-qty-sheet-btn diet-catalog-qty-sheet-btn--ghost" data-catalog-qty-sheet-close>Cancel</button>
+                    <button type="button" class="diet-catalog-qty-sheet-btn diet-catalog-qty-sheet-btn--primary" data-catalog-qty-sheet-save>Save</button>
+                </div>
+            </section>
+        </div>
+    `);
+
+    const sheet = getEl("catalogQtyActionSheet");
+    const inputEl = getEl("catalogQtySheetInput");
+    if (!sheet || !inputEl) {
+        return;
+    }
+
+    sheet.addEventListener("click", async (event) => {
+        const closeTrigger = event.target.closest("[data-catalog-qty-sheet-close]");
+        if (closeTrigger) {
+            closeCatalogQtyActionSheet();
+            return;
+        }
+
+        const saveTrigger = event.target.closest("[data-catalog-qty-sheet-save]");
+        if (!saveTrigger) {
+            return;
+        }
+
+        await saveCatalogQtyActionSheet();
+    });
+
+    inputEl.addEventListener("keydown", async (event) => {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            closeCatalogQtyActionSheet();
+            return;
+        }
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            await saveCatalogQtyActionSheet();
+        }
+    });
+}
+
+function openCatalogQtyActionSheet(details = {}) {
+    ensureCatalogQtyActionSheet();
+
+    const sheet = getEl("catalogQtyActionSheet");
+    const titleEl = getEl("catalogQtySheetTitle");
+    const inputEl = getEl("catalogQtySheetInput");
+    const unitEl = getEl("catalogQtySheetUnit");
+    if (!sheet || !titleEl || !inputEl || !unitEl) {
+        return;
+    }
+
+    const foodId = String(details.foodId || "").trim();
+    if (!foodId) {
+        return;
+    }
+
+    const foodName = String(details.foodName || "").trim();
+    const qty = toNumber(details.currentQuantity, 0);
+    const unit = String(details.unit || "").trim();
+
+    sheet.setAttribute("data-food-id", foodId);
+    titleEl.textContent = foodName ? `Set quantity - ${foodName}` : "Set quantity";
+    inputEl.value = qty > 0 ? formatMacro(qty) : "";
+    unitEl.textContent = unit;
+    unitEl.style.display = unit ? "inline-flex" : "none";
+
+    sheet.hidden = false;
+    sheet.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    window.setTimeout(() => {
+        inputEl.focus();
+        inputEl.select();
+    }, 30);
+}
+
+function closeCatalogQtyActionSheet() {
+    const sheet = getEl("catalogQtyActionSheet");
+    if (!sheet) {
+        return;
+    }
+
+    sheet.hidden = true;
+    sheet.setAttribute("aria-hidden", "true");
+    sheet.setAttribute("data-food-id", "");
+    document.body.style.overflow = "";
+}
+
+async function saveCatalogQtyActionSheet() {
+    const sheet = getEl("catalogQtyActionSheet");
+    const inputEl = getEl("catalogQtySheetInput");
+    if (!sheet || !inputEl) {
+        return;
+    }
+
+    const foodId = sheet.getAttribute("data-food-id") || "";
+    const nextQty = toNumber(inputEl.value, 0);
+
+    if (!foodId) {
+        return;
+    }
+
+    if (nextQty <= 0) {
+        await showDietAlert("Quantity must be greater than 0.", { title: "Invalid Quantity" });
+        inputEl.focus();
+        inputEl.select();
+        return;
+    }
+
+    const rowInput = document.querySelector(`.food-catalog-qty-input[data-food-id="${foodId}"]`);
+    if (rowInput) {
+        rowInput.value = formatMacro(nextQty);
+    }
+
+    closeCatalogQtyActionSheet();
 }
 
 async function resolveActorUserId() {
@@ -622,9 +1069,11 @@ function renderDietChartView(chartData) {
         const hasFoodItems = meals.some((meal) => Array.isArray(meal?.items) && meal.items.length > 0);
         let overall = { carbs: 0, protein: 0, fats: 0, calories: 0 };
 
+        const totalMeals = meals.length;
         const mealsHtml = meals.map((meal, mealIndex) => {
             let mealTotals = { carbs: 0, protein: 0, fats: 0, calories: 0 };
             const mealLabel = toTitleCaseWords(meal.meal_name || `Meal ${mealIndex + 1}`) || `Meal ${mealIndex + 1}`;
+            const mealIcon = resolveMealIcon(mealLabel, mealIndex, totalMeals);
 
             const itemCards = (meal.items || []).map((item, itemIndex) => {
                 const computed = getComputedFromItem(item);
@@ -689,7 +1138,7 @@ function renderDietChartView(chartData) {
                 <div class="diet-view-meal-block">
                     <div class="diet-view-meal-header">
                         <div class="diet-view-meal-label-wrap">
-                            <span class="diet-view-meal-label js-meal-name-label" data-meal-index="${mealIndex}">${escapeHtml(mealLabel)}</span>
+                            <span class="diet-view-meal-label js-meal-name-label" data-meal-index="${mealIndex}"><i data-lucide="${mealIcon}" class="diet-view-meal-icon" aria-hidden="true"></i><span class="diet-view-meal-label-text">${escapeHtml(mealLabel)}</span></span>
                             <div class="diet-meal-name-edit-wrap" style="display: none;">
                                 <input type="text" class="form-control form-control-sm diet-meal-name-inline-input" data-meal-index="${mealIndex}" value="${escapeHtml(mealLabel)}">
                                 <button type="button" class="diet-meal-name-save-btn" data-meal-index="${mealIndex}" aria-label="Save meal name" title="Save meal name">
@@ -778,6 +1227,10 @@ function renderDietChartView(chartData) {
             </div>
         `;
 
+        if (window.lucide?.createIcons) {
+            window.lucide.createIcons();
+        }
+
         if (hasFoodItems) {
             setTimeout(() => {
                 renderMacroPieChart(overall);
@@ -789,11 +1242,136 @@ function renderDietChartView(chartData) {
         }, 100);
     }
 
+    function isDietMealMobileMenuMode() {
+        return window.matchMedia("(max-width: 767px)").matches;
+    }
+
+    function startViewMealInlineRename(mealIndex) {
+        const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
+        const input = document.querySelector(`.diet-meal-name-inline-input[data-meal-index="${mealIndex}"]`);
+        const editWrap = input ? input.closest('.diet-meal-name-edit-wrap') : null;
+
+        if (!label || !input) {
+            return;
+        }
+
+        document.querySelectorAll('.diet-meal-menu').forEach((menuEl) => menuEl.classList.remove('open'));
+        document.querySelectorAll('.diet-meal-menu-btn').forEach((menuBtn) => menuBtn.setAttribute('aria-expanded', 'false'));
+
+        label.style.display = 'none';
+        if (editWrap) {
+            editWrap.style.display = 'inline-flex';
+        }
+        input.focus();
+        input.select();
+    }
+
+    function ensureDietMealActionSheet() {
+        if (getEl("dietMealActionSheet")) {
+            return;
+        }
+
+        document.body.insertAdjacentHTML("beforeend", `
+            <div class="tp-plan-card-sheet" id="dietMealActionSheet" hidden aria-hidden="true" data-meal-index="">
+                <button type="button" class="tp-plan-card-sheet-backdrop" data-meal-sheet-close aria-label="Close meal actions"></button>
+                <section class="tp-plan-card-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="dietMealActionSheetTitle">
+                    <div class="tp-plan-card-sheet-head">
+                        <p class="tp-plan-card-sheet-title" id="dietMealActionSheetTitle">Meal options</p>
+                        <button type="button" class="tp-plan-card-sheet-close" data-meal-sheet-close aria-label="Close"><i data-lucide="x"></i></button>
+                    </div>
+                    <div class="tp-plan-card-sheet-actions">
+                        <button type="button" class="tp-plan-card-sheet-btn" data-meal-sheet-action="rename"><i class="fa fa-pencil-alt"></i> Rename</button>
+                        <button type="button" class="tp-plan-card-sheet-btn tp-plan-card-sheet-btn--danger" data-meal-sheet-action="delete"><i class="fa fa-trash-alt"></i> Delete</button>
+                    </div>
+                </section>
+            </div>
+        `);
+
+        const sheet = getEl("dietMealActionSheet");
+        if (!sheet) {
+            return;
+        }
+
+        sheet.addEventListener("click", (event) => {
+            const closeTrigger = event.target.closest("[data-meal-sheet-close]");
+            if (closeTrigger) {
+                closeDietMealActionSheet();
+                return;
+            }
+
+            const actionBtn = event.target.closest("[data-meal-sheet-action]");
+            if (!actionBtn) {
+                return;
+            }
+
+            const mealIndexRaw = sheet.getAttribute("data-meal-index");
+            const mealIndex = Number.parseInt(mealIndexRaw, 10);
+            closeDietMealActionSheet();
+
+            if (Number.isNaN(mealIndex)) {
+                return;
+            }
+
+            if (actionBtn.getAttribute("data-meal-sheet-action") === "rename") {
+                startViewMealInlineRename(mealIndex);
+                return;
+            }
+
+            if (actionBtn.getAttribute("data-meal-sheet-action") === "delete") {
+                showDeleteMealConfirmationModal(mealIndex);
+            }
+        });
+
+        if (window.lucide?.createIcons) {
+            window.lucide.createIcons();
+        }
+    }
+
+    function openDietMealActionSheet(mealIndex) {
+        ensureDietMealActionSheet();
+        const sheet = getEl("dietMealActionSheet");
+        if (!sheet) {
+            return;
+        }
+
+        const titleEl = getEl("dietMealActionSheetTitle");
+        const labelEl = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"] .diet-view-meal-label-text`);
+        if (titleEl) {
+            titleEl.textContent = labelEl?.textContent ? `${labelEl.textContent.trim()} options` : "Meal options";
+        }
+
+        sheet.setAttribute("data-meal-index", String(mealIndex));
+        sheet.hidden = false;
+        sheet.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        if (window.lucide?.createIcons) {
+            window.lucide.createIcons();
+        }
+    }
+
+    function closeDietMealActionSheet() {
+        const sheet = getEl("dietMealActionSheet");
+        if (!sheet) {
+            return;
+        }
+
+        sheet.removeAttribute("data-meal-index");
+        sheet.hidden = true;
+        sheet.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
     function setupViewModeEventHandlers() {
         document.querySelectorAll('.diet-meal-menu-btn').forEach((btn) => {
             btn.addEventListener('click', (event) => {
                 event.stopPropagation();
                 const mealIndex = event.currentTarget.getAttribute('data-meal-index');
+
+                if (isDietMealMobileMenuMode()) {
+                    openDietMealActionSheet(mealIndex);
+                    return;
+                }
+
                 const menu = document.querySelector(`.diet-meal-menu[data-meal-index="${mealIndex}"]`);
 
                 document.querySelectorAll('.diet-meal-menu').forEach((m) => {
@@ -821,25 +1399,12 @@ function renderDietChartView(chartData) {
             btn.addEventListener('click', (event) => {
                 event.stopPropagation();
                 const mealIndex = parseInt(event.currentTarget.getAttribute('data-meal-index'), 10);
-                const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
-                const input = document.querySelector(`.diet-meal-name-inline-input[data-meal-index="${mealIndex}"]`);
-                const editWrap = input ? input.closest('.diet-meal-name-edit-wrap') : null;
                 const menu = document.querySelector(`.diet-meal-menu[data-meal-index="${mealIndex}"]`);
-
-                if (!label || !input) {
-                    return;
-                }
 
                 if (menu) {
                     menu.classList.remove('open');
                 }
-
-                label.style.display = 'none';
-                if (editWrap) {
-                    editWrap.style.display = 'inline-flex';
-                }
-                input.focus();
-                input.select();
+                startViewMealInlineRename(mealIndex);
             });
         });
 
@@ -863,7 +1428,7 @@ function renderDietChartView(chartData) {
                 const newName = (input.value || '').trim();
 
                 if (!newName) {
-                    input.value = label ? label.textContent : `Meal ${mealIndex + 1}`;
+                    input.value = label ? getViewMealLabelText(label) : `Meal ${mealIndex + 1}`;
                 }
 
                 if (label) {
@@ -887,7 +1452,7 @@ function renderDietChartView(chartData) {
                     const mealIndex = parseInt(input.getAttribute('data-meal-index'), 10);
                     const label = document.querySelector(`.js-meal-name-label[data-meal-index="${mealIndex}"]`);
                     const editWrap = input.closest('.diet-meal-name-edit-wrap');
-                    input.value = label ? label.textContent : '';
+                    input.value = label ? getViewMealLabelText(label) : '';
                     if (editWrap) {
                         editWrap.style.display = 'none';
                     }
@@ -958,9 +1523,30 @@ function renderDietChartView(chartData) {
                 event.preventDefault();
                 event.stopPropagation();
 
+                const wrap = event.currentTarget.closest('.diet-view-item-qty');
+                if (isDietQtySheetMode()) {
+                    if (!wrap) {
+                        return;
+                    }
+
+                    const mealIndex = parseInt(wrap.getAttribute('data-meal-index') || '', 10);
+                    const itemIndex = parseInt(wrap.getAttribute('data-item-index') || '', 10);
+                    const currentQuantity = wrap.getAttribute('data-current-quantity') || '0';
+                    const unit = wrap.querySelector('.diet-item-qty-display .diet-item-unit')?.textContent || '';
+                    const foodName = wrap.closest('.diet-view-item-card')?.querySelector('.diet-view-item-name')?.textContent || '';
+
+                    openDietQtyActionSheet({
+                        mealIndex,
+                        itemIndex,
+                        currentQuantity,
+                        unit,
+                        foodName
+                    });
+                    return;
+                }
+
                 closeAllQtyEditors();
 
-                const wrap = event.currentTarget.closest('.diet-view-item-qty');
                 const input = wrap?.querySelector('.diet-item-qty-input');
                 if (!wrap || !input) {
                     return;
@@ -2175,7 +2761,10 @@ function addMeal(mealData = {}) {
 
     mealEl.innerHTML = `
         <div class="meal-card-header diet-meal-header">
-            <input type="text" class="form-control diet-meal-name" value="${escapeHtml(mealData.meal_name || `Meal ${mealSort}`)}" placeholder="Meal name">
+            <div class="diet-meal-name-input-wrap">
+                <span class="diet-meal-name-icon" aria-hidden="true"></span>
+                <input type="text" class="form-control diet-meal-name" value="${escapeHtml(mealData.meal_name || `Meal ${mealSort}`)}" placeholder="Meal name">
+            </div>
             <div class="diet-meal-header-actions">
                 <button type="button" class="btn btn-outline-primary btn-sm js-add-food-row">
                     <i class="fa fa-plus"></i> Add Food
@@ -2208,6 +2797,7 @@ function addMeal(mealData = {}) {
     }
 
     recalculateMealTotals(mealEl);
+    renderEditorMealIcons();
     return mealEl;
 }
 
@@ -2218,6 +2808,7 @@ function deleteMeal(mealElement) {
 
     mealElement.remove();
     recalculateDietChartTotals();
+    renderEditorMealIcons();
 }
 
 function addFoodRow(mealElement, rowData = null) {
@@ -3201,8 +3792,15 @@ function bindDietChartEvents() {
             // Per-card 3-dot menu button
             const menuBtn = event.target.closest(".js-card-menu-btn");
             if (menuBtn) {
+                event.preventDefault();
                 event.stopPropagation();
                 const chartId = menuBtn.getAttribute("data-chart-id");
+
+                if (isDietChartMobileMenuMode()) {
+                    openDietChartCardActionSheet(chartId);
+                    return;
+                }
+
                 const menu = chartStrip.querySelector(`.tp-plan-card-menu[data-menu-chart-id="${chartId}"]`);
                 chartStrip.querySelectorAll(".tp-plan-card-menu").forEach((m) => {
                     if (m !== menu) {
@@ -3276,17 +3874,16 @@ function bindDietChartEvents() {
             if (!chartCard || event.target.closest(".js-card-menu-btn")) {
                 return;
             }
+
+            if (!isDietChartMobileMenuMode()) {
+                return;
+            }
+
             longPressTimer = setTimeout(() => {
                 longPressTimer = null;
                 const chartId = chartCard.getAttribute("data-chart-id");
-                const menu = chartStrip.querySelector(`.tp-plan-card-menu[data-menu-chart-id="${chartId}"]`);
                 closeDietChartActionsMenu();
-                if (menu) {
-                    menu.hidden = false;
-                    requestAnimationFrame(() => {
-                        menu.classList.add("is-open");
-                    });
-                }
+                openDietChartCardActionSheet(chartId);
             }, 500);
         }, { passive: true });
 
@@ -3430,6 +4027,11 @@ function bindDietChartEvents() {
             if (event.target.classList.contains("diet-food-quantity")) {
                 const rowEl = event.target.closest(".diet-food-row");
                 recalculateFoodRow(rowEl);
+                return;
+            }
+
+            if (event.target.classList.contains("diet-meal-name")) {
+                renderEditorMealIcons();
             }
         });
     }
@@ -3682,8 +4284,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         foodCatalogList.addEventListener("click", async (event) => {
+            const qtyInputClick = event.target.closest(".food-catalog-qty-input");
             const qtyUpBtn = event.target.closest(".js-catalog-qty-up");
             const qtyDownBtn = event.target.closest(".js-catalog-qty-down");
+
+            if (isCatalogQtySheetMode() && (qtyInputClick || qtyUpBtn || qtyDownBtn)) {
+                event.preventDefault();
+                const card = (qtyInputClick || qtyUpBtn || qtyDownBtn).closest(".diet-catalog-pick-card");
+                const qtyInput = card ? card.querySelector(".food-catalog-qty-input") : null;
+                const foodId = qtyInput ? String(qtyInput.getAttribute("data-food-id") || "") : "";
+                const foodName = card ? card.querySelector(".diet-catalog-pick-name")?.textContent || "" : "";
+                const unit = card ? card.querySelector(".diet-catalog-unit-pill")?.textContent || "" : "";
+                const currentQuantity = qtyInput ? qtyInput.value : "";
+
+                openCatalogQtyActionSheet({
+                    foodId,
+                    foodName,
+                    unit,
+                    currentQuantity
+                });
+                return;
+            }
+
             if (qtyUpBtn || qtyDownBtn) {
                 const card = (qtyUpBtn || qtyDownBtn).closest(".diet-catalog-pick-card");
                 const qtyInput = card ? card.querySelector(".food-catalog-qty-input") : null;
