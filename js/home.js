@@ -19,6 +19,60 @@ function byId(id) {
     return document.getElementById(id);
 }
 
+function refreshIcons() {
+    if (typeof window.tyfitRefreshIcons === "function") {
+        window.tyfitRefreshIcons();
+        return;
+    }
+    if (window.lucide?.createIcons) {
+        window.lucide.createIcons();
+    }
+}
+
+function mountHomeLoader() {
+    if (byId("tyfitPageLoader")) return;
+    const loader = document.createElement("div");
+    loader.id = "tyfitPageLoader";
+    loader.className = "tyfit-page-loader";
+    loader.innerHTML = '<div class="tyfit-page-loader__panel"><div class="tyfit-page-loader__spinner" aria-hidden="true"></div><p>Loading TYFIT...</p></div>';
+    document.body.appendChild(loader);
+    requestAnimationFrame(() => loader.classList.add("is-visible"));
+    mountHomeLoader._ts = Date.now();
+}
+
+function unmountHomeLoader() {
+    const loader = byId("tyfitPageLoader");
+    if (!loader) return;
+    const elapsed = Date.now() - (mountHomeLoader._ts || Date.now());
+    const delay = Math.max(0, 260 - elapsed);
+    setTimeout(() => {
+        loader.classList.remove("is-visible");
+        loader.classList.add("is-leaving");
+        setTimeout(() => loader.remove(), 220);
+    }, delay);
+}
+
+function unmountHomeLoaderWhenReady() {
+    if (document.readyState === "complete") {
+        refreshIcons();
+        unmountHomeLoader();
+        return;
+    }
+
+    window.addEventListener("load", () => {
+        refreshIcons();
+        unmountHomeLoader();
+    }, { once: true });
+}
+
+if (document.body) {
+    mountHomeLoader();
+} else {
+    document.addEventListener("readystatechange", () => {
+        if (document.readyState !== "loading") mountHomeLoader();
+    }, { once: true });
+}
+
 let quickAccessExpanded = false;
 let isHomeUserLoggedIn = false;
 let activeCalculatorName = "BMR Calculator";
@@ -68,9 +122,7 @@ function renderHome(data) {
             quickAccessToggle.style.display = "none";
         }
 
-        if (window.lucide?.createIcons) {
-            window.lucide.createIcons();
-        }
+        refreshIcons();
     }
 }
 
@@ -98,9 +150,7 @@ function openCalculatorComingSoon(name) {
     modal.hidden = false;
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("tyfit-calc-modal-open");
-    setTimeout(() => {
-        if (window.lucide?.createIcons) window.lucide.createIcons();
-    }, 0);
+    setTimeout(refreshIcons, 0);
 }
 
 function closeCalculatorComingSoon() {
@@ -451,7 +501,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    if (window.lucide?.createIcons) {
-        window.lucide.createIcons();
-    }
+    refreshIcons();
+    unmountHomeLoaderWhenReady();
 });

@@ -62,6 +62,80 @@ body[data-page="training-plan"] .tyfit-main-inner {
   font-weight: 400;
 }
 
+.tp-user-toolbar {
+  margin: 10px 0 16px;
+  width: 100%;
+}
+
+.tp-user-select-wrap {
+  width: 100%;
+  max-width: none;
+}
+
+.tp-user-select-wrap label {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 400;
+  color: #1A1F36;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.tp-user-select-control {
+  position: relative;
+  width: 100%;
+}
+
+.tp-user-select-control > i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: #64748b;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tp-user-select {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid #d7e2ef;
+  background: #fff;
+  color: #1A1F36;
+  padding: 0 40px 0 12px;
+  font-size: 15px;
+  font-weight: 400;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1;
+  appearance: none;
+  outline: none;
+}
+
+.tp-user-select option {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.tp-user-select:focus {
+  border-color: #9dbbf2;
+  box-shadow: 0 0 0 3px rgba(15, 111, 234, 0.12);
+}
+
+.tp-user-select-control i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: #64748b;
+  pointer-events: none;
+}
+
 .tp-back-btn,
 .tp-icon-action,
 .tp-modal-close {

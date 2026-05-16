@@ -1,0 +1,269 @@
+body[data-page="privacy-data"],
+body[data-page="privacy-policy"],
+body[data-page="terms"],
+body[data-page="cookie-policy"],
+body[data-page="data-processing"] {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.tyfit-privacy-hero {
+    padding: 28px;
+    background: linear-gradient(180deg, #e9f3ff 0%, #f7fbff 100%);
+    border: 1px solid #dbeafe;
+}
+
+.tyfit-privacy-eyebrow {
+    margin: 0 0 6px;
+    color: #2563eb;
+    letter-spacing: 0.18em;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.tyfit-privacy-title {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.06;
+    font-weight: 750;
+    color: #0f172a;
+}
+
+.tyfit-privacy-subtitle {
+    margin: 9px 0 0;
+    color: #475569;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.tyfit-privacy-card-grid {
+    display: grid;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.tyfit-privacy-request-card {
+    padding: 22px;
+    border-radius: 18px;
+    border: 1px solid #e6edf8;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.tyfit-privacy-request-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.tyfit-privacy-request-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.tyfit-privacy-request-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.1;
+}
+
+.tyfit-privacy-request-icon.is-danger {
+    color: #dc2626;
+    background: #fff1f2;
+}
+
+.tyfit-privacy-request-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 650;
+}
+
+.tyfit-privacy-request-copy {
+    margin: 0 0 14px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.tyfit-privacy-btn {
+    min-height: 44px;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    background: #0f6fea;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0 16px;
+    cursor: pointer;
+    transition: filter 0.16s ease;
+}
+
+.tyfit-privacy-btn:hover {
+    filter: brightness(0.96);
+}
+
+.tyfit-privacy-btn.is-soft {
+    background: #ffffff;
+    color: #1d4ed8;
+    border-color: #cfe2ff;
+}
+
+.tyfit-privacy-btn.is-danger {
+    background: #fff7f7;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.tyfit-privacy-links-card {
+    padding: 22px;
+    margin-top: 14px;
+}
+
+.tyfit-privacy-links-card h3 {
+    margin: 0 0 8px;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 650;
+}
+
+.tyfit-privacy-links-card p {
+    margin: 0 0 12px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.tyfit-privacy-legal-link {
+    border: 1px solid transparent;
+    border-radius: 12px;
+    min-height: 48px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+}
+
+.tyfit-privacy-legal-link i,
+.tyfit-privacy-legal-link svg {
+    width: 17px;
+    height: 17px;
+    color: #2563eb;
+    flex-shrink: 0;
+}
+
+.tyfit-privacy-legal-link:hover {
+    border-color: #dbeafe;
+    background: #f8fbff;
+}
+
+.tyfit-privacy-page-card {
+    padding: 22px;
+    margin-top: 14px;
+}
+
+.tyfit-privacy-page-card h2 {
+    margin: 0 0 8px;
+    color: #0f172a;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.tyfit-privacy-page-card h3 {
+    margin: 16px 0 6px;
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 650;
+}
+
+.tyfit-privacy-page-card p,
+.tyfit-privacy-page-card li {
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.tyfit-privacy-page-card ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.tyfit-privacy-modal[hidden] {
+    display: none !important;
+}
+
+.tyfit-privacy-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1250;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.tyfit-privacy-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+    border: 0;
+}
+
+.tyfit-privacy-modal-panel {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 460px);
+    border-radius: 20px 20px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.26);
+    padding: 16px;
+}
+
+.tyfit-privacy-modal-panel h4 {
+    margin: 0 0 8px;
+    color: #0f172a;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.tyfit-privacy-modal-panel p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.tyfit-privacy-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+@media (min-width: 768px) {
+    .tyfit-privacy-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tyfit-privacy-modal {
+        align-items: center;
+        padding: 16px;
+    }
+
+    .tyfit-privacy-modal-panel {
+        border-radius: 18px;
+    }
+}

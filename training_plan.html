@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260425a" rel="stylesheet">
-    <link href="css/training.css?v=20260428d" rel="stylesheet">
+    <link href="css/training.css?v=20260516b" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="training-plan">
 
@@ -134,6 +134,18 @@
                             <p class="tp-eyebrow">TRAINING PLAN</p>
                             <h2 class="tp-page-title">Training Plan</h2>
                             <p class="tp-page-subtitle">Plan your workouts. Stay consistent.</p>
+                        </div>
+                    </section>
+
+                    <section class="tp-user-toolbar" id="trainingUserToolbar" hidden>
+                        <div class="tp-user-select-wrap">
+                            <label for="trainingUserSelect">Select User</label>
+                            <div class="tp-user-select-control">
+                                <select id="trainingUserSelect" class="tp-user-select">
+                                    <option value="">Select user...</option>
+                                </select>
+                                <i data-lucide="chevron-down" aria-hidden="true"></i>
+                            </div>
                         </div>
                     </section>
 
@@ -406,6 +418,6 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260427c"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/training_plan.js?v=20260428c"></script>
+    <script src="js/training_plan.js?v=20260516a"></script>
 </body>
 </html>

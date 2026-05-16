@@ -136,6 +136,40 @@
     margin-right: auto;
 }
 
+body[data-page="diet-chart"] .tp-hero-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 0 8px 18px;
+}
+
+body[data-page="diet-chart"] .tp-eyebrow {
+    margin: 0 0 4px;
+    color: #0f6fea;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+}
+
+body[data-page="diet-chart"] .tp-page-title {
+    margin: 0;
+    color: #101828;
+    font-size: clamp(30px, 4vw, 42px);
+    line-height: 1.04;
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    display: block;
+}
+
+body[data-page="diet-chart"] .tp-page-subtitle {
+    margin: 8px 0 0;
+    color: #667085;
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 400;
+}
+
 /* ============================================
    DIET CHART PAGE - MEAL CARDS
    ============================================ */
@@ -1959,6 +1993,13 @@
     flex: 1 1 320px;
 }
 
+.diet-user-select-wrap label {
+    font-size: 15px;
+    font-weight: 400;
+    color: #1A1F36;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
 .diet-chart-switcher {
     display: grid;
     gap: 10px;
@@ -2556,15 +2597,23 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+    width: 100%;
     border: 1px solid #cbd5e1;
     border-radius: 12px;
     background-color: #ffffff;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
     padding: 11px 42px 11px 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
+    font-size: 15px;
+    font-weight: 400;
+    color: #1A1F36;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     min-height: 44px;
+}
+
+.diet-user-select option {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    font-weight: 400;
 }
 
 .diet-user-select:focus {

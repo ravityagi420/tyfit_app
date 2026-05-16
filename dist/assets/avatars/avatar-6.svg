@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Monkey avatar">
+  <defs>
+    <linearGradient id="g6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fde68a"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="80" fill="url(#g6)"/>
+
+  <ellipse cx="44" cy="70" rx="14" ry="18" fill="#7c4a24"/>
+  <ellipse cx="116" cy="70" rx="14" ry="18" fill="#7c4a24"/>
+  <ellipse cx="44" cy="70" rx="8" ry="10" fill="#f7d7a8"/>
+  <ellipse cx="116" cy="70" rx="8" ry="10" fill="#f7d7a8"/>
+
+  <ellipse cx="80" cy="78" rx="38" ry="34" fill="#8b5a2b"/>
+  <ellipse cx="80" cy="86" rx="24" ry="20" fill="#f7d7a8"/>
+
+  <circle cx="68" cy="74" r="4" fill="#1f2937"/>
+  <circle cx="92" cy="74" r="4" fill="#1f2937"/>
+  <circle cx="66.8" cy="72.8" r="1" fill="#ffffff"/>
+  <circle cx="90.8" cy="72.8" r="1" fill="#ffffff"/>
+
+  <ellipse cx="80" cy="86" rx="3" ry="2.3" fill="#5b3719"/>
+  <path d="M72 92c2.2 2.8 5 4.2 8 4.2s5.8-1.4 8-4.2" fill="none" stroke="#5b3719" stroke-width="2.4" stroke-linecap="round"/>
+
+  <path d="M62 60c3-2.6 7-4 11-4" fill="none" stroke="#6a3f1f" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M98 56c4 0 8 1.4 11 4" fill="none" stroke="#6a3f1f" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

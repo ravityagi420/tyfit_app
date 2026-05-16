@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Decline Crunch">
+  <title>Decline Crunch</title>
+  
+  <circle cx="24" cy="21" r="4"/>
+  <path d="M28 24 C35 28 39 34 42 42"/>
+  <path d="M23 31 C18 35 16 40 15 47"/>
+  <path d="M39 43 H52"/>
+  <path d="M20 47 H30"/>
+  <path d="M14 50 C25 54 43 54 54 50"/>
+
+</svg>

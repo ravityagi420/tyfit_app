@@ -5,6 +5,120 @@
 (function () {
     function byId(id) { return document.getElementById(id); }
 
+    let iconRefreshRaf = null;
+    let iconRefreshIdle = null;
+    let loaderVisibleAt = 0;
+
+    function mountPageLoader() {
+        if (byId('tyfitPageLoader')) return;
+
+        const loader = document.createElement('div');
+        loader.id = 'tyfitPageLoader';
+        loader.className = 'tyfit-page-loader';
+        loader.setAttribute('aria-hidden', 'true');
+        loader.innerHTML = [
+            '<div class="tyfit-page-loader__panel">',
+            '  <div class="tyfit-page-loader__spinner" aria-hidden="true"></div>',
+            '  <p>Loading TYFIT...</p>',
+            '</div>'
+        ].join('');
+
+        document.body.appendChild(loader);
+        requestAnimationFrame(() => loader.classList.add('is-visible'));
+        loaderVisibleAt = Date.now();
+    }
+
+    function unmountPageLoader() {
+        const loader = byId('tyfitPageLoader');
+        if (!loader) return;
+
+        const minVisible = 280;
+        const elapsed = Date.now() - loaderVisibleAt;
+        const wait = Math.max(0, minVisible - elapsed);
+
+        setTimeout(() => {
+            loader.classList.remove('is-visible');
+            loader.classList.add('is-leaving');
+            setTimeout(() => loader.remove(), 220);
+        }, wait);
+    }
+
+    function unmountPageLoaderWhenReady() {
+        if (document.readyState === 'complete') {
+            refreshIcons();
+            unmountPageLoader();
+            return;
+        }
+
+        window.addEventListener('load', () => {
+            refreshIcons();
+            unmountPageLoader();
+        }, { once: true });
+    }
+
+    function refreshIcons() {
+        if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
+
+        if (iconRefreshRaf) cancelAnimationFrame(iconRefreshRaf);
+        if (iconRefreshIdle && typeof window.cancelIdleCallback === 'function') {
+            window.cancelIdleCallback(iconRefreshIdle);
+        }
+
+        iconRefreshRaf = requestAnimationFrame(() => {
+            const run = () => {
+                try {
+                    window.lucide.createIcons();
+                } catch (err) {
+                    console.warn('Icon render warning:', err?.message || err);
+                }
+            };
+
+            if (typeof window.requestIdleCallback === 'function') {
+                iconRefreshIdle = window.requestIdleCallback(run, { timeout: 220 });
+            } else {
+                setTimeout(run, 16);
+            }
+        });
+    }
+
+    // Expose a shared, throttled icon refresh for other page scripts.
+    window.tyfitRefreshIcons = refreshIcons;
+
+    function optimizeImages() {
+        const images = document.querySelectorAll('img');
+        images.forEach((img, index) => {
+            if (!img.getAttribute('decoding')) img.setAttribute('decoding', 'async');
+            if (!img.getAttribute('loading')) {
+                const shouldEager = index < 2 || img.closest('.tyfit-mobile-topbar, .tyfit-sidebar-head, .tyfit-hero-card');
+                img.setAttribute('loading', shouldEager ? 'eager' : 'lazy');
+            }
+        });
+    }
+
+    function observeDynamicIcons() {
+        const root = byId('tyfitLayout') || document.body;
+        if (!root || typeof MutationObserver === 'undefined') return;
+
+        const observer = new MutationObserver((mutations) => {
+            let found = false;
+            for (const mutation of mutations) {
+                if (mutation.type !== 'childList') continue;
+                for (const node of mutation.addedNodes) {
+                    if (node.nodeType !== 1) continue;
+                    if ((node.matches && node.matches('i[data-lucide]')) || (node.querySelector && node.querySelector('i[data-lucide]'))) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+
+            if (found) refreshIcons();
+        });
+
+        observer.observe(root, { childList: true, subtree: true });
+    }
+
     function toggleSidebar() {
         const layout = byId('tyfitLayout');
         if (layout) layout.classList.toggle('sidebar-collapsed');
@@ -73,7 +187,17 @@
         showToast._t = setTimeout(() => toast.classList.remove('is-show'), 2200);
     }
 
+    if (document.body) {
+        mountPageLoader();
+    } else {
+        document.addEventListener('readystatechange', () => {
+            if (document.readyState !== 'loading') mountPageLoader();
+        }, { once: true });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        optimizeImages();
+
         document.querySelectorAll('.tyfit-sidebar .sidebar-nav-item').forEach((item) => {
             const label = item.querySelector('span')?.textContent?.trim();
             if (!label) return;
@@ -178,6 +302,10 @@
             });
         });
 
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        observeDynamicIcons();
+        refreshIcons();
+
+        document.addEventListener('component-loaded', refreshIcons);
+        unmountPageLoaderWhenReady();
     });
 }());

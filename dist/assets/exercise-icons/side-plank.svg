@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Side Plank">
+  <title>Side Plank</title>
+  
+  <circle cx="17" cy="27" r="4"/>
+  <path d="M21 29 H46"/>
+  <path d="M29 29 L24 41"/>
+  <path d="M46 29 L55 38"/>
+  <path d="M9 42 H56"/>
+
+</svg>

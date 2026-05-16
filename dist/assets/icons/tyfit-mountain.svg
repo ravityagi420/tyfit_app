@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" fill="none" role="img" aria-label="Tyfit compact mountain illustration">
+  <title>Tyfit Compact Mountain</title>
+
+  <!--
+    Color control:
+    - Set the main color with CSS: .tyfit-mountain { color: #0F6FEA; }
+    - The illustration uses currentColor with different opacity levels.
+  -->
+
+  <g opacity="0.16">
+    <path d="M38 196C98 160 141 171 196 190C254 210 301 184 352 160C421 128 479 151 600 106" stroke="currentColor" stroke-width="10" stroke-linecap="round"/>
+    <path d="M80 199C139 177 183 181 229 198C286 219 331 196 386 170C454 139 509 153 612 118" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <g opacity="0.22">
+    <path d="M116 184L218 92L290 184H116Z" fill="currentColor"/>
+    <path d="M250 184L372 72L506 184H250Z" fill="currentColor"/>
+    <path d="M418 184L520 102L612 184H418Z" fill="currentColor"/>
+  </g>
+
+  <g opacity="0.36">
+    <path d="M248 184L372 72L506 184H248Z" fill="currentColor"/>
+    <path d="M372 72L414 184H506L416 110L395 136L372 72Z" fill="currentColor"/>
+  </g>
+
+  <g opacity="0.62">
+    <path d="M289 184L372 72L429 184H289Z" fill="currentColor"/>
+    <path d="M372 72L397 126L379 116L360 145L348 133L372 72Z" fill="white" opacity="0.72"/>
+    <path d="M360 145L379 116L397 126L429 184H389L374 160L360 184H289L348 133L360 145Z" fill="currentColor" opacity="0.55"/>
+  </g>
+
+  <path d="M324 184C342 152 356 126 372 72" stroke="white" stroke-width="5" stroke-linecap="round" stroke-dasharray="10 10" opacity="0.85"/>
+  <path d="M373 71V34" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  <path d="M376 38C396 29 414 43 433 35V70C414 78 396 64 376 72V38Z" fill="currentColor"/>
+
+  <g opacity="0.34" stroke="currentColor" stroke-width="4" stroke-linecap="round">
+    <path d="M174 96C180 90 187 90 193 96"/>
+    <path d="M522 78C528 72 536 72 542 78"/>
+  </g>
+</svg>

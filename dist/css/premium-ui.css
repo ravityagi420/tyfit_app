@@ -1,0 +1,2489 @@
+:root {
+    --tyfit-bg: #F7F9FC;
+    --tyfit-card: #FFFFFF;
+    --tyfit-primary: #6C63FF;
+    --tyfit-primary-light: #F1EEFF;
+    --tyfit-text: #1A1F36;
+    --tyfit-text-secondary: #6B7280;
+    --tyfit-border: #EEF1F7;
+    --tyfit-success: #22C55E;
+    --tyfit-danger: #FF5C7A;
+    --tyfit-carbs: #F97316;
+    --tyfit-protein: #22C55E;
+    --tyfit-fats: #3B82F6;
+    --tyfit-shadow: 0 8px 24px rgba(20, 24, 40, 0.05);
+    --tyfit-card-radius: 18px;
+    --tyfit-sidebar-w: 272px;
+    --tyfit-sidebar-collapsed-w: 94px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--tyfit-bg);
+    color: var(--tyfit-text);
+    overflow-x: hidden;
+}
+
+body.tyfit-app {
+    min-height: 100vh;
+}
+
+/* Keep placeholders stable before Lucide hydrates SVGs */
+i[data-lucide] {
+    display: inline-flex;
+    width: 1em;
+    height: 1em;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
+
+.lucide {
+    shape-rendering: geometricPrecision;
+}
+
+/* Global loader shown while shell and icons hydrate */
+.tyfit-page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(247, 249, 252, 0.9);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.tyfit-page-loader.is-visible {
+    opacity: 1;
+}
+
+.tyfit-page-loader.is-leaving {
+    opacity: 0;
+}
+
+.tyfit-page-loader__panel {
+    min-width: 180px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid #e9edf5;
+    box-shadow: 0 14px 30px rgba(17, 24, 39, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tyfit-page-loader__panel p {
+    margin: 0;
+    font-size: 13px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.tyfit-page-loader__spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 2px solid #dbe2f0;
+    border-top-color: var(--tyfit-primary);
+    animation: tyfitSpin 0.8s linear infinite;
+}
+
+@keyframes tyfitSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Reduce paint/layout work for long page sections (progressive rendering). */
+.tyfit-main-inner section,
+.tyfit-main-inner article,
+.tyfit-main-inner .tyfit-profile-card,
+.tyfit-main-inner .tyfit-profile-sections-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 320px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+body {
+        font-weight: 400;
+}
+
+.tyfit-main,
+body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main * {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.sidebar {
+        width: 280px;
+        padding: 28px 24px;
+}
+
+.sidebar-logo {
+    margin-bottom: 0;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-divider {
+    margin: 14px 4px;
+    border: none;
+    border-top: 1px solid #EAECF4;
+}
+
+/* ── Sidebar inner flex layout ── */
+.sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.sidebar-menu {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 16px;
+}
+
+.sidebar-footer {
+    flex-shrink: 0;
+    padding-top: 10px;
+}
+
+/* ── Section labels ── */
+.sidebar-section-label {
+    margin: 22px 12px 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: #9BA3B8;
+    text-transform: uppercase;
+}
+
+.sidebar-section-label:first-child {
+    margin-top: 10px;
+}
+
+/* ── Nav items ── */
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 10px;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.sidebar-nav-item svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.9;
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+.sidebar-nav-item.active,
+.sidebar-nav-item.is-active {
+    background: #F1EEFF;
+    color: #6C63FF;
+    font-weight: 500;
+}
+
+.sidebar-nav-item:hover {
+    background: #F7F5FF;
+    color: #6C63FF;
+}
+
+/* ── Logout button ── */
+.sidebar-logout {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid #FECACA;
+    background: #FFF1F2;
+    color: #EF4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-logout:hover {
+    background: #FFE4E6;
+    border-color: #FCA5A5;
+}
+
+.sidebar-logout svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+    flex-shrink: 0;
+}
+
+.tool-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        min-height: 118px;
+        padding: 22px;
+        border-radius: 18px;
+        background: #FFFFFF;
+        border: 1px solid #EEF1F7;
+        box-shadow: 0 10px 28px rgba(20, 24, 40, 0.06);
+}
+
+.tool-card-title {
+        color: #182033;
+        font-size: 18px;
+    font-weight: 400;
+        margin-bottom: 6px;
+}
+
+.tool-card-subtitle {
+        color: #64748B;
+        font-size: 13px;
+        line-height: 1.45;
+        font-weight: 400;
+}
+
+.tool-icon-box {
+    width: 72px;
+    height: 72px;
+    min-width: 72px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tool-icon-box svg {
+    width: 38px;
+    height: 38px;
+    stroke-width: 1.5;
+}
+
+.icon-diet {
+    color: #6C63FF;
+    background: #F1EEFF;
+}
+
+.icon-training {
+    color: #22C55E;
+    background: #EAFBF1;
+}
+
+.icon-food {
+    color: #FF5C7A;
+    background: #FFF0F4;
+}
+
+.icon-bmr {
+    color: #FF8A3D;
+    background: #FFF3EA;
+}
+
+.icon-bodyfat {
+    color: #7C5CFF;
+    background: #F3EEFF;
+}
+
+.icon-macro {
+    color: #2EC4B6;
+    background: #EAFBFA;
+}
+
+.icon-calorie {
+    color: #FF6B35;
+    background: #FFF0EA;
+}
+
+.icon-1rm {
+    color: #4A90E2;
+    background: #EEF6FF;
+}
+
+.icon-reminder {
+    color: #F59E0B;
+    background: #FFF8E8;
+}
+
+.tyfit-mobile-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    height: 62px;
+    padding: 10px 16px;
+    background: rgba(247, 248, 252, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--tyfit-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tyfit-mobile-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.tyfit-logo-link {
+    display: inline-flex;
+    align-items: center;
+}
+
+.tyfit-logo-img {
+    width: 72px;
+    height: auto;
+}
+
+.tyfit-wordmark {
+    font-size: 30px;
+    font-weight: 500;
+    color: #000;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.tyfit-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: 1px solid var(--tyfit-border);
+    background: #fff;
+    color: #6A6F81;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tyfit-mobile-topbar .tyfit-icon-btn {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.tyfit-mobile-logo-center {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tyfit-mobile-logo-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #000;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.tyfit-icon-btn:hover {
+    box-shadow: 0 6px 16px rgba(24, 32, 51, 0.11);
+    transform: translateY(-1px);
+}
+
+.tyfit-layout {
+    display: block;
+    min-height: 100vh;
+}
+
+.tyfit-sidebar {
+    display: none;
+}
+
+.tyfit-main {
+    padding: 74px 14px 100px;
+}
+
+.tyfit-main-inner {
+    width: min(960px, 100%);
+    margin: 0 auto;
+    display: grid;
+    gap: 18px;
+}
+
+.tyfit-desktop-topbar {
+    display: none;
+}
+
+.tyfit-home-intro h3 {
+    margin: 0 0 4px;
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.tyfit-home-intro p {
+    margin: 0;
+    color: var(--tyfit-text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.tyfit-home-login-link {
+    color: #6c63ff;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.tyfit-home-login-link:hover {
+    color: #554bf5;
+}
+
+.tyfit-hero-card {
+    background: linear-gradient(135deg, #EEEAFF 0%, #EDF0FF 100%);
+    border: 1px solid #C9C5FF;
+    border-radius: 22px;
+    padding: 9px 8px;
+    box-shadow: 0 8px 28px rgba(108, 99, 255, 0.13), 0 2px 8px rgba(108, 99, 255, 0.07);
+    overflow: hidden;
+    position: relative;
+}
+
+body[data-page="home"] .tyfit-coming-card,
+body[data-page="home"] .tyfit-motivation-card,
+body[data-page="home"] #motivationCard {
+    display: none !important;
+}
+
+.tyfit-hero-graph {
+    filter: drop-shadow(0 6px 10px rgba(108, 99, 255, 0.5));
+}
+
+.tyfit-hero-inline {
+    display: grid;
+    grid-template-columns: auto 1fr minmax(110px, 160px);
+    align-items: center;
+    gap: 12px;
+}
+
+.tyfit-hero-copy-text {
+    min-width: 0;
+    margin-left: 4px;
+}
+
+.tyfit-hero-copy-text h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #101828;
+    line-height: 1.3;
+}
+
+.tyfit-hero-copy-text p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: #667085;
+    line-height: 1.4;
+}
+
+.tyfit-hero-mountain {
+    width: 165px;
+    height: 108px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 10px;
+    opacity: 0.92;
+    filter: invert(40%) sepia(80%) saturate(600%) hue-rotate(220deg) brightness(100%) contrast(100%);
+}
+
+.tyfit-hero-copy {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.tyfit-hero-icon {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    border-radius: 50%;
+    background: #E8E5FF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #5955E8;
+    font-size: 22px;
+    box-shadow: 0 4px 14px rgba(108, 99, 255, 0.22);
+    flex-shrink: 0;
+}
+
+.tyfit-hero-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 2;
+}
+
+.tyfit-hero-copy h4 {
+    margin: 0 0 1px;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.tyfit-hero-copy p {
+    margin: 0;
+    color: #CAC7FF;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.tyfit-hero-graph {
+    width: 100%;
+    height: 70px;
+}
+
+.tyfit-section {
+    display: grid;
+    gap: 12px;
+}
+
+.tyfit-section-head h4 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.tyfit-view-all-link {
+    border: none;
+    background: transparent;
+    color: #0F6FEA;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+}
+
+.tyfit-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+/* Extra cards hidden by default on all screen sizes; overridden per breakpoint */
+.tyfit-tools-grid:not(.is-expanded) .tyfit-tool-card--extra {
+    display: flex;
+}
+
+.tyfit-tool-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    min-height: unset;
+    border-radius: var(--tyfit-card-radius);
+    background: var(--tyfit-card);
+    border: 1px solid var(--tyfit-border);
+    box-shadow: var(--tyfit-shadow);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    text-align: center;
+}
+
+.tyfit-tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(20, 24, 40, 0.08);
+}
+
+.tyfit-tool-card:active {
+    transform: scale(0.98);
+}
+
+.tyfit-tool-icon {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tyfit-tool-icon svg {
+    width: 30px;
+    height: 30px;
+    stroke-width: 1.8;
+}
+
+.tyfit-tool-info h5 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tyfit-tool-info p {
+    display: none;
+}
+
+.tyfit-tool-card h5.tool-card-title {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--tyfit-text);
+    line-height: 1.35;
+    word-break: break-word;
+}
+
+.tyfit-tool-card > [data-lucide="chevron-right"] {
+    display: none;
+}
+
+.tyfit-coming-card {
+    background: linear-gradient(135deg, #EAF3FF 0%, #EEF0FF 100%);
+    border: 1px solid #C8DCF8;
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: 0 8px 28px rgba(15, 111, 234, 0.10), 0 2px 8px rgba(15, 111, 234, 0.05);
+    display: grid;
+    gap: 16px;
+}
+
+.tyfit-coming-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #DAEAFF;
+    color: #0F6FEA;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.tyfit-coming-content h4 {
+    margin: 10px 0 6px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--tyfit-text);
+}
+
+.tyfit-coming-desktop {
+    display: grid;
+    gap: 16px;
+}
+
+.tyfit-coming-mobile {
+    display: none;
+}
+
+.tyfit-mobile-progress-row {
+    display: grid;
+    grid-template-columns: auto 1fr 96px;
+    align-items: center;
+    gap: 10px;
+}
+
+.tyfit-progress-ring--small {
+    width: 62px;
+    height: 62px;
+}
+
+.tyfit-mobile-progress-copy strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tyfit-text);
+}
+
+.tyfit-mobile-progress-copy span {
+    display: block;
+    margin-top: 3px;
+    font-size: 11px;
+    color: var(--tyfit-text-secondary);
+}
+
+.tyfit-mobile-progress-graph {
+    width: 96px;
+    height: 52px;
+}
+
+.tyfit-coming-content p {
+    margin: 0;
+    color: var(--tyfit-text-secondary);
+    max-width: 42ch;
+    font-size: 14px;
+}
+
+.tyfit-notify-btn {
+    margin-top: 10px;
+    border: 1px solid #8B87F5;
+    background: rgba(255,255,255,0.6);
+    color: #5955E8;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tyfit-notify-btn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.tyfit-coming-preview {
+    border: 1px dashed #D5CEF5;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+    padding: 14px;
+    opacity: 0.86;
+}
+
+.tyfit-preview-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.tyfit-preview-cols div {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.tyfit-preview-cols span {
+    display: block;
+    color: #8E93A5;
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.tyfit-preview-cols strong {
+    font-size: 17px;
+}
+
+.tyfit-progress-ring-wrap {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tyfit-progress-ring {
+    --progress: 72;
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(#6C63FF calc(var(--progress) * 1%), #E9ECF4 0);
+    position: relative;
+}
+
+.tyfit-progress-ring::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+.tyfit-progress-ring span {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tyfit-progress-ring-wrap ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    color: #8790A8;
+    font-size: 12px;
+}
+
+.tyfit-motivation-card {
+    border: 1px solid var(--tyfit-border);
+    background: var(--tyfit-card);
+    border-radius: var(--tyfit-card-radius);
+    box-shadow: var(--tyfit-shadow);
+    width: 100%;
+    text-align: left;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tyfit-motivation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(20, 24, 40, 0.08);
+}
+
+body[data-page="home"] .tyfit-motivation-card {
+    background: var(--tyfit-primary-light);
+    border-color: #E3DDFC;
+}
+
+body[data-page="home"] .tyfit-motivation-right {
+    color: #6C63FF;
+}
+
+.tyfit-biceps-img {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.tyfit-biceps-emoji {
+    display: none;
+}
+
+.tyfit-motivation-left {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.tyfit-star-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--tyfit-primary-light);
+    color: #6C63FF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tyfit-motivation-left h4 {
+    margin: 0 0 5px;
+    font-size: 16px;
+}
+
+.tyfit-motivation-left p {
+    margin: 0;
+    font-size: 13px;
+    color: #4E556A;
+}
+
+.tyfit-motivation-left small {
+    color: #97A0B4;
+}
+
+.tyfit-motivation-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #B5BBC9;
+}
+
+.tyfit-profile-band {
+    background: linear-gradient(180deg, #EDEAFF 0%, rgba(237, 234, 255, 0) 100%);
+    border-radius: 26px;
+    padding: 14px;
+}
+
+.tyfit-profile-summary-card,
+.tyfit-profile-sections-card,
+.tyfit-logout-card {
+    background: #fff;
+    border: 1px solid var(--tyfit-border);
+    border-radius: 22px;
+    box-shadow: var(--tyfit-shadow);
+}
+
+.tyfit-profile-summary-card {
+    padding: 16px;
+}
+
+.tyfit-summary-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tyfit-summary-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tyfit-summary-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    object-fit: cover;
+    border: 3px solid #F1EEFF;
+}
+
+.tyfit-summary-user h3 {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+}
+
+.tyfit-summary-user p {
+    margin: 5px 0 0;
+    color: var(--tyfit-text-secondary);
+    font-size: 13px;
+}
+
+.tyfit-mini-edit {
+    border: 1px solid var(--tyfit-border);
+    background: #fff;
+    color: #667085;
+    border-radius: 999px;
+    padding: 7px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.tyfit-summary-meta {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--tyfit-border);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.tyfit-meta-item {
+    padding-right: 8px;
+    border-right: 1px solid var(--tyfit-border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tyfit-meta-item:last-child {
+    border-right: none;
+}
+
+.tyfit-meta-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background: var(--tyfit-primary-light);
+    color: var(--tyfit-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+}
+
+.tyfit-meta-item span {
+    display: block;
+    color: #99A0B2;
+    font-size: 11px;
+}
+
+.tyfit-meta-item strong {
+    display: block;
+    font-size: 12px;
+}
+
+.tyfit-profile-sections-card {
+    padding: 14px;
+}
+
+.tyfit-profile-sections-card h4 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.tyfit-section-row {
+    width: 100%;
+    border: none;
+    background: transparent;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    text-align: left;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--tyfit-border);
+    cursor: pointer;
+}
+
+.tyfit-section-row:last-child {
+    border-bottom: none;
+}
+
+.tyfit-section-row:hover {
+    background: #FAFBFF;
+}
+
+.tyfit-section-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--tyfit-primary-light);
+    color: var(--tyfit-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tyfit-section-copy strong {
+    display: block;
+    font-size: 14px;
+}
+
+.tyfit-section-copy span {
+    color: var(--tyfit-text-secondary);
+    font-size: 12px;
+}
+
+.tyfit-status-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tyfit-status-icon.completed {
+    background: #22C55E;
+    color: #fff;
+}
+
+.tyfit-status-icon.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #B45309;
+}
+
+.tyfit-status-icon svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.5;
+}
+
+.tyfit-chevron {
+    color: #C0C7D6;
+    font-size: 12px;
+}
+
+.tyfit-logout-card {
+    border: 1px solid #FFD9E0;
+    color: var(--tyfit-danger);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.tyfit-mobile-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    background: #fff;
+    border-top: 1px solid var(--tyfit-border);
+    height: 72px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    padding: 0 6px;
+}
+
+.tyfit-mobile-drawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: -84vw;
+    width: 84vw;
+    max-width: 420px;
+    z-index: 101;
+    background: #fff;
+    border-right: 1px solid var(--tyfit-border);
+    padding: 20px 18px;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.tyfit-mobile-drawer.sidebar {
+    margin-top: 0 !important;
+}
+
+.tyfit-mobile-drawer.is-open {
+    left: 0;
+}
+
+.tyfit-mobile-drawer-head {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.tyfit-mobile-drawer-head .tyfit-logo-link {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tyfit-mobile-drawer-head .tyfit-logo-img {
+    width: 30px;
+}
+
+.tyfit-mobile-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 21, 38, 0.4);
+    z-index: 100;
+}
+
+.tyfit-nav-separator {
+    height: 1px;
+    background: var(--tyfit-border);
+    margin: 8px 6px;
+}
+
+.tyfit-dropdown-wrap {
+    position: relative;
+}
+
+.tyfit-mobile-topbar-dropdown .tyfit-popover-menu {
+    right: -2px;
+    left: auto;
+}
+
+.tyfit-dot {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6C63FF;
+    box-shadow: 0 0 0 2px #fff;
+}
+
+.tyfit-popover-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 220px;
+    border-radius: 14px;
+    border: 1px solid var(--tyfit-border);
+    background: #fff;
+    box-shadow: 0 14px 30px rgba(24, 32, 51, 0.14);
+    padding: 8px;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    z-index: 105;
+}
+
+.tyfit-popover-menu.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.tyfit-popover-empty,
+.tyfit-popover-item {
+    margin: 0;
+    font-size: 13px;
+    color: #54607A;
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+.tyfit-popover-item {
+    display: block;
+    text-decoration: none;
+}
+
+.tyfit-popover-item:hover {
+    background: #F7F8FD;
+}
+
+.tyfit-menu-action {
+    width: 100%;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #4F5970;
+    cursor: pointer;
+}
+
+.tyfit-menu-action:hover {
+    background: #F3F5FF;
+}
+
+.tyfit-account-btn {
+    border: 1px solid var(--tyfit-border);
+    background: #fff;
+    border-radius: 999px;
+    height: 40px;
+    padding: 4px 10px 4px 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 550;
+    color: #46516A;
+    cursor: pointer;
+}
+
+.tyfit-account-btn.tyfit-account-btn--guest {
+    border-color: #dbe4ff;
+    background: linear-gradient(145deg, #6c63ff, #5a50f7);
+    color: #ffffff;
+    padding: 0 16px;
+    font-weight: 600;
+    box-shadow: 0 10px 20px rgba(108, 99, 255, 0.24);
+}
+
+.tyfit-account-btn.tyfit-account-btn--guest:hover {
+    filter: brightness(1.03);
+}
+
+.tyfit-account-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #E4E8F5;
+}
+
+.tyfit-desktop-actions {
+    display: none;
+}
+
+.tyfit-sidebar-toggle-floating {
+    display: none;
+}
+
+.tyfit-mobile-bottom-nav a,
+.tyfit-mobile-bottom-nav button {
+    border: none;
+    background: transparent;
+    color: #667085;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.tyfit-mobile-bottom-nav a i,
+.tyfit-mobile-bottom-nav button i,
+.tyfit-mobile-bottom-nav a svg,
+.tyfit-mobile-bottom-nav button svg {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.9;
+}
+
+.tyfit-mobile-bottom-nav a svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tyfit-mobile-bottom-nav a.is-active svg {
+    stroke-width: 2;
+}
+
+.tyfit-mobile-bottom-nav .is-active {
+    color: var(--tyfit-primary);
+}
+
+#quickAddBtn.tyfit-plus-btn,
+.tyfit-plus-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background: linear-gradient(145deg, #6C63FF, #554BF5) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 12px 24px rgba(108, 99, 255, 0.35);
+}
+
+#quickAddBtn.tyfit-plus-btn i,
+#quickAddBtn.tyfit-plus-btn svg,
+.tyfit-plus-btn i,
+.tyfit-plus-btn svg {
+    color: #fff !important;
+    stroke: currentColor;
+}
+
+.tyfit-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 17, 33, 0.4);
+    z-index: 95;
+}
+
+.tyfit-quick-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: -100%;
+    z-index: 100;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 16px;
+    box-shadow: 0 -18px 36px rgba(18, 23, 44, 0.2);
+    transition: bottom 0.25s ease;
+}
+
+.tyfit-quick-sheet.is-open {
+    bottom: 0;
+}
+
+.tyfit-quick-sheet header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.tyfit-quick-sheet h4 {
+    margin: 0;
+}
+
+.tyfit-sheet-action {
+    width: 100%;
+    border: 1px solid var(--tyfit-border);
+    border-radius: 14px;
+    background: #fff;
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.tyfit-toast {
+    position: fixed;
+    left: 50%;
+    top: 82px;
+    transform: translateX(-50%) translateY(-20px);
+    background: #1C1B3A;
+    color: #fff;
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    z-index: 120;
+}
+
+.tyfit-toast.is-show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (min-width: 640px) {
+    .tyfit-main {
+        padding-inline: 20px;
+    }
+}
+
+@media (max-width: 359px) {
+    .tyfit-tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .tyfit-tools-grid:not(.is-expanded) .tyfit-tool-card--extra:nth-child(-n+8) {
+        display: flex;
+    }
+
+    .tyfit-mobile-topbar {
+        grid-template-columns: 1fr auto 1fr;
+        display: grid;
+    }
+
+    .tyfit-mobile-logo-center {
+        justify-self: center;
+    }
+
+    .tyfit-mobile-topbar .tyfit-logo-img {
+        width: 36px;
+    }
+
+    .tyfit-mobile-topbar .tyfit-wordmark,
+    .tyfit-mobile-drawer-head .tyfit-wordmark {
+        font-size: 15px;
+    }
+
+    .tyfit-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .tyfit-section-head h4 {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    #quickAccessToggle {
+        display: inline-flex;
+        font-size: 13px;
+        color: #0F6FEA;
+    }
+
+    .tyfit-mobile-topbar .tyfit-dropdown-wrap {
+        justify-self: end;
+    }
+
+    .tyfit-hero-card {
+        padding: 7px;
+    }
+
+    .tyfit-hero-inline {
+        grid-template-columns: auto 1fr 132px;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .tyfit-hero-icon {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+    }
+
+    .tyfit-hero-icon svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .tyfit-hero-copy-text h4 {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .tyfit-hero-copy-text p {
+        font-size: 11.5px;
+    }
+
+    .tyfit-hero-mountain {
+        width: 144px;
+        height: 144px;
+        border-radius: 0;
+        object-fit: fill;
+    }
+
+    .tyfit-tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .tyfit-tool-card,
+    .tool-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 14px;
+        padding: 12px 8px;
+        text-align: center;
+        gap: 8px;
+        min-height: unset;
+    }
+
+    .tyfit-tool-card h5.tool-card-title {
+        font-size: 11.5px;
+        font-weight: 600;
+    }
+
+    .tyfit-tool-info {
+        display: contents;
+    }
+
+    .tyfit-tool-info h5 {
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .tyfit-tool-info p {
+        display: none;
+    }
+
+    .tyfit-tool-card > [data-lucide="chevron-right"] {
+        display: none;
+    }
+
+    .tyfit-tool-icon,
+    .tool-icon-box {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 14px;
+    }
+
+    .tyfit-tool-icon svg,
+    .tool-icon-box svg {
+        width: 26px;
+        height: 26px;
+    }
+
+    .tyfit-coming-desktop {
+        display: none;
+    }
+
+    .tyfit-coming-mobile {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .tyfit-coming-mobile-left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        min-width: 0;
+    }
+
+    .tyfit-coming-mobile h5 {
+        margin: 6px 0 5px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--tyfit-text);
+    }
+
+    .tyfit-coming-mobile p {
+        margin: 0 0 12px;
+        font-size: 12.5px;
+        color: var(--tyfit-text-secondary);
+        line-height: 1.5;
+    }
+
+    .tyfit-coming-mobile-right {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .tyfit-coming-preview-img {
+        width: 220px;
+        height: 220px;
+        object-fit: contain;
+    }
+
+    .tyfit-mobile-progress-row {
+        display: none;
+    }
+
+    body[data-page="home"] .tyfit-motivation-card {
+        align-items: center;
+    }
+
+    body[data-page="home"] .tyfit-motivation-right {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tyfit-biceps-img {
+        width: 88px;
+        height: 88px;
+    }
+
+    .tyfit-star-badge {
+        background: #B5B1FF;
+        color: #fff;
+    }
+
+    .tyfit-motivation-left h4 {
+        font-weight: 400;
+        color: #4E556A;
+    }
+
+    .tool-card-subtitle,
+    .tyfit-tool-info p {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .tyfit-mobile-topbar .tyfit-logo-img {
+        width: 46px;
+    }
+
+    .tyfit-mobile-topbar .tyfit-wordmark,
+    .tyfit-mobile-drawer-head .tyfit-wordmark {
+        font-size: 19px;
+    }
+}
+
+@media (min-width: 1024px) {
+    body.tyfit-app {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .tyfit-mobile-topbar,
+    .tyfit-mobile-drawer,
+    .tyfit-mobile-drawer-backdrop,
+    .tyfit-mobile-bottom-nav,
+    .tyfit-sheet-backdrop,
+    .tyfit-quick-sheet {
+        display: none;
+    }
+
+    .tyfit-layout {
+        display: flex;
+        height: 100vh;
+        gap: 20px;
+        position: relative;
+    }
+
+    .tyfit-sidebar {
+        display: flex;
+        flex-direction: column;
+        width: 280px;
+        background: #fff;
+        border: 1px solid var(--tyfit-border);
+        border-radius: 0;
+        padding: 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+        transition: width 0.22s ease;
+    }
+
+    .tyfit-sidebar > .sidebar-inner {
+        padding: 24px 18px;
+    }
+
+    .tyfit-sidebar-head {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 52px;
+        margin-bottom: 8px;
+        flex-shrink: 0;
+    }
+
+    .tyfit-sidebar .tyfit-logo-img {
+        width: 34px;
+    }
+
+    .tyfit-sidebar .tyfit-wordmark {
+        display: inline;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--tyfit-text);
+    }
+
+    .tyfit-sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tyfit-sidebar-nav:not(.tyfit-sidebar-nav--secondary) {
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        margin-top: 10px;
+        padding-right: 2px;
+    }
+
+    .tyfit-sidebar-nav--secondary {
+        margin-top: auto;
+        flex-shrink: 0;
+        padding-top: 10px;
+    }
+
+    .tyfit-nav-item {
+        transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+    }
+
+    .tyfit-main {
+        flex: 1;
+        padding: 10px 20px 24px;
+        min-width: 0;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .tyfit-desktop-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        width: min(980px, calc(100% - 24px));
+        margin: 0 auto 12px;
+        padding: 0 0 10px;
+        position: sticky;
+        top: 0;
+        z-index: 45;
+        background: linear-gradient(180deg, rgba(247, 249, 252, 0.98) 78%, rgba(247, 249, 252, 0));
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    .tyfit-desktop-separator {
+        width: 1px;
+        height: 22px;
+        background: rgba(24, 32, 51, 0.12);
+        margin: 0 2px 0 4px;
+    }
+
+    .tyfit-notif-btn {
+        position: relative;
+    }
+
+    .tyfit-desktop-actions .tyfit-icon-btn {
+        border: none;
+        background: transparent;
+        box-shadow: none;
+        width: auto;
+        height: auto;
+        border-radius: 0;
+        padding: 0 4px;
+        color: #55607a;
+    }
+
+    .tyfit-desktop-actions .tyfit-icon-btn:hover {
+        transform: none;
+        box-shadow: none;
+        color: #39445f;
+    }
+
+    .tyfit-desktop-actions .tyfit-notif-btn [data-lucide="bell"] {
+        width: 18px;
+        height: 18px;
+        stroke-width: 2.2;
+    }
+
+    .tyfit-desktop-actions .tyfit-notif-btn .tyfit-dot {
+        top: -1px;
+        right: -2px;
+        box-shadow: none;
+    }
+
+    .tyfit-account-btn {
+        border: none;
+        background: transparent;
+        border-radius: 0;
+        padding: 0;
+        gap: 8px;
+        height: auto;
+    }
+
+    .tyfit-account-btn:hover {
+        background: transparent;
+    }
+
+    .tyfit-account-avatar {
+        width: 34px;
+        height: 34px;
+        border: 1px solid #dbe2f3;
+    }
+
+    .tyfit-account-btn span {
+        font-size: 14px;
+        font-weight: 500;
+        color: #46516a;
+    }
+
+    .tyfit-sidebar-toggle-floating {
+        display: inline-flex;
+        position: fixed;
+        left: calc(280px - 16px);
+        top: 12px;
+        z-index: 60;
+        width: 30px;
+        height: 30px;
+        border: 1px solid var(--tyfit-border);
+        border-radius: 8px;
+        background: #fff;
+        color: #6B7280;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: left 0.22s ease, transform 0.18s ease;
+    }
+
+    .tyfit-sidebar-toggle-floating:hover {
+        transform: translateY(-1px);
+    }
+
+    .tyfit-main-inner {
+        width: min(980px, calc(100% - 24px));
+        margin: 0 auto;
+        gap: 20px;
+    }
+
+    body[data-page="home"] .tyfit-tool-card {
+        min-height: unset;
+    }
+
+    .tyfit-hero-card {
+        padding: 10px 12px;
+    }
+
+    .tyfit-hero-inline {
+        grid-template-columns: auto 1fr 180px;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .tyfit-hero-copy-text {
+        max-width: 400px;
+    }
+
+    .tyfit-hero-copy-text h4 {
+        font-size: 17px;
+    }
+
+    .tyfit-hero-copy-text p {
+        font-size: 14px;
+    }
+
+    .tyfit-hero-mountain {
+        width: 180px;
+        height: 110px;
+    }
+
+    .tyfit-hero-icon {
+        width: 68px;
+        height: 68px;
+    }
+
+    .tyfit-hero-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .tyfit-tools-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tyfit-tool-card,
+    .tool-card {
+        padding: 16px 14px;
+        gap: 10px;
+        border-radius: 16px;
+    }
+
+    .tyfit-tool-card h5.tool-card-title {
+        font-size: 13px;
+    }
+
+    .tyfit-tool-icon,
+    .tool-icon-box {
+        width: 56px;
+        height: 56px;
+    }
+
+    .tyfit-tool-icon svg,
+    .tool-icon-box svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .tyfit-tools-grid .tyfit-tool-card--extra {
+        display: flex;
+    }
+
+    .tyfit-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+
+    .tyfit-coming-desktop {
+        grid-template-columns: 1.2fr 1fr;
+        align-items: center;
+    }
+
+    .tyfit-summary-avatar {
+        width: 78px;
+        height: 78px;
+    }
+
+    .tyfit-section-row {
+        padding-inline: 6px;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar {
+        width: var(--tyfit-sidebar-collapsed-w);
+        overflow: visible;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar > .sidebar-inner {
+        padding: 18px 10px;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-section-label,
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-nav-item span,
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-footer {
+        display: none;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-nav-item {
+        justify-content: center;
+        gap: 0;
+        padding-inline: 0;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .tyfit-nav-item span {
+        display: none;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .tyfit-nav-item {
+        justify-content: center;
+        gap: 0;
+        padding-inline: 0;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar-toggle-floating {
+        left: calc(var(--tyfit-sidebar-collapsed-w) - 16px);
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar-toggle-floating i {
+        transform: rotate(180deg);
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .tyfit-logo-img {
+        width: 36px;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .tyfit-wordmark {
+        display: none;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-nav-item {
+        position: relative;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-nav-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: calc(100% + 10px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: #111827;
+        color: #ffffff;
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        box-shadow: 0 10px 20px rgba(17, 24, 39, 0.24);
+        transition: opacity 0.16s ease;
+        z-index: 30;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-nav-item[data-tool-tip]::after {
+        content: attr(data-tool-tip);
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-nav-item:hover::after,
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-nav-item:focus-visible::after {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+body.tyfit-calc-modal-open {
+    overflow: hidden;
+}
+
+.tyfit-calc-modal[hidden] {
+    display: none !important;
+}
+
+.tyfit-calc-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.tyfit-calc-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.58);
+    backdrop-filter: blur(8px);
+}
+
+.tyfit-calc-modal-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 520px);
+    border-radius: 24px;
+    border: 1px solid #e8ebf4;
+    background: linear-gradient(180deg, #ffffff 0%, #f6f8ff 100%);
+    box-shadow: 0 26px 60px rgba(15, 23, 42, 0.24);
+    overflow: hidden;
+}
+
+.tyfit-calc-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 18px 12px;
+    border-bottom: 1px solid #edf0f8;
+}
+
+.tyfit-calc-modal-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #1a1f36;
+    font-weight: 700;
+}
+
+.tyfit-calc-modal-body {
+    padding: 22px 22px 26px;
+}
+
+.tyfit-calc-modal-body p {
+    margin: 0;
+    font-size: 15px;
+    color: #5b647b;
+}
+
+@media (max-width: 767px) {
+    .tyfit-calc-modal {
+        align-items: stretch;
+        justify-content: stretch;
+        padding: 0;
+    }
+
+    .tyfit-calc-modal-dialog {
+        width: 100%;
+        max-width: none;
+        height: 100svh;
+        border-radius: 0;
+        border: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tyfit-calc-modal-header {
+        padding: 16px;
+        border-bottom: 1px solid #edf0f8;
+    }
+
+    .tyfit-calc-modal-body {
+        padding: 20px 16px;
+    }
+}
+
+/* Keep sidebar look consistent on all pages, including portal/admin views. */
+.tyfit-sidebar .sidebar-nav-item,
+.tyfit-mobile-drawer .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 10px;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.tyfit-sidebar .sidebar-nav-item svg,
+.tyfit-mobile-drawer .sidebar-nav-item svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.9;
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+.tyfit-sidebar .sidebar-nav-item.active,
+.tyfit-sidebar .sidebar-nav-item.is-active,
+.tyfit-mobile-drawer .sidebar-nav-item.active,
+.tyfit-mobile-drawer .sidebar-nav-item.is-active {
+    background: #F1EEFF;
+    color: #6C63FF;
+    font-weight: 500;
+}
+
+.tyfit-sidebar .sidebar-nav-item:hover,
+.tyfit-mobile-drawer .sidebar-nav-item:hover {
+    background: #F7F5FF;
+    color: #6C63FF;
+}
+
+/* ══════════════════════════════════════
+   Profile page — typography & layout
+═══════════════════════════════════════ */
+
+body[data-page="profile"] {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Summary card — gradient bg + breathing room */
+body[data-page="profile"] .tyfit-profile-summary-card {
+    padding: 28px 28px 24px;
+    background: linear-gradient(180deg, #EDEAFF 0%, rgba(237, 234, 255, 0.3) 100%);
+    border: 1px solid #E3DDFC;
+}
+
+/* Name */
+body[data-page="profile"] .tyfit-summary-user h3 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+body[data-page="profile"] .tyfit-mini-edit.tyfit-mini-edit--icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 12px;
+    border: 1px solid #dfe5f3;
+    background: #ffffff;
+    color: #4b5875;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(20, 24, 40, 0.08);
+}
+
+body[data-page="profile"] .tyfit-mini-edit.tyfit-mini-edit--icon:hover {
+    background: #f8faff;
+    border-color: #cdd7ef;
+    transform: translateY(-1px);
+}
+
+body[data-page="profile"] .tyfit-mini-edit.tyfit-mini-edit--icon svg {
+    width: 17px;
+    height: 17px;
+    stroke-width: 2.1;
+}
+
+/* Email */
+body[data-page="profile"] .tyfit-summary-user p {
+    font-size: 14px;
+    font-weight: 400;
+    margin-top: 3px;
+}
+
+/* Avatar — slightly larger, cleaner radius */
+body[data-page="profile"] .tyfit-summary-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    border: 3px solid #EDE9FF;
+    box-shadow: 0 4px 14px rgba(108, 99, 255, 0.15);
+}
+
+/* ── Meta row (Member Since / Diet Plan / Goal) ── */
+body[data-page="profile"] .tyfit-summary-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    padding: 0;
+    margin-top: 3px;
+    gap: 0;
+    background: #ffffff;
+    border: 1px solid #e7ebf5;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(20, 24, 40, 0.06);
+    overflow: hidden;
+}
+
+body[data-page="profile"] .tyfit-meta-item {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    padding: 14px 16px;
+    min-height: 78px;
+    min-width: 0;
+}
+
+body[data-page="profile"] .tyfit-meta-item:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 1px;
+    background: #edf1f7;
+}
+
+body[data-page="profile"] .tyfit-summary-meta {
+    gap: 0;
+}
+
+body[data-page="profile"] .tyfit-meta-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    flex-shrink: 0;
+    line-height: 0;
+}
+
+body[data-page="profile"] .tyfit-meta-icon svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    color: #ffffff;
+}
+
+body[data-page="profile"] .tyfit-meta-item > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1px;
+    min-width: 0;
+}
+
+body[data-page="profile"] .tyfit-meta-item span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #8c95a9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+body[data-page="profile"] .tyfit-meta-item strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tyfit-text);
+}
+
+/* Meta icon color variants */
+.tyfit-meta-icon--calendar { background: #6C63FF; }
+.tyfit-meta-icon--diet     { background: #14b87a; }
+.tyfit-meta-icon--goal     { background: #f57c2a; }
+
+/* ── Sections card ── */
+body[data-page="profile"] .tyfit-profile-sections-card {
+    padding: 24px;
+}
+
+body[data-page="profile"] .tyfit-section-copy strong {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--tyfit-text);
+}
+
+body[data-page="profile"] .tyfit-section-copy span {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--tyfit-text-secondary);
+    margin-top: 1px;
+}
+
+body[data-page="profile"] .tyfit-section-row {
+    padding: 18px 10px;
+    gap: 14px;
+}
+
+body[data-page="profile"] .tyfit-section-icon {
+    background: rgba(108, 99, 255, 0.09);
+    color: #5f57e8;
+}
+
+/* ── Status icon colors (filled variants) ── */
+body[data-page="profile"] .tyfit-status-icon.completed {
+    color: #16a34a;
+    background: rgba(22, 163, 74, 0.12);
+}
+
+body[data-page="profile"] .tyfit-status-icon.warning {
+    color: #B45309;
+    background: rgba(245, 158, 11, 0.18);
+}
+
+/* ── Logout card alignment ── */
+body[data-page="profile"] .tyfit-logout-card {
+    padding: 16px 18px;
+    border-radius: 22px;
+    border: 1px solid #e7ebf5;
+    background: #ffffff;
+    color: #ef7d8f;
+    box-shadow: none;
+    transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+body[data-page="profile"] .tyfit-logout-card > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+body[data-page="profile"] .tyfit-logout-card:hover {
+    background: #fff7f8;
+    border-color: #f6cfd5;
+}
+
+body[data-page="profile"] .tyfit-logout-card > i,
+body[data-page="profile"] .tyfit-logout-card > span i {
+    color: #ef7d8f;
+}
+
+body[data-page="profile"] .tyfit-logout-card > span svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+    body[data-page="profile"] .tyfit-summary-meta {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 14px;
+    }
+
+    body[data-page="profile"] .tyfit-meta-item {
+        justify-content: flex-start;
+        min-height: 64px;
+        padding: 10px 8px;
+        gap: 8px;
+        border-bottom: none;
+    }
+
+    body[data-page="profile"] .tyfit-meta-item:not(:last-child)::after {
+        top: 10px;
+        bottom: 10px;
+    }
+
+    body[data-page="profile"] .tyfit-meta-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+    }
+
+    body[data-page="profile"] .tyfit-meta-icon svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    body[data-page="profile"] .tyfit-meta-item span {
+        font-size: 9.5px;
+        letter-spacing: 0.03em;
+    }
+
+    body[data-page="profile"] .tyfit-meta-item strong {
+        font-size: 11.5px;
+    }
+}
+
+/* ── Compact sidebar on short screens ── */
+@media (max-height: 720px) {
+    .sidebar-nav-item {
+        height: 38px;
+        font-size: 14px;
+    }
+    .sidebar-section-label {
+        margin-top: 14px;
+        margin-bottom: 4px;
+        font-size: 10.5px;
+    }
+    .sidebar-logout {
+        height: 38px;
+        font-size: 14px;
+    }
+}

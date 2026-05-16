@@ -5,6 +5,10 @@
 
 const TP = {
   currentUserId: null,
+  activeAdminId: null,
+  isAdmin: false,
+  users: [],
+  selectedUserId: null,
   plans: [],
   selectedPlanId: null,
   selectedDayId: null,
@@ -54,7 +58,19 @@ const CATALOG_THEME_MAP = {
 };
 
 function byId(id) { return document.getElementById(id); }
-function setIcons() { if (window.lucide?.createIcons) window.lucide.createIcons(); }
+function targetUserId() {
+  if (TP.isAdmin) {
+    return TP.selectedUserId || TP.currentUserId;
+  }
+  return TP.currentUserId;
+}
+function setIcons() {
+  if (typeof window.tyfitRefreshIcons === "function") {
+    window.tyfitRefreshIcons();
+    return;
+  }
+  if (window.lucide?.createIcons) window.lucide.createIcons();
+}
 function escHtml(v) {
   return String(v ?? "")
     .replace(/&/g, "&amp;")
@@ -234,6 +250,7 @@ function exerciseIcon(bodyPart) {
 async function init() {
   try {
     let user = null;
+    let accessState = null;
 
     if (typeof window.requireLoginWithModal === "function") {
       user = await window.requireLoginWithModal();
@@ -247,10 +264,43 @@ async function init() {
       return;
     }
 
+    if (typeof window.getAccessState === "function") {
+      try {
+        accessState = await window.getAccessState();
+      } catch (error) {
+        console.warn("training access state lookup warning:", error?.message || error);
+      }
+      if (!accessState) {
+        try {
+          accessState = await window.getAccessState({ user });
+        } catch (error) {
+          console.warn("training access state fallback warning:", error?.message || error);
+        }
+      }
+    }
+
     TP.currentUserId = user.id;
+    TP.activeAdminId = user.id;
+    TP.isAdmin = Boolean(accessState?.isAdmin || (typeof window.isAdminUser === "function" && window.isAdminUser(user)));
+    TP.selectedUserId = user.id;
+
     await hydrateDesktopHeader(user);
     bindShell();
     bindStaticTrainingUI();
+
+    if (TP.isAdmin) {
+      await loadTrainingUsersList();
+      setTrainingUserToolbarVisible(true);
+      if (TP.selectedUserId) {
+        const selectEl = byId("trainingUserSelect");
+        if (selectEl) {
+          selectEl.value = TP.selectedUserId;
+        }
+      }
+    } else {
+      setTrainingUserToolbarVisible(false);
+    }
+
     await fetchAndRenderPlans();
     bindTrainingHistory();
     applyHistoryState();
@@ -355,32 +405,33 @@ async function dbFetchPlans() {
   const { data, error } = await window.supabaseClient
     .from("training_plans")
     .select("*")
-    .eq("user_id", TP.currentUserId)
+    .eq("user_id", targetUserId())
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data || [];
 }
 async function dbCreatePlan(title) {
+  const ownerId = targetUserId();
   let res = await window.supabaseClient
     .from("training_plans")
-    .insert({ user_id: TP.currentUserId, title })
+    .insert({ user_id: ownerId, title })
     .select()
     .single();
   if (res.error && /title/i.test(res.error.message || "")) {
-    res = await window.supabaseClient.from("training_plans").insert({ user_id: TP.currentUserId, name: title }).select().single();
+    res = await window.supabaseClient.from("training_plans").insert({ user_id: ownerId, name: title }).select().single();
   }
   if (res.error) throw res.error;
   return res.data;
 }
 async function dbRenamePlan(id, title) {
-  let res = await window.supabaseClient.from("training_plans").update({ title }).eq("id", id).eq("user_id", TP.currentUserId);
+  let res = await window.supabaseClient.from("training_plans").update({ title }).eq("id", id).eq("user_id", targetUserId());
   if (res.error && /title/i.test(res.error.message || "")) {
-    res = await window.supabaseClient.from("training_plans").update({ name: title }).eq("id", id).eq("user_id", TP.currentUserId);
+    res = await window.supabaseClient.from("training_plans").update({ name: title }).eq("id", id).eq("user_id", targetUserId());
   }
   if (res.error) throw res.error;
 }
 async function dbDeletePlan(id) {
-  const { error } = await window.supabaseClient.from("training_plans").delete().eq("id", id).eq("user_id", TP.currentUserId);
+  const { error } = await window.supabaseClient.from("training_plans").delete().eq("id", id).eq("user_id", targetUserId());
   if (error) throw error;
 }
 async function dbFetchDays(planId) {
@@ -1521,6 +1572,13 @@ function closeTrainingPlanActionSheet() {
 
 /* ── Shell + events ────────────────── */
 function bindStaticTrainingUI() {
+  const userSelect = byId("trainingUserSelect");
+  if (userSelect) {
+    userSelect.addEventListener("change", async (event) => {
+      await handleTrainingUserSelection(event.target.value);
+    });
+  }
+
   byId("backToPlansBtn")?.addEventListener("click", goBackToTrainingMain);
   byId("detailAddExerciseBtn")?.addEventListener("click", openCatalogModal);
   byId("dayHeaderAddExerciseBtn")?.addEventListener("click", openCatalogModal);
@@ -1553,6 +1611,67 @@ function bindStaticTrainingUI() {
   byId("confirmDialogCancelBtn")?.addEventListener("click", () => closeConfirmDialog(false));
   byId("confirmDialogOkBtn")?.addEventListener("click", () => closeConfirmDialog(true));
   document.addEventListener("keydown", e => { if (e.key === "Escape") { ["catalogModalOverlay", "exerciseDetailOverlay", "editExerciseOverlay", "inputDialogOverlay", "confirmDialogOverlay"].forEach(closeModal); } });
+}
+
+function setTrainingUserToolbarVisible(visible) {
+  const wrap = byId("trainingUserToolbar");
+  if (!wrap) return;
+  wrap.hidden = !visible;
+}
+
+async function loadTrainingUsersList() {
+  const selectEl = byId("trainingUserSelect");
+  if (!selectEl) return;
+
+  const { data, error } = await window.supabaseClient
+    .from("profiles")
+    .select("id, email, full_name, role")
+    .order("email", { ascending: true });
+
+  if (error) {
+    throw new Error("Failed to load users: " + error.message);
+  }
+
+  TP.users = data || [];
+  if (TP.isAdmin && TP.users.length <= 1) {
+    console.warn("Admin can currently see only one profile row. Check Supabase RLS policy on profiles SELECT for admin role.");
+  }
+  selectEl.innerHTML = '<option value="">Select user...</option>';
+
+  TP.users.forEach((user) => {
+    const fullName = (user.full_name || user.email || "Unnamed User").trim();
+    const roleText = user.role ? user.role.replace(/[_-]/g, " ") : "user";
+    const roleLabel = roleText.charAt(0).toUpperCase() + roleText.slice(1);
+    const option = document.createElement("option");
+    option.value = user.id;
+    option.textContent = `${fullName} - ${roleLabel}`;
+    selectEl.appendChild(option);
+  });
+
+  if (!TP.selectedUserId && TP.users.length) {
+    TP.selectedUserId = TP.users[0].id;
+  }
+}
+
+async function handleTrainingUserSelection(userId) {
+  if (!TP.isAdmin) return;
+
+  TP.selectedUserId = userId || "";
+  TP.selectedPlanId = null;
+  TP.selectedDayId = null;
+  TP.days = [];
+  TP.exercisesByDay = {};
+
+  if (!TP.selectedUserId) {
+    TP.plans = [];
+    renderPlanSelector();
+    renderMainContent();
+    return;
+  }
+
+  await fetchAndRenderPlans();
+  showMainScreen();
+  ensureHistoryMainState();
 }
 function bindShell() {
   document.querySelectorAll(".tyfit-sidebar .sidebar-nav-item").forEach((item) => {

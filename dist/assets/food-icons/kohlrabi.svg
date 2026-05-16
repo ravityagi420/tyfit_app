@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Kohlrabi">
+  <title>Kohlrabi</title>
+  
+  <path d="M32 52c-10-9-14-19-10-28 3-7 10-10 10-10s7 3 10 10c4 9 0 19-10 28z"/>
+  <path d="M32 14v38"/>
+  <path d="M22 29c7 2 13 2 20 0"/>
+  <path d="M24 40c5 2 11 2 16 0"/>
+
+</svg>

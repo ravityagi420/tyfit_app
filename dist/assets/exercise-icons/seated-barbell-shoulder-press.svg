@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Seated Barbell Shoulder Press">
+  <title>Seated Barbell Shoulder Press</title>
+  
+  <circle cx="32" cy="17" r="4"/>
+  <path d="M32 21 V36"/>
+  <path d="M22 30 L14 21"/>
+  <path d="M42 30 L50 21"/>
+  <path d="M14 21 L19 16"/>
+  <path d="M50 21 L45 16"/>
+  <path d="M25 42 H39"/>
+
+</svg>

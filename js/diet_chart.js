@@ -26,6 +26,14 @@ const DIET_STATE = {
     }
 };
 
+function refreshIcons() {
+    if (typeof window.tyfitRefreshIcons === "function") {
+        window.tyfitRefreshIcons();
+        return;
+    }
+    refreshIcons();
+}
+
 function setDietDirty(isDirty) {
     DIET_STATE.hasUnsavedChanges = Boolean(isDirty);
 
@@ -144,9 +152,7 @@ function renderEditorMealIcons() {
         iconWrap.innerHTML = `<i data-lucide="${iconName}"></i>`;
     });
 
-    if (window.lucide?.createIcons) {
-        window.lucide.createIcons();
-    }
+    refreshIcons();
 }
 
 function normalizeDietChartName(value) {
@@ -515,9 +521,7 @@ function renderDietChartSelector() {
         setSelectedDietChartName("No chart selected");
     }
 
-    if (window.lucide?.createIcons) {
-        window.lucide.createIcons();
-    }
+    refreshIcons();
 }
 
 function closeDietChartActionsMenu() {
@@ -1227,9 +1231,7 @@ function renderDietChartView(chartData) {
             </div>
         `;
 
-        if (window.lucide?.createIcons) {
-            window.lucide.createIcons();
-        }
+        refreshIcons();
 
         if (hasFoodItems) {
             setTimeout(() => {
@@ -1322,9 +1324,7 @@ function renderDietChartView(chartData) {
             }
         });
 
-        if (window.lucide?.createIcons) {
-            window.lucide.createIcons();
-        }
+        refreshIcons();
     }
 
     function openDietMealActionSheet(mealIndex) {
@@ -1344,9 +1344,7 @@ function renderDietChartView(chartData) {
         sheet.hidden = false;
         sheet.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
-        if (window.lucide?.createIcons) {
-            window.lucide.createIcons();
-        }
+        refreshIcons();
     }
 
     function closeDietMealActionSheet() {
@@ -2511,6 +2509,10 @@ async function loadUsersList() {
     }
 
     DIET_STATE.users = data || [];
+
+    if (DIET_STATE.isAdmin && DIET_STATE.users.length <= 1) {
+        console.warn("Admin can currently see only one profile row. Check Supabase RLS policy on profiles SELECT for admin role.");
+    }
 
     selectEl.innerHTML = '<option value="">Select user...</option>';
     DIET_STATE.users.forEach((user) => {

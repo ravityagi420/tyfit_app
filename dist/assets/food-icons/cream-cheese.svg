@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Cream cheese">
+  <title>Cream cheese</title>
+  
+  <path d="M12 42 46 20l6 22H12z"/>
+  <circle cx="34" cy="35" r="3"/>
+  <circle cx="45" cy="39" r="2"/>
+  <circle cx="25" cy="41" r="2"/>
+
+</svg>
