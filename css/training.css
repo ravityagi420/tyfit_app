@@ -86,7 +86,9 @@ body[data-page="training-plan"] .tyfit-main-inner {
   width: 100%;
 }
 
-.tp-user-select-control > i {
+.tp-user-select-control > i,
+.tp-user-select-control > svg,
+.tp-user-select-control [data-lucide] {
   position: absolute;
   right: 12px;
   top: 50%;
@@ -125,7 +127,9 @@ body[data-page="training-plan"] .tyfit-main-inner {
   box-shadow: 0 0 0 3px rgba(15, 111, 234, 0.12);
 }
 
-.tp-user-select-control i {
+.tp-user-select-control i,
+.tp-user-select-control svg,
+.tp-user-select-control [data-lucide] {
   position: absolute;
   right: 12px;
   top: 50%;
