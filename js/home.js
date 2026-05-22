@@ -2,8 +2,8 @@ const homeData = {
     name: "",
     fullName: "",
     profileImage: "assets/avatars/avatar-1.svg",
-    motivationTitle: "Progress starts with a plan.",
-    motivationText: "Small steps today, stronger tomorrow.",
+    motivationTitle: "Small habits.\nBig transformation.",
+    motivationText: "Stay consistent today,\nthank yourself tomorrow.",
     notifications: [],
     tools: [
         { title: "Diet Chart", subtitle: "View your diet and nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
@@ -90,6 +90,34 @@ function showToast(message) {
     }, 2200);
 }
 
+function setHeroTitle(el, value) {
+    if (!el) return;
+    const raw = String(value || "").trim();
+    const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const firstLine = lines[0] || "Small habits.";
+    const secondLine = lines[1] || "Big transformation.";
+
+    el.textContent = "";
+    el.append(document.createTextNode(firstLine));
+    el.append(document.createElement("br"));
+    const accent = document.createElement("span");
+    accent.textContent = secondLine;
+    el.append(accent);
+}
+
+function setHeroSubtitle(el, value) {
+    if (!el) return;
+    const raw = String(value || "").trim();
+    const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const firstLine = lines[0] || "Stay consistent today,";
+    const secondLine = lines[1] || "thank yourself tomorrow.";
+
+    el.textContent = "";
+    el.append(document.createTextNode(firstLine));
+    el.append(document.createElement("br"));
+    el.append(document.createTextNode(secondLine));
+}
+
 function renderHome(data) {
     const greeting = byId("homeGreeting");
     const subtitle = byId("homeSubtitle");
@@ -98,8 +126,8 @@ function renderHome(data) {
 
     if (greeting) greeting.textContent = `Hello${data.name ? `, ${data.name}` : ""} 👋`;
     if (subtitle) subtitle.textContent = "Let’s build consistency today";
-    if (heroTitle) heroTitle.textContent = data.motivationTitle;
-    if (heroText) heroText.textContent = data.motivationText;
+    setHeroTitle(heroTitle, data.motivationTitle);
+    setHeroSubtitle(heroText, data.motivationText);
 
     const desktopName = byId("desktopProfileName");
     const desktopAvatar = byId("desktopProfileAvatar");

@@ -2111,7 +2111,7 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     inset: 0;
     z-index: 1200;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -2126,10 +2126,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 .tp-plan-card-sheet-panel {
     position: relative;
     z-index: 1;
-    width: min(100%, 440px);
-    border-radius: 18px 18px 0 0;
+    width: min(92vw, 440px);
+    border-radius: 18px;
     background: #ffffff;
-    box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.26);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.26);
     padding: 14px;
 }
 
@@ -2144,8 +2144,9 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 .tp-plan-card-sheet-title {
     margin: 0;
     font-size: 15px;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 400;
+    color: #1A1F36;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .tp-plan-card-sheet-close {
@@ -2797,9 +2798,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     inset: 0;
     z-index: 220;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     background: rgba(16, 24, 40, 0.45);
+    padding: 12px;
 }
 
 .diet-chart-input-overlay.tp-modal-overlay[hidden] {
@@ -2807,14 +2809,14 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 }
 
 .diet-chart-input-overlay .tp-modal {
-    width: 100%;
-    max-height: 93dvh;
+    width: min(100%, 560px);
+    max-height: calc(100svh - 24px);
     background: #fff;
-    border-radius: 24px 24px 0 0;
+    border-radius: 20px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 -18px 60px rgba(16, 24, 40, 0.18);
+    box-shadow: 0 16px 44px rgba(16, 24, 40, 0.22);
 }
 
 .diet-chart-input-overlay .tp-modal-header {
@@ -2853,10 +2855,11 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 
 .diet-chart-input-overlay .tp-modal-header h3 {
     margin: 0;
-    color: #111827;
-    font-size: 22px;
-    font-weight: 750;
-    letter-spacing: -0.03em;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .diet-chart-input-overlay .tp-modal-body {
@@ -3038,6 +3041,30 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     min-width: 0;
 }
 
+.diet-meal-replacement-badge {
+    border: 1px solid rgba(29, 78, 216, 0.2);
+    background: #eef4ff;
+    color: #1d4ed8;
+    border-radius: 999px;
+    height: 30px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.diet-meal-replacement-badge svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.2;
+}
+
+.diet-meal-replacement-badge:hover {
+    background: #dbeafe;
+}
+
 .diet-meal-name-inline-input {
     min-width: 180px;
     max-width: 280px;
@@ -3209,6 +3236,284 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 .diet-view-add-meal-btn:hover {
     border-color: #3b82f6;
     color: #3b82f6;
+}
+
+.diet-meal-replacement-overlay[hidden] {
+    display: none !important;
+}
+
+.diet-meal-replacement-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+}
+
+.diet-meal-replacement-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(6px);
+}
+
+.diet-meal-replacement-modal {
+    position: relative;
+    z-index: 1;
+    width: min(92vw, 680px);
+    max-height: min(88vh, 780px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.26);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.diet-meal-replacement-header {
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    padding: 16px 18px;
+}
+
+.diet-meal-replacement-body {
+    padding: 20px;
+    background: #f8fafc;
+    overflow-y: auto;
+}
+
+.diet-meal-replacement-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.diet-meal-replacement-title-wrap h3 {
+    margin: 0;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.diet-meal-replacement-badge-title {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #1A1F36;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.diet-meal-replacement-badge-title svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.1;
+}
+
+.diet-meal-replacement-footer {
+    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    padding: 12px 18px;
+    background: #ffffff;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.diet-meal-replacement-footer .tp-btn {
+    height: 40px;
+    border-radius: 10px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.diet-meal-replacement-footer .tp-btn-ghost {
+    background: #ffffff;
+    border-color: #d0d8e4;
+    color: #334155;
+}
+
+.diet-meal-replacement-footer .tp-btn-primary {
+    background: #0f6fea;
+    color: #ffffff;
+    border-color: #0f6fea;
+}
+
+.diet-meal-replacement-footer .tp-btn-primary:hover {
+    background: #0c5dd0;
+    border-color: #0c5dd0;
+}
+
+.diet-meal-replacement-footer .tp-btn-danger {
+    background: #dc2626;
+    color: #ffffff;
+    border: none;
+}
+
+.diet-meal-replacement-footer .tp-btn-danger:hover {
+    background: #b91c1c;
+}
+
+.diet-replacement-editor-wrap {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 14px;
+}
+
+.diet-replacement-hint {
+    margin: 0 0 14px;
+    color: #475467;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.diet-replacement-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.diet-replacement-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 120px 110px 38px;
+    gap: 10px;
+    align-items: center;
+    padding: 11px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.diet-replacement-row .form-control {
+    height: 40px;
+    border: 1px solid #d0d8e4;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    padding: 0 12px;
+    box-shadow: none;
+}
+
+.diet-replacement-row .form-control:focus {
+    border-color: #98b5e8;
+    box-shadow: 0 0 0 3px rgba(15, 111, 234, 0.12);
+}
+
+.diet-replacement-row .js-replacement-food-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364758b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.diet-replacement-row .js-replacement-unit {
+    background: #f1f5f9;
+    color: #475467;
+}
+
+.diet-replacement-row-delete {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    border-radius: 10px;
+    color: #dc2626;
+    background: #fff1f2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.diet-replacement-row-delete:hover {
+    background: #fee2e2;
+    border-color: rgba(220, 38, 38, 0.34);
+}
+
+.diet-replacement-add-row {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px dashed #cbd5e1;
+    background: #ffffff;
+    color: #1A1F36;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.diet-replacement-add-row:hover {
+    border-color: #98b5e8;
+    background: #f8fbff;
+}
+
+.diet-replacement-view-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+}
+
+.diet-replacement-card {
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    padding: 14px;
+    background: #ffffff;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+}
+
+.diet-replacement-card-title {
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.diet-replacement-card-qty {
+    margin-top: 6px;
+    color: #475467;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.diet-replacement-card-macros {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.diet-replacement-empty {
+    border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+    background: #ffffff;
+    color: #64748b;
+    padding: 24px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 400;
 }
 
 .diet-view-meal-content {
@@ -3387,7 +3692,7 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     inset: 0;
     z-index: 1300;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -3402,10 +3707,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 .diet-qty-sheet-panel {
     position: relative;
     z-index: 1;
-    width: min(100%, 460px);
-    border-radius: 20px 20px 0 0;
+    width: min(92vw, 460px);
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.22);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.22);
     padding: 16px;
 }
 
@@ -3419,9 +3724,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 
 .diet-qty-sheet-title {
     margin: 0;
-    color: #0f172a;
-    font-size: 16px;
-    font-weight: 650;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .diet-qty-sheet-close {
@@ -3525,7 +3831,7 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     inset: 0;
     z-index: 1310;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -3540,10 +3846,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 .diet-catalog-qty-sheet-panel {
     position: relative;
     z-index: 1;
-    width: min(100%, 460px);
-    border-radius: 20px 20px 0 0;
+    width: min(92vw, 460px);
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.22);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.22);
     padding: 16px;
 }
 
@@ -3557,9 +3863,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 
 .diet-catalog-qty-sheet-title {
     margin: 0;
-    color: #0f172a;
-    font-size: 16px;
-    font-weight: 650;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .diet-catalog-qty-sheet-close {
@@ -3917,6 +4224,11 @@ body[data-page="diet-chart"] .tp-page-subtitle {
         gap: 8px;
     }
 
+    .diet-meal-replacement-badge {
+        height: 28px;
+        padding: 0 8px;
+    }
+
     .diet-meal-menu-btn {
         width: 30px;
         height: 30px;
@@ -3930,6 +4242,35 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     .diet-meal-menu-item {
         font-size: 12px;
         padding: 8px 9px;
+    }
+
+    .diet-meal-replacement-modal {
+        width: 100vw;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .diet-meal-replacement-body {
+        padding: 14px;
+    }
+
+    .diet-meal-replacement-footer {
+        padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+        gap: 8px;
+    }
+
+    .diet-replacement-row {
+        grid-template-columns: 1fr;
+    }
+
+    .diet-replacement-row .form-control {
+        height: 42px;
+    }
+
+    .diet-replacement-row-delete {
+        width: 100%;
+        height: 40px;
     }
 
     .diet-meal-name-inline-input {
@@ -4367,11 +4708,14 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     }
 
     .diet-chart-input-overlay.tp-modal-overlay {
-        align-items: flex-end;
+        align-items: center;
+        padding: 10px;
     }
 
     .diet-chart-input-overlay .tp-modal {
-        border-radius: 24px 24px 0 0;
+        border-radius: 18px;
+        width: min(100%, 560px);
+        max-height: calc(100svh - 20px);
     }
 
     .diet-user-select-wrap {

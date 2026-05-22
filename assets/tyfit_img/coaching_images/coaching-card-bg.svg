@@ -1,0 +1,24 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="1200" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17143D"/>
+      <stop offset=".45" stop-color="#241B62"/>
+      <stop offset="1" stop-color="#2B206D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(100 260) rotate(-12) scale(340 150)">
+      <stop stop-color="#6C63FF" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#6C63FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="300" rx="34" fill="url(#card)"/>
+  <rect width="1200" height="300" rx="34" fill="url(#glow)"/>
+  <path d="M0 230C190 160 320 275 510 205C700 135 790 185 960 118C1060 78 1130 84 1200 42" stroke="#8A6CFF" stroke-opacity=".22"/>
+  <path d="M0 252C210 175 330 292 526 224C718 156 805 204 981 142C1078 108 1132 105 1200 76" stroke="#FFFFFF" stroke-opacity=".08"/>
+  <g opacity=".18" fill="#FFFFFF">
+    <circle cx="1110" cy="62" r="2"/>
+    <circle cx="1140" cy="92" r="2"/>
+    <circle cx="1028" cy="218" r="1.5"/>
+    <circle cx="92" cy="238" r="2"/>
+    <circle cx="76" cy="218" r="1.5"/>
+  </g>
+</svg>

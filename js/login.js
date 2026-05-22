@@ -76,6 +76,12 @@ function getBlackLogoHref() {
     : "assets/tyfit_img/black_icon_logo.png";
 }
 
+function getLoginIllustrationHref() {
+  return window.location.pathname.includes("/portal/")
+    ? "../assets/tyfit_img/login_window_image.png"
+    : "assets/tyfit_img/login_window_image.png";
+}
+
 function getDisplayName(session) {
   const user = session?.user;
 
@@ -292,6 +298,78 @@ function updateMobileSettingsAction(accessState) {
     : '<i class="fa fa-sign-in-alt"></i><span>Login</span>';
 }
 
+function resolveMobileProfileAvatar(accessState) {
+  const defaultAvatar = "/assets/avatars/avatar-1.svg";
+  const desktopAvatar = document.getElementById("desktopProfileAvatar");
+
+  if (accessState?.isLoggedIn) {
+    const profilePicture = accessState?.profile?.profile_picture_url;
+    if (profilePicture && /^https?:\/\//i.test(profilePicture)) {
+      return profilePicture;
+    }
+
+    if (window.tyfitProfile?.resolveProfileImage && accessState?.profile) {
+      const resolved = window.tyfitProfile.resolveProfileImage(accessState.profile);
+      if (resolved) {
+        return resolved;
+      }
+    }
+  }
+
+  if (desktopAvatar?.src) {
+    return desktopAvatar.src;
+  }
+
+  return defaultAvatar;
+}
+
+function updateMobileBottomNav(accessState) {
+  const nav = document.querySelector(".tyfit-mobile-bottom-nav");
+  if (!nav) {
+    return;
+  }
+
+  const links = Array.from(nav.querySelectorAll("a"));
+  links.forEach((link) => {
+    const label = link.querySelector("span")?.textContent?.trim().toLowerCase();
+    const iconEl = link.querySelector("i[data-lucide], svg[data-lucide], [data-lucide]");
+
+    if (label === "diet chart" && iconEl) {
+      iconEl.setAttribute("data-lucide", "soup");
+    }
+
+    if (label === "training" && iconEl) {
+      iconEl.setAttribute("data-lucide", "activity");
+    }
+
+    if (label === "profile") {
+      link.classList.add("tyfit-mobile-profile-link");
+
+      const existingIcon = link.querySelector("i[data-lucide], svg, [data-lucide]");
+      if (existingIcon) {
+        existingIcon.remove();
+      }
+
+      let avatarImg = link.querySelector("img.tyfit-mobile-profile-avatar");
+      if (!avatarImg) {
+        avatarImg = document.createElement("img");
+        avatarImg.className = "tyfit-mobile-profile-avatar";
+        avatarImg.alt = "Profile";
+        avatarImg.loading = "lazy";
+        link.prepend(avatarImg);
+      }
+
+      avatarImg.src = resolveMobileProfileAvatar(accessState);
+    }
+  });
+
+  if (typeof window.tyfitRefreshIcons === "function") {
+    window.tyfitRefreshIcons();
+  } else if (window.lucide?.createIcons) {
+    window.lucide.createIcons();
+  }
+}
+
 function applyCollapsedSidebarTooltips() {
   document.querySelectorAll(".tyfit-sidebar .sidebar-nav-item").forEach((item) => {
     const label = item.querySelector("span")?.textContent?.trim();
@@ -389,33 +467,37 @@ function ensureAuthModalStyles() {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 0;
     }
 
     #tyfitAuthModal .tyfit-auth-modal-backdrop {
       position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, 0.62);
-      backdrop-filter: blur(16px);
+      background: rgba(15, 23, 42, 0.38);
+      backdrop-filter: blur(10px);
     }
 
     #tyfitAuthModal .tyfit-auth-modal-dialog {
       position: relative;
       z-index: 1;
-      width: min(100%, 420px);
+      width: min(100%, 520px);
     }
 
     #tyfitAuthModal .tyfit-auth-modal-content {
-      background: #ffffff;
-      border-radius: 28px;
+      background: transparent;
+      border-radius: 0;
       overflow: hidden;
-      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+      box-shadow: none;
     }
 
     #tyfitAuthModal .tyfit-auth-modal-header {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 2;
       display: flex;
       justify-content: flex-end;
-      padding: 18px 18px 0;
+      padding: 0;
     }
 
     #tyfitAuthModal .tyfit-auth-close {
@@ -423,67 +505,148 @@ function ensureAuthModalStyles() {
       height: 40px;
       border: 0;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.06);
+      background: rgba(255, 255, 255, 0.82);
       color: #0f172a;
       font-size: 24px;
       line-height: 1;
       cursor: pointer;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
     }
 
     #tyfitAuthModal .tyfit-auth-modal-body {
-      padding: 8px 32px 32px;
-      text-align: center;
+      padding: 0;
     }
 
-    #tyfitAuthModal .tyfit-auth-logo {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 18px;
+    #tyfitAuthModal .tyfit-login-screen {
+      width: 100%;
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(108, 99, 255, 0.08), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 22px calc(28px + env(safe-area-inset-bottom));
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    #tyfitAuthModal .tyfit-login-content {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      text-align: center;
+      color: #101828;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #tyfitAuthModal .tyfit-login-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 34px;
+    }
+
+    #tyfitAuthModal .tyfit-login-logo-icon {
+      width: 86px;
+      height: auto;
+      object-fit: contain;
+    }
+
+    #tyfitAuthModal .tyfit-login-wordmark {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.34em;
+      color: #111111;
+      margin-left: 0.34em;
+    }
+
+    #tyfitAuthModal .tyfit-login-copy h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: #101828;
+    }
+
+    #tyfitAuthModal .tyfit-login-copy p {
+      margin: 16px 0 0;
+      font-size: 20px;
+      line-height: 1.45;
+      color: #667085;
+      font-weight: 450;
+      max-width: 360px;
+    }
+
+    #tyfitAuthModal .tyfit-login-visual-wrap {
+      margin: 34px auto 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #tyfitAuthModal .tyfit-login-visual {
+      width: min(330px, 86vw);
+      height: auto;
       display: block;
       object-fit: contain;
     }
 
-    #tyfitAuthModal .tyfit-auth-title {
-      margin: 0 0 12px;
-      color: #0f172a;
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
-    #tyfitAuthModal .tyfit-auth-copy {
-      margin: 0 0 22px;
-      color: #475569;
-      font-size: 0.98rem;
-      line-height: 1.5;
-    }
-
-    #tyfitAuthModal .tyfit-auth-google-btn {
+    #tyfitAuthModal .tyfit-google-login-btn {
       width: 100%;
+      height: 78px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      padding: 14px 18px;
+      gap: 18px;
+      padding: 0 22px;
       border: 0;
       border-radius: 16px;
-      background: #111827;
+      background: linear-gradient(135deg, #111827 0%, #020617 100%);
       color: #ffffff;
-      font-size: 0.98rem;
+      font-size: 24px;
       font-weight: 600;
+      letter-spacing: -0.02em;
       cursor: pointer;
+      box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
     }
 
-    #tyfitAuthModal .tyfit-auth-google-mark {
-      width: 24px;
-      height: 24px;
+    #tyfitAuthModal .tyfit-google-icon-wrap {
+      width: 46px;
+      height: 46px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       background: #ffffff;
-      color: #111827;
-      font-weight: 700;
-      font-size: 0.92rem;
+      flex: 0 0 auto;
+    }
+
+    #tyfitAuthModal .tyfit-google-icon-wrap svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    #tyfitAuthModal .tyfit-login-trust {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #667085;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    #tyfitAuthModal .tyfit-login-trust svg {
+      width: 20px;
+      height: 20px;
+      color: #6c63ff;
+      stroke-width: 2.2;
       flex: 0 0 auto;
     }
 
@@ -503,27 +666,146 @@ function ensureAuthModalStyles() {
       user-select: auto;
     }
 
-    @media (max-width: 767px) {
+    @media (max-width: 430px) {
+      #tyfitAuthModal .tyfit-login-screen {
+        padding: 26px 26px calc(28px + env(safe-area-inset-bottom));
+      }
+
+      #tyfitAuthModal .tyfit-login-brand {
+        margin-bottom: 30px;
+      }
+
+      #tyfitAuthModal .tyfit-login-logo-icon {
+        width: 78px;
+      }
+
+      #tyfitAuthModal .tyfit-login-wordmark {
+        font-size: 25px;
+      }
+
+      #tyfitAuthModal .tyfit-login-copy h1 {
+        font-size: 31px;
+      }
+
+      #tyfitAuthModal .tyfit-login-copy p {
+        font-size: 18px;
+      }
+
+      #tyfitAuthModal .tyfit-login-visual-wrap {
+        margin: 30px auto 24px;
+      }
+
+      #tyfitAuthModal .tyfit-login-visual {
+        width: min(310px, 84vw);
+      }
+
+      #tyfitAuthModal .tyfit-google-login-btn {
+        height: 70px;
+        font-size: 21px;
+        border-radius: 15px;
+      }
+
+      #tyfitAuthModal .tyfit-google-icon-wrap {
+        width: 42px;
+        height: 42px;
+      }
+
+    }
+
+    @media (max-height: 760px) {
+      #tyfitAuthModal .tyfit-login-brand {
+        margin-bottom: 22px;
+      }
+
+      #tyfitAuthModal .tyfit-login-visual-wrap {
+        margin: 22px auto 18px;
+      }
+
+      #tyfitAuthModal .tyfit-login-visual {
+        width: min(280px, 78vw);
+      }
+    }
+
+    @media (min-width: 768px) {
       #tyfitAuthModal {
-        padding: 16px;
+        padding: 24px;
         align-items: center;
         justify-content: center;
       }
 
       #tyfitAuthModal .tyfit-auth-modal-dialog {
-        width: min(100%, 420px);
+        width: min(100%, 440px);
       }
 
       #tyfitAuthModal .tyfit-auth-modal-content {
-        border-radius: 24px;
+        border-radius: 28px;
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
       }
 
       #tyfitAuthModal .tyfit-auth-modal-header {
-        padding: 16px 16px 0;
+        top: 16px;
+        right: 16px;
       }
 
-      #tyfitAuthModal .tyfit-auth-modal-body {
-        padding: 8px 22px 24px;
+      #tyfitAuthModal .tyfit-login-screen {
+        min-height: auto;
+        border-radius: 28px;
+        padding: 36px 32px 32px;
+        background: #ffffff;
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+      }
+
+      #tyfitAuthModal .tyfit-login-content {
+        max-width: 360px;
+      }
+
+      #tyfitAuthModal .tyfit-login-brand {
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      #tyfitAuthModal .tyfit-login-logo-icon {
+        width: 64px;
+      }
+
+      #tyfitAuthModal .tyfit-login-wordmark {
+        font-size: 20px;
+        letter-spacing: 0.22em;
+        margin-left: 0.22em;
+      }
+
+      #tyfitAuthModal .tyfit-login-copy h1 {
+        font-size: 28px;
+      }
+
+      #tyfitAuthModal .tyfit-login-copy p {
+        margin-top: 12px;
+        font-size: 16px;
+      }
+
+      #tyfitAuthModal .tyfit-login-visual-wrap,
+      #tyfitAuthModal .tyfit-login-trust,
+      #tyfitAuthModal .tyfit-login-copy p {
+        display: none;
+      }
+
+      #tyfitAuthModal .tyfit-google-login-btn {
+        margin-top: 24px;
+        height: 56px;
+        font-size: 16px;
+        gap: 12px;
+        border-radius: 16px;
+        box-shadow: none;
+      }
+
+      #tyfitAuthModal .tyfit-google-icon-wrap {
+        width: 34px;
+        height: 34px;
+      }
+
+      #tyfitAuthModal .tyfit-google-icon-wrap svg {
+        width: 20px;
+        height: 20px;
       }
     }
   `;
@@ -553,13 +835,36 @@ function ensureAuthModal() {
             </button>
           </div>
           <div class="modal-body tyfit-auth-modal-body">
-            <img src="${getBlackLogoHref()}" alt="Tyfit" class="tyfit-auth-logo" id="tyfitAuthLogo">
-            <h5 class="tyfit-auth-title" id="tyfitAuthTitle">Login to TYFIT</h5>
-            <p class="tyfit-auth-copy">Use your Google account to continue to the portal.</p>
-            <button type="button" class="tyfit-auth-google-btn" id="tyfitAuthGoogleBtn">
-              <span class="tyfit-auth-google-mark" aria-hidden="true">G</span>
-              <span>Continue with Google</span>
-            </button>
+            <div class="tyfit-login-screen">
+              <div class="tyfit-login-content">
+                <div class="tyfit-login-brand">
+                  <img src="${getBlackLogoHref()}" alt="TYFIT" class="tyfit-login-logo-icon" id="tyfitAuthLogo">
+                  <div class="tyfit-login-wordmark">TYFIT</div>
+                </div>
+                <div class="tyfit-login-copy">
+                  <h1 id="tyfitAuthTitle">Welcome back!</h1>
+                  <p>Sign in to continue your fitness journey</p>
+                </div>
+                <div class="tyfit-login-visual-wrap">
+                  <img src="${getLoginIllustrationHref()}" alt="" class="tyfit-login-visual">
+                </div>
+                <button type="button" class="tyfit-google-login-btn" id="tyfitAuthGoogleBtn">
+                  <span class="tyfit-google-icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21.805 12.23c0-.68-.06-1.333-.173-1.96H12v3.708h5.498a4.706 4.706 0 0 1-2.04 3.087v2.564h3.305c1.935-1.782 3.042-4.407 3.042-7.399Z" fill="#4285F4"/>
+                      <path d="M12 22c2.76 0 5.077-.915 6.77-2.47l-3.305-2.564c-.916.614-2.087.977-3.465.977-2.654 0-4.903-1.792-5.707-4.202H2.877v2.645A9.998 9.998 0 0 0 12 22Z" fill="#34A853"/>
+                      <path d="M6.293 13.741A5.997 5.997 0 0 1 5.974 12c0-.605.109-1.193.319-1.741V7.614H2.877A9.997 9.997 0 0 0 2 12c0 1.614.386 3.14 1.07 4.386l3.223-2.645Z" fill="#FBBC04"/>
+                      <path d="M12 6.057c1.5 0 2.848.516 3.91 1.529l2.932-2.932C17.072 2.997 14.755 2 12 2a9.998 9.998 0 0 0-9.123 5.614l3.416 2.645C7.097 7.849 9.346 6.057 12 6.057Z" fill="#EA4335"/>
+                    </svg>
+                  </span>
+                  <span>Continue with Google</span>
+                </button>
+                <div class="tyfit-login-trust">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>Secure, private and easy</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -798,6 +1103,7 @@ async function syncAuthUi(sessionArg) {
   updateAdminLinkState(accessState);
   updatePrimaryNavLinks(accessState);
   updateMobileSettingsAction(accessState);
+  updateMobileBottomNav(accessState);
   applyCollapsedSidebarTooltips();
   updateTopbarGuestState(accessState);
   await showUser(session);

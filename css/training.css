@@ -1094,14 +1094,21 @@ body[data-page="training-plan"] .tyfit-main-inner {
 @keyframes tpSpin { to { transform: rotate(360deg); } }
 
 /* Modal / full-screen on mobile */
-.tp-modal-overlay { position:fixed; inset:0; z-index:220; display:flex; align-items:flex-end; justify-content:center; background: rgba(16,24,40,.45); }
+.tp-modal-overlay { position:fixed; inset:0; z-index:220; display:flex; align-items:center; justify-content:center; background: rgba(16,24,40,.45); padding: 12px; }
 .tp-modal-overlay[hidden] { display:none; }
-.tp-modal { width:100%; max-height:93dvh; background:#fff; border-radius:24px 24px 0 0; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 -18px 60px rgba(16,24,40,.18); }
+.tp-modal { width:min(100%, 720px); max-height:93dvh; background:#fff; border-radius:24px; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 18px 60px rgba(16,24,40,.18); }
 .tp-modal-header { padding: 22px 20px 16px; border-bottom: 1px solid var(--tp-border); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-shrink:0; background:#fff; }
 .tp-modal-header-main { display:flex; align-items:center; gap:13px; min-width:0; }
 .tp-modal-badge { width:44px; height:44px; border-radius: 15px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .tp-modal-badge svg { width:21px; height:21px; stroke-width:2.2; }
-.tp-modal-header h3 { margin:0; color:var(--tp-text); font-size:22px; font-weight:750; letter-spacing:-.03em; }
+.tp-modal-header h3 {
+  margin: 0;
+  color: #1A1F36;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
 .tp-modal-header p { margin:4px 0 0; color:var(--tp-muted); font-size:14px; line-height:1.45; }
 .tp-modal-close { width:42px; height:42px; border-radius:14px; flex-shrink:0; }
 .tp-modal-close svg { width:20px; height:20px; }
@@ -1117,7 +1124,7 @@ body[data-page="training-plan"] .tyfit-main-inner {
   inset: 0;
   z-index: 260;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
 }
 
@@ -1132,10 +1139,10 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-plan-card-sheet-panel {
   position: relative;
   z-index: 1;
-  width: min(100%, 440px);
-  border-radius: 18px 18px 0 0;
+  width: min(92vw, 440px);
+  border-radius: 18px;
   background: #ffffff;
-  box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.26);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.26);
   padding: 14px;
 }
 
@@ -1150,8 +1157,9 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-plan-card-sheet-title {
   margin: 0;
   font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 400;
+  color: #1A1F36;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .tp-plan-card-sheet-close {
@@ -1394,16 +1402,17 @@ body[data-page="training-plan"] .tyfit-main-inner {
 }
 @media (max-width: 1024px) {
   .tp-modal-overlay {
-    align-items: stretch;
-    background: #fff;
+    align-items: center;
+    background: rgba(16, 24, 40, 0.45);
+    padding: 12px;
   }
   .tp-modal {
-    width: 100%;
-    max-width: none;
-    height: 100dvh;
-    max-height: 100dvh;
-    border-radius: 0;
-    box-shadow: none;
+    width: min(100%, 640px);
+    max-width: 640px;
+    height: auto;
+    max-height: calc(100svh - 24px);
+    border-radius: 20px;
+    box-shadow: 0 16px 44px rgba(16, 24, 40, 0.22);
   }
   .tp-modal-header {
     padding-top: max(18px, env(safe-area-inset-top));
@@ -1575,8 +1584,8 @@ body[data-page="training-plan"] .tyfit-main-inner {
     min-width: 184px;
   }
   .tp-form-row { grid-template-columns:1fr; }
-  .tp-modal-overlay { background:#fff; }
-  .tp-modal { height:100dvh; max-height:100dvh; border-radius:0; box-shadow:none; }
+  .tp-modal-overlay { background: rgba(16, 24, 40, 0.45); align-items:center; padding:10px; }
+  .tp-modal { width:min(100%, 560px); height:auto; max-height:calc(100svh - 20px); border-radius:18px; box-shadow:0 14px 34px rgba(16, 24, 40, 0.22); }
   .tp-modal-header { padding-top: max(18px, env(safe-area-inset-top)); }
   .tp-modal-footer { position: sticky; bottom:0; }
 

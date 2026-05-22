@@ -1,0 +1,28 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#6C63FF"/>
+      <stop offset="55%" stop-color="#2A2468"/>
+      <stop offset="100%" stop-color="#17143D"/>
+    </radialGradient>
+    <linearGradient id="person" x1="256" y1="110" x2="256" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C9C7F8"/>
+    </linearGradient>
+    <linearGradient id="cap" x1="172" y1="95" x2="340" y2="185" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E6E4FF"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="238" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="232" stroke="#8A6CFF" stroke-width="12" opacity=".9"/>
+  <path d="M126 430c20-86 69-132 130-132s110 46 130 132H126Z" fill="url(#person)"/>
+  <path d="M178 427c12-58 39-91 78-91s66 33 78 91H178Z" fill="#17143D" opacity=".55"/>
+  <path d="M178 206c0-49 35-89 78-89s78 40 78 89v43c0 55-35 96-78 96s-78-41-78-96v-43Z" fill="url(#person)"/>
+  <path d="M164 157c14-40 50-67 92-67s78 27 92 67c-45-11-139-11-184 0Z" fill="url(#cap)"/>
+  <path d="M149 166c55-23 159-23 214 0-12 20-30 28-52 23-36-8-74-8-110 0-22 5-40-3-52-23Z" fill="#FFFFFF"/>
+  <path d="M229 135l58 10-36 28-22-38Z" fill="#17143D"/>
+  <path d="M243 145l21 4-13 10-8-14Z" fill="#6C63FF"/>
+  <path d="M220 363l36 36 36-36" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".92"/>
+  <path d="M256 398v50" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" opacity=".9"/>
+</svg>
