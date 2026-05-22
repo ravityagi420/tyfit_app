@@ -2592,3 +2592,86 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
         font-size: 14px;
     }
 }
+
+/* ── GDPR Compliance Section ── */
+.tyfit-gdpr-section {
+    margin: 38px auto 34px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    max-width: 420px;
+}
+
+.tyfit-gdpr-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.tyfit-gdpr-shield {
+    width: 58px;
+    height: 58px;
+    opacity: 0.72;
+    filter: drop-shadow(0 8px 18px rgba(108, 99, 255, 0.12));
+}
+
+.tyfit-gdpr-copy {
+    text-align: left;
+}
+
+.tyfit-gdpr-subtitle {
+    font-size: 15px;
+    line-height: 1;
+    color: rgba(108, 99, 255, 0.48);
+    font-family: "Caveat", "Segoe Print", cursive;
+    font-weight: 500;
+    margin-bottom: 4px;
+    letter-spacing: 0.2px;
+}
+
+.tyfit-gdpr-title {
+    font-size: 38px;
+    line-height: 0.95;
+    color: rgba(108, 99, 255, 0.66);
+    font-family: "Caveat", "Segoe Print", cursive;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 6px;
+}
+
+.tyfit-gdpr-leaf {
+    width: 42px;
+    height: auto;
+    opacity: 0.45;
+}
+
+@media (max-width: 420px) {
+    .tyfit-gdpr-section {
+        gap: 8px;
+        max-width: 100%;
+        margin-top: 34px;
+        margin-bottom: 32px;
+    }
+
+    .tyfit-gdpr-leaf {
+        width: 28px;
+    }
+
+    .tyfit-gdpr-shield {
+        width: 50px;
+        height: 50px;
+    }
+
+    .tyfit-gdpr-title {
+        font-size: 34px;
+    }
+
+    .tyfit-gdpr-subtitle {
+        font-size: 14px;
+    }
+}

@@ -52,6 +52,54 @@ function shouldRequireAuthOnCurrentPage() {
   return !isLoginPage() && !isHome;
 }
 
+function ensureAuthBootstrapShield() {
+  if (isLoginPage()) {
+    return;
+  }
+
+  if (document.getElementById("tyfitAuthBootstrapStyles")) {
+    return;
+  }
+
+  const styleEl = document.createElement("style");
+  styleEl.id = "tyfitAuthBootstrapStyles";
+  styleEl.textContent = `
+    #tyfitAuthBootstrapShield {
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
+      background: linear-gradient(180deg, #f9fcff 0%, #f2f7ff 100%);
+      pointer-events: all;
+    }
+  `;
+
+  const mountShield = () => {
+    if (document.getElementById("tyfitAuthBootstrapShield")) {
+      return;
+    }
+
+    const shieldEl = document.createElement("div");
+    shieldEl.id = "tyfitAuthBootstrapShield";
+    shieldEl.setAttribute("aria-hidden", "true");
+    document.body.appendChild(shieldEl);
+  };
+
+  document.head.appendChild(styleEl);
+
+  if (document.body) {
+    mountShield();
+  } else {
+    document.addEventListener("DOMContentLoaded", mountShield, { once: true });
+  }
+}
+
+function removeAuthBootstrapShield() {
+  const shieldEl = document.getElementById("tyfitAuthBootstrapShield");
+  if (shieldEl) {
+    shieldEl.remove();
+  }
+}
+
 function getPostLoginRedirect() {
   return isLoginPage() ? "/index.html" : getSanitizedCurrentPath();
 }
@@ -104,6 +152,455 @@ function safeDialogAlert(options) {
   const message = typeof options === "string" ? options : (options?.message || "Something went wrong.");
   window.alert(message);
   return Promise.resolve(true);
+}
+
+function setConsentValidationState(consentWrap, errorEl, isValid) {
+  if (consentWrap) {
+    consentWrap.classList.toggle("is-invalid", !isValid);
+  }
+
+  if (errorEl) {
+    errorEl.style.display = isValid ? "none" : "block";
+  }
+}
+
+function resolveConsentContext(triggerEl) {
+  const modalEl = document.getElementById("tyfitAuthModal");
+  const triggerInsideModal = Boolean(triggerEl?.closest?.("#tyfitAuthModal"));
+  const modalVisible = Boolean(modalEl && !modalEl.hidden);
+  const preferModal = triggerInsideModal || (!triggerEl && modalVisible);
+
+  if (preferModal) {
+    return {
+      checkbox: document.getElementById("tyfitAuthConsentCheckbox"),
+      consentWrap: document.getElementById("tyfitAuthConsentWrap"),
+      errorEl: document.getElementById("tyfitAuthConsentError")
+    };
+  }
+
+  return {
+    checkbox: document.getElementById("loginConsentCheckbox") || document.getElementById("tyfitAuthConsentCheckbox"),
+    consentWrap: document.getElementById("loginConsentWrap") || document.getElementById("tyfitAuthConsentWrap"),
+    errorEl: document.getElementById("loginConsentError") || document.getElementById("tyfitAuthConsentError")
+  };
+}
+
+function bindConsentValidationHandlers() {
+  const consentMappings = [
+    {
+      checkboxId: "loginConsentCheckbox",
+      consentWrapId: "loginConsentWrap",
+      errorId: "loginConsentError"
+    },
+    {
+      checkboxId: "tyfitAuthConsentCheckbox",
+      consentWrapId: "tyfitAuthConsentWrap",
+      errorId: "tyfitAuthConsentError"
+    }
+  ];
+
+  consentMappings.forEach((mapping) => {
+    const checkbox = document.getElementById(mapping.checkboxId);
+
+    if (!checkbox || checkbox.dataset.consentBound === "true") {
+      return;
+    }
+
+    checkbox.dataset.consentBound = "true";
+    checkbox.addEventListener("change", () => {
+      const consentWrap = document.getElementById(mapping.consentWrapId);
+      const errorEl = document.getElementById(mapping.errorId);
+      setConsentValidationState(consentWrap, errorEl, checkbox.checked);
+    });
+  });
+}
+
+function ensureLegalModalStyles() {
+  if (document.getElementById("tyfitLegalModalStyles")) {
+    return;
+  }
+
+  const styleEl = document.createElement("style");
+  styleEl.id = "tyfitLegalModalStyles";
+  styleEl.textContent = `
+    #tyfitLegalModal {
+      position: fixed;
+      inset: 0;
+      z-index: 14000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #tyfitLegalModal[hidden] {
+      display: none;
+    }
+
+    #tyfitLegalModal .tyfit-legal-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.62);
+      border: 0;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    #tyfitLegalModal .tyfit-legal-modal-dialog {
+      position: relative;
+      width: min(96vw, 980px);
+      height: min(88vh, 860px);
+      border-radius: 20px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 30px 100px rgba(15, 23, 42, 0.38);
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+    }
+
+    #tyfitLegalModal .tyfit-legal-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #e4e7ec;
+      background: #ffffff;
+      flex: 0 0 auto;
+    }
+
+    #tyfitLegalModal .tyfit-legal-modal-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+      color: #101828;
+      font-weight: 700;
+    }
+
+    #tyfitLegalModal .tyfit-legal-modal-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #d0d5dd;
+      background: #ffffff;
+      color: #344054;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+
+    #tyfitLegalModal .tyfit-legal-modal-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      background: #f8fafc;
+      overflow: auto;
+      padding: 20px;
+    }
+
+    #tyfitLegalModal .tyfit-legal-modal-content {
+      width: min(100%, 860px);
+      margin: 0 auto;
+      color: #1f2937;
+      font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    #tyfitLegalModal .tyfit-legal-doc {
+      display: grid;
+      gap: 16px;
+    }
+
+    #tyfitLegalModal .tyfit-legal-doc article,
+    #tyfitLegalModal .tyfit-legal-doc section {
+      background: #ffffff;
+      border: 1px solid #e4e7ec;
+      border-radius: 16px;
+      padding: 18px 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    #tyfitLegalModal .tyfit-legal-doc h1,
+    #tyfitLegalModal .tyfit-legal-doc h2,
+    #tyfitLegalModal .tyfit-legal-doc h3,
+    #tyfitLegalModal .tyfit-legal-doc h4 {
+      color: #101828;
+      margin: 0 0 10px;
+      line-height: 1.3;
+    }
+
+    #tyfitLegalModal .tyfit-legal-doc p {
+      margin: 0 0 10px;
+      color: #475467;
+    }
+
+    #tyfitLegalModal .tyfit-legal-doc p:last-child {
+      margin-bottom: 0;
+    }
+
+    #tyfitLegalModal .tyfit-legal-loading,
+    #tyfitLegalModal .tyfit-legal-error {
+      background: #ffffff;
+      border: 1px solid #e4e7ec;
+      border-radius: 14px;
+      padding: 18px;
+      color: #475467;
+      font-size: 15px;
+    }
+
+    #tyfitLegalModal .tyfit-legal-error a {
+      color: #1d4ed8;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    body.tyfit-legal-modal-open {
+      overflow: hidden;
+    }
+
+    @media (max-width: 767px) {
+      #tyfitLegalModal {
+        padding: 0;
+      }
+
+      #tyfitLegalModal .tyfit-legal-modal-dialog {
+        width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+      }
+
+      #tyfitLegalModal .tyfit-legal-modal-header {
+        padding: 12px 14px;
+      }
+
+      #tyfitLegalModal .tyfit-legal-modal-title {
+        font-size: 16px;
+      }
+
+      #tyfitLegalModal .tyfit-legal-modal-body {
+        padding: 14px 12px calc(14px + env(safe-area-inset-bottom));
+      }
+
+      #tyfitLegalModal .tyfit-legal-doc article,
+      #tyfitLegalModal .tyfit-legal-doc section {
+        border-radius: 12px;
+        padding: 14px 12px;
+      }
+    }
+  `;
+
+  document.head.appendChild(styleEl);
+}
+
+function ensureLegalModal() {
+  if (document.getElementById("tyfitLegalModal")) {
+    return;
+  }
+
+  if (!document.body) {
+    return;
+  }
+
+  ensureLegalModalStyles();
+
+  const modalMarkup = `
+    <div id="tyfitLegalModal" tabindex="-1" aria-hidden="true" hidden>
+      <button type="button" class="tyfit-legal-modal-backdrop" data-legal-close aria-label="Close legal document"></button>
+      <section class="tyfit-legal-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="tyfitLegalModalTitle">
+        <header class="tyfit-legal-modal-header">
+          <h2 class="tyfit-legal-modal-title" id="tyfitLegalModalTitle">Legal</h2>
+          <button type="button" class="tyfit-legal-modal-close" data-legal-close aria-label="Close legal document">&times;</button>
+        </header>
+        <div class="tyfit-legal-modal-body">
+          <div class="tyfit-legal-modal-content" id="tyfitLegalModalContent" aria-live="polite"></div>
+        </div>
+      </section>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalMarkup);
+
+  const modalEl = document.getElementById("tyfitLegalModal");
+  const closers = modalEl?.querySelectorAll("[data-legal-close]") || [];
+
+  closers.forEach((closeEl) => {
+    closeEl.addEventListener("click", closeLegalModal);
+  });
+}
+
+function getLegalContentCache() {
+  if (!window.tyfitLegalContentCache) {
+    window.tyfitLegalContentCache = new Map();
+  }
+
+  return window.tyfitLegalContentCache;
+}
+
+function extractLegalBodyHtml(doc) {
+  const root = doc.querySelector(".tyfit-main-inner") || doc.querySelector("main") || doc.body;
+
+  if (!root) {
+    return "";
+  }
+
+  const preferredBlocks = Array.from(root.querySelectorAll("article.tyfit-privacy-hero, section.tyfit-privacy-page-card"));
+  const selectedBlocks = preferredBlocks.length > 0 ? preferredBlocks : Array.from(root.children).slice(0, 8);
+  const container = document.createElement("div");
+
+  selectedBlocks.forEach((node) => {
+    container.appendChild(node.cloneNode(true));
+  });
+
+  container.querySelectorAll("script, style, nav, header, footer, .tyfit-mobile-bottom-nav, .tyfit-sidebar, .tyfit-desktop-topbar, .tyfit-mobile-topbar, .tyfit-toast, .back-to-top").forEach((el) => {
+    el.remove();
+  });
+
+  return container.innerHTML.trim();
+}
+
+async function renderLegalContent(url) {
+  const contentEl = document.getElementById("tyfitLegalModalContent");
+
+  if (!contentEl) {
+    return;
+  }
+
+  const cache = getLegalContentCache();
+  contentEl.innerHTML = `<div class="tyfit-legal-loading">Loading legal content...</div>`;
+
+  try {
+    if (!cache.has(url)) {
+      const response = await fetch(url, { credentials: "same-origin" });
+
+      if (!response.ok) {
+        throw new Error(`Could not load ${url}`);
+      }
+
+      const html = await response.text();
+      const parsed = new DOMParser().parseFromString(html, "text/html");
+      const legalHtml = extractLegalBodyHtml(parsed);
+
+      if (!legalHtml) {
+        throw new Error("No legal content found");
+      }
+
+      cache.set(url, legalHtml);
+    }
+
+    contentEl.innerHTML = `<div class="tyfit-legal-doc">${cache.get(url)}</div>`;
+    const bodyEl = contentEl.closest(".tyfit-legal-modal-body");
+    if (bodyEl) {
+      bodyEl.scrollTop = 0;
+    }
+  } catch (error) {
+    console.error("Legal modal load error:", error);
+    contentEl.innerHTML = `<div class="tyfit-legal-error">We could not load this legal document inside the modal right now. <a href="${url}" target="_blank" rel="noopener noreferrer">Open it in a new page</a>.</div>`;
+  }
+}
+
+function openLegalModal({ url, title }) {
+  if (!url) {
+    return;
+  }
+
+  ensureLegalModal();
+
+  const modalEl = document.getElementById("tyfitLegalModal");
+  const titleEl = document.getElementById("tyfitLegalModalTitle");
+  const contentEl = document.getElementById("tyfitLegalModalContent");
+
+  if (!modalEl || !contentEl) {
+    window.location.href = url;
+    return;
+  }
+
+  if (titleEl) {
+    titleEl.textContent = title || "Legal";
+  }
+
+  modalEl.hidden = false;
+  modalEl.setAttribute("aria-hidden", "false");
+  document.body.classList.add("tyfit-legal-modal-open");
+
+  const authModal = document.getElementById("tyfitAuthModal");
+  if (authModal) {
+    authModal.dataset.legalOpen = "true";
+  }
+
+  void renderLegalContent(url);
+}
+
+function closeLegalModal() {
+  const modalEl = document.getElementById("tyfitLegalModal");
+  const contentEl = document.getElementById("tyfitLegalModalContent");
+  const authModal = document.getElementById("tyfitAuthModal");
+
+  document.body.classList.remove("tyfit-legal-modal-open");
+
+  if (!modalEl) {
+    return;
+  }
+
+  modalEl.hidden = true;
+  modalEl.setAttribute("aria-hidden", "true");
+
+  if (contentEl) {
+    contentEl.innerHTML = "";
+  }
+
+  if (authModal) {
+    authModal.dataset.legalOpen = "false";
+  }
+}
+
+function bindLegalModalTriggers() {
+  if (document.body?.dataset.legalModalBound === "true") {
+    return;
+  }
+
+  if (document.body) {
+    document.body.dataset.legalModalBound = "true";
+  }
+
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[data-legal-modal]");
+
+    if (!link) {
+      return;
+    }
+
+    event.preventDefault();
+    const url = link.getAttribute("data-legal-modal") || link.getAttribute("href") || "";
+    const title = link.getAttribute("data-legal-title") || link.textContent?.trim() || "Legal";
+    openLegalModal({ url, title });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    const modalEl = document.getElementById("tyfitLegalModal");
+    if (!modalEl || modalEl.hidden) {
+      return;
+    }
+
+    event.preventDefault();
+    if (typeof event.stopImmediatePropagation === "function") {
+      event.stopImmediatePropagation();
+    } else {
+      event.stopPropagation();
+    }
+
+    closeLegalModal();
+  });
 }
 
 async function waitForStableSession({ attempts = 8, intervalMs = 150 } = {}) {
@@ -491,26 +988,7 @@ function ensureAuthModalStyles() {
     }
 
     #tyfitAuthModal .tyfit-auth-modal-header {
-      position: absolute;
-      top: 18px;
-      right: 18px;
-      z-index: 2;
-      display: flex;
-      justify-content: flex-end;
-      padding: 0;
-    }
-
-    #tyfitAuthModal .tyfit-auth-close {
-      width: 40px;
-      height: 40px;
-      border: 0;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.82);
-      color: #0f172a;
-      font-size: 24px;
-      line-height: 1;
-      cursor: pointer;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+      display: none;
     }
 
     #tyfitAuthModal .tyfit-auth-modal-body {
@@ -521,8 +999,9 @@ function ensureAuthModalStyles() {
       width: 100%;
       min-height: 100dvh;
       background:
-        radial-gradient(circle at 50% 42%, rgba(108, 99, 255, 0.08), transparent 34%),
-        linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+        radial-gradient(circle at 50% 35%, rgba(108, 99, 255, 0.13), transparent 50%),
+        radial-gradient(circle at 18% 82%, rgba(91, 155, 255, 0.11), transparent 46%),
+        linear-gradient(180deg, #f7fbff 0%, #edf4ff 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -631,6 +1110,47 @@ function ensureAuthModalStyles() {
       height: 26px;
     }
 
+    #tyfitAuthModal .tyfit-login-consent {
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    #tyfitAuthModal .tyfit-login-consent-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: #475467;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    #tyfitAuthModal .tyfit-login-consent-checkbox {
+      margin-top: 3px;
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+    }
+
+    #tyfitAuthModal .tyfit-login-consent-link {
+      color: #1d4ed8;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    #tyfitAuthModal .tyfit-consent-error {
+      margin: 8px 0 0;
+      color: #b42318;
+      font-size: 13px;
+      line-height: 1.4;
+      display: none;
+    }
+
+    #tyfitAuthModal .tyfit-login-consent.is-invalid .tyfit-consent-error {
+      display: block;
+    }
+
     #tyfitAuthModal .tyfit-login-trust {
       margin-top: 20px;
       display: inline-flex;
@@ -655,13 +1175,15 @@ function ensureAuthModalStyles() {
       overflow: hidden;
     }
 
-    body.tyfit-auth-locked > *:not(#tyfitAuthModal) {
+    body.tyfit-auth-locked > *:not(#tyfitAuthModal):not(#tyfitLegalModal) {
       pointer-events: none;
       user-select: none;
     }
 
     body.tyfit-auth-locked #tyfitAuthModal,
-    body.tyfit-auth-locked #tyfitAuthModal * {
+    body.tyfit-auth-locked #tyfitAuthModal *,
+    body.tyfit-auth-locked #tyfitLegalModal,
+    body.tyfit-auth-locked #tyfitLegalModal * {
       pointer-events: auto;
       user-select: auto;
     }
@@ -710,6 +1232,10 @@ function ensureAuthModalStyles() {
         height: 42px;
       }
 
+      #tyfitAuthModal .tyfit-login-consent-label {
+        font-size: 13px;
+      }
+
     }
 
     @media (max-height: 760px) {
@@ -742,16 +1268,14 @@ function ensureAuthModalStyles() {
         box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
       }
 
-      #tyfitAuthModal .tyfit-auth-modal-header {
-        top: 16px;
-        right: 16px;
-      }
-
       #tyfitAuthModal .tyfit-login-screen {
         min-height: auto;
         border-radius: 28px;
         padding: 36px 32px 32px;
-        background: #ffffff;
+        background:
+          radial-gradient(circle at 52% 28%, rgba(108, 99, 255, 0.12), transparent 54%),
+          radial-gradient(circle at 14% 86%, rgba(91, 155, 255, 0.09), transparent 44%),
+          linear-gradient(180deg, #f8fcff 0%, #eff5ff 100%);
         box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
       }
 
@@ -807,6 +1331,14 @@ function ensureAuthModalStyles() {
         width: 20px;
         height: 20px;
       }
+
+      #tyfitAuthModal .tyfit-login-consent {
+        margin-top: 12px;
+      }
+
+      #tyfitAuthModal .tyfit-login-consent-label {
+        font-size: 12px;
+      }
     }
   `;
 
@@ -830,9 +1362,6 @@ function ensureAuthModal() {
       <div class="tyfit-auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="tyfitAuthTitle">
         <div class="tyfit-auth-modal-content">
           <div class="modal-header tyfit-auth-modal-header">
-            <button type="button" class="tyfit-auth-close" data-auth-close aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
           </div>
           <div class="modal-body tyfit-auth-modal-body">
             <div class="tyfit-login-screen">
@@ -859,6 +1388,13 @@ function ensureAuthModal() {
                   </span>
                   <span>Continue with Google</span>
                 </button>
+                <div class="tyfit-login-consent" data-auth-consent-scope="modal" id="tyfitAuthConsentWrap">
+                  <label class="tyfit-login-consent-label" for="tyfitAuthConsentCheckbox">
+                    <input type="checkbox" class="tyfit-login-consent-checkbox" id="tyfitAuthConsentCheckbox" data-auth-consent-checkbox>
+                    <span>I agree to Tyfit's <a href="terms.html" class="tyfit-login-consent-link" data-legal-modal="terms.html" data-legal-title="Terms of Use">Terms of Use</a> and <a href="privacy-policy.html" class="tyfit-login-consent-link" data-legal-modal="privacy-policy.html" data-legal-title="Privacy Policy">Privacy Policy</a>.</span>
+                  </label>
+                  <p class="tyfit-consent-error" id="tyfitAuthConsentError" role="alert" aria-live="polite">Please accept the Terms and Privacy Policy to continue.</p>
+                </div>
                 <div class="tyfit-login-trust">
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   <span>Secure, private and easy</span>
@@ -875,23 +1411,20 @@ function ensureAuthModal() {
 
   const googleBtn = document.getElementById("tyfitAuthGoogleBtn");
   const modalEl = document.getElementById("tyfitAuthModal");
-  const closeBtn = modalEl?.querySelector("[data-auth-close]");
   const backdrop = modalEl?.querySelector(".tyfit-auth-modal-backdrop");
 
   if (googleBtn) {
     googleBtn.addEventListener("click", googleLogin);
   }
 
+  bindConsentValidationHandlers();
+
   const requestClose = () => {
-    if (modalEl?.dataset.locked === "true") {
+    if (modalEl?.dataset.locked === "true" || modalEl?.dataset.legalOpen === "true") {
       return;
     }
     closeAuthModal();
   };
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", requestClose);
-  }
 
   if (backdrop) {
     backdrop.addEventListener("click", requestClose);
@@ -905,7 +1438,7 @@ function ensureAuthModal() {
       }
 
       const activeModal = document.getElementById("tyfitAuthModal");
-      if (!activeModal || activeModal.hidden || activeModal.dataset.locked === "true") {
+      if (!activeModal || activeModal.hidden || activeModal.dataset.locked === "true" || activeModal.dataset.legalOpen === "true") {
         return;
       }
 
@@ -918,7 +1451,6 @@ function openAuthModal(options = {}) {
   ensureAuthModal();
 
   const modalEl = document.getElementById("tyfitAuthModal");
-  const closeBtn = modalEl?.querySelector(".tyfit-auth-close");
   const logoEl = document.getElementById("tyfitAuthLogo");
   const locked = options.locked !== false;
 
@@ -930,8 +1462,10 @@ function openAuthModal(options = {}) {
     logoEl.src = getBlackLogoHref();
   }
 
-  if (closeBtn) {
-    closeBtn.style.display = locked ? "none" : "block";
+  // Ensure no close button ever exists in the auth modal
+  const existingClose = modalEl.querySelector(".tyfit-auth-close");
+  if (existingClose) {
+    existingClose.remove();
   }
 
   modalEl.dataset.locked = String(locked);
@@ -998,6 +1532,8 @@ function bindAuthUi() {
   const desktopAccountBtn = document.getElementById("desktopAccountBtn");
 
   bindGlobalLogoutActions();
+  bindConsentValidationHandlers();
+  bindLegalModalTriggers();
 
   if (loginBtn && loginBtn.dataset.authBound !== "true") {
     loginBtn.dataset.authBound = "true";
@@ -1153,6 +1689,17 @@ async function googleLogin(event) {
     event.preventDefault();
   }
 
+  const triggerEl = event?.currentTarget instanceof Element ? event.currentTarget : null;
+  const { checkbox, consentWrap, errorEl } = resolveConsentContext(triggerEl);
+
+  if (checkbox && !checkbox.checked) {
+    setConsentValidationState(consentWrap, errorEl, false);
+    checkbox.focus();
+    return;
+  }
+
+  setConsentValidationState(consentWrap, errorEl, true);
+
   sessionStorage.setItem("postLoginRedirect", getPostLoginRedirect());
 
   const { error } = await window.supabaseClient.auth.signInWithOAuth({
@@ -1189,6 +1736,7 @@ async function logout(event) {
 
   window.tyfitAccessState = null;
   updateAuthButtons(false);
+  openAuthModal({ locked: true });
 
   const mobileSettingsMenu = document.getElementById("mobileSettingsMenu");
   const mobileSettingsBtn = document.getElementById("mobileSettingsBtn");
@@ -1258,13 +1806,14 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
   }, 0);
 });
 
+ensureAuthBootstrapShield();
+
 window.addEventListener("DOMContentLoaded", async () => {
   try {
     ensureAuthModal();
     bindAuthUi();
     const callbackSession = await processOAuthCallback();
-    const stableSession = callbackSession || await waitForStableSession({ attempts: 20, intervalMs: 150 });
-    const session = stableSession || await getCurrentSession();
+    const session = callbackSession || await getCurrentSession();
 
     if (session) {
       await ensureProfile(session);
@@ -1275,12 +1824,14 @@ window.addEventListener("DOMContentLoaded", async () => {
     if (!session && shouldRequireAuthOnCurrentPage()) {
       openAuthModal({ locked: true });
     }
+    removeAuthBootstrapShield();
   } catch (err) {
     console.error("Unhandled auth init error:", err);
     await safeDialogAlert({
       title: "Authentication Error",
       message: "Unexpected auth init error: " + err.message
     });
+    removeAuthBootstrapShield();
   }
 });
 
