@@ -256,6 +256,35 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
     flex-shrink: 0;
 }
 
+.tyfit-mobile-drawer .sidebar-footer.tyfit-mobile-drawer-logout-wrap {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid #F3F4F8;
+    text-align: left;
+}
+
+.tyfit-mobile-drawer .sidebar-logout.tyfit-mobile-drawer-logout {
+    height: auto;
+    padding: 10px 16px 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #DC2626;
+    justify-content: flex-start;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: inherit;
+    line-height: 1;
+    gap: 8px;
+    transition: color 0.14s ease;
+}
+
+.tyfit-mobile-drawer .sidebar-logout.tyfit-mobile-drawer-logout:hover {
+    background: transparent;
+    border-color: transparent;
+    color: #B91C1C;
+}
+
 .tool-card {
         display: flex;
         align-items: center;
@@ -997,8 +1026,7 @@ body[data-page="home"] .tyfit-motivation-right {
 }
 
 .tyfit-profile-summary-card,
-.tyfit-profile-sections-card,
-.tyfit-logout-card {
+.tyfit-profile-sections-card {
     background: #fff;
     border: 1px solid var(--tyfit-border);
     border-radius: 22px;
@@ -1183,14 +1211,28 @@ body[data-page="home"] .tyfit-motivation-right {
 }
 
 .tyfit-logout-card {
-    border: 1px solid #FFD9E0;
-    color: var(--tyfit-danger);
-    padding: 16px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: #C81E1E;
+    padding: 14px 0 2px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 8px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.tyfit-logout-card:hover {
+    color: #B91C1C;
+}
+
+.tyfit-logout-card .tyfit-logout-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .tyfit-mobile-bottom-nav {
@@ -2504,9 +2546,7 @@ body[data-page="profile"] .tyfit-status-icon.warning {
 body[data-page="profile"] .tyfit-logout-card {
     padding: 16px 18px;
     border-radius: 22px;
-    border: 1px solid #e7ebf5;
-    background: #ffffff;
-    color: #ef7d8f;
+    color: #DC2626;
     box-shadow: none;
     transition: background-color 0.16s ease, border-color 0.16s ease;
 }

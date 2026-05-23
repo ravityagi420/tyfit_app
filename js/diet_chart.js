@@ -22,6 +22,7 @@ const DIET_STATE = {
     pageStatusTimer: null,
     chartActionMenuOutsideBound: false,
     activeMealReplacementContext: null,
+    catalogSearchSuggestionIndex: -1,
     selectedUserMeta: {
         bmr: null,
         tdee: null
@@ -372,9 +373,105 @@ function formatMacro(value) {
     return toNumber(value, 0).toFixed(1).replace(/\.0$/, "");
 }
 
+function hideCatalogSearchSuggestions() {
+    const suggestionEl = getEl("catalogSearchSuggestions");
+    if (!suggestionEl) {
+        return;
+    }
+
+    DIET_STATE.catalogSearchSuggestionIndex = -1;
+    suggestionEl.innerHTML = "";
+    suggestionEl.style.display = "none";
+}
+
+function highlightCatalogSearchSuggestion(index) {
+    const suggestionEl = getEl("catalogSearchSuggestions");
+    if (!suggestionEl) {
+        return;
+    }
+
+    const buttons = Array.from(suggestionEl.querySelectorAll(".food-search-suggestion-item"));
+    if (!buttons.length) {
+        DIET_STATE.catalogSearchSuggestionIndex = -1;
+        return;
+    }
+
+    const nextIndex = Math.max(0, Math.min(index, buttons.length - 1));
+    buttons.forEach((button, idx) => {
+        button.classList.toggle("is-active", idx === nextIndex);
+    });
+
+    DIET_STATE.catalogSearchSuggestionIndex = nextIndex;
+}
+
+function getCatalogSearchSuggestionNames(query) {
+    const normalizedQuery = String(query || "").trim().toLowerCase();
+    if (!normalizedQuery) {
+        return [];
+    }
+
+    const uniqueNames = [];
+    const seen = new Set();
+
+    DIET_STATE.foodCatalog.forEach((food) => {
+        const foodName = String(food?.food_name || "").trim();
+        if (!foodName) {
+            return;
+        }
+
+        const key = foodName.toLowerCase();
+        if (seen.has(key)) {
+            return;
+        }
+
+        seen.add(key);
+        uniqueNames.push(foodName);
+    });
+
+    return uniqueNames
+        .filter((name) => name.toLowerCase().includes(normalizedQuery))
+        .sort((left, right) => left.localeCompare(right, undefined, { sensitivity: "base" }))
+        .slice(0, 8);
+}
+
+function renderCatalogSearchSuggestions(query) {
+    const suggestionEl = getEl("catalogSearchSuggestions");
+    if (!suggestionEl) {
+        return;
+    }
+
+    const names = getCatalogSearchSuggestionNames(query);
+    if (!names.length) {
+        hideCatalogSearchSuggestions();
+        return;
+    }
+
+    suggestionEl.innerHTML = names
+        .map((name) => `<button type="button" class="food-search-suggestion-item" data-name="${escapeHtml(name)}">${escapeHtml(name)}</button>`)
+        .join("");
+    suggestionEl.style.display = "block";
+    DIET_STATE.catalogSearchSuggestionIndex = -1;
+}
+
+async function applyCatalogSearchSuggestion(name) {
+    const foodSearchInput = getEl("foodSearchInput");
+    if (!foodSearchInput) {
+        return;
+    }
+
+    foodSearchInput.value = name;
+    hideCatalogSearchSuggestions();
+    await renderFoodCatalogModalList(name);
+}
+
 function showPageStatus(message, type = "info") {
     const statusEl = getEl("dietChartPageStatus");
     if (!statusEl) {
+        return;
+    }
+
+    if (type === "info") {
+        hidePageStatus();
         return;
     }
 
@@ -794,7 +891,9 @@ function ensureCatalogQtyActionSheet() {
         return;
     }
 
-    document.body.insertAdjacentHTML("beforeend", `
+    const sheetHost = getEl("selectFoodModal") || document.body;
+
+    sheetHost.insertAdjacentHTML("beforeend", `
         <div class="diet-catalog-qty-sheet" id="catalogQtyActionSheet" hidden aria-hidden="true" data-food-id="">
             <button type="button" class="diet-catalog-qty-sheet-backdrop" data-catalog-qty-sheet-close aria-label="Close quantity editor"></button>
             <section class="diet-catalog-qty-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="catalogQtySheetTitle">
@@ -2325,6 +2424,8 @@ async function openFoodCatalogModalForMeal(mealIndex) {
         searchInput.value = "";
     }
 
+    hideCatalogSearchSuggestions();
+
     await renderFoodCatalogModalList("");
 
     if (window.jQuery && window.jQuery.fn.modal) {
@@ -3813,6 +3914,14 @@ async function saveCustomFoodItem() {
 function showCustomFoodStatus(message, type = "danger") {
     const el = getEl("customFoodStatus");
     if (!el) return;
+
+    if (type === "info") {
+        el.style.display = "none";
+        el.textContent = "";
+        el.className = "alert";
+        return;
+    }
+
     el.className = `alert alert-${type} mt-3 mb-0`;
     el.textContent = message;
     el.style.display = "block";
@@ -4305,7 +4414,6 @@ async function handleUserSelection(userId) {
         if (!charts.length) {
             hideLoadingSpinner();
             setEditorVisibility(false);
-            showPageStatus("No existing diet chart for this user.", "warning");
             return;
         }
 
@@ -4737,7 +4845,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 } else {
                     setEditorVisibility(false);
                     setSelectedDietChartName("No chart selected");
-                    showPageStatus("No diet chart found. Create one to get started.", "info");
                 }
 
                 hideLoadingSpinner();
@@ -4818,8 +4925,55 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const foodSearchInput = getEl("foodSearchInput");
     if (foodSearchInput) {
-        foodSearchInput.addEventListener("input", (event) => {
-            renderFoodCatalogModalList(event.target.value || "");
+        foodSearchInput.addEventListener("input", async (event) => {
+            const query = event.target.value || "";
+            renderCatalogSearchSuggestions(query);
+            await renderFoodCatalogModalList(query);
+        });
+
+        foodSearchInput.addEventListener("keydown", async (event) => {
+            const suggestionEl = getEl("catalogSearchSuggestions");
+            const suggestionButtons = suggestionEl
+                ? Array.from(suggestionEl.querySelectorAll(".food-search-suggestion-item"))
+                : [];
+            const hasSuggestions = suggestionButtons.length > 0 && suggestionEl.style.display !== "none";
+
+            if (event.key === "ArrowDown" && hasSuggestions) {
+                event.preventDefault();
+                const nextIndex = DIET_STATE.catalogSearchSuggestionIndex + 1 >= suggestionButtons.length
+                    ? 0
+                    : DIET_STATE.catalogSearchSuggestionIndex + 1;
+                highlightCatalogSearchSuggestion(nextIndex);
+                return;
+            }
+
+            if (event.key === "ArrowUp" && hasSuggestions) {
+                event.preventDefault();
+                const nextIndex = DIET_STATE.catalogSearchSuggestionIndex - 1 < 0
+                    ? suggestionButtons.length - 1
+                    : DIET_STATE.catalogSearchSuggestionIndex - 1;
+                highlightCatalogSearchSuggestion(nextIndex);
+                return;
+            }
+
+            if (event.key === "Enter" && hasSuggestions && DIET_STATE.catalogSearchSuggestionIndex >= 0) {
+                event.preventDefault();
+                const activeButton = suggestionButtons[DIET_STATE.catalogSearchSuggestionIndex];
+                if (activeButton) {
+                    await applyCatalogSearchSuggestion(activeButton.getAttribute("data-name") || "");
+                }
+                return;
+            }
+
+            if (event.key === "Escape") {
+                hideCatalogSearchSuggestions();
+            }
+        });
+
+        foodSearchInput.addEventListener("blur", () => {
+            window.setTimeout(() => {
+                hideCatalogSearchSuggestions();
+            }, 120);
         });
     }
 
@@ -4832,7 +4986,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
             const term = chip.getAttribute("data-search-chip") || "";
             foodSearchInput.value = term;
+            hideCatalogSearchSuggestions();
             renderFoodCatalogModalList(term);
+        });
+    }
+
+    const catalogSearchSuggestions = getEl("catalogSearchSuggestions");
+    if (catalogSearchSuggestions && foodSearchInput) {
+        catalogSearchSuggestions.addEventListener("mousedown", async (event) => {
+            const suggestionBtn = event.target.closest(".food-search-suggestion-item");
+            if (!suggestionBtn) {
+                return;
+            }
+
+            event.preventDefault();
+            await applyCatalogSearchSuggestion(suggestionBtn.getAttribute("data-name") || "");
         });
     }
 

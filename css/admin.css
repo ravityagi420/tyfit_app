@@ -1,4 +1,17 @@
 /* ============================================
+   FOOD CATALOG - FONT OVERRIDE (match sidebar Inter)
+   ============================================ */
+body[data-page="food-catalog"],
+body[data-page="food-catalog"] .food-catalog-entry-card,
+body[data-page="food-catalog"] .diet-view-item-name,
+body[data-page="food-catalog"] .diet-view-item-qty,
+body[data-page="food-catalog"] .catalog-section-label,
+body[data-page="food-catalog"] .food-catalog-sticky-controls {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+}
+
+/* ============================================
    ADMIN PAGES - TAB BAR STYLES
    ============================================ */
 
@@ -290,13 +303,12 @@ body[data-page="diet-chart"] .tp-page-subtitle {
    ============================================ */
 
 .food-list-card {
-    height: 100%;
-}
-
-.food-list-card {
-    background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
-    border-top: 4px solid #2b6cb0;
-    border-radius: 14px;
+    height: auto;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
 }
 
 .food-form-modal-content {
@@ -833,6 +845,15 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 .catalog-search-input:focus {
     border-color: #7bafd4 !important;
     background: #fff;
+}
+
+#selectFoodModal .catalog-search-wrap .catalog-search-suggestions {
+    z-index: 1065;
+    max-height: 240px;
+}
+
+#selectFoodModal .catalog-search-wrap .food-search-suggestion-item.is-active {
+    background-color: #f3f8ff;
 }
 
 /* ── Diet-themed catalog pick cards ── */
@@ -2370,10 +2391,17 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 
 .diet-empty-state {
     text-align: center;
-    padding: 32px 16px;
-    border: 1px dashed #c7d6e5;
-    border-radius: 12px;
-    background-color: #f8fbff;
+    padding: 18px 8px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.diet-empty-state .diet-empty-state-text {
+    color: rgba(100, 116, 139, 0.9);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.45;
 }
 
 .diet-header-card {
@@ -4805,6 +4833,26 @@ body[data-page="diet-chart"] .tp-page-subtitle {
         justify-content: center;
     }
 
+    .food-catalog-entry-card {
+        margin: 0;
+    }
+
+    .food-catalog-entry-card .food-macro-bars {
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    .food-catalog-entry-card .diet-view-macro {
+        flex: 1 1 0;
+        justify-content: center;
+        white-space: nowrap;
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+
     .food-row-bottom {
         grid-template-columns: 1fr;
     }
@@ -5015,9 +5063,17 @@ body.food-auth-pending .food-page-skeleton {
     position: sticky;
     top: 56px;
     z-index: 26;
-    background: #fff;
-    padding: 8px 0 6px;
-    margin-bottom: 10px;
+    background: linear-gradient(180deg, #f8fbff 0%, rgba(248, 251, 255, 0.9) 72%, rgba(248, 251, 255, 0) 100%);
+    padding: 4px 0 10px;
+    margin-bottom: 8px;
+}
+
+.food-table-wrapper {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
 }
 
 .food-load-more-wrap {

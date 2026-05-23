@@ -198,11 +198,7 @@
                     <div id="dietChartPageStatus" class="alert" style="display: none;"></div>
 
                     <div id="dietChartEmptyState" class="diet-empty-state" style="display: none;">
-                        <h5 class="mb-2">No diet chart</h5>
-                        <p class="text-muted mb-3">This user does not have a saved diet chart yet.</p>
-                        <button type="button" id="createDietChartBtn" class="food-add-row-btn">
-                            <i class="fa fa-plus"></i> Create Diet Chart
-                        </button>
+                        <p class="diet-empty-state-text mb-0">Click + New Plan to create the first plan.</p>
                     </div>
 
                     <div id="dietChartView" style="display: none;"></div>
@@ -310,6 +306,7 @@
                         <div class="catalog-search-wrap mb-0">
                             <i class="fa fa-search catalog-search-icon"></i>
                             <input type="text" id="foodSearchInput" class="form-control catalog-search-input" placeholder="Search food by name..." autocomplete="off">
+                            <div id="catalogSearchSuggestions" class="food-search-suggestions catalog-search-suggestions" style="display: none;"></div>
                         </div>
                     </div>
                     <div class="catalog-quick-suggestions" id="catalogQuickSuggestions">
@@ -555,8 +552,8 @@
     <script src="../lib/lucide/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
-    <script src="../js/login.js?v=20260523i"></script>
+    <script src="../js/login.js?v=20260523l"></script>
     <script src="../js/shell.js"></script>
-    <script src="../js/diet_chart.js?v=20260516a"></script>
+    <script src="../js/diet_chart.js?v=20260524d"></script>
 </body>
 </html>

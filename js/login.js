@@ -832,11 +832,11 @@ function updateMobileBottomNav(accessState) {
     const iconEl = link.querySelector("i[data-lucide], svg[data-lucide], [data-lucide]");
 
     if (label === "diet chart" && iconEl) {
-      iconEl.setAttribute("data-lucide", "soup");
+      iconEl.setAttribute("data-lucide", "clipboard-list");
     }
 
     if (label === "training" && iconEl) {
-      iconEl.setAttribute("data-lucide", "activity");
+      iconEl.setAttribute("data-lucide", "dumbbell");
     }
 
     if (label === "profile") {
@@ -865,6 +865,39 @@ function updateMobileBottomNav(accessState) {
   } else if (window.lucide?.createIcons) {
     window.lucide.createIcons();
   }
+}
+
+function ensureMobileDrawerLogout(accessState) {
+  const drawerEl = document.getElementById("mobileDrawer");
+  const sidebarInnerEl = drawerEl?.querySelector(".sidebar-inner");
+
+  if (!sidebarInnerEl) {
+    return;
+  }
+
+  const existingFooter = sidebarInnerEl.querySelector(".tyfit-mobile-drawer-logout-wrap");
+
+  if (!accessState?.isLoggedIn) {
+    if (existingFooter) {
+      existingFooter.remove();
+    }
+    return;
+  }
+
+  if (existingFooter) {
+    return;
+  }
+
+  const footerEl = document.createElement("div");
+  footerEl.className = "sidebar-footer tyfit-mobile-drawer-logout-wrap";
+  footerEl.innerHTML = `
+    <button type="button" class="sidebar-logout tyfit-mobile-drawer-logout" data-action="logout" aria-label="Logout">
+      <i data-lucide="log-out"></i>
+      <span>Logout</span>
+    </button>
+  `;
+
+  sidebarInnerEl.appendChild(footerEl);
 }
 
 function applyCollapsedSidebarTooltips() {
@@ -1639,6 +1672,7 @@ async function syncAuthUi(sessionArg) {
   updateAdminLinkState(accessState);
   updatePrimaryNavLinks(accessState);
   updateMobileSettingsAction(accessState);
+  ensureMobileDrawerLogout(accessState);
   updateMobileBottomNav(accessState);
   applyCollapsedSidebarTooltips();
   updateTopbarGuestState(accessState);
