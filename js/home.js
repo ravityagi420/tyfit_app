@@ -8,10 +8,10 @@ const homeData = {
     tools: [
         { title: "Diet Chart", subtitle: "View your diet and nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
         { title: "Training Plan", subtitle: "Your workout made simple", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
-        { title: "Food Catalog", subtitle: "Explore foods and nutrition", href: "portal/food_catalog.html", icon: "book-open", colorClass: "icon-food" },
-        { title: "BMR Calculator", subtitle: "Calculate your daily BMR", href: "#", icon: "calculator", colorClass: "icon-bmr" },
-        { title: "Macro Calculator", subtitle: "Track your macros easily", href: "#", icon: "pie-chart", colorClass: "icon-macro" },
-        { title: "Calorie Calculator", subtitle: "Count your calories", href: "#", icon: "flame", colorClass: "icon-calorie" }
+        { title: "Progress Tracker", subtitle: "View your daily check-ins", href: "checkin_summary.html", icon: "activity", colorClass: "icon-food", appendToday: true },
+        { title: "BMR Calculator", subtitle: "Calculate your daily BMR", href: "#", icon: "calculator", colorClass: "icon-bmr", comingSoon: true },
+        { title: "Macro Calculator", subtitle: "Track your macros easily", href: "#", icon: "pie-chart", colorClass: "icon-macro", comingSoon: true },
+        { title: "Calorie Calculator", subtitle: "Count your calories", href: "#", icon: "flame", colorClass: "icon-calorie", comingSoon: true }
     ]
 };
 
@@ -136,14 +136,25 @@ function renderHome(data) {
 
     const grid = byId("homeToolsGrid");
     if (grid) {
-        grid.innerHTML = data.tools.map((tool) => `
-            <a class="tyfit-tool-card" href="${tool.href}" data-title="${tool.title}"${tool.href === "#" ? ` data-calculator="${tool.title}"` : ""}>
-                <span class="tyfit-tool-icon ${tool.colorClass}">
-                    <i data-lucide="${tool.icon}"></i>
-                </span>
-                <h5 class="tool-card-title">${tool.title}</h5>
-            </a>
-        `).join("");
+        const today = new Date().toISOString().slice(0, 10);
+        grid.innerHTML = data.tools.map((tool) => {
+            const isComingSoon = Boolean(tool.comingSoon);
+            const href = isComingSoon ? "#" : (tool.appendToday ? `${tool.href}?date=${today}` : tool.href);
+            const dataAttrs = isComingSoon
+                ? ' data-coming-soon="true"'
+                : (href === "#" ? ` data-calculator="${tool.title}"` : "");
+            const cardClass = isComingSoon ? "tyfit-tool-card tyfit-tool-card--coming-soon" : "tyfit-tool-card";
+            const badge = isComingSoon ? '<span class="tyfit-coming-soon-label">Coming Soon</span>' : "";
+            return `
+                <a class="${cardClass}" href="${href}" data-title="${tool.title}"${dataAttrs}>
+                    ${badge}
+                    <span class="tyfit-tool-icon ${tool.colorClass}">
+                        <i data-lucide="${tool.icon}"></i>
+                    </span>
+                    <h5 class="tool-card-title">${tool.title}</h5>
+                </a>
+            `;
+        }).join("");
 
         const quickAccessToggle = byId("quickAccessToggle");
         if (quickAccessToggle) {
@@ -347,6 +358,12 @@ function bindShellInteractions() {
             if (typeof window.openAuthModal === "function") {
                 window.openAuthModal({ locked: false });
             }
+            return;
+        }
+
+        const comingSoonTrigger = event.target.closest("[data-coming-soon]");
+        if (comingSoonTrigger) {
+            event.preventDefault();
             return;
         }
 

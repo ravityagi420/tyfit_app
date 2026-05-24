@@ -726,6 +726,39 @@ body[data-page="home"] #motivationCard {
 
 .tyfit-tool-card:active {
     transform: scale(0.98);
+
+.tyfit-tool-card--coming-soon {
+    position: relative;
+    cursor: default;
+    opacity: 0.68;
+}
+
+.tyfit-tool-card--coming-soon:hover {
+    transform: none;
+    box-shadow: var(--tyfit-shadow);
+}
+
+.tyfit-tool-card--coming-soon:active {
+    transform: none;
+}
+
+.tyfit-coming-soon-label {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.45px;
+    text-transform: uppercase;
+    color: #8a93a2;
+    background: rgba(140, 148, 163, 0.10);
+    border: 1px solid rgba(140, 148, 163, 0.22);
+    border-radius: 4px;
+    padding: 2px 5px;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+}
 }
 
 .tyfit-tool-icon {
