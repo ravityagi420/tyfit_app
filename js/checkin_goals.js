@@ -44,6 +44,14 @@
         return "Not set";
     }
 
+    function categoryClass(category) {
+        const key = String(category || "").toLowerCase();
+        if (key.includes("diet")) return "checkin-tag--diet";
+        if (key.includes("supplement")) return "checkin-tag--supplement";
+        if (key.includes("activity")) return "checkin-tag--activity";
+        return "checkin-tag--lifestyle";
+    }
+
     function normalizeGoal(row) {
         return {
             id: row.id,
@@ -74,12 +82,12 @@
         tableBody.innerHTML = STATE.goals.map((goal) => {
             return `<tr>
                 <td><strong>${escapeHtml(goal.goal_name)}</strong></td>
-                <td><span class="checkin-tag">${escapeHtml(goal.goal_category)}</span></td>
+                <td><span class="checkin-tag ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span></td>
                 <td>${escapeHtml(targetText(goal))}</td>
                 <td>
                     <div class="checkin-goal-actions">
-                        <button type="button" class="checkin-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="square-pen"></i></button>
-                        <button type="button" class="checkin-icon-btn danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash-2"></i></button>
+                        <button type="button" class="checkin-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
+                        <button type="button" class="checkin-icon-btn danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash2"></i></button>
                     </div>
                 </td>
             </tr>`;
@@ -88,10 +96,10 @@
         cardList.innerHTML = STATE.goals.map((goal) => {
             return `<article class="checkin-goal-card">
                 <div class="checkin-goal-meta">
-                    <span class="checkin-tag">${escapeHtml(goal.goal_category)}</span>
+                    <span class="checkin-tag ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span>
                     <div class="checkin-goal-actions">
-                        <button type="button" class="checkin-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="square-pen"></i></button>
-                        <button type="button" class="checkin-icon-btn danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash-2"></i></button>
+                        <button type="button" class="checkin-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
+                        <button type="button" class="checkin-icon-btn danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash2"></i></button>
                     </div>
                 </div>
                 <h4>${escapeHtml(goal.goal_name)}</h4>
@@ -114,14 +122,19 @@
     function clearGoalForm() {
         el("goalNameInput").value = "";
         el("goalCategoryInput").value = "Diet";
+        if (el("goalTypeInput")) el("goalTypeInput").value = "binary";
         el("goalTargetValueInput").value = "";
         el("goalTargetUnitInput").value = "";
+        if (el("goalTargetTextInput")) el("goalTargetTextInput").value = "";
+        if (el("goalGreenRuleInput")) el("goalGreenRuleInput").value = "";
+        if (el("goalYellowRuleInput")) el("goalYellowRuleInput").value = "";
+        if (el("goalRedRuleInput")) el("goalRedRuleInput").value = "";
         applyGoalCategoryRules("Diet");
     }
 
     function shouldHideTargetFields(category) {
-        const key = String(category || "").trim().toLowerCase();
-        return key === "diet" || key === "supplement";
+        void category;
+        return false;
     }
 
     function applyGoalCategoryRules(category) {
@@ -157,8 +170,13 @@
             el("goalModalTitle").textContent = "Edit Goal";
             el("goalNameInput").value = goal.goal_name || "";
             el("goalCategoryInput").value = goal.goal_category || "Lifestyle";
+            if (el("goalTypeInput")) el("goalTypeInput").value = "numeric";
             el("goalTargetValueInput").value = goal.target_value ?? "";
             el("goalTargetUnitInput").value = goal.target_unit || "";
+            if (el("goalTargetTextInput")) el("goalTargetTextInput").value = "";
+            if (el("goalGreenRuleInput")) el("goalGreenRuleInput").value = "";
+            if (el("goalYellowRuleInput")) el("goalYellowRuleInput").value = "";
+            if (el("goalRedRuleInput")) el("goalRedRuleInput").value = "";
             applyGoalCategoryRules(el("goalCategoryInput").value);
         } else {
             el("goalModalTitle").textContent = "Add Goal";

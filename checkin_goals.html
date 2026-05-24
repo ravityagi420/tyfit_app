@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
-    <link href="css/checkin.css?v=20260524b" rel="stylesheet">
+    <link href="css/checkin.css?v=20260525b" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-goals">
     <header class="tyfit-mobile-topbar">
@@ -123,7 +123,7 @@
                         </div>
                     </section>
 
-                    <section class="checkin-panel checkin-hidden" id="goalPanel" style="padding:16px;">
+                    <section class="checkin-panel checkin-hidden" id="goalPanel">
                         <div class="checkin-goals-table-wrap" id="goalTableWrap">
                             <table class="checkin-goals-table">
                                 <thead>
@@ -160,7 +160,7 @@
             <h4>Quick Actions</h4>
             <button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close"><i data-lucide="x"></i></button>
         </header>
-        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i>Daily Check-in</button>
+        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i> Log Progress</button>
         <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
     </section>
 
@@ -187,6 +187,14 @@
                         <option value="Lifestyle">Lifestyle</option>
                     </select>
                 </div>
+                <div class="checkin-form-field">
+                    <label for="goalTypeInput">Goal Type</label>
+                    <select id="goalTypeInput">
+                        <option value="binary">Yes/No</option>
+                        <option value="numeric">Numeric</option>
+                        <option value="habit">Habit</option>
+                    </select>
+                </div>
                 <div class="checkin-form-field" id="goalTargetValueField">
                     <label for="goalTargetValueInput">Target Value</label>
                     <input type="number" step="0.01" id="goalTargetValueInput" placeholder="e.g. 2.5">
@@ -194,6 +202,22 @@
                 <div class="checkin-form-field" id="goalTargetUnitField">
                     <label for="goalTargetUnitInput">Target Unit</label>
                     <input type="text" id="goalTargetUnitInput" placeholder="e.g. litres, steps">
+                </div>
+                <div class="checkin-form-field checkin-span-2">
+                    <label for="goalTargetTextInput">Target Text</label>
+                    <input type="text" id="goalTargetTextInput" placeholder="e.g. Take after breakfast">
+                </div>
+                <div class="checkin-form-field">
+                    <label for="goalGreenRuleInput">Green Rule</label>
+                    <input type="text" id="goalGreenRuleInput" placeholder="e.g. Completed in full">
+                </div>
+                <div class="checkin-form-field">
+                    <label for="goalYellowRuleInput">Yellow Rule</label>
+                    <input type="text" id="goalYellowRuleInput" placeholder="e.g. Completed partially">
+                </div>
+                <div class="checkin-form-field checkin-span-2">
+                    <label for="goalRedRuleInput">Red Rule</label>
+                    <input type="text" id="goalRedRuleInput" placeholder="e.g. Missed completely">
                 </div>
             </div>
             <div class="checkin-modal-actions">
@@ -211,6 +235,6 @@
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/shell.js"></script>
-    <script src="js/checkin_goals.js?v=20260524d"></script>
+    <script src="js/checkin_goals.js?v=20260525a"></script>
 </body>
 </html>

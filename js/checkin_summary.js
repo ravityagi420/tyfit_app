@@ -51,6 +51,25 @@
         return `${year}-${month}-${day}`;
     }
 
+    function scoreFromCheckin(row) {
+        if (!row) return 0;
+        const raw = row.overall_score ?? row.adherence_percent ?? 0;
+        const value = Number(raw);
+        return Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
+    }
+
+    function goalIconFromName(goalName) {
+        const key = String(goalName || "").toLowerCase();
+        if (key.includes("water")) return "droplet";
+        if (key.includes("step")) return "footprints";
+        if (key.includes("sleep")) return "moon";
+        if (key.includes("workout") || key.includes("training")) return "dumbbell";
+        if (key.includes("supplement") || key.includes("vitamin")) return "pill";
+        if (key.includes("protein")) return "beef";
+        if (key.includes("diet") || key.includes("meal")) return "utensils-crossed";
+        return "target";
+    }
+
     async function loadUsersForAdmin() {
         const toolbar = el("summaryUserToolbar");
         const select = el("summaryUserSelect");
@@ -134,7 +153,8 @@
             const active = iso === STATE.selectedDate ? "is-active" : "";
             const label = cursor.toLocaleDateString(undefined, { weekday: "short" });
             const day = String(cursor.getDate()).padStart(2, "0");
-            buttons.push(`<button type="button" class="checkin-summary-day ${active}" data-summary-date="${iso}" title="${checkin ? `Adherence ${checkin.adherence_percent || 0}%` : "No check-in"}">${label}<br>${day}</button>`);
+            const dot = checkin ? '<span class="checkin-summary-day-dot" aria-hidden="true"></span>' : "";
+            buttons.push(`<button type="button" class="checkin-summary-day ${active}" data-summary-date="${iso}" title="${checkin ? `Score ${scoreFromCheckin(checkin)}%` : "No check-in"}">${label}<br>${day}${dot}</button>`);
             cursor.setDate(cursor.getDate() + 1);
         }
 
@@ -148,7 +168,7 @@
         const recent = [...STATE.checkins].slice(-7).reverse();
         strip.innerHTML = recent.map((row) => {
             const label = new Date(row.checkin_date).toLocaleDateString(undefined, { weekday: "short", day: "numeric" });
-            return `<article class="checkin-week-item"><strong>${Math.round(row.adherence_percent || 0)}%</strong><span>${escapeHtml(label)}</span></article>`;
+            return `<article class="checkin-week-item"><strong>${scoreFromCheckin(row)}%</strong><span>${escapeHtml(label)}</span></article>`;
         }).join("");
     }
 
@@ -178,7 +198,7 @@
         if (!list) return;
 
         if (!entries.length) {
-            list.innerHTML = '<article class="checkin-empty-card"><h3 style="font-size:22px;">No check-in on this day</h3><p>Pick another date or log a check-in for this day.</p></article>';
+            list.innerHTML = '<article class="checkin-empty-card"><h3>No check-in on this day</h3><p>Pick another date or log a check-in for this day.</p></article>';
             return;
         }
 
@@ -186,6 +206,7 @@
             const goalName = STATE.goalsById[String(entry.goal_id)] || "Goal";
             const status = String(entry.status || "missed").toLowerCase();
             const titleStatus = status === "done" ? "Done" : status === "partial" ? "Partial" : "Missed";
+            const statusIcon = status === "done" ? "check-circle" : status === "partial" ? "circle-dashed" : "x-circle";
             const noteParts = [];
             if (entry.actual_value !== null && entry.actual_value !== undefined && String(entry.actual_value).trim() !== "") {
                 noteParts.push(`Actual: ${entry.actual_value}`);
@@ -195,12 +216,12 @@
             }
 
             return `<article class="checkin-summary-item">
-                <span class="checkin-goal-icon"><i data-lucide="target"></i></span>
-                <div>
-                    <h4 style="margin:0;color:#281f53;font-size:15px;">${escapeHtml(goalName)}</h4>
-                    <p style="margin:2px 0 0;color:#6d6894;font-size:12px;">${escapeHtml(noteParts.join(" • ") || "No additional note")}</p>
+                <span class="checkin-goal-icon"><i data-lucide="${goalIconFromName(goalName)}"></i></span>
+                <div class="checkin-summary-copy">
+                    <h4>${escapeHtml(goalName)}</h4>
+                    <p>${escapeHtml(noteParts.join(" • ") || "No additional note")}</p>
                 </div>
-                <span class="checkin-status-badge ${status}">${escapeHtml(titleStatus)}</span>
+                <span class="checkin-status-badge ${status}"><i data-lucide="${statusIcon}"></i>${escapeHtml(titleStatus)}</span>
             </article>`;
         }).join("");
 
@@ -210,6 +231,15 @@
     async function renderSelectedDay() {
         const selected = STATE.checkins.find((row) => row.checkin_date === STATE.selectedDate) || null;
         STATE.activeCheckin = selected;
+
+        const overall = el("summaryOverallScore");
+        const doneNode = el("summaryDoneCount");
+        const partialNode = el("summaryPartialCount");
+        const missedNode = el("summaryMissedCount");
+        if (overall) overall.textContent = `${scoreFromCheckin(selected)}%`;
+        if (doneNode) doneNode.textContent = String(selected?.done_count || 0);
+        if (partialNode) partialNode.textContent = String(selected?.partial_count || 0);
+        if (missedNode) missedNode.textContent = String(selected?.missed_count || 0);
 
         const coachCard = el("coachNoteCard");
         const coachInput = el("coachNoteInput");

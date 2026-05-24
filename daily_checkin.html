@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
-    <link href="css/checkin.css?v=20260524a" rel="stylesheet">
+    <link href="css/checkin.css?v=20260525f" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="daily-checkin">
     <header class="tyfit-mobile-topbar">
@@ -95,10 +95,10 @@
 
                     <section class="checkin-toolbar-card">
                         <div class="checkin-date-scroll" id="checkinDateStrip"></div>
+                        <p class="checkin-selected-date" id="checkinSelectedDateText"></p>
                     </section>
 
                     <section class="checkin-hero-card">
-                        <p class="checkin-eyebrow">DAILY CONSISTENCY</p>
                         <div class="checkin-title-row">
                             <div>
                                 <h1 class="checkin-greeting" id="checkinGreeting">Good morning 👋</h1>
@@ -108,13 +108,38 @@
                         </div>
                     </section>
 
-                    <section class="checkin-progress-card checkin-summary-card" id="progressCard">
-                        <div class="checkin-progress-grid">
-                            <div class="checkin-ring" id="checkinProgressRing"><span class="checkin-ring-value" id="checkinProgressPercent">0%</span></div>
-                            <div class="checkin-metric-list">
-                                <article class="checkin-metric"><strong id="metricDone">0</strong><span>Done</span></article>
-                                <article class="checkin-metric"><strong id="metricPartial">0</strong><span>Partial</span></article>
-                                <article class="checkin-metric"><strong id="metricMissed">0</strong><span>Missed</span></article>
+                    <section class="today-summary-card" id="progressCard">
+                        <h3 class="summary-card-title" id="progressCardTitle">Today's Progress</h3>
+                        <div class="summary-ring-section">
+                            <svg class="summary-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
+                                        <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="60" cy="60" r="54" fill="none" stroke="#EEEAFE" stroke-width="12"/>
+                                <circle class="summary-ring-progress" id="checkinProgressRing" cx="60" cy="60" r="54" fill="none" stroke="url(#ringGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 339.29" transform="rotate(-90 60 60)"/>
+                                <text x="60" y="56" text-anchor="middle" class="summary-ring-value" id="checkinProgressPercent">0%</text>
+                                <text x="60" y="76" text-anchor="middle" class="summary-ring-label">Overall Score</text>
+                            </svg>
+                        </div>
+
+                        <div class="summary-divider"></div>
+
+                        <div class="summary-counts-section">
+                            <div class="summary-count">
+                                <div class="count-icon done"><i data-lucide="check"></i></div>
+                                <span class="count-number"><strong id="metricDone">0</strong> Done</span>
+                            </div>
+                            <div class="summary-count">
+                                <div class="count-icon partial"><i data-lucide="alert-circle"></i></div>
+                                <span class="count-number"><strong id="metricPartial">0</strong> Partial</span>
+                            </div>
+                            <div class="summary-count">
+                                <div class="count-icon missed"><i data-lucide="x"></i></div>
+                                <span class="count-number"><strong id="metricMissed">0</strong> Missed</span>
                             </div>
                         </div>
                     </section>
@@ -123,6 +148,7 @@
 
                     <div class="checkin-sticky-submit" id="submitWrap">
                         <button type="button" class="checkin-secondary-btn" id="submitCheckinBtn"><i data-lucide="send"></i> Submit Check-in</button>
+                        <p class="checkin-submit-helper">You can edit your check-in until 11:59 PM</p>
                     </div>
                 </div>
             </div>
@@ -140,7 +166,7 @@
     <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
     <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
         <header><h4>Quick Actions</h4><button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close"><i data-lucide="x"></i></button></header>
-        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i>Daily Check-in</button>
+        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i> Log Progress</button>
         <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
     </section>
 
@@ -152,6 +178,28 @@
         <button type="button" class="checkin-pill-btn" id="goalActionCloseBtn">Close</button>
     </section>
 
+    <div class="checkin-note-modal-overlay checkin-hidden" id="goalNoteModalBackdrop"></div>
+    <section class="checkin-note-modal checkin-hidden" id="goalNoteModal" aria-hidden="true" aria-labelledby="goalNoteModalTitle">
+        <h4 id="goalNoteModalTitle">Add note</h4>
+        <div class="checkin-note-modal-body">
+            <div class="checkin-note-actual-field checkin-hidden" id="goalActualFieldWrap">
+                <label for="goalActualInput">Actual value</label>
+                <div class="checkin-note-actual-input-wrap">
+                    <input type="number" step="0.01" id="goalActualInput" placeholder="Enter value">
+                    <span id="goalActualUnit"></span>
+                </div>
+            </div>
+            <div class="checkin-note-textarea-field">
+                <label for="goalNoteInput">Note (optional)</label>
+                <textarea id="goalNoteInput" placeholder="Add a quick note"></textarea>
+            </div>
+        </div>
+        <div class="checkin-note-modal-actions">
+            <button type="button" class="checkin-pill-btn" id="goalNoteCancelBtn">Cancel</button>
+            <button type="button" class="checkin-secondary-btn" id="goalNoteSaveBtn">Save Note</button>
+        </div>
+    </section>
+
     <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -160,6 +208,6 @@
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/shell.js"></script>
-    <script src="js/daily_checkin.js?v=20260524b"></script>
+    <script src="js/daily_checkin.js?v=20260525d"></script>
 </body>
 </html>

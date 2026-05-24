@@ -8,7 +8,7 @@ const homeData = {
     tools: [
         { title: "Diet Chart", subtitle: "View your diet and nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
         { title: "Training Plan", subtitle: "Your workout made simple", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
-        { title: "Progress Tracker", subtitle: "View your daily check-ins", href: "checkin_summary.html", icon: "activity", colorClass: "icon-food", appendToday: true },
+        { title: "Progress", subtitle: "Track daily consistency", href: "checkin_summary.html", icon: "activity", colorClass: "icon-food", appendToday: true },
         { title: "BMR Calculator", subtitle: "Calculate your daily BMR", href: "#", icon: "calculator", colorClass: "icon-bmr", comingSoon: true },
         { title: "Macro Calculator", subtitle: "Track your macros easily", href: "#", icon: "pie-chart", colorClass: "icon-macro", comingSoon: true },
         { title: "Calorie Calculator", subtitle: "Count your calories", href: "#", icon: "flame", colorClass: "icon-calorie", comingSoon: true }

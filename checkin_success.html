@@ -13,42 +13,80 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
-    <link href="css/checkin.css?v=20260524a" rel="stylesheet">
+    <link href="css/checkin.css?v=20260525f" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-success">
-    <div class="tyfit-layout" id="tyfitLayout">
-        <main class="tyfit-main" style="margin-left:0;max-width:100%;padding:16px;">
-            <div class="tyfit-main-inner" style="max-width:900px;margin:0 auto;">
-                <section class="checkin-success-card" style="padding:24px;position:relative;overflow:hidden;">
-                    <img src="assets/status/streak_confetti.svg" class="checkin-confetti" alt="" aria-hidden="true">
-                    <div class="checkin-success-layout">
-                        <img src="assets/status/checkin_success_illustration.svg" alt="Check-in success" class="checkin-success-hero">
-                        <h1 class="checkin-success-title">Check-in Submitted!</h1>
-                        <p class="checkin-success-subtitle">Great job staying consistent 💪</p>
-
-                        <article class="checkin-summary-card" style="padding:16px;width:min(100%,520px);">
-                            <div class="checkin-metric-list">
-                                <div class="checkin-metric"><strong id="successPercent">0%</strong><span>Adherence</span></div>
-                                <div class="checkin-metric"><strong id="successDone">0</strong><span>Done</span></div>
-                                <div class="checkin-metric"><strong id="successPartial">0</strong><span>Partial</span></div>
-                                <div class="checkin-metric"><strong id="successMissed">0</strong><span>Missed</span></div>
-                            </div>
-                        </article>
-
-                        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
-                            <a href="checkin_summary.html" class="checkin-secondary-btn" id="viewHistoryBtn"><i data-lucide="history"></i> View History</a>
-                            <a href="index.html" class="checkin-secondary-btn"><i data-lucide="house"></i> Back to Home</a>
-                        </div>
-                    </div>
-                </section>
+    <div class="checkin-success-page">
+        <!-- Purple Success Header with Floating Icon -->
+        <div class="success-hero">
+            <!-- Floating Success Icon -->
+            <div class="success-floating-icon">
+                <img src="assets/status/checkin_success_illustration.svg" alt="Check-in success" class="success-icon-illustration">
             </div>
-        </main>
+        </div>
+
+        <!-- White Content Panel -->
+        <div class="success-content">
+            <!-- Title Section -->
+            <h1 class="success-title">Check-in Submitted!</h1>
+            <p class="success-subtitle">Great job staying consistent 💪</p>
+
+            <!-- Today's Summary Card -->
+            <div class="today-summary-card">
+                <h3 class="summary-card-title">Today's Progress</h3>
+                <!-- Left: Progress Ring -->
+                <div class="summary-ring-section">
+                    <svg class="summary-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
+                                <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="#EEEAFE" stroke-width="12"/>
+                        <circle class="summary-ring-progress" cx="60" cy="60" r="54" fill="none" stroke="url(#ringGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 339.29" transform="rotate(-90 60 60)"/>
+                        <text x="60" y="56" text-anchor="middle" class="summary-ring-value" id="successScoreValue">0%</text>
+                        <text x="60" y="76" text-anchor="middle" class="summary-ring-label">Overall Score</text>
+                    </svg>
+                </div>
+
+                <!-- Middle: Divider -->
+                <div class="summary-divider"></div>
+
+                <!-- Right: Counts -->
+                <div class="summary-counts-section">
+                    <div class="summary-count">
+                        <div class="count-icon done"><i data-lucide="check"></i></div>
+                        <span class="count-number"><strong id="successDone">0</strong> Done</span>
+                    </div>
+                    <div class="summary-count">
+                        <div class="count-icon partial"><i data-lucide="alert-circle"></i></div>
+                        <span class="count-number"><strong id="successPartial">0</strong> Partial</span>
+                    </div>
+                    <div class="summary-count">
+                        <div class="count-icon missed"><i data-lucide="x"></i></div>
+                        <span class="count-number"><strong id="successMissed">0</strong> Missed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="success-buttons">
+                <a href="checkin_summary.html" class="success-btn primary" id="viewHistoryBtn">
+                    <i data-lucide="history"></i> View History
+                </a>
+                <a href="index.html" class="success-btn secondary">
+                    <i data-lucide="home"></i> Back to Home
+                </a>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
-    <script src="js/checkin_success.js?v=20260524a"></script>
+    <script src="js/checkin_success.js?v=20260525c"></script>
 </body>
 </html>

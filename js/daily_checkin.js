@@ -9,7 +9,9 @@
         goalInputs: {},
         checkinId: "",
         users: [],
-        actionGoalId: ""
+        actionGoalId: "",
+        noteModalGoalId: "",
+        checkinsByDate: new Map()
     };
 
     function el(id) {
@@ -88,9 +90,17 @@
             id: row.id,
             goal_name: row.goal_name || row.name || "Untitled Goal",
             goal_category: row.goal_category || row.category || "Lifestyle",
+            goal_type: row.goal_type || row.type || "",
             target_value: row.target_value ?? null,
             target_unit: row.target_unit || ""
         };
+    }
+
+    function isNumericGoal(goal) {
+        const type = String(goal.goal_type || "").toLowerCase();
+        if (type.includes("number") || type.includes("numeric") || type.includes("quantitative")) return true;
+        if (goal.target_value === null || goal.target_value === undefined || String(goal.target_value).trim() === "") return false;
+        return Number.isFinite(Number(goal.target_value));
     }
 
     function groupName(goal) {
@@ -100,6 +110,14 @@
         if (category.includes("activity") || category.includes("workout")) return "Activity";
         if (category.includes("lifestyle")) return "Lifestyle Goals";
         return "Lifestyle Goals";
+    }
+
+    function groupIcon(title) {
+        const key = String(title || "").toLowerCase();
+        if (key.includes("diet")) return "utensils-crossed";
+        if (key.includes("supplement")) return "pill";
+        if (key.includes("activity")) return "dumbbell";
+        return "target";
     }
 
     function getManageGoalsHref() {
@@ -168,7 +186,12 @@
         const percentNode = el("checkinProgressPercent");
 
         if (percentNode) percentNode.textContent = `${adherence}%`;
-        if (ring) ring.style.background = `conic-gradient(var(--checkin-primary) ${Math.max(0, Math.min(360, adherence * 3.6))}deg, rgba(108, 99, 255, 0.14) 0deg)`;
+        if (ring) {
+            const clamped = Math.max(0, Math.min(100, adherence));
+            const circumference = 2 * Math.PI * 54;
+            const progress = circumference * (clamped / 100);
+            ring.style.strokeDasharray = `${progress} ${circumference}`;
+        }
 
         const doneNode = el("metricDone");
         const partialNode = el("metricPartial");
@@ -185,7 +208,12 @@
         if (!wrap || !submitWrap) return;
 
         if (!STATE.goals.length) {
-            wrap.innerHTML = "";
+            wrap.innerHTML = `<section class="checkin-empty-card">
+                <span class="checkin-empty-icon"><i data-lucide="target"></i></span>
+                <h3>No goals defined yet</h3>
+                <p>Create your daily goals to start tracking your consistency and progress.</p>
+                <a class="checkin-secondary-btn" href="${escapeHtml(getManageGoalsHref())}"><i data-lucide="plus"></i> Add Goals</a>
+            </section>`;
             submitWrap.classList.add("checkin-hidden");
             if (manageBtn) {
                 manageBtn.innerHTML = '<i data-lucide="plus"></i> Add Goal';
@@ -215,33 +243,35 @@
             .map(([title, goals]) => {
                 const items = goals.map((goal) => {
                     const input = getInput(goal.id);
-                    const shouldShowComment = input.commentOpen || input.status === "partial" || input.status === "missed";
-                    const shouldShowActual = input.actualOpen;
-                    return `<article class="checkin-goal-row" data-goal-row="${goal.id}">
-                        <div class="checkin-goal-row-top">
-                            <span class="checkin-goal-icon"><i data-lucide="${goalIcon(goal)}"></i></span>
-                            <div class="checkin-goal-text">
+                    const hasNote = Boolean((input.comment || "").trim());
+                    const notePreview = hasNote
+                        ? `<p class="checkin-goal-note-preview">Note: ${escapeHtml(String(input.comment).replace(/\s+/g, " ").trim())}</p>`
+                        : "";
+
+                    return `<article class="checkin-goal-row-compact" data-goal-row="${goal.id}">
+                        <div class="checkin-goal-left">
+                            <div class="checkin-goal-title-line">
                                 <h4>${escapeHtml(goal.goal_name)}</h4>
-                                <p>${escapeHtml(goalTargetText(goal))}</p>
+                                <button type="button" class="checkin-goal-comment-btn ${hasNote ? "has-note" : ""}" data-goal-note="${goal.id}" title="${hasNote ? "Edit comment" : "Add comment"}" aria-label="${hasNote ? "Edit note" : "Add note"}">
+                                    <i data-lucide="message-circle-more"></i>
+                                    ${hasNote ? '<span class="note-dot" aria-hidden="true"></span>' : ""}
+                                </button>
                             </div>
-                            <button type="button" class="checkin-goal-menu-btn" data-goal-menu="${goal.id}" aria-label="Goal options"><i data-lucide="ellipsis-vertical"></i></button>
+                            <p class="checkin-goal-target">${escapeHtml(goalTargetText(goal))}</p>
+                            ${notePreview}
                         </div>
-                        <div class="checkin-status-row" role="group" aria-label="Status options">
+                        <div class="checkin-status-circles" role="group" aria-label="Status options">
                             ${STATUS_VALUES.map((status) => {
                                 const selected = input.status === status ? "is-active" : "";
-                                return `<button type="button" class="checkin-status-btn ${selected}" data-goal-status="${goal.id}" data-status="${status}" aria-label="${status}"></button>`;
+                                const label = status === "done" ? "Done" : status === "partial" ? "Partial" : "Missed";
+                                const icon = status === "done" ? "check" : status === "partial" ? "plus" : "x";
+                                return `<button type="button" class="checkin-status-circle-btn ${selected}" data-goal-status="${goal.id}" data-status="${status}" aria-label="${label}"><span class="checkin-status-circle-dot"><i data-lucide="${icon}"></i></span></button>`;
                             }).join("")}
-                        </div>
-                        <div class="checkin-goal-extra ${shouldShowComment ? "is-open" : ""}" data-goal-comment-wrap="${goal.id}">
-                            <textarea data-goal-comment="${goal.id}" placeholder="Optional note...">${escapeHtml(input.comment || "")}</textarea>
-                        </div>
-                        <div class="checkin-goal-extra ${shouldShowActual ? "is-open" : ""}" data-goal-actual-wrap="${goal.id}">
-                            <input type="number" step="0.01" data-goal-actual="${goal.id}" placeholder="Actual value" value="${escapeHtml(input.actual_value || "")}">
                         </div>
                     </article>`;
                 }).join("");
 
-                return `<section class="checkin-group checkin-panel" style="padding:14px;"><h3 class="checkin-group-title">${escapeHtml(title)}</h3>${items}</section>`;
+                return `<section class="checkin-group"><h3 class="checkin-group-title"><i data-lucide="${groupIcon(title)}"></i>${escapeHtml(title)}</h3><div class="checkin-goal-list-card">${items}</div></section>`;
             }).join("");
 
         wrap.innerHTML = sections;
@@ -251,6 +281,7 @@
 
     function renderDateStrip() {
         const strip = el("checkinDateStrip");
+        const selectedDateText = el("checkinSelectedDateText");
         if (!strip) return;
 
         const selectedDate = STATE.selectedDate;
@@ -269,8 +300,19 @@
 
         strip.innerHTML = days.map((item) => {
             const active = item.iso === selectedDate ? "is-active" : "";
-            return `<button type="button" class="checkin-date-pill ${active}" data-checkin-date="${item.iso}"><span>${item.label}</span><strong>${item.day}</strong><span>${item.month}</span></button>`;
+            const hasCheckin = STATE.checkinsByDate.has(item.iso);
+            const dot = hasCheckin ? '<span class="checkin-date-dot" aria-hidden="true"></span>' : "";
+            return `<button type="button" class="checkin-date-pill ${active}" data-checkin-date="${item.iso}"><span>${item.label}</span><strong>${item.day}</strong><span>${item.month}</span>${dot}</button>`;
         }).join("");
+
+        if (selectedDateText) {
+            const parsed = parseDate(selectedDate);
+            selectedDateText.textContent = parsed
+                ? parsed.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+                : "";
+        }
+
+        updateProgressCardTitle(selectedDate);
 
         const activeNode = strip.querySelector(".checkin-date-pill.is-active");
         if (activeNode) {
@@ -279,6 +321,26 @@
         }
 
         strip.scrollLeft = strip.scrollWidth;
+    }
+
+    function updateProgressCardTitle(selectedDate) {
+        const title = el("progressCardTitle");
+        if (!title) return;
+
+        const todayIso = formatISODate(new Date());
+        if (selectedDate === todayIso) {
+            title.textContent = "Today's Progress";
+            return;
+        }
+
+        const parsed = parseDate(selectedDate);
+        if (!parsed) {
+            title.textContent = "Progress";
+            return;
+        }
+
+        const dateLabel = parsed.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+        title.textContent = `${dateLabel} Progress`;
     }
 
     async function loadUsersForAdmin() {
@@ -306,6 +368,21 @@
         select.innerHTML = STATE.users.map((user) => `<option value="${user.id}">${escapeHtml(buildUserLabel(user))}</option>`).join("");
         STATE.targetUserId = select.value || STATE.access.user.id;
         toolbar.classList.remove("checkin-hidden");
+    }
+
+    async function loadSubmittedDates() {
+        const { data, error } = await window.supabaseClient
+            .from("daily_checkins")
+            .select("checkin_date")
+            .eq("user_id", STATE.targetUserId);
+
+        if (error) {
+            console.warn("load submitted dates warning:", error.message || error);
+            STATE.checkinsByDate = new Map();
+            return;
+        }
+
+        STATE.checkinsByDate = new Map((data || []).map((row) => [String(row.checkin_date), true]));
     }
 
     async function loadGoals() {
@@ -417,6 +494,7 @@
             .from("daily_checkins")
             .update({
                 adherence_percent: adherence,
+                overall_score: adherence,
                 done_count: doneCount,
                 partial_count: partialCount,
                 missed_count: missedCount,
@@ -436,7 +514,11 @@
             })
             .eq("id", checkinId);
 
-        return { error: fallback.error || primary.error };
+        if (!fallback.error) {
+            return { error: null };
+        }
+
+        return { error: fallback.error };
     }
 
     async function insertDailyCheckinRecord(adherence, doneCount, partialCount, missedCount) {
@@ -445,6 +527,7 @@
                 user_id: STATE.targetUserId,
                 checkin_date: STATE.selectedDate,
                 adherence_percent: adherence,
+                overall_score: adherence,
                 done_count: doneCount,
                 partial_count: partialCount,
                 missed_count: missedCount,
@@ -454,6 +537,7 @@
                 user_id: STATE.targetUserId,
                 checkin_date: STATE.selectedDate,
                 adherence_percent: adherence,
+                overall_score: adherence,
                 done_count: doneCount,
                 partial_count: partialCount,
                 missed_count: missedCount
@@ -536,17 +620,17 @@
         const deleteResult = await window.supabaseClient
             .from("daily_checkin_entries")
             .delete()
-            .eq("checkin_id", checkinId);
+            .eq("daily_checkin_id", checkinId);
 
         if (deleteResult.error) {
             await window.supabaseClient
                 .from("daily_checkin_entries")
                 .delete()
-                .eq("daily_checkin_id", checkinId);
+                .eq("checkin_id", checkinId);
         }
 
         const entries = payload.map((item) => ({
-            checkin_id: checkinId,
+            daily_checkin_id: checkinId,
             goal_id: item.goal_id,
             status: item.status,
             comment: item.comment,
@@ -561,7 +645,7 @@
             insert = await window.supabaseClient
                 .from("daily_checkin_entries")
                 .insert(entries.map((item) => ({
-                    daily_checkin_id: checkinId,
+                    checkin_id: checkinId,
                     goal_id: item.goal_id,
                     status: item.status,
                     comment: item.comment,
@@ -605,33 +689,101 @@
                 const status = statusBtn.getAttribute("data-status");
                 const value = getInput(goalId);
                 value.status = status;
-                if (status === "partial" || status === "missed") {
-                    value.commentOpen = true;
-                }
                 renderGoalGroups();
                 return;
             }
 
-            const menuBtn = event.target.closest("[data-goal-menu]");
-            if (menuBtn) {
-                openGoalActionSheet(menuBtn.getAttribute("data-goal-menu"));
+            const noteBtn = event.target.closest("[data-goal-note]");
+            if (noteBtn) {
+                openGoalNoteModal(noteBtn.getAttribute("data-goal-note"));
             }
         });
+    }
 
-        wrap.addEventListener("input", (event) => {
-            const comment = event.target.closest("[data-goal-comment]");
-            if (comment) {
-                const goalId = comment.getAttribute("data-goal-comment");
-                getInput(goalId).comment = comment.value;
-                return;
-            }
+    function openGoalNoteModal(goalId) {
+        const id = String(goalId || "");
+        const goal = STATE.goals.find((item) => String(item.id) === id);
+        const input = getInput(id);
+        const backdrop = el("goalNoteModalBackdrop");
+        const modal = el("goalNoteModal");
+        const title = el("goalNoteModalTitle");
+        const noteInput = el("goalNoteInput");
+        const actualWrap = el("goalActualFieldWrap");
+        const actualInput = el("goalActualInput");
+        const unit = el("goalActualUnit");
+        if (!goal || !backdrop || !modal || !title || !noteInput || !actualWrap || !actualInput || !unit) return;
 
-            const actual = event.target.closest("[data-goal-actual]");
-            if (actual) {
-                const goalId = actual.getAttribute("data-goal-actual");
-                getInput(goalId).actual_value = actual.value;
-            }
-        });
+        STATE.noteModalGoalId = id;
+        title.textContent = `Add note for ${goal.goal_name}`;
+        noteInput.value = input.comment || "";
+
+        if (isNumericGoal(goal)) {
+            actualWrap.classList.remove("checkin-hidden");
+            actualInput.value = input.actual_value || "";
+            unit.textContent = goal.target_unit || "";
+        } else {
+            actualWrap.classList.add("checkin-hidden");
+            actualInput.value = "";
+            unit.textContent = "";
+        }
+
+        backdrop.classList.remove("checkin-hidden");
+        modal.classList.remove("checkin-hidden");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        noteInput.focus();
+    }
+
+    function closeGoalNoteModal() {
+        const backdrop = el("goalNoteModalBackdrop");
+        const modal = el("goalNoteModal");
+        if (!backdrop || !modal) return;
+        backdrop.classList.add("checkin-hidden");
+        modal.classList.add("checkin-hidden");
+        modal.setAttribute("aria-hidden", "true");
+        STATE.noteModalGoalId = "";
+        document.body.style.overflow = "";
+    }
+
+    function saveGoalNoteModal() {
+        if (!STATE.noteModalGoalId) return;
+        const goal = STATE.goals.find((item) => String(item.id) === STATE.noteModalGoalId);
+        const input = getInput(STATE.noteModalGoalId);
+        const noteInput = el("goalNoteInput");
+        const actualInput = el("goalActualInput");
+        if (!goal || !noteInput || !actualInput) return;
+
+        input.comment = (noteInput.value || "").trim();
+        if (isNumericGoal(goal)) {
+            input.actual_value = (actualInput.value || "").trim();
+        }
+
+        closeGoalNoteModal();
+        renderGoalGroups();
+    }
+
+    function bindGoalNoteModal() {
+        const backdrop = el("goalNoteModalBackdrop");
+        const cancelBtn = el("goalNoteCancelBtn");
+        const saveBtn = el("goalNoteSaveBtn");
+        const modal = el("goalNoteModal");
+        const noteInput = el("goalNoteInput");
+
+        if (backdrop) backdrop.addEventListener("click", closeGoalNoteModal);
+        if (cancelBtn) cancelBtn.addEventListener("click", closeGoalNoteModal);
+        if (saveBtn) saveBtn.addEventListener("click", saveGoalNoteModal);
+        if (modal) {
+            modal.addEventListener("click", (event) => {
+                event.stopPropagation();
+            });
+        }
+        if (noteInput) {
+            noteInput.addEventListener("keydown", (event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                    saveGoalNoteModal();
+                }
+            });
+        }
     }
 
     function bindActionSheet() {
@@ -680,6 +832,8 @@
         if (submit) {
             submit.addEventListener("click", async () => {
                 await saveCheckin();
+                await loadSubmittedDates();
+                renderDateStrip();
             });
         }
 
@@ -687,6 +841,8 @@
         if (userSelect) {
             userSelect.addEventListener("change", async () => {
                 STATE.targetUserId = userSelect.value;
+                await loadSubmittedDates();
+                renderDateStrip();
                 await loadGoals();
                 await loadCheckinForDate();
                 renderGoalGroups();
@@ -706,6 +862,7 @@
     async function init() {
         bindDateChange();
         bindGoalInteractions();
+        bindGoalNoteModal();
         bindActionSheet();
         bindStaticActions();
 
@@ -739,6 +896,7 @@
             }
         }
 
+        await loadSubmittedDates();
         renderDateStrip();
         setGreeting();
         await loadGoals();
