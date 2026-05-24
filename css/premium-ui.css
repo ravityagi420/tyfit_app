@@ -1456,8 +1456,8 @@ body[data-page="home"] .tyfit-motivation-right {
 .tyfit-mobile-bottom-nav a svg,
 .tyfit-mobile-bottom-nav button svg {
     font-size: 26px;
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
     stroke-width: 2.8;
 }
 
@@ -1512,7 +1512,7 @@ body[data-page="home"] .tyfit-motivation-right {
     z-index: 100;
     background: #fff;
     border-radius: 20px 20px 0 0;
-    padding: 16px;
+    padding: 16px 16px 40px;
     box-shadow: 0 -18px 36px rgba(18, 23, 44, 0.2);
     transition: bottom 0.25s ease;
 }

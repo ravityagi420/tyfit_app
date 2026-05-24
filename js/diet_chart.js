@@ -1136,7 +1136,7 @@ function hasFibreValue(item) {
 }
 
 function canManageMealReplacements() {
-    return Boolean(DIET_STATE.canManageReplacements || DIET_STATE.isAdmin);
+    return Boolean(DIET_STATE.isAdmin);
 }
 
 function getMealReplacementBundle(chartData, mealId) {
@@ -1149,65 +1149,136 @@ function getMealReplacementBundle(chartData, mealId) {
 }
 
 function normalizeReplacementItem(item, index = 0) {
-    const quantity = toNumber(item?.quantity ?? item?.qty, 0);
-    const referenceQuantity = toNumber(item?.reference_quantity ?? item?.base_quantity ?? item?.quantity, 0);
-    const referenceCarbs = toNumber(item?.reference_carbs ?? item?.carbs, 0);
-    const referenceProtein = toNumber(item?.reference_protein ?? item?.protein, 0);
-    const referenceFat = toNumber(item?.reference_fat ?? item?.fats ?? item?.fat, 0);
-    const referenceFibre = toNumber(item?.reference_fibre ?? item?.fibre, 0);
-
     return {
         id: item?.id || "",
-        food_id: item?.food_id || "",
-        food_name: item?.food_name || item?.name || "Food Item",
-        quantity,
-        quantity_unit: item?.quantity_unit || item?.unit || item?.reference_unit || "g",
-        reference_quantity: referenceQuantity,
-        reference_unit: item?.reference_unit || item?.quantity_unit || item?.unit || "g",
-        reference_carbs: referenceCarbs,
-        reference_protein: referenceProtein,
-        reference_fat: referenceFat,
-        reference_fibre: referenceFibre,
+        meal_id: item?.meal_id || item?.diet_chart_meal_id || "",
+        name: item?.name || item?.replacement_name || item?.title || item?.food_name || "Replacement",
+        total_calories: toNumber(item?.total_calories ?? item?.calories ?? item?.reference_calories, 0),
+        total_protein: toNumber(item?.total_protein ?? item?.protein ?? item?.reference_protein, 0),
+        details: item?.details || item?.description || item?.notes || item?.text || "",
         sort_order: toNumber(item?.sort_order, index + 1)
     };
 }
 
-function buildReplacementFoodOptionsHtml(selectedFoodId = "", customFoodName = "") {
-    const options = ['<option value="">Select Food</option>'];
+const REPLACEMENT_THEME_KEYS = ["green", "red", "blue", "yellow", "purple"];
+const REPLACEMENT_FOOD_ICONS = ["sandwich", "soup", "salad", "cooking-pot", "wheat", "apple"];
 
-    DIET_STATE.foodCatalog.forEach((food) => {
-        const selected = String(food.food_id) === String(selectedFoodId) ? "selected" : "";
-        options.push(`<option value="${food.food_id}" ${selected}>${escapeHtml(food.food_name || "Food")}</option>`);
-    });
-
-    if (customFoodName && !selectedFoodId) {
-        options.push(`<option value="__custom__${escapeHtml(customFoodName)}" selected>${escapeHtml(customFoodName)} (Custom)</option>`);
-    }
-
-    return options.join("");
+function getReplacementThemeKey(index = 0) {
+    return REPLACEMENT_THEME_KEYS[index % REPLACEMENT_THEME_KEYS.length];
 }
 
-function buildMealReplacementRowHtml(rowData = {}) {
-    const customFoodName = !rowData.food_id && rowData.food_name ? rowData.food_name : "";
+function getReplacementFoodIcon(index = 0) {
+    return REPLACEMENT_FOOD_ICONS[index % REPLACEMENT_FOOD_ICONS.length];
+}
+
+function buildReplacementIngredientsHtml(details = "") {
+    const lines = String(details)
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+    const items = (lines.length ? lines : [details || "-"])
+        .map((line) => `<li>${escapeHtml(line)}</li>`)
+        .join("");
+
+    return `<ul class="diet-replacement-ingredients-list">${items}</ul>`;
+}
+
+function buildMealReplacementRowHtml(rowData = {}, rowIndex = 0) {
+    const theme = getReplacementThemeKey(rowIndex);
+    const foodIcon = getReplacementFoodIcon(rowIndex);
 
     return `
-        <div class="diet-replacement-row"
-            data-reference-quantity="${formatMacro(rowData.reference_quantity || 0)}"
-            data-reference-unit="${escapeHtml(rowData.reference_unit || rowData.quantity_unit || "g")}"
-            data-reference-carbs="${formatMacro(rowData.reference_carbs || 0)}"
-            data-reference-protein="${formatMacro(rowData.reference_protein || 0)}"
-            data-reference-fat="${formatMacro(rowData.reference_fat || 0)}"
-            data-reference-fibre="${formatMacro(rowData.reference_fibre || 0)}">
-            <select class="form-control form-control-sm js-replacement-food-select">
-                ${buildReplacementFoodOptionsHtml(rowData.food_id || "", customFoodName)}
-            </select>
-            <input type="number" class="form-control form-control-sm js-replacement-qty" min="0.01" step="0.01" value="${formatMacro(rowData.quantity || 0)}" placeholder="Qty">
-            <input type="text" class="form-control form-control-sm js-replacement-unit" value="${escapeHtml(rowData.quantity_unit || rowData.reference_unit || "g")}" readonly>
-            <button type="button" class="diet-replacement-row-delete" aria-label="Delete replacement item" title="Delete replacement item">
-                <i class="fa fa-trash"></i>
-            </button>
+        <div class="diet-replacement-row diet-replacement-theme-${theme}" data-replacement-row>
+            <div class="diet-replacement-row-head">
+                <div class="diet-replacement-row-icon" aria-hidden="true"><i data-lucide="${foodIcon}"></i></div>
+                <div class="diet-replacement-row-name-wrap">
+                    <input type="text" class="form-control form-control-sm js-replacement-name" value="${escapeHtml(rowData.name || "")}" placeholder="Replacement name">
+                </div>
+                <button type="button" class="diet-replacement-row-delete" aria-label="Delete replacement" title="Delete replacement">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </div>
+            <div class="diet-replacement-metrics-grid">
+                <div class="diet-replacement-metric-card">
+                    <div class="diet-replacement-metric-label"><i data-lucide="flame"></i> Total Calories</div>
+                    <div class="diet-replacement-input-wrapper">
+                        <input type="number" class="form-control form-control-sm js-replacement-calories" min="0" step="0.1" value="${formatMacro(rowData.total_calories || 0)}" placeholder="0">
+                        <span class="diet-replacement-input-label">kCal</span>
+                    </div>
+                </div>
+                <div class="diet-replacement-metric-card">
+                    <div class="diet-replacement-metric-label"><i data-lucide="leaf"></i> Total Protein</div>
+                    <div class="diet-replacement-input-wrapper">
+                        <input type="number" class="form-control form-control-sm js-replacement-protein" min="0" step="0.1" value="${formatMacro(rowData.total_protein || 0)}" placeholder="0">
+                        <span class="diet-replacement-input-label">g</span>
+                    </div>
+                </div>
+            </div>
+            <div class="diet-replacement-text-wrap">
+                <textarea class="form-control js-replacement-text" rows="4" placeholder="Add one ingredient per line">${escapeHtml(rowData.details || "")}</textarea>
+            </div>
         </div>
     `;
+}
+
+function buildMealReplacementViewCardHtml(rowData = {}, rowIndex = 0) {
+    const theme = getReplacementThemeKey(rowIndex);
+    const foodIcon = getReplacementFoodIcon(rowIndex);
+    const ingredientsHtml = buildReplacementIngredientsHtml(rowData.details || "");
+
+    return `
+        <article class="diet-replacement-card diet-replacement-theme-${theme}">
+            <div class="diet-replacement-card-head">
+                <div class="diet-replacement-card-icon" aria-hidden="true"><i data-lucide="${foodIcon}"></i></div>
+                <div class="diet-replacement-card-title-wrap">
+                    <div class="diet-replacement-card-title">${escapeHtml(rowData.name || "Replacement")}</div>
+                </div>
+            </div>
+            <div class="diet-replacement-card-grid">
+                <div class="diet-replacement-card-stat">
+                    <div class="diet-replacement-card-stat-label"><i data-lucide="flame"></i> Total Calories</div>
+                    <div class="diet-replacement-card-stat-value">${formatMacro(rowData.total_calories || 0)} kCal</div>
+                </div>
+                <div class="diet-replacement-card-stat">
+                    <div class="diet-replacement-card-stat-label"><i data-lucide="leaf"></i> Total Protein</div>
+                    <div class="diet-replacement-card-stat-value">${formatMacro(rowData.total_protein || 0)} g</div>
+                </div>
+            </div>
+            <div class="diet-replacement-card-ingredients">
+                <div class="diet-replacement-card-ingredients-label">INGREDIENTS</div>
+                ${ingredientsHtml}
+            </div>
+        </article>
+    `;
+}
+
+function buildMealReplacementEmptyHtml(message) {
+    return `<div class="diet-replacement-empty">${escapeHtml(message)}</div>`;
+}
+
+function getMealReplacementFormRows() {
+    return Array.from(document.querySelectorAll("#dietMealReplacementRows .diet-replacement-row"));
+}
+
+function getMealReplacementRowPayload(row) {
+    const nameInput = row.querySelector(".js-replacement-name");
+    const caloriesInput = row.querySelector(".js-replacement-calories");
+    const proteinInput = row.querySelector(".js-replacement-protein");
+    const textInput = row.querySelector(".js-replacement-text");
+
+    return {
+        name: nameInput?.value.trim() || "",
+        totalCalories: toNumber(caloriesInput?.value, 0),
+        totalProtein: toNumber(proteinInput?.value, 0),
+        details: textInput?.value.trim() || ""
+    };
+}
+
+function createReplacementRowHtml(rowData = {}) {
+    const list = getEl("dietMealReplacementRows");
+    const index = list?.querySelectorAll(".diet-replacement-row").length || 0;
+    return buildMealReplacementRowHtml(rowData, index);
 }
 
 function ensureDietMealReplacementModal() {
@@ -1221,19 +1292,15 @@ function ensureDietMealReplacementModal() {
             <section class="diet-meal-replacement-modal tp-modal" role="dialog" aria-modal="true" aria-labelledby="dietMealReplacementTitle">
                 <header class="diet-meal-replacement-header tp-modal-header">
                     <div class="diet-meal-replacement-title-wrap tp-modal-header-main">
-                        <p class="diet-meal-replacement-badge-title tp-modal-badge"><i data-lucide="repeat-2"></i> Meal Swap</p>
-                        <h3 id="dietMealReplacementTitle">Meal Alternatives</h3>
+                        <p class="diet-meal-replacement-badge-title tp-modal-badge"><i data-lucide="repeat-2"></i> Replacements</p>
+                        <h3 id="dietMealReplacementTitle">Meal Replacements</h3>
+                        <p class="diet-meal-replacement-subtitle" id="dietMealReplacementSubtitle" hidden></p>
                     </div>
                     <button type="button" class="diet-meal-replacement-close tp-modal-close" data-replacement-close aria-label="Close">
                         <i data-lucide="x"></i>
                     </button>
                 </header>
                 <div class="diet-meal-replacement-body tp-modal-body" id="dietMealReplacementBody"></div>
-                <footer class="diet-meal-replacement-footer tp-modal-footer" id="dietMealReplacementFooter">
-                    <button type="button" class="tp-btn tp-btn-ghost" data-replacement-close>Close</button>
-                    <button type="button" class="tp-btn tp-btn-danger" id="dietMealReplacementDeleteBtn" style="display:none;">Delete</button>
-                    <button type="button" class="tp-btn tp-btn-primary" id="dietMealReplacementSaveBtn" style="display:none;">Save</button>
-                </footer>
             </section>
         </div>
     `);
@@ -1253,7 +1320,7 @@ function ensureDietMealReplacementModal() {
         if (event.target.closest("#dietMealReplacementAddRow")) {
             const list = getEl("dietMealReplacementRows");
             if (list) {
-                list.insertAdjacentHTML("beforeend", buildMealReplacementRowHtml());
+                list.insertAdjacentHTML("beforeend", createReplacementRowHtml());
             }
             return;
         }
@@ -1274,41 +1341,6 @@ function ensureDietMealReplacementModal() {
         }
     });
 
-    overlay.addEventListener("change", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLSelectElement) || !target.classList.contains("js-replacement-food-select")) {
-            return;
-        }
-
-        const row = target.closest(".diet-replacement-row");
-        if (!row) {
-            return;
-        }
-
-        const selectedFood = DIET_STATE.foodCatalog.find((food) => String(food.food_id) === String(target.value));
-        const qtyInput = row.querySelector(".js-replacement-qty");
-        const unitInput = row.querySelector(".js-replacement-unit");
-
-        if (!selectedFood) {
-            return;
-        }
-
-        row.dataset.referenceQuantity = String(toNumber(selectedFood.quantity, 0));
-        row.dataset.referenceUnit = selectedFood.unit_of_quantity || "g";
-        row.dataset.referenceCarbs = String(toNumber(selectedFood.carbs, 0));
-        row.dataset.referenceProtein = String(toNumber(selectedFood.protein, 0));
-        row.dataset.referenceFat = String(toNumber(selectedFood.fats, 0));
-        row.dataset.referenceFibre = String(toNumber(selectedFood.fibre, 0));
-
-        if (qtyInput && (!qtyInput.value || toNumber(qtyInput.value, 0) <= 0)) {
-            qtyInput.value = formatMacro(selectedFood.quantity || 0);
-        }
-
-        if (unitInput) {
-            unitInput.value = selectedFood.unit_of_quantity || "g";
-        }
-    });
-
     refreshIcons();
 }
 
@@ -1326,11 +1358,10 @@ function openDietMealReplacementModal({ mealIndex, mode = "view" }) {
 
     const overlay = getEl("dietMealReplacementOverlay");
     const titleEl = getEl("dietMealReplacementTitle");
+    const subtitleEl = getEl("dietMealReplacementSubtitle");
     const bodyEl = getEl("dietMealReplacementBody");
-    const saveBtn = getEl("dietMealReplacementSaveBtn");
-    const deleteBtn = getEl("dietMealReplacementDeleteBtn");
 
-    if (!overlay || !titleEl || !bodyEl || !saveBtn || !deleteBtn) {
+    if (!overlay || !titleEl || !bodyEl || !subtitleEl) {
         return;
     }
 
@@ -1341,51 +1372,36 @@ function openDietMealReplacementModal({ mealIndex, mode = "view" }) {
     DIET_STATE.activeMealReplacementContext = {
         mealIndex,
         mealId,
-        replacementId: bundle.replacement?.id || "",
         mode
     };
 
-    titleEl.textContent = mode === "manage" ? `${mealName} Replacement` : `${mealName} Alternatives`;
+    titleEl.textContent = `${mealName} Replacements`;
 
     if (mode === "manage") {
+        subtitleEl.hidden = false;
+        subtitleEl.textContent = "Manage meal replacements";
         bodyEl.innerHTML = `
-            <div class="diet-replacement-editor-wrap">
-                <p class="diet-replacement-hint">Build alternative food options for this meal. These appear as suggested swaps for the client.</p>
+                <button type="button" class="diet-replacement-add-row" id="dietMealReplacementAddRow">+ Add</button>
                 <div id="dietMealReplacementRows" class="diet-replacement-rows">
-                    ${(items.length ? items : [{}]).map((item) => buildMealReplacementRowHtml(item)).join("")}
+                    ${(items.length ? items : [{}]).map((item, index) => buildMealReplacementRowHtml(item, index)).join("")}
                 </div>
-                <button type="button" class="diet-replacement-add-row" id="dietMealReplacementAddRow">
-                    <i class="fa fa-plus"></i> Add Replacement Item
-                </button>
-            </div>
+                <div class="diet-replacement-actions">
+                    <button type="button" class="tp-btn tp-btn-primary" id="dietMealReplacementSaveBtn">Save Replacements</button>
+                </div>
         `;
-        saveBtn.style.display = "inline-flex";
-        deleteBtn.style.display = bundle.replacement?.id ? "inline-flex" : "none";
     } else {
+        subtitleEl.hidden = true;
+        subtitleEl.textContent = "";
         if (!items.length) {
-            bodyEl.innerHTML = '<div class="diet-replacement-empty">No replacement options available yet for this meal.</div>';
+            bodyEl.innerHTML = buildMealReplacementEmptyHtml("No replacements have been added for this meal yet.");
         } else {
             bodyEl.innerHTML = `
                 <div class="diet-replacement-view-grid">
-                    ${items.map((item) => {
-                        const computed = getComputedFromItem(item);
-                        return `
-                            <article class="diet-replacement-card">
-                                <div class="diet-replacement-card-title">${escapeHtml(item.food_name || "Food")}</div>
-                                <div class="diet-replacement-card-qty">${formatMacro(item.quantity)} ${escapeHtml(item.quantity_unit || "")}</div>
-                                <div class="diet-replacement-card-macros">
-                                    <span><i class="fa fa-bolt"></i> C ${formatMacro(computed.carbs)}g</span>
-                                    <span><i class="fa fa-dumbbell"></i> P ${formatMacro(computed.protein)}g</span>
-                                    <span><i class="fa fa-tint"></i> F ${formatMacro(computed.fats)}g</span>
-                                </div>
-                            </article>
-                        `;
-                    }).join("")}
+                    ${items.map((item, index) => buildMealReplacementViewCardHtml(item, index)).join("")}
                 </div>
+                <p class="diet-replacement-view-note">These are healthy alternatives for your convenience.</p>
             `;
         }
-        saveBtn.style.display = "none";
-        deleteBtn.style.display = "none";
     }
 
     overlay.hidden = false;
@@ -1422,47 +1438,44 @@ async function saveMealReplacementFromModal() {
         return;
     }
 
-    const rows = Array.from(document.querySelectorAll("#dietMealReplacementRows .diet-replacement-row"));
+    const rows = getMealReplacementFormRows();
     if (!rows.length) {
-        await showDietAlert("Add at least one replacement item.", { title: "Validation" });
+        await showDietAlert("Add at least one replacement card.", { title: "Validation" });
         return;
     }
 
     const payloadRows = [];
 
     for (let index = 0; index < rows.length; index += 1) {
-        const row = rows[index];
-        const selectEl = row.querySelector(".js-replacement-food-select");
-        const qtyInput = row.querySelector(".js-replacement-qty");
-        const unitInput = row.querySelector(".js-replacement-unit");
+        const payload = getMealReplacementRowPayload(rows[index]);
 
-        const foodValue = selectEl?.value || "";
-        const quantity = toNumber(qtyInput?.value, 0);
-
-        if (!foodValue) {
-            await showDietAlert("Please select food for all replacement rows.", { title: "Validation" });
+        if (!payload.name) {
+            await showDietAlert("Please enter a replacement name for every card.", { title: "Validation" });
             return;
         }
 
-        if (quantity <= 0) {
-            await showDietAlert("Quantity must be greater than 0 for all replacement rows.", { title: "Validation" });
+        if (payload.totalCalories <= 0) {
+            await showDietAlert("Total calories must be greater than 0 for every card.", { title: "Validation" });
             return;
         }
 
-        const selectedFood = DIET_STATE.foodCatalog.find((food) => String(food.food_id) === String(foodValue));
-        const selectedLabel = selectEl?.selectedOptions?.[0]?.textContent || "Food Item";
-        const foodName = selectedFood?.food_name || selectedLabel.replace(/\s*\(Custom\)\s*$/i, "").trim();
+        if (payload.totalProtein < 0) {
+            await showDietAlert("Total protein cannot be negative.", { title: "Validation" });
+            return;
+        }
+
+        if (!payload.details) {
+            await showDietAlert("Please add supporting text for every replacement card.", { title: "Validation" });
+            return;
+        }
 
         payloadRows.push({
-            food_name: foodName,
-            quantity,
-            quantity_unit: unitInput?.value || row.dataset.referenceUnit || "g",
-            reference_quantity: toNumber(row.dataset.referenceQuantity, selectedFood?.quantity || quantity),
-            reference_unit: row.dataset.referenceUnit || selectedFood?.unit_of_quantity || unitInput?.value || "g",
-            reference_carbs: toNumber(row.dataset.referenceCarbs, selectedFood?.carbs || 0),
-            reference_protein: toNumber(row.dataset.referenceProtein, selectedFood?.protein || 0),
-            reference_fat: toNumber(row.dataset.referenceFat, selectedFood?.fats || 0),
-            reference_fibre: toNumber(row.dataset.referenceFibre, selectedFood?.fibre || 0),
+            diet_chart_meal_id: context.mealId,
+            title: payload.name,
+            name: payload.name,
+            total_calories: payload.totalCalories,
+            total_protein: payload.totalProtein,
+            details: payload.details,
             sort_order: index + 1,
             updated_at: new Date().toISOString()
         });
@@ -1475,78 +1488,45 @@ async function saveMealReplacementFromModal() {
     }
 
     try {
-        let replacementId = context.replacementId || "";
-
-        if (replacementId) {
-            const { error: updateError } = await window.supabaseClient
-                .from("meal_replacements")
-                .update({ updated_at: new Date().toISOString() })
-                .eq("id", replacementId);
-
-            if (updateError) {
-                throw new Error(updateError.message || "Failed to update replacement.");
-            }
-        } else {
-            const { data: created, error: createError } = await window.supabaseClient
-                .from("meal_replacements")
-                .insert({
-                    diet_chart_meal_id: context.mealId,
-                    updated_at: new Date().toISOString()
-                })
-                .select("id")
-                .single();
-
-            if (createError || !created?.id) {
-                throw new Error(createError?.message || "Failed to create replacement.");
-            }
-
-            replacementId = created.id;
-        }
-
-        const { error: deleteItemsError } = await window.supabaseClient
-            .from("meal_replacement_items")
+        const { error: deleteExistingError } = await window.supabaseClient
+            .from("meal_replacements")
             .delete()
-            .eq("meal_replacement_id", replacementId);
+            .eq("diet_chart_meal_id", context.mealId);
 
-        if (deleteItemsError) {
-            throw new Error(deleteItemsError.message || "Failed to replace existing replacement items.");
+        if (deleteExistingError) {
+            throw new Error(deleteExistingError.message || "Failed to clear existing replacements.");
         }
 
-        const insertPayload = payloadRows.map((item) => ({
-            meal_replacement_id: replacementId,
-            ...item
-        }));
+        const { error: insertReplacementError } = await window.supabaseClient
+            .from("meal_replacements")
+            .insert(payloadRows);
 
-        const { error: insertItemsError } = await window.supabaseClient
-            .from("meal_replacement_items")
-            .insert(insertPayload);
-
-        if (insertItemsError) {
-            throw new Error(insertItemsError.message || "Failed to save replacement items.");
+        if (insertReplacementError) {
+            throw new Error(insertReplacementError.message || "Failed to save replacement cards.");
         }
 
         await reloadCurrentDietChartView();
         closeDietMealReplacementModal();
-        showPageStatus("Meal replacement saved successfully.", "success");
+        showPageStatus("Meal replacements saved successfully.", "success");
     } catch (error) {
         console.error("saveMealReplacementFromModal error:", error);
-        await showDietAlert(error.message || "Failed to save meal replacement.", { title: "Save Failed" });
+        await showDietAlert(error.message || "Failed to save meal replacements.", { title: "Save Failed" });
     } finally {
         if (saveBtn) {
             saveBtn.disabled = false;
-            saveBtn.innerHTML = "Save";
+            saveBtn.innerHTML = "Save Replacements";
         }
     }
 }
 
 async function deleteMealReplacementFromModal() {
     const context = DIET_STATE.activeMealReplacementContext;
-    if (!context?.replacementId) {
+    if (!context?.mealId) {
         return;
     }
 
-    const confirmed = await showDietConfirm("Delete replacement for this meal?", {
-        title: "Delete Replacement",
+    const confirmed = await showDietConfirm("Delete all replacements for this meal?", {
+        title: "Delete Replacements",
         confirmLabel: "Delete",
         cancelLabel: "Cancel",
         danger: true
@@ -1557,30 +1537,21 @@ async function deleteMealReplacementFromModal() {
     }
 
     try {
-        const { error: deleteItemsError } = await window.supabaseClient
-            .from("meal_replacement_items")
-            .delete()
-            .eq("meal_replacement_id", context.replacementId);
-
-        if (deleteItemsError) {
-            throw new Error(deleteItemsError.message || "Failed to delete replacement items.");
-        }
-
         const { error: deleteReplacementError } = await window.supabaseClient
             .from("meal_replacements")
             .delete()
-            .eq("id", context.replacementId);
+            .eq("diet_chart_meal_id", context.mealId);
 
         if (deleteReplacementError) {
-            throw new Error(deleteReplacementError.message || "Failed to delete replacement.");
+            throw new Error(deleteReplacementError.message || "Failed to delete replacements.");
         }
 
         await reloadCurrentDietChartView();
         closeDietMealReplacementModal();
-        showPageStatus("Meal replacement deleted.", "success");
+        showPageStatus("Meal replacements deleted.", "success");
     } catch (error) {
         console.error("deleteMealReplacementFromModal error:", error);
-        await showDietAlert(error.message || "Failed to delete meal replacement.", { title: "Delete Failed" });
+        await showDietAlert(error.message || "Failed to delete meal replacements.", { title: "Delete Failed" });
     }
 }
 
@@ -1604,36 +1575,31 @@ async function loadMealReplacementsByMealIds(mealIds) {
         return emptyResult;
     }
 
-    const replacementIds = replacements.map((row) => row.id).filter(Boolean);
-    let replacementItems = [];
+    const sortedReplacements = [...replacements].sort((left, right) => {
+        const leftOrder = toNumber(left?.sort_order, 0);
+        const rightOrder = toNumber(right?.sort_order, 0);
 
-    if (replacementIds.length > 0) {
-        const { data: itemsData, error: itemsError } = await window.supabaseClient
-            .from("meal_replacement_items")
-            .select("*")
-            .in("meal_replacement_id", replacementIds)
-            .order("sort_order", { ascending: true });
-
-        if (itemsError) {
-            console.error("loadMealReplacementsByMealIds items error:", itemsError);
-        } else {
-            replacementItems = itemsData || [];
+        if (leftOrder !== rightOrder) {
+            return leftOrder - rightOrder;
         }
-    }
 
-    replacements.forEach((replacement) => {
+        const leftTime = new Date(left?.updated_at || left?.created_at || 0).getTime();
+        const rightTime = new Date(right?.updated_at || right?.created_at || 0).getTime();
+        return leftTime - rightTime;
+    });
+
+    sortedReplacements.forEach((replacement) => {
         const mealId = replacement.diet_chart_meal_id;
         if (!mealId) {
             return;
         }
 
-        const itemsForReplacement = replacementItems
-            .filter((item) => item.meal_replacement_id === replacement.id)
-            .map((item, index) => normalizeReplacementItem(item, index));
+        const normalizedReplacement = normalizeReplacementItem(replacement, 0);
+        const currentItems = emptyResult[mealId]?.items || [];
 
         emptyResult[mealId] = {
             replacement,
-            items: itemsForReplacement
+            items: [...currentItems, normalizedReplacement]
         };
     });
 
@@ -1687,7 +1653,7 @@ function renderDietChartView(chartData) {
             const mealReplacements = getMealReplacementBundle(chartData, meal.id);
             const hasMealReplacements = (mealReplacements.items || []).length > 0;
             const replacementActionLabel = canManageMealReplacements()
-                ? (hasMealReplacements ? "Edit Replacement" : "Add Replacement")
+                ? (hasMealReplacements ? "Edit Replacements" : "Add Replacements")
                 : "View Replacements";
 
             const itemCards = (meal.items || []).map((item, itemIndex) => {
@@ -1971,7 +1937,7 @@ function renderDietChartView(chartData) {
             const replacementBundle = getMealReplacementBundle(DIET_STATE.currentChartData, meal?.id);
             const hasItems = (replacementBundle.items || []).length > 0;
             const actionLabel = canManageMealReplacements()
-                ? (hasItems ? "Edit Replacement" : "Add Replacement")
+                ? (hasItems ? "Edit Replacements" : "Add Replacements")
                 : "View Replacements";
             replacementActionBtn.innerHTML = `<i class="fa fa-random"></i> ${actionLabel}`;
         }

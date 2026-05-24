@@ -18,8 +18,8 @@
     <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="../css/style.css?v=20260422b" rel="stylesheet">
-    <link href="../css/admin.css?v=20260516u" rel="stylesheet">
+    <link href="../css/style.css?v=20260524a" rel="stylesheet">
+    <link href="../css/admin.css?v=20260524g" rel="stylesheet">
     <link href="../css/premium-ui.css" rel="stylesheet">
 </head>
 
@@ -197,8 +197,15 @@
                 <div class="col-12" style="padding: 0;">
                     <div id="dietChartPageStatus" class="alert" style="display: none;"></div>
 
-                    <div id="dietChartEmptyState" class="diet-empty-state" style="display: none;">
-                        <p class="diet-empty-state-text mb-0">Click + New Plan to create the first plan.</p>
+                    <div id="dietChartEmptyState" class="tp-empty-state" style="display: none;">
+                        <div class="tp-empty-icon" aria-hidden="true">
+                            <i data-lucide="clipboard-list"></i>
+                        </div>
+                        <h4>No diet chart yet</h4>
+                        <p>Create your first nutrition plan and start adding meals to build a diet chart.</p>
+                        <button type="button" id="createDietChartBtn" class="tp-btn tp-btn-primary">
+                            <i data-lucide="plus"></i> Create Plan
+                        </button>
                     </div>
 
                     <div id="dietChartView" style="display: none;"></div>
