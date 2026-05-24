@@ -726,6 +726,7 @@ body[data-page="home"] #motivationCard {
 
 .tyfit-tool-card:active {
     transform: scale(0.98);
+}
 
 .tyfit-tool-card--coming-soon {
     position: relative;
@@ -744,21 +745,28 @@ body[data-page="home"] #motivationCard {
 
 .tyfit-coming-soon-label {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.45px;
+    top: 0;
+    right: 0;
+    width: 50%;
+    box-sizing: border-box;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.25px;
     text-transform: uppercase;
-    color: #8a93a2;
-    background: rgba(140, 148, 163, 0.10);
-    border: 1px solid rgba(140, 148, 163, 0.22);
-    border-radius: 4px;
-    padding: 2px 5px;
-    line-height: 1.4;
+    color: rgba(24, 26, 29, 0.78);
+    background: rgba(120, 126, 135, 0.18);
+    border: 1px solid rgba(120, 126, 135, 0.26);
+    border-radius: 0 var(--tyfit-card-radius) 0 8px;
+    padding: 2px 6px;
+    line-height: 1.2;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     pointer-events: none;
-}
 }
 
 .tyfit-tool-icon {
