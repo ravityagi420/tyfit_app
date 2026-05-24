@@ -1239,11 +1239,11 @@ function ensureAuthModalStyles() {
       }
 
       #tyfitAuthModal .tyfit-login-copy h1 {
-        font-size: 31px;
+        font-size: 25px;
       }
 
       #tyfitAuthModal .tyfit-login-copy p {
-        font-size: 18px;
+        font-size: 15px;
       }
 
       #tyfitAuthModal .tyfit-login-visual-wrap {
@@ -1251,7 +1251,7 @@ function ensureAuthModalStyles() {
       }
 
       #tyfitAuthModal .tyfit-login-visual {
-        width: min(310px, 84vw);
+        width: min(250px, 84vw);
       }
 
       #tyfitAuthModal .tyfit-google-login-btn {
