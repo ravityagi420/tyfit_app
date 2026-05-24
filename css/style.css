@@ -3277,6 +3277,7 @@ body.tyfit-auth-locked .row {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 6px;
+    align-items: start;
 }
 
 .tyfit-avatar-option {
@@ -3940,6 +3941,16 @@ span.flatpickr-weekday {
 
     .tyfit-avatar-grid {
         grid-template-columns: repeat(6, 1fr);
+        gap: 4px;
+    }
+
+    .tyfit-avatar-option {
+        padding: 2px;
+        border-width: 1.5px;
+    }
+
+    .tyfit-profile-main {
+        background: transparent;
     }
 
     .tyfit-cc-dropdown {

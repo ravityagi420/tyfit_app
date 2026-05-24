@@ -150,21 +150,22 @@
                             </div>
                             <div class="tyfit-ig-photo-meta">
                                 <span class="tyfit-ig-photo-name" id="profileDisplayName">Your Name</span>
-                                <button type="button" id="profileChangePhotoTrigger" class="tyfit-ig-change-photo-link">Edit Picture or Avatar</button>
+                                <button type="button" id="profileChangePhotoTrigger" class="tyfit-ig-change-photo-link">Edit Avatar</button>
                             </div>
                         </div>
 
                         <!-- Photo picker modal panel (hidden by default) -->
                         <div id="profilePhotoPicker" class="tyfit-photo-picker" aria-hidden="true">
-                            <div id="profilePhotoSwitch" class="tyfit-photo-picker-tabs tyfit-segmented-switch is-upload" role="tablist">
-                                <button type="button" class="tyfit-tab-btn active" id="profileTabUpload" role="tab" aria-selected="true" aria-controls="profileUploadPane">
+                            <!-- Tab switcher hidden while upload is disabled -->
+                            <div id="profilePhotoSwitch" class="tyfit-photo-picker-tabs tyfit-segmented-switch is-avatar" role="tablist" style="display:none;">
+                                <button type="button" class="tyfit-tab-btn" id="profileTabUpload" role="tab" aria-selected="false" aria-controls="profileUploadPane" style="display:none;">
                                     <i data-lucide="upload"></i> Upload Photo
                                 </button>
-                                <button type="button" class="tyfit-tab-btn" id="profileTabAvatar" role="tab" aria-selected="false" aria-controls="profileAvatarPane">
+                                <button type="button" class="tyfit-tab-btn active" id="profileTabAvatar" role="tab" aria-selected="true" aria-controls="profileAvatarPane">
                                     <i data-lucide="user-circle"></i> Choose Avatar
                                 </button>
                             </div>
-                            <div id="profileUploadPane" class="tyfit-tab-pane is-active" role="tabpanel">
+                            <div id="profileUploadPane" class="tyfit-tab-pane" role="tabpanel" style="display:none;">
                                 <label for="profilePictureInput" class="tyfit-upload-area">
                                     <i data-lucide="cloud-upload"></i>
                                     <span>Click to upload photo</span>
@@ -172,7 +173,7 @@
                                 </label>
                                 <input type="file" id="profilePictureInput" accept="image/*" hidden>
                             </div>
-                            <div id="profileAvatarPane" class="tyfit-tab-pane" role="tabpanel">
+                            <div id="profileAvatarPane" class="tyfit-tab-pane is-active" role="tabpanel">
                                 <div id="profileAvatarGrid" class="tyfit-avatar-grid"></div>
                             </div>
                         </div>
@@ -357,7 +358,7 @@
                     <i data-lucide="x"></i>
                 </button>
             </header>
-            <button type="button" class="tyfit-sheet-action" data-action="meal"><i data-lucide="salad"></i> Add Meal</button>
+            <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i> Log Progress</button>
             <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
         </section>
         <div class="tyfit-toast" id="appToast" aria-live="polite"></div>

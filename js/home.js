@@ -430,8 +430,14 @@ function bindShellInteractions() {
 
     document.querySelectorAll(".tyfit-sheet-action").forEach((btn) => {
         btn.addEventListener("click", () => {
-            const action = btn.dataset.action === "meal" ? "Add Meal" : "Log Weight";
-            showToast(`${action} clicked.`);
+            const action = String(btn.dataset.action || "").toLowerCase();
+            if (action === "checkin" || action === "meal") {
+                closeSheet();
+                window.location.href = "daily_checkin.html";
+                return;
+            }
+
+            showToast("Log Weight clicked.");
             closeSheet();
         });
     });

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Check-in Submitted</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tyfit check-in success summary">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
+    <link href="css/checkin.css?v=20260524a" rel="stylesheet">
+</head>
+<body class="tyfit-app" data-page="checkin-success">
+    <div class="tyfit-layout" id="tyfitLayout">
+        <main class="tyfit-main" style="margin-left:0;max-width:100%;padding:16px;">
+            <div class="tyfit-main-inner" style="max-width:900px;margin:0 auto;">
+                <section class="checkin-success-card" style="padding:24px;position:relative;overflow:hidden;">
+                    <img src="assets/status/streak_confetti.svg" class="checkin-confetti" alt="" aria-hidden="true">
+                    <div class="checkin-success-layout">
+                        <img src="assets/status/checkin_success_illustration.svg" alt="Check-in success" class="checkin-success-hero">
+                        <h1 class="checkin-success-title">Check-in Submitted!</h1>
+                        <p class="checkin-success-subtitle">Great job staying consistent 💪</p>
+
+                        <article class="checkin-summary-card" style="padding:16px;width:min(100%,520px);">
+                            <div class="checkin-metric-list">
+                                <div class="checkin-metric"><strong id="successPercent">0%</strong><span>Adherence</span></div>
+                                <div class="checkin-metric"><strong id="successDone">0</strong><span>Done</span></div>
+                                <div class="checkin-metric"><strong id="successPartial">0</strong><span>Partial</span></div>
+                                <div class="checkin-metric"><strong id="successMissed">0</strong><span>Missed</span></div>
+                            </div>
+                        </article>
+
+                        <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+                            <a href="checkin_summary.html" class="checkin-secondary-btn" id="viewHistoryBtn"><i data-lucide="history"></i> View History</a>
+                            <a href="index.html" class="checkin-secondary-btn"><i data-lucide="house"></i> Back to Home</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="lib/lucide/lucide.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/login.js?v=20260523l"></script>
+    <script src="js/checkin_success.js?v=20260524a"></script>
+</body>
+</html>

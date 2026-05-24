@@ -2109,6 +2109,21 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     color: #475569;
 }
 
+.tp-plan-card-menu-btn.is-pinned,
+.tp-plan-card-menu-btn:disabled {
+    cursor: default;
+    color: var(--diet-accent);
+}
+
+.tp-plan-card-menu-btn.is-pinned svg {
+    width: 10px;
+    height: 10px;
+    stroke-width: 1.9;
+    transform: rotate(30deg);
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
 .tp-plan-card-menu {
     position: absolute;
     top: 30px;

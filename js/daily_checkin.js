@@ -1,0 +1,756 @@
+(function () {
+    const STATUS_VALUES = ["done", "partial", "missed"];
+
+    const STATE = {
+        access: null,
+        targetUserId: "",
+        selectedDate: "",
+        goals: [],
+        goalInputs: {},
+        checkinId: "",
+        users: [],
+        actionGoalId: ""
+    };
+
+    function el(id) {
+        return document.getElementById(id);
+    }
+
+    function refreshIcons() {
+        if (typeof window.tyfitRefreshIcons === "function") {
+            window.tyfitRefreshIcons();
+            return;
+        }
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
+        }
+    }
+
+    function showToast(message) {
+        const toast = el("appToast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("is-show");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => toast.classList.remove("is-show"), 2200);
+    }
+
+    function formatISODate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
+    function parseDate(iso) {
+        const [year, month, day] = String(iso || "").split("-").map((item) => Number(item));
+        if (!year || !month || !day) return null;
+        return new Date(year, month - 1, day);
+    }
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function goalTargetText(goal) {
+        if (goal.target_value !== null && goal.target_value !== undefined && String(goal.target_value).trim() !== "") {
+            const num = Number(goal.target_value);
+            const value = Number.isFinite(num) ? (Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.00$/, "")) : String(goal.target_value);
+            return `Target: ${value}${goal.target_unit ? ` ${goal.target_unit}` : ""}`;
+        }
+        return "Target not set";
+    }
+
+    function goalIcon(goal) {
+        const key = `${goal.goal_name || ""} ${goal.goal_category || ""}`.toLowerCase();
+        if (key.includes("water")) return "droplets";
+        if (key.includes("step")) return "footprints";
+        if (key.includes("sleep")) return "moon";
+        if (key.includes("workout") || key.includes("training")) return "dumbbell";
+        if (key.includes("vitamin") || key.includes("supplement")) return "pill";
+        if (key.includes("breakfast") || key.includes("lunch") || key.includes("dinner")) return "utensils-crossed";
+        if (key.includes("protein")) return "beef";
+        return "target";
+    }
+
+    function buildUserLabel(profile) {
+        const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(" ").trim() || profile.full_name || "";
+        return fullName || profile.email || "User";
+    }
+
+    function normalizeGoal(row) {
+        return {
+            id: row.id,
+            goal_name: row.goal_name || row.name || "Untitled Goal",
+            goal_category: row.goal_category || row.category || "Lifestyle",
+            target_value: row.target_value ?? null,
+            target_unit: row.target_unit || ""
+        };
+    }
+
+    function groupName(goal) {
+        const category = String(goal.goal_category || "").toLowerCase();
+        if (category.includes("diet")) return "Diet";
+        if (category.includes("supplement")) return "Supplements";
+        if (category.includes("activity") || category.includes("workout")) return "Activity";
+        if (category.includes("lifestyle")) return "Lifestyle Goals";
+        return "Lifestyle Goals";
+    }
+
+    function getManageGoalsHref() {
+        if (STATE.access?.isAdmin && STATE.targetUserId && STATE.targetUserId !== STATE.access.user.id) {
+            return `checkin_goals.html?user=${encodeURIComponent(STATE.targetUserId)}`;
+        }
+        return "checkin_goals.html";
+    }
+
+    function openGoalActionSheet(goalId) {
+        STATE.actionGoalId = String(goalId || "");
+        const goal = STATE.goals.find((item) => String(item.id) === STATE.actionGoalId);
+        const sheet = el("goalActionSheet");
+        const backdrop = el("goalActionBackdrop");
+        const title = el("goalActionTitle");
+        if (!sheet || !backdrop || !goal) return;
+
+        title.textContent = `${goal.goal_name} options`;
+        sheet.classList.remove("checkin-hidden");
+        backdrop.classList.remove("checkin-hidden");
+        sheet.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeGoalActionSheet() {
+        const sheet = el("goalActionSheet");
+        const backdrop = el("goalActionBackdrop");
+        if (!sheet || !backdrop) return;
+        sheet.classList.add("checkin-hidden");
+        backdrop.classList.add("checkin-hidden");
+        sheet.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        STATE.actionGoalId = "";
+    }
+
+    function getInput(goalId) {
+        const key = String(goalId);
+        if (!STATE.goalInputs[key]) {
+            STATE.goalInputs[key] = {
+                status: "",
+                comment: "",
+                actual_value: "",
+                commentOpen: false,
+                actualOpen: false
+            };
+        }
+        return STATE.goalInputs[key];
+    }
+
+    function updateProgressCard() {
+        const values = Object.values(STATE.goalInputs);
+        let done = 0;
+        let partial = 0;
+        let missed = 0;
+
+        STATE.goals.forEach((goal) => {
+            const value = getInput(goal.id).status;
+            if (value === "done") done += 1;
+            else if (value === "partial") partial += 1;
+            else if (value === "missed") missed += 1;
+        });
+
+        const total = STATE.goals.length || 1;
+        const adherence = Math.round(((done + partial * 0.5) / total) * 100);
+        const ring = el("checkinProgressRing");
+        const percentNode = el("checkinProgressPercent");
+
+        if (percentNode) percentNode.textContent = `${adherence}%`;
+        if (ring) ring.style.background = `conic-gradient(var(--checkin-primary) ${Math.max(0, Math.min(360, adherence * 3.6))}deg, rgba(108, 99, 255, 0.14) 0deg)`;
+
+        const doneNode = el("metricDone");
+        const partialNode = el("metricPartial");
+        const missedNode = el("metricMissed");
+        if (doneNode) doneNode.textContent = String(done);
+        if (partialNode) partialNode.textContent = String(partial);
+        if (missedNode) missedNode.textContent = String(missed);
+    }
+
+    function renderGoalGroups() {
+        const wrap = el("checkinGroupsWrap");
+        const submitWrap = el("submitWrap");
+        const manageBtn = el("manageGoalsBtn");
+        if (!wrap || !submitWrap) return;
+
+        if (!STATE.goals.length) {
+            wrap.innerHTML = "";
+            submitWrap.classList.add("checkin-hidden");
+            if (manageBtn) {
+                manageBtn.innerHTML = '<i data-lucide="plus"></i> Add Goal';
+            }
+            refreshIcons();
+            return;
+        }
+
+        submitWrap.classList.remove("checkin-hidden");
+        if (manageBtn) {
+            manageBtn.innerHTML = '<i data-lucide="settings-2"></i> Manage Goals';
+        }
+
+        const grouped = {
+            "Diet": [],
+            "Lifestyle Goals": [],
+            "Supplements": [],
+            "Activity": []
+        };
+
+        STATE.goals.forEach((goal) => {
+            grouped[groupName(goal)].push(goal);
+        });
+
+        const sections = Object.entries(grouped)
+            .filter((entry) => entry[1].length > 0)
+            .map(([title, goals]) => {
+                const items = goals.map((goal) => {
+                    const input = getInput(goal.id);
+                    const shouldShowComment = input.commentOpen || input.status === "partial" || input.status === "missed";
+                    const shouldShowActual = input.actualOpen;
+                    return `<article class="checkin-goal-row" data-goal-row="${goal.id}">
+                        <div class="checkin-goal-row-top">
+                            <span class="checkin-goal-icon"><i data-lucide="${goalIcon(goal)}"></i></span>
+                            <div class="checkin-goal-text">
+                                <h4>${escapeHtml(goal.goal_name)}</h4>
+                                <p>${escapeHtml(goalTargetText(goal))}</p>
+                            </div>
+                            <button type="button" class="checkin-goal-menu-btn" data-goal-menu="${goal.id}" aria-label="Goal options"><i data-lucide="ellipsis-vertical"></i></button>
+                        </div>
+                        <div class="checkin-status-row" role="group" aria-label="Status options">
+                            ${STATUS_VALUES.map((status) => {
+                                const selected = input.status === status ? "is-active" : "";
+                                return `<button type="button" class="checkin-status-btn ${selected}" data-goal-status="${goal.id}" data-status="${status}" aria-label="${status}"></button>`;
+                            }).join("")}
+                        </div>
+                        <div class="checkin-goal-extra ${shouldShowComment ? "is-open" : ""}" data-goal-comment-wrap="${goal.id}">
+                            <textarea data-goal-comment="${goal.id}" placeholder="Optional note...">${escapeHtml(input.comment || "")}</textarea>
+                        </div>
+                        <div class="checkin-goal-extra ${shouldShowActual ? "is-open" : ""}" data-goal-actual-wrap="${goal.id}">
+                            <input type="number" step="0.01" data-goal-actual="${goal.id}" placeholder="Actual value" value="${escapeHtml(input.actual_value || "")}">
+                        </div>
+                    </article>`;
+                }).join("");
+
+                return `<section class="checkin-group checkin-panel" style="padding:14px;"><h3 class="checkin-group-title">${escapeHtml(title)}</h3>${items}</section>`;
+            }).join("");
+
+        wrap.innerHTML = sections;
+        refreshIcons();
+        updateProgressCard();
+    }
+
+    function renderDateStrip() {
+        const strip = el("checkinDateStrip");
+        if (!strip) return;
+
+        const selectedDate = STATE.selectedDate;
+        const today = new Date();
+        const days = [];
+
+        for (let i = 9; i >= 0; i -= 1) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const iso = formatISODate(date);
+            const label = date.toLocaleDateString(undefined, { weekday: "short" });
+            const day = date.getDate();
+            const month = date.toLocaleDateString(undefined, { month: "short" });
+            days.push({ iso, label, day, month });
+        }
+
+        strip.innerHTML = days.map((item) => {
+            const active = item.iso === selectedDate ? "is-active" : "";
+            return `<button type="button" class="checkin-date-pill ${active}" data-checkin-date="${item.iso}"><span>${item.label}</span><strong>${item.day}</strong><span>${item.month}</span></button>`;
+        }).join("");
+
+        const activeNode = strip.querySelector(".checkin-date-pill.is-active");
+        if (activeNode) {
+            activeNode.scrollIntoView({ behavior: "smooth", inline: "end", block: "nearest" });
+            return;
+        }
+
+        strip.scrollLeft = strip.scrollWidth;
+    }
+
+    async function loadUsersForAdmin() {
+        const toolbar = el("checkinUserToolbar");
+        const select = el("checkinUserSelect");
+        if (!toolbar || !select || !STATE.access?.isAdmin) return;
+
+        const { data, error } = await window.supabaseClient
+            .from("profiles")
+            .select("id, first_name, last_name, full_name, email, role, is_admin")
+            .order("full_name", { ascending: true });
+
+        if (error) {
+            console.warn("daily checkin user list warning:", error.message || error);
+            return;
+        }
+
+        STATE.users = (data || []).filter((item) => item?.id).filter((item) => {
+            if (item.id === STATE.access.user.id) return true;
+            if (item.is_admin === true) return false;
+            const role = String(item.role || "").toLowerCase();
+            return role !== "admin";
+        });
+
+        select.innerHTML = STATE.users.map((user) => `<option value="${user.id}">${escapeHtml(buildUserLabel(user))}</option>`).join("");
+        STATE.targetUserId = select.value || STATE.access.user.id;
+        toolbar.classList.remove("checkin-hidden");
+    }
+
+    async function loadGoals() {
+        const { data, error } = await window.supabaseClient
+            .from("checkin_goals")
+            .select("*")
+            .eq("user_id", STATE.targetUserId)
+            .order("created_at", { ascending: true });
+
+        if (error) {
+            showToast("Could not load goals.");
+            console.error("load goals error:", error);
+            return;
+        }
+
+        STATE.goals = (data || []).map(normalizeGoal);
+        STATE.goalInputs = {};
+        STATE.goals.forEach((goal) => getInput(goal.id));
+    }
+
+    async function getExistingCheckin() {
+        const { data, error } = await window.supabaseClient
+            .from("daily_checkins")
+            .select("*")
+            .eq("user_id", STATE.targetUserId)
+            .eq("checkin_date", STATE.selectedDate)
+            .maybeSingle();
+
+        if (error) {
+            console.error("load checkin error:", error);
+            showToast("Could not load check-in data.");
+            return null;
+        }
+
+        return data || null;
+    }
+
+    async function loadEntries(checkinId) {
+        const map = {};
+
+        let query = window.supabaseClient
+            .from("daily_checkin_entries")
+            .select("*")
+            .eq("checkin_id", checkinId);
+
+        let { data, error } = await query;
+
+        if (error) {
+            const fallback = await window.supabaseClient
+                .from("daily_checkin_entries")
+                .select("*")
+                .eq("daily_checkin_id", checkinId);
+            data = fallback.data;
+            error = fallback.error;
+        }
+
+        if (error) {
+            console.error("load entries error:", error);
+            return map;
+        }
+
+        (data || []).forEach((row) => {
+            map[String(row.goal_id)] = {
+                status: row.status || "",
+                comment: row.comment || "",
+                actual_value: row.actual_value === null || row.actual_value === undefined ? "" : String(row.actual_value),
+                commentOpen: Boolean(row.comment),
+                actualOpen: row.actual_value !== null && row.actual_value !== undefined && String(row.actual_value) !== ""
+            };
+        });
+
+        return map;
+    }
+
+    async function loadCheckinForDate() {
+        const checkin = await getExistingCheckin();
+        STATE.checkinId = checkin?.id || "";
+
+        if (checkin?.id) {
+            const savedInputs = await loadEntries(checkin.id);
+            STATE.goals.forEach((goal) => {
+                const key = String(goal.id);
+                const input = getInput(goal.id);
+                const fromDb = savedInputs[key];
+                if (!fromDb) return;
+                input.status = fromDb.status || "";
+                input.comment = fromDb.comment || "";
+                input.actual_value = fromDb.actual_value || "";
+                input.commentOpen = Boolean(fromDb.commentOpen || input.status === "partial" || input.status === "missed");
+                input.actualOpen = Boolean(fromDb.actualOpen);
+            });
+        }
+
+        const submit = el("submitCheckinBtn");
+        if (submit) {
+            submit.innerHTML = checkin?.id
+                ? '<i data-lucide="save"></i> Update Check-in'
+                : '<i data-lucide="send"></i> Submit Check-in';
+        }
+    }
+
+    function getSupabaseErrorMessage(error) {
+        if (!error) return "unknown error";
+        return error.message || error.details || error.hint || "unknown error";
+    }
+
+    async function updateDailyCheckinRecord(checkinId, adherence, doneCount, partialCount, missedCount) {
+        const primary = await window.supabaseClient
+            .from("daily_checkins")
+            .update({
+                adherence_percent: adherence,
+                done_count: doneCount,
+                partial_count: partialCount,
+                missed_count: missedCount,
+                updated_at: new Date().toISOString()
+            })
+            .eq("id", checkinId);
+
+        if (!primary.error) {
+            return { error: null };
+        }
+
+        // Fallback for schemas where metric columns are different/missing.
+        const fallback = await window.supabaseClient
+            .from("daily_checkins")
+            .update({
+                updated_at: new Date().toISOString()
+            })
+            .eq("id", checkinId);
+
+        return { error: fallback.error || primary.error };
+    }
+
+    async function insertDailyCheckinRecord(adherence, doneCount, partialCount, missedCount) {
+        const payloads = [
+            {
+                user_id: STATE.targetUserId,
+                checkin_date: STATE.selectedDate,
+                adherence_percent: adherence,
+                done_count: doneCount,
+                partial_count: partialCount,
+                missed_count: missedCount,
+                created_by: STATE.access.user.id
+            },
+            {
+                user_id: STATE.targetUserId,
+                checkin_date: STATE.selectedDate,
+                adherence_percent: adherence,
+                done_count: doneCount,
+                partial_count: partialCount,
+                missed_count: missedCount
+            },
+            {
+                user_id: STATE.targetUserId,
+                checkin_date: STATE.selectedDate
+            }
+        ];
+
+        let lastError = null;
+
+        for (const payload of payloads) {
+            const result = await window.supabaseClient
+                .from("daily_checkins")
+                .insert(payload)
+                .select("id")
+                .single();
+
+            if (!result.error && result.data?.id) {
+                return { id: result.data.id, error: null };
+            }
+
+            lastError = result.error || null;
+        }
+
+        return { id: "", error: lastError };
+    }
+
+    async function saveCheckin() {
+        if (!STATE.goals.length) {
+            showToast("Add goals first.");
+            return;
+        }
+
+        const payload = STATE.goals.map((goal) => {
+            const value = getInput(goal.id);
+            return {
+                goal_id: goal.id,
+                status: value.status || "missed",
+                comment: (value.comment || "").trim() || null,
+                actual_value: value.actual_value === "" ? null : Number(value.actual_value)
+            };
+        });
+
+        const doneCount = payload.filter((item) => item.status === "done").length;
+        const partialCount = payload.filter((item) => item.status === "partial").length;
+        const missedCount = payload.filter((item) => item.status === "missed").length;
+        const adherence = Math.round(((doneCount + partialCount * 0.5) / (STATE.goals.length || 1)) * 100);
+
+        let checkinId = STATE.checkinId;
+
+        if (checkinId) {
+            const { error } = await updateDailyCheckinRecord(checkinId, adherence, doneCount, partialCount, missedCount);
+
+            if (error) {
+                showToast(`Could not update check-in: ${getSupabaseErrorMessage(error)}`);
+                console.error("update checkin error:", error);
+                return;
+            }
+        } else {
+            const { id, error } = await insertDailyCheckinRecord(adherence, doneCount, partialCount, missedCount);
+
+            if (error || !id) {
+                showToast(`Could not submit check-in: ${getSupabaseErrorMessage(error)}`);
+                console.error("insert checkin error:", error);
+                return;
+            }
+
+            checkinId = id;
+            STATE.checkinId = checkinId;
+
+            // Ensure metrics are written even if insert fallback used the minimal payload.
+            const updateAfterInsert = await updateDailyCheckinRecord(checkinId, adherence, doneCount, partialCount, missedCount);
+            if (updateAfterInsert.error) {
+                console.warn("Post-insert metric update warning:", updateAfterInsert.error);
+            }
+        }
+
+        const deleteResult = await window.supabaseClient
+            .from("daily_checkin_entries")
+            .delete()
+            .eq("checkin_id", checkinId);
+
+        if (deleteResult.error) {
+            await window.supabaseClient
+                .from("daily_checkin_entries")
+                .delete()
+                .eq("daily_checkin_id", checkinId);
+        }
+
+        const entries = payload.map((item) => ({
+            checkin_id: checkinId,
+            goal_id: item.goal_id,
+            status: item.status,
+            comment: item.comment,
+            actual_value: item.actual_value
+        }));
+
+        let insert = await window.supabaseClient
+            .from("daily_checkin_entries")
+            .insert(entries);
+
+        if (insert.error) {
+            insert = await window.supabaseClient
+                .from("daily_checkin_entries")
+                .insert(entries.map((item) => ({
+                    daily_checkin_id: checkinId,
+                    goal_id: item.goal_id,
+                    status: item.status,
+                    comment: item.comment,
+                    actual_value: item.actual_value
+                })));
+        }
+
+        if (insert.error) {
+            showToast(`Could not save check-in entries: ${getSupabaseErrorMessage(insert.error)}`);
+            console.error("insert entries error:", insert.error);
+            return;
+        }
+
+        const nextUrl = `checkin_success.html?date=${encodeURIComponent(STATE.selectedDate)}&adherence=${encodeURIComponent(adherence)}&done=${encodeURIComponent(doneCount)}&partial=${encodeURIComponent(partialCount)}&missed=${encodeURIComponent(missedCount)}`;
+        window.location.href = nextUrl;
+    }
+
+    function bindDateChange() {
+        const strip = el("checkinDateStrip");
+        if (!strip) return;
+        strip.addEventListener("click", async (event) => {
+            const btn = event.target.closest("[data-checkin-date]");
+            if (!btn) return;
+            STATE.selectedDate = btn.getAttribute("data-checkin-date");
+            renderDateStrip();
+            await loadGoals();
+            await loadCheckinForDate();
+            renderGoalGroups();
+            refreshIcons();
+        });
+    }
+
+    function bindGoalInteractions() {
+        const wrap = el("checkinGroupsWrap");
+        if (!wrap) return;
+
+        wrap.addEventListener("click", (event) => {
+            const statusBtn = event.target.closest("[data-goal-status][data-status]");
+            if (statusBtn) {
+                const goalId = statusBtn.getAttribute("data-goal-status");
+                const status = statusBtn.getAttribute("data-status");
+                const value = getInput(goalId);
+                value.status = status;
+                if (status === "partial" || status === "missed") {
+                    value.commentOpen = true;
+                }
+                renderGoalGroups();
+                return;
+            }
+
+            const menuBtn = event.target.closest("[data-goal-menu]");
+            if (menuBtn) {
+                openGoalActionSheet(menuBtn.getAttribute("data-goal-menu"));
+            }
+        });
+
+        wrap.addEventListener("input", (event) => {
+            const comment = event.target.closest("[data-goal-comment]");
+            if (comment) {
+                const goalId = comment.getAttribute("data-goal-comment");
+                getInput(goalId).comment = comment.value;
+                return;
+            }
+
+            const actual = event.target.closest("[data-goal-actual]");
+            if (actual) {
+                const goalId = actual.getAttribute("data-goal-actual");
+                getInput(goalId).actual_value = actual.value;
+            }
+        });
+    }
+
+    function bindActionSheet() {
+        const backdrop = el("goalActionBackdrop");
+        const closeBtn = el("goalActionCloseBtn");
+        const commentBtn = el("goalActionCommentBtn");
+        const actualBtn = el("goalActionActualBtn");
+
+        if (backdrop) backdrop.addEventListener("click", closeGoalActionSheet);
+        if (closeBtn) closeBtn.addEventListener("click", closeGoalActionSheet);
+
+        if (commentBtn) {
+            commentBtn.addEventListener("click", () => {
+                if (!STATE.actionGoalId) return;
+                const input = getInput(STATE.actionGoalId);
+                input.commentOpen = !input.commentOpen;
+                renderGoalGroups();
+                closeGoalActionSheet();
+                const node = document.querySelector(`[data-goal-comment="${STATE.actionGoalId}"]`);
+                if (node) node.focus();
+            });
+        }
+
+        if (actualBtn) {
+            actualBtn.addEventListener("click", () => {
+                if (!STATE.actionGoalId) return;
+                const input = getInput(STATE.actionGoalId);
+                input.actualOpen = !input.actualOpen;
+                renderGoalGroups();
+                closeGoalActionSheet();
+                const node = document.querySelector(`[data-goal-actual="${STATE.actionGoalId}"]`);
+                if (node) node.focus();
+            });
+        }
+    }
+
+    function bindStaticActions() {
+        const manage = el("manageGoalsBtn");
+        if (manage) {
+            manage.addEventListener("click", () => {
+                window.location.href = getManageGoalsHref();
+            });
+        }
+
+        const submit = el("submitCheckinBtn");
+        if (submit) {
+            submit.addEventListener("click", async () => {
+                await saveCheckin();
+            });
+        }
+
+        const userSelect = el("checkinUserSelect");
+        if (userSelect) {
+            userSelect.addEventListener("change", async () => {
+                STATE.targetUserId = userSelect.value;
+                await loadGoals();
+                await loadCheckinForDate();
+                renderGoalGroups();
+            });
+        }
+    }
+
+    function setGreeting() {
+        const name = STATE.access?.profile?.first_name || STATE.access?.user?.user_metadata?.given_name || "";
+        const greeting = el("checkinGreeting");
+        if (!greeting) return;
+        const hour = new Date().getHours();
+        const part = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+        greeting.textContent = `Good ${part}${name ? `, ${name}` : ""} 👋`;
+    }
+
+    async function init() {
+        bindDateChange();
+        bindGoalInteractions();
+        bindActionSheet();
+        bindStaticActions();
+
+        const params = new URLSearchParams(window.location.search);
+        const qDate = params.get("date");
+        const todayIso = formatISODate(new Date());
+        STATE.selectedDate = qDate && parseDate(qDate) ? qDate : todayIso;
+
+        if (typeof window.getAccessState !== "function") {
+            showToast("Auth state is not ready yet.");
+            return;
+        }
+
+        STATE.access = await window.getAccessState();
+        if (!STATE.access?.isLoggedIn || !STATE.access?.user?.id) {
+            showToast("Please log in first.");
+            return;
+        }
+
+        STATE.targetUserId = STATE.access.user.id;
+        if (STATE.access.isAdmin) {
+            await loadUsersForAdmin();
+
+            const userFromQuery = params.get("user");
+            if (userFromQuery) {
+                const userSelect = el("checkinUserSelect");
+                if (userSelect && Array.from(userSelect.options).some((opt) => opt.value === userFromQuery)) {
+                    userSelect.value = userFromQuery;
+                    STATE.targetUserId = userFromQuery;
+                }
+            }
+        }
+
+        renderDateStrip();
+        setGreeting();
+        await loadGoals();
+        await loadCheckinForDate();
+        renderGoalGroups();
+        refreshIcons();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        init().catch((error) => {
+            console.error("daily_checkin init error:", error);
+            showToast("Could not load Daily Check-in.");
+        });
+    });
+}());

@@ -297,7 +297,17 @@
 
         document.querySelectorAll('.tyfit-sheet-action').forEach(btn => {
             btn.addEventListener('click', () => {
-                showToast((btn.dataset.action === 'meal' ? 'Add Meal' : 'Log Weight') + ' clicked.');
+                const action = String(btn.dataset.action || '').toLowerCase();
+                const inPortal = window.location.pathname.includes('/portal/');
+                const checkinHref = inPortal ? '../daily_checkin.html' : 'daily_checkin.html';
+
+                if (action === 'checkin' || action === 'meal') {
+                    closeSheet();
+                    window.location.href = checkinHref;
+                    return;
+                }
+
+                showToast('Log Weight clicked.');
                 closeSheet();
             });
         });

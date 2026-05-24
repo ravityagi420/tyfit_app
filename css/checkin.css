@@ -1,0 +1,1003 @@
+/* Tyfit Daily Check-in / Goal Tracking */
+body[data-page^="checkin"],
+body[data-page="daily-checkin"] {
+    --checkin-bg-1: #f7f5ff;
+    --checkin-bg-2: #f4f1ff;
+    --checkin-bg-3: #eeeafe;
+    --checkin-primary: #6c63ff;
+    --checkin-primary-strong: #5a51f0;
+    --checkin-text: #17142f;
+    --checkin-muted: #6e6a8f;
+    --checkin-surface: rgba(255, 255, 255, 0.82);
+    --checkin-border: rgba(108, 99, 255, 0.18);
+    --checkin-shadow: 0 24px 60px rgba(108, 99, 255, 0.12);
+    --checkin-green: #33b87a;
+    --checkin-yellow: #ffb347;
+    --checkin-red: #f26578;
+}
+
+body[data-page^="checkin"] .tyfit-main-inner,
+body[data-page="daily-checkin"] .tyfit-main-inner {
+    padding-bottom: 110px;
+}
+
+.checkin-shell {
+    display: grid;
+    gap: 18px;
+}
+
+.checkin-hero-card {
+    border-radius: 24px;
+    padding: 22px;
+    border: 1px solid var(--checkin-border);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 243, 255, 0.9) 100%);
+    box-shadow: var(--checkin-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.checkin-hero-card::after {
+    content: "";
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    right: -70px;
+    top: -80px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(108, 99, 255, 0.22) 0%, rgba(108, 99, 255, 0) 72%);
+    pointer-events: none;
+}
+
+.checkin-eyebrow {
+    margin: 0;
+    color: var(--checkin-primary);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    font-weight: 800;
+}
+
+.checkin-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.checkin-title {
+    margin: 0;
+    color: var(--checkin-text);
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+}
+
+.checkin-subtitle {
+    margin: 8px 0 0;
+    color: var(--checkin-muted);
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 720px;
+}
+
+.checkin-secondary-btn,
+.checkin-pill-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.checkin-secondary-btn {
+    color: var(--checkin-primary);
+    background: rgba(108, 99, 255, 0.08);
+    border: 1px solid rgba(108, 99, 255, 0.26);
+}
+
+.checkin-pill-btn {
+    color: #4b4774;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.checkin-secondary-btn:hover,
+.checkin-pill-btn:hover {
+    transform: translateY(-1px);
+}
+
+.checkin-toolbar-card,
+.checkin-panel,
+.checkin-success-card,
+.checkin-summary-card {
+    background: var(--checkin-surface);
+    border: 1px solid var(--checkin-border);
+    border-radius: 22px;
+    box-shadow: var(--checkin-shadow);
+    backdrop-filter: blur(6px);
+}
+
+.checkin-toolbar-card {
+    padding: 14px;
+    display: grid;
+    gap: 10px;
+}
+
+.checkin-user-select-wrap {
+    display: grid;
+    gap: 6px;
+}
+
+.checkin-user-select-wrap label {
+    margin: 0;
+    color: #5d5882;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.checkin-select-control {
+    position: relative;
+}
+
+.checkin-select-control select {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(108, 99, 255, 0.25);
+    background: rgba(255, 255, 255, 0.92);
+    min-height: 44px;
+    padding: 10px 36px 10px 12px;
+    color: #302b57;
+    font-size: 14px;
+    font-weight: 600;
+    appearance: none;
+}
+
+.checkin-select-control i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: #847fa7;
+    pointer-events: none;
+}
+
+.checkin-goals-table-wrap {
+    overflow: auto;
+}
+
+.checkin-goals-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    min-width: 760px;
+}
+
+.checkin-goals-table th {
+    color: #6b6690;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 12px;
+}
+
+.checkin-goals-table td {
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 1px solid rgba(108, 99, 255, 0.16);
+    border-bottom: 1px solid rgba(108, 99, 255, 0.16);
+    padding: 14px 12px;
+    color: #312c58;
+    font-size: 14px;
+}
+
+.checkin-goals-table td:first-child {
+    border-left: 1px solid rgba(108, 99, 255, 0.16);
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+}
+
+.checkin-goals-table td:last-child {
+    border-right: 1px solid rgba(108, 99, 255, 0.16);
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+}
+
+.checkin-goals-table tr:hover td {
+    border-color: rgba(108, 99, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.checkin-goal-actions {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.checkin-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    background: rgba(108, 99, 255, 0.08);
+    color: #5a51f0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkin-icon-btn.danger {
+    color: #d64d67;
+    border-color: rgba(242, 101, 120, 0.3);
+    background: rgba(242, 101, 120, 0.1);
+}
+
+.checkin-mobile-goal-list {
+    display: none;
+    gap: 12px;
+}
+
+.checkin-goal-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(108, 99, 255, 0.18);
+    border-radius: 16px;
+    padding: 14px;
+    display: grid;
+    gap: 8px;
+}
+
+.checkin-goal-card h4 {
+    margin: 0;
+    color: #271f54;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.checkin-goal-card p {
+    margin: 0;
+    color: #68638d;
+    font-size: 13px;
+}
+
+.checkin-goal-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.checkin-tag {
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(108, 99, 255, 0.12);
+    color: #5a51f0;
+}
+
+.checkin-date-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 6px 2px 6px;
+    scrollbar-width: none;
+}
+
+.checkin-date-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.checkin-date-pill {
+    min-width: 76px;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    border-radius: 14px;
+    padding: 10px 8px;
+    display: grid;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.86);
+    color: #5f5b82;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.checkin-date-pill strong {
+    font-size: 15px;
+    color: #2f2957;
+}
+
+.checkin-date-pill.is-active {
+    background: linear-gradient(145deg, #6c63ff 0%, #5a51f0 100%);
+    color: #e9e7ff;
+    border-color: transparent;
+    box-shadow: 0 12px 24px rgba(108, 99, 255, 0.28);
+}
+
+.checkin-date-pill.is-active strong {
+    color: #fff;
+}
+
+.checkin-date-pill[disabled] {
+    opacity: 0.45;
+}
+
+.checkin-greeting {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 32px);
+    color: #1e1842;
+    line-height: 1.12;
+}
+
+.checkin-progress-card {
+    position: relative;
+    padding: 16px;
+    overflow: hidden;
+}
+
+.checkin-progress-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("../assets/status/goal_card_glow.svg") right top / 260px auto no-repeat;
+    opacity: 0.42;
+    pointer-events: none;
+}
+
+.checkin-progress-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 112px 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.checkin-ring {
+    width: 108px;
+    height: 108px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: conic-gradient(var(--checkin-primary) 0deg, rgba(108, 99, 255, 0.12) 0deg);
+}
+
+.checkin-ring::before {
+    content: "";
+    width: 82px;
+    height: 82px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid rgba(108, 99, 255, 0.16);
+    position: absolute;
+}
+
+.checkin-ring-value {
+    position: relative;
+    z-index: 1;
+    color: #352d67;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.checkin-metric-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.checkin-metric {
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(108, 99, 255, 0.16);
+    padding: 10px;
+    text-align: center;
+}
+
+.checkin-metric strong {
+    display: block;
+    font-size: 20px;
+    color: #2d2758;
+}
+
+.checkin-metric span {
+    color: #6d6793;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.checkin-group {
+    display: grid;
+    gap: 10px;
+}
+
+.checkin-group-title {
+    margin: 0;
+    color: #3d3766;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.checkin-goal-row {
+    border: 1px solid rgba(108, 99, 255, 0.18);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.checkin-goal-row-top {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkin-goal-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: rgba(108, 99, 255, 0.12);
+    color: var(--checkin-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checkin-goal-text h4 {
+    margin: 0;
+    color: #231b4e;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.checkin-goal-text p {
+    margin: 2px 0 0;
+    color: #726d98;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.checkin-goal-menu-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid rgba(108, 99, 255, 0.18);
+    background: rgba(108, 99, 255, 0.08);
+    color: #5d55f3;
+}
+
+.checkin-status-row {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.checkin-status-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 141, 197, 0.45);
+    background: #fff;
+    position: relative;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.checkin-status-btn.is-active {
+    transform: scale(1.05);
+    box-shadow: 0 10px 16px rgba(108, 99, 255, 0.2);
+}
+
+.checkin-status-btn[data-status="done"] { color: var(--checkin-green); }
+.checkin-status-btn[data-status="partial"] { color: var(--checkin-yellow); }
+.checkin-status-btn[data-status="missed"] { color: var(--checkin-red); }
+
+.checkin-status-btn.is-active::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.92;
+}
+
+.checkin-goal-extra {
+    display: none;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.checkin-goal-extra.is-open {
+    display: grid;
+}
+
+.checkin-goal-extra textarea,
+.checkin-goal-extra input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px 12px;
+    color: #312a57;
+    font-size: 13px;
+}
+
+.checkin-goal-extra textarea {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.checkin-sticky-submit {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(74px + env(safe-area-inset-bottom));
+    z-index: 60;
+}
+
+.checkin-sticky-submit .checkin-secondary-btn {
+    width: 100%;
+    min-height: 52px;
+    font-size: 15px;
+    border-radius: 16px;
+}
+
+.checkin-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(22, 16, 50, 0.36);
+    backdrop-filter: blur(4px);
+    z-index: 2200;
+}
+
+.checkin-action-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2201;
+    border-radius: 22px 22px 0 0;
+    background: #fff;
+    border: 1px solid rgba(108, 99, 255, 0.18);
+    box-shadow: 0 -14px 32px rgba(37, 30, 88, 0.24);
+    padding: 18px;
+    display: grid;
+    gap: 10px;
+}
+
+.checkin-action-sheet h4 {
+    margin: 0;
+    color: #271f53;
+    font-size: 16px;
+}
+
+.checkin-sheet-option {
+    border-radius: 14px;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    background: rgba(108, 99, 255, 0.08);
+    color: #4a43cb;
+    padding: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.checkin-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 14, 39, 0.34);
+    backdrop-filter: blur(6px);
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.checkin-modal {
+    width: min(100%, 780px);
+    max-height: min(90vh, 860px);
+    overflow: auto;
+    border-radius: 24px;
+    background: #fff;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    box-shadow: 0 32px 60px rgba(36, 27, 89, 0.24);
+    padding: 18px;
+    display: grid;
+    gap: 14px;
+}
+
+.checkin-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.checkin-modal-title-wrap {
+    display: grid;
+    gap: 2px;
+}
+
+.checkin-modal-head h3 {
+    margin: 0;
+    color: #261e52;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.checkin-modal-subtitle {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.checkin-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.checkin-form-field {
+    display: grid;
+    gap: 6px;
+}
+
+.checkin-form-field label {
+    margin: 0;
+    color: #5d5883;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.checkin-form-field input,
+.checkin-form-field select,
+.checkin-form-field textarea {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(108, 99, 255, 0.24);
+    background: rgba(248, 247, 255, 0.7);
+    color: #2d2753;
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.checkin-form-field textarea {
+    min-height: 78px;
+    resize: vertical;
+}
+
+.checkin-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.checkin-modal-cancel-btn,
+.checkin-modal-save-btn {
+    min-width: 128px;
+    min-height: 44px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.checkin-modal-cancel-btn {
+    background: #fff;
+    border: 1px solid rgba(108, 99, 255, 0.28);
+    color: #544c86;
+}
+
+.checkin-modal-save-btn {
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.18) 0%, rgba(90, 81, 240, 0.26) 100%);
+    border: 1px solid rgba(108, 99, 255, 0.34);
+    color: #443cae;
+    box-shadow: 0 10px 20px rgba(108, 99, 255, 0.14);
+}
+
+body[data-page="checkin-goals"] .checkin-modal-overlay {
+    padding: 16px;
+}
+
+body[data-page="checkin-goals"] .checkin-modal {
+    width: min(100%, 760px);
+    max-height: min(90vh, 860px);
+    border-radius: 14px;
+    border: 0;
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 24px 56px rgba(17, 24, 39, 0.18);
+}
+
+body[data-page="checkin-goals"] .checkin-modal-head {
+    padding: 16px 18px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+}
+
+body[data-page="checkin-goals"] .checkin-modal-grid {
+    padding: 16px 18px;
+    background: linear-gradient(180deg, #fbfdff 0%, #f4f8fd 100%);
+}
+
+body[data-page="checkin-goals"] .checkin-form-field label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    color: #334155;
+    text-transform: uppercase;
+}
+
+body[data-page="checkin-goals"] .checkin-form-field input,
+body[data-page="checkin-goals"] .checkin-form-field select {
+    min-height: 42px;
+    border-radius: 12px;
+    border: 1px solid #c7d6e5;
+    background: #f8fcff;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+body[data-page="checkin-goals"] .checkin-form-field input:focus,
+body[data-page="checkin-goals"] .checkin-form-field select:focus {
+    outline: none;
+    border-color: #7bafd4;
+    background: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
+}
+
+body[data-page="checkin-goals"] .checkin-modal-actions {
+    padding: 14px 18px 16px;
+    border-top: 1px solid #e2e8f0;
+    background: #fff;
+}
+
+body[data-page="checkin-goals"] .checkin-modal-cancel-btn {
+    background: #f1f5f9;
+    border-color: #d9e2ec;
+    color: #334155;
+}
+
+body[data-page="checkin-goals"] .checkin-modal-save-btn {
+    background: linear-gradient(180deg, #2b6cb0 0%, #1f5b99 100%);
+    border-color: #1f5b99;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(31, 91, 153, 0.26);
+}
+
+body[data-page="checkin-goals"] .checkin-icon-btn#goalModalClose {
+    background: transparent;
+    border-color: transparent;
+    color: #374151;
+}
+
+body[data-page="checkin-goals"] .checkin-icon-btn#goalModalClose:hover {
+    background: rgba(15, 23, 42, 0.06);
+}
+
+.checkin-success-layout {
+    display: grid;
+    gap: 14px;
+    justify-items: center;
+    text-align: center;
+}
+
+.checkin-success-layout .checkin-success-hero {
+    width: min(320px, 78vw);
+}
+
+.checkin-success-title {
+    margin: 0;
+    color: #261f53;
+    font-size: clamp(26px, 4vw, 38px);
+    line-height: 1.05;
+    font-weight: 800;
+}
+
+.checkin-success-subtitle {
+    margin: 0;
+    color: #6d6894;
+    font-size: 15px;
+}
+
+.checkin-confetti {
+    position: absolute;
+    width: min(360px, 84vw);
+    opacity: 0.38;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.checkin-summary-calendar {
+    overflow-x: auto;
+    display: flex;
+    gap: 8px;
+    padding: 8px 2px;
+    scrollbar-width: none;
+}
+
+.checkin-summary-calendar::-webkit-scrollbar {
+    display: none;
+}
+
+.checkin-summary-day {
+    min-width: 62px;
+    border-radius: 12px;
+    border: 1px solid rgba(108, 99, 255, 0.22);
+    background: rgba(255, 255, 255, 0.88);
+    color: #524d79;
+    padding: 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.checkin-summary-day.is-active {
+    background: linear-gradient(145deg, #6c63ff 0%, #5a51f0 100%);
+    color: #fff;
+    border-color: transparent;
+}
+
+.checkin-summary-list {
+    display: grid;
+    gap: 10px;
+}
+
+.checkin-summary-item {
+    border-radius: 14px;
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 12px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.checkin-status-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.checkin-status-badge.done { background: var(--checkin-green); }
+.checkin-status-badge.partial { background: var(--checkin-yellow); }
+.checkin-status-badge.missed { background: var(--checkin-red); }
+
+.checkin-week-strip {
+    display: none;
+    gap: 10px;
+}
+
+.checkin-week-item {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(108, 99, 255, 0.22);
+    padding: 10px;
+    min-width: 96px;
+    text-align: center;
+}
+
+.checkin-week-item strong {
+    display: block;
+    color: #2f2956;
+    font-size: 18px;
+}
+
+.checkin-floating-add {
+    position: fixed;
+    right: 14px;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    z-index: 70;
+}
+
+.checkin-floating-add .checkin-secondary-btn {
+    width: 54px;
+    height: 54px;
+    border-radius: 999px;
+    padding: 0;
+}
+
+.checkin-hidden {
+    display: none !important;
+}
+
+@media (max-width: 1023px) {
+    .checkin-title-row {
+        display: grid;
+        gap: 10px;
+    }
+
+    body[data-page="checkin-goals"] .checkin-modal-overlay {
+        align-items: center;
+        padding: 12px;
+    }
+
+    body[data-page="checkin-goals"] .checkin-modal {
+        width: 100%;
+        max-width: 640px;
+        max-height: min(92dvh, 860px);
+        min-height: 0;
+        border-radius: 14px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 767px) {
+    .checkin-goals-table-wrap {
+        display: none;
+    }
+
+    .checkin-mobile-goal-list {
+        display: grid;
+    }
+
+    .checkin-progress-grid {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+    }
+
+    .checkin-sticky-submit {
+        bottom: calc(84px + env(safe-area-inset-bottom));
+    }
+
+    .checkin-modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body[data-page="checkin-goals"] .checkin-modal-head,
+    body[data-page="checkin-goals"] .checkin-modal-grid,
+    body[data-page="checkin-goals"] .checkin-modal-actions {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .checkin-modal-actions {
+        justify-content: stretch;
+    }
+
+    .checkin-modal-cancel-btn,
+    .checkin-modal-save-btn {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    .checkin-week-strip {
+        display: flex;
+    }
+
+    .checkin-sticky-submit {
+        position: static;
+        margin-top: 10px;
+    }
+
+    .checkin-sticky-submit .checkin-secondary-btn {
+        width: auto;
+        min-width: 220px;
+    }
+
+    .checkin-floating-add {
+        display: none;
+    }
+}

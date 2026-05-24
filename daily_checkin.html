@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Daily Check-in</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track daily adherence in Tyfit">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
+    <link href="css/checkin.css?v=20260524a" rel="stylesheet">
+</head>
+<body class="tyfit-app" data-page="daily-checkin">
+    <header class="tyfit-mobile-topbar">
+        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
+        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home">
+            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span>
+        </a>
+        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown"><button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i></button></div>
+    </header>
+
+    <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
+        <div class="sidebar-inner">
+            <div class="tyfit-mobile-drawer-head">
+                <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu"><i data-lucide="x"></i></button>
+                <a class="tyfit-logo-link" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a>
+            </div>
+            <div class="sidebar-menu">
+                <p class="sidebar-section-label">MAIN</p>
+                <a href="index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                <a href="portal/diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                <a href="training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">TOOLS</p>
+                <a href="daily_checkin.html" class="sidebar-nav-item active"><i data-lucide="clipboard-check"></i><span>Daily Check-in</span></a>
+                <a href="checkin_goals.html" class="sidebar-nav-item"><i data-lucide="flag"></i><span>Daily Goals</span></a>
+                <a href="checkin_summary.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i><span>Check-in Summary</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">ACCOUNT</p>
+                <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+            </div>
+        </div>
+    </aside>
+    <div class="tyfit-mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
+
+    <div class="tyfit-layout" id="tyfitLayout">
+        <aside class="tyfit-sidebar sidebar" id="tyfitSidebar">
+            <div class="sidebar-inner">
+                <div class="tyfit-sidebar-head"><a class="tyfit-logo-link sidebar-logo" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a></div>
+                <div class="sidebar-menu">
+                    <p class="sidebar-section-label">MAIN</p>
+                    <a href="index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                    <a href="portal/diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                    <a href="training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">TOOLS</p>
+                    <a href="daily_checkin.html" class="sidebar-nav-item active"><i data-lucide="clipboard-check"></i><span>Daily Check-in</span></a>
+                    <a href="checkin_goals.html" class="sidebar-nav-item"><i data-lucide="flag"></i><span>Daily Goals</span></a>
+                    <a href="checkin_summary.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i><span>Check-in Summary</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">ACCOUNT</p>
+                    <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                </div>
+            </div>
+        </aside>
+
+        <button class="tyfit-sidebar-toggle-floating" id="sidebarCollapseBtn" aria-label="Toggle sidebar"><i data-lucide="panel-left-close"></i></button>
+
+        <main class="tyfit-main">
+            <div class="tyfit-desktop-actions">
+                <div class="tyfit-dropdown-wrap">
+                    <button class="tyfit-icon-btn tyfit-notif-btn" id="desktopNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i></button>
+                    <div class="tyfit-popover-menu" id="desktopNotifMenu" aria-hidden="true"><p class="tyfit-popover-empty">No new notification</p></div>
+                </div>
+                <span class="tyfit-desktop-separator" aria-hidden="true"></span>
+                <div class="tyfit-dropdown-wrap" id="desktopAccountWrap">
+                    <button class="tyfit-account-btn" id="desktopAccountBtn" aria-label="Account menu"><img id="desktopProfileAvatar" class="tyfit-account-avatar" src="assets/avatars/avatar-1.svg" alt="Profile"><span id="desktopProfileName">Account</span><i data-lucide="chevron-down"></i></button>
+                    <div class="tyfit-popover-menu tyfit-popover-menu--account" id="desktopAccountMenu" aria-hidden="true"><button type="button" class="tyfit-menu-action" data-action="account">My Account</button><button type="button" class="tyfit-menu-action" data-action="logout">Logout</button></div>
+                </div>
+            </div>
+
+            <div class="tyfit-main-inner">
+                <div class="checkin-shell">
+                    <section class="checkin-toolbar-card checkin-hidden" id="checkinUserToolbar">
+                        <div class="checkin-user-select-wrap">
+                            <label for="checkinUserSelect">Select User</label>
+                            <div class="checkin-select-control"><select id="checkinUserSelect"></select><i data-lucide="chevron-down"></i></div>
+                        </div>
+                    </section>
+
+                    <section class="checkin-toolbar-card">
+                        <div class="checkin-date-scroll" id="checkinDateStrip"></div>
+                    </section>
+
+                    <section class="checkin-hero-card">
+                        <p class="checkin-eyebrow">DAILY CONSISTENCY</p>
+                        <div class="checkin-title-row">
+                            <div>
+                                <h1 class="checkin-greeting" id="checkinGreeting">Good morning 👋</h1>
+                                <p class="checkin-subtitle">Let's track your day. Small steps, big results.</p>
+                            </div>
+                            <button type="button" class="checkin-secondary-btn" id="manageGoalsBtn"><i data-lucide="settings-2"></i> Manage Goals</button>
+                        </div>
+                    </section>
+
+                    <section class="checkin-progress-card checkin-summary-card" id="progressCard">
+                        <div class="checkin-progress-grid">
+                            <div class="checkin-ring" id="checkinProgressRing"><span class="checkin-ring-value" id="checkinProgressPercent">0%</span></div>
+                            <div class="checkin-metric-list">
+                                <article class="checkin-metric"><strong id="metricDone">0</strong><span>Done</span></article>
+                                <article class="checkin-metric"><strong id="metricPartial">0</strong><span>Partial</span></article>
+                                <article class="checkin-metric"><strong id="metricMissed">0</strong><span>Missed</span></article>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div id="checkinGroupsWrap" class="checkin-shell"></div>
+
+                    <div class="checkin-sticky-submit" id="submitWrap">
+                        <button type="button" class="checkin-secondary-btn" id="submitCheckinBtn"><i data-lucide="send"></i> Submit Check-in</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">
+        <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
+        <a href="portal/diet_chart.html"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+        <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
+        <a href="training_plan.html"><i data-lucide="dumbbell"></i><span>Training</span></a>
+        <a href="profile.html"><i data-lucide="user"></i><span>Profile</span></a>
+    </nav>
+
+    <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
+    <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
+        <header><h4>Quick Actions</h4><button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close"><i data-lucide="x"></i></button></header>
+        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i> Log Progress</button>
+        <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
+    </section>
+
+    <div class="checkin-sheet-backdrop checkin-hidden" id="goalActionBackdrop"></div>
+    <section class="checkin-action-sheet checkin-hidden" id="goalActionSheet" aria-hidden="true">
+        <h4 id="goalActionTitle">Goal options</h4>
+        <button type="button" class="checkin-sheet-option" id="goalActionCommentBtn"><i data-lucide="message-square"></i> Add Comment</button>
+        <button type="button" class="checkin-sheet-option" id="goalActionActualBtn"><i data-lucide="activity"></i> Add Actual Value</button>
+        <button type="button" class="checkin-pill-btn" id="goalActionCloseBtn">Close</button>
+    </section>
+
+    <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="lib/lucide/lucide.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/login.js?v=20260523l"></script>
+    <script src="js/profile-utils.js?v=20260423d"></script>
+    <script src="js/shell.js"></script>
+    <script src="js/daily_checkin.js?v=20260524b"></script>
+</body>
+</html>
