@@ -3581,6 +3581,7 @@ span.flatpickr-weekday {
     left: 0;
     width: 300px;
     max-width: 94vw;
+    box-sizing: border-box;
     background: #fff;
     border: 1.5px solid #e2e8f0;
     border-radius: 14px;
@@ -3637,7 +3638,7 @@ span.flatpickr-weekday {
     list-style: none;
     margin: 0;
     padding: 6px 0;
-    max-height: 220px;
+    max-height: min(52vh, 360px);
     overflow-y: auto;
 }
 
@@ -3680,6 +3681,15 @@ span.flatpickr-weekday {
     color: #64748b;
     font-size: 12px;
     flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+    .tyfit-phone-wrap .tyfit-cc-dropdown {
+        left: 0;
+        right: 0;
+        width: auto;
+        max-width: none;
+    }
 }
 
 /* ── Measurement (height/weight) ── */

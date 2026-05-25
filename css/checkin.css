@@ -1968,11 +1968,15 @@ body[data-page="daily-checkin"] .checkin-note-modal {
     top: 50%;
     transform: translate(-50%, -50%);
     width: min(92vw, 420px);
+    max-width: calc(100vw - 24px);
     background: #FFFFFF;
     border: 1px solid rgba(108, 99, 255, 0.18);
     border-radius: 18px;
     box-shadow: 0 28px 56px rgba(17, 24, 39, 0.16);
     padding: 16px;
+    box-sizing: border-box;
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
     z-index: 2201;
     display: grid;
     gap: 12px;
@@ -2057,15 +2061,17 @@ body[data-page="daily-checkin"] .checkin-note-modal-actions {
     }
 
     body[data-page="daily-checkin"] .checkin-note-modal {
-        top: auto;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        transform: none;
-        width: 100%;
-        max-width: none;
-        border-radius: 18px 18px 0 0;
-        padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        transform: translate(-50%, -50%);
+        width: min(92vw, 360px);
+        max-width: calc(100vw - 20px);
+        max-height: calc(100dvh - 20px);
+        border-radius: 18px;
+        padding: 14px;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom));
     }
 }
 

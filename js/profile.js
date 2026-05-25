@@ -295,12 +295,10 @@ function renderProfileOverview(data) {
             const rawProfile = data._profile || null;
             const rawUserAbout = data._userAbout || null;
 
-            // privacyData: no status icon; fitnessGoal: always warning
+            // privacyData and fitnessGoal: no status icon
             let statusHtml = "";
-            if (row.key !== "privacyData") {
-                const status = (row.key === "fitnessGoal")
-                    ? "warning"
-                    : computeSectionStatus(row.key, rawProfile, rawUserAbout);
+            if (row.key !== "privacyData" && row.key !== "fitnessGoal") {
+                const status = computeSectionStatus(row.key, rawProfile, rawUserAbout);
                 const statusUi = getStatusIcon(status);
                 statusHtml = `<span class="tyfit-status-icon ${statusUi.className}"><i data-lucide="${statusUi.icon}"></i></span>`;
             }
@@ -392,6 +390,7 @@ function bindProfileInteractions() {
             }
 
             if (section === "fitnessGoal") {
+                window.location.href = "daily_checkin.html";
                 return;
             }
         });

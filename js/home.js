@@ -514,6 +514,15 @@ function isFilled(value) {
 }
 
 function calculateProfileCompletion(profile, userAbout) {
+    // Keep completion logic aligned with shared profile-utils to avoid mismatch bugs.
+    if (window.tyfitProfile?.calculateProfileCompletion) {
+        const result = window.tyfitProfile.calculateProfileCompletion(profile, userAbout);
+        const percent = Number(result?.percent);
+        if (Number.isFinite(percent)) {
+            return Math.max(0, Math.min(100, Math.round(percent)));
+        }
+    }
+
     const fields = [
         profile?.first_name,
         profile?.last_name,
@@ -539,32 +548,48 @@ async function renderProfileCompletionCard(userId) {
     const percent = document.getElementById("profileCompletionPercent");
     if (!card || !ring || !percent) return;
 
+    card.onclick = () => { window.location.href = "profile_edit.html"; };
+
     try {
-        const [{ data: profile }, { data: userAbout }] = await Promise.all([
-            window.supabaseClient.from("profiles").select("*").eq("id", userId).maybeSingle(),
-            window.supabaseClient.from("user_about").select("*").eq("user_id", userId).maybeSingle()
+        const [profile, userAbout] = await Promise.all([
+            window.tyfitProfile?.fetchProfile
+                ? window.tyfitProfile.fetchProfile(userId)
+                : window.supabaseClient.from("profiles").select("*").eq("id", userId).maybeSingle().then((r) => r.data || null),
+            window.tyfitProfile?.fetchUserAbout
+                ? window.tyfitProfile.fetchUserAbout(userId)
+                : window.supabaseClient.from("user_about").select("*").eq("user_id", userId).maybeSingle().then((r) => r.data || null)
         ]);
 
-        const completion = calculateProfileCompletion(profile, userAbout);
-
-        if (completion >= 100) {
+        if (!profile && !userAbout) {
             card.hidden = true;
+            card.style.display = "none";
+            return;
+        }
+
+        const completion = calculateProfileCompletion(profile, userAbout);
+        const clamped = Math.max(0, Math.min(100, Number.isFinite(completion) ? completion : 0));
+
+        if (clamped >= 100) {
+            percent.textContent = "100%";
+            card.hidden = true;
+            card.style.display = "none";
             return;
         }
 
         card.hidden = false;
+        card.style.removeProperty("display");
         card.classList.remove("is-danger", "is-warning");
-        if (completion <= 40) card.classList.add("is-danger");
-        else if (completion <= 70) card.classList.add("is-warning");
-        const clamped = Math.max(0, Math.min(100, completion));
+        if (clamped <= 40) card.classList.add("is-danger");
+        else if (clamped <= 70) card.classList.add("is-warning");
         const circumference = 2 * Math.PI * 22;
         ring.style.strokeDasharray = `${circumference}`;
         ring.style.strokeDashoffset = `${circumference * (1 - clamped / 100)}`;
-        percent.textContent = `${completion}%`;
-        card.onclick = () => { window.location.href = "profile_edit.html"; };
+        percent.textContent = `${clamped}%`;
         if (window.lucide) window.lucide.createIcons();
     } catch (err) {
         console.warn("renderProfileCompletionCard error:", err?.message || err);
+        card.hidden = true;
+        card.style.display = "none";
     }
 }
 
