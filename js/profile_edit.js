@@ -385,7 +385,7 @@ function openCCDropdown() {
     btn?.setAttribute("aria-expanded", "true");
     _ccDropdownOpen = true;
     const searchEl = pe("profileCCSearch");
-    if (searchEl) { searchEl.value = ""; renderCCList(""); setTimeout(() => searchEl.focus(), 50); }
+    if (searchEl) { searchEl.value = ""; renderCCList(""); }
 }
 
 function closeCCDropdown() {

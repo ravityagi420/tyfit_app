@@ -1917,21 +1917,18 @@ body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active[data-status="done"] .checkin-status-circle-dot {
     background: rgba(34, 184, 106, 0.82);
-    border-color: rgba(34, 184, 106, 0.82);
     border-style: solid;
     box-shadow: 0 1px 4px rgba(34, 184, 106, 0.14);
 }
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active[data-status="partial"] .checkin-status-circle-dot {
     background: rgba(255, 184, 0, 0.82);
-    border-color: rgba(255, 184, 0, 0.82);
     border-style: solid;
     box-shadow: 0 1px 4px rgba(255, 184, 0, 0.14);
 }
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active[data-status="missed"] .checkin-status-circle-dot {
     background: rgba(255, 94, 125, 0.82);
-    border-color: rgba(255, 94, 125, 0.82);
     border-style: solid;
     box-shadow: 0 1px 4px rgba(255, 94, 125, 0.14);
 }
