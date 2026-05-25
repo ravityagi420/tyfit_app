@@ -1757,6 +1757,11 @@ async function logout(event) {
     event.preventDefault();
   }
 
+  // Stop session keep-alive when user logs out
+  if (typeof stopSessionKeepAlive === 'function') {
+    stopSessionKeepAlive();
+  }
+
   const { error } = await window.supabaseClient.auth.signOut();
 
   if (error) {

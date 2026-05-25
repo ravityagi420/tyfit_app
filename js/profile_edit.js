@@ -664,8 +664,15 @@ async function autoSaveProfilePicture() {
             profilePictureUri = PROFILE_EDIT_STATE.selectedAvatarKey || "avatar-5.svg";
         }
 
+        // Preserve all existing form fields when saving picture to prevent data loss
         const profilePatch = {
-            profile_picture_url: profilePictureUri || null
+            profile_picture_url: profilePictureUri || null,
+            first_name: (pe("profileFirstName")?.value || "").trim(),
+            last_name: (pe("profileLastName")?.value || "").trim(),
+            email: (pe("profileEmail")?.value || "").trim(),
+            phone_country_code: (pe("profilePhoneCode")?.value || "").trim(),
+            phone_number: (pe("profilePhoneNumber")?.value || "").replace(/\D/g, "").trim(),
+            country: (pe("profileCountry")?.value || "").trim()
         };
         const userAboutPatch = {
             avatar_key: PROFILE_EDIT_STATE.mode === "avatar" ? (PROFILE_EDIT_STATE.selectedAvatarKey || null) : null

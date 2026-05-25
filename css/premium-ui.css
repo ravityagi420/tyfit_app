@@ -2722,9 +2722,9 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
     margin: 10px 0;
     padding: 12px 14px;
     border-radius: 18px;
-    border: 1px solid #D9F2E5;
-    background: linear-gradient(135deg, #FFFFFF 0%, #F7FDF9 55%, #F2FBF6 100%);
-    box-shadow: 0 10px 24px rgba(34, 168, 97, 0.09);
+    border: 1px solid #BDE8D1;
+    background: linear-gradient(140deg, #FFFFFF 0%, #EFFAF4 42%, #E3F6EC 100%);
+    box-shadow: 0 10px 24px rgba(34, 168, 97, 0.12);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2735,7 +2735,7 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
 
 .tp-profile-completion-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 30px rgba(34, 168, 97, 0.14);
+    box-shadow: 0 14px 30px rgba(34, 168, 97, 0.18);
 }
 
 /* 0–40 %: danger (red) */
