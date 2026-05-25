@@ -9,13 +9,21 @@
         }
     }
 
+    function ringColorForScore(score) {
+        if (score < 40) return "#FF5E7D";
+        if (score <= 75) return "#FFB800";
+        return "#22A861";
+    }
+
     function updateProgressRing(score) {
         const ring = document.querySelector(".summary-ring-progress");
         if (!ring) return;
 
+        const clamped = Math.max(0, Math.min(100, Number(score) || 0));
         const circumference = 2 * Math.PI * 54; // radius = 54
-        const offset = circumference * (1 - (score / 100));
+        const offset = circumference * (1 - (clamped / 100));
         ring.style.strokeDasharray = `${circumference - offset} ${circumference}`;
+        ring.style.stroke = ringColorForScore(clamped);
     }
 
     function setSummary(data) {

@@ -508,6 +508,61 @@ function bindShellInteractions() {
     });
 }
 
+/* ── Profile Completion Card ────────────────────────────────── */
+function isFilled(value) {
+    return value !== null && value !== undefined && String(value).trim() !== "";
+}
+
+function calculateProfileCompletion(profile, userAbout) {
+    const fields = [
+        profile?.first_name,
+        profile?.last_name,
+        profile?.email,
+        profile?.date_of_birth,
+        profile?.profile_picture_url,
+        profile?.phone_country_code,
+        profile?.phone_number,
+        profile?.country,
+        userAbout?.gender,
+        userAbout?.height,
+        userAbout?.weight,
+        userAbout?.goal,
+        userAbout?.activity_level,
+    ];
+    const filled = fields.filter(isFilled).length;
+    return Math.round((filled / fields.length) * 100);
+}
+
+async function renderProfileCompletionCard(userId) {
+    const card = document.getElementById("profileCompletionCard");
+    const bar = document.getElementById("profileCompletionBar");
+    const percent = document.getElementById("profileCompletionPercent");
+    if (!card || !bar || !percent) return;
+
+    try {
+        const [{ data: profile }, { data: userAbout }] = await Promise.all([
+            window.supabaseClient.from("profiles").select("*").eq("id", userId).maybeSingle(),
+            window.supabaseClient.from("user_about").select("*").eq("user_id", userId).maybeSingle()
+        ]);
+
+        const completion = calculateProfileCompletion(profile, userAbout);
+
+        if (completion >= 100) {
+            card.hidden = true;
+            return;
+        }
+
+        card.hidden = false;
+        card.classList.toggle("is-warning", completion < 50);
+        bar.style.width = `${completion}%`;
+        percent.textContent = `${completion}%`;
+        card.onclick = () => { window.location.href = "profile_edit.html"; };
+        if (window.lucide) window.lucide.createIcons();
+    } catch (err) {
+        console.warn("renderProfileCompletionCard error:", err?.message || err);
+    }
+}
+
 async function hydrateNameFromProfile() {
     try {
         if (!window.tyfitProfile?.getCurrentUser) {
@@ -534,6 +589,8 @@ async function hydrateNameFromProfile() {
             fullName,
             profileImage
         });
+
+        renderProfileCompletionCard(user.id);
     } catch (error) {
         console.warn("hydrateNameFromProfile warning:", error?.message || error);
         renderHome(homeData);

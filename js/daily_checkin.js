@@ -11,8 +11,13 @@
         users: [],
         actionGoalId: "",
         noteModalGoalId: "",
-        checkinsByDate: new Map()
+        checkinsByDate: new Map(),
+        autosaveTimer: null,
+        hasPendingChanges: false,
+        isSaving: false
     };
+
+    const AUTOSAVE_DELAY_MS = 7000;
 
     function el(id) {
         return document.getElementById(id);
@@ -167,6 +172,39 @@
         return STATE.goalInputs[key];
     }
 
+    function ringColorForScore(score) {
+        if (score < 40) return "#FF5E7D";
+        if (score <= 75) return "#FFB800";
+        return "#22A861";
+    }
+
+    function clearAutosaveTimer() {
+        if (STATE.autosaveTimer) {
+            clearTimeout(STATE.autosaveTimer);
+            STATE.autosaveTimer = null;
+        }
+    }
+
+    async function runAutosaveIfNeeded() {
+        STATE.autosaveTimer = null;
+        if (!STATE.hasPendingChanges || STATE.isSaving) return;
+        await saveCheckin({
+            redirectOnSuccess: false,
+            showSuccessToast: false,
+            isAutosave: true
+        });
+    }
+
+    function markPendingChanges() {
+        STATE.hasPendingChanges = true;
+        clearAutosaveTimer();
+        STATE.autosaveTimer = setTimeout(() => {
+            runAutosaveIfNeeded().catch((error) => {
+                console.error("autosave error:", error);
+            });
+        }, AUTOSAVE_DELAY_MS);
+    }
+
     function updateProgressCard() {
         const values = Object.values(STATE.goalInputs);
         let done = 0;
@@ -191,6 +229,7 @@
             const circumference = 2 * Math.PI * 54;
             const progress = circumference * (clamped / 100);
             ring.style.strokeDasharray = `${progress} ${circumference}`;
+            ring.style.stroke = ringColorForScore(clamped);
         }
 
         const doneNode = el("metricDone");
@@ -288,7 +327,7 @@
         const today = new Date();
         const days = [];
 
-        for (let i = 9; i >= 0; i -= 1) {
+        for (let i = 6; i >= 0; i -= 1) {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
             const iso = formatISODate(date);
@@ -458,6 +497,8 @@
     }
 
     async function loadCheckinForDate() {
+        clearAutosaveTimer();
+        STATE.hasPendingChanges = false;
         const checkin = await getExistingCheckin();
         STATE.checkinId = checkin?.id || "";
 
@@ -480,7 +521,7 @@
         if (submit) {
             submit.innerHTML = checkin?.id
                 ? '<i data-lucide="save"></i> Update Check-in'
-                : '<i data-lucide="send"></i> Submit Check-in';
+                : '<i data-lucide="save"></i> Save Check-in';
         }
     }
 
@@ -567,100 +608,134 @@
         return { id: "", error: lastError };
     }
 
-    async function saveCheckin() {
+    async function saveCheckin(options = {}) {
+        const {
+            redirectOnSuccess = false,
+            showSuccessToast = true,
+            isAutosave = false
+        } = options;
+
+        if (STATE.isSaving) return;
+
         if (!STATE.goals.length) {
             showToast("Add goals first.");
             return;
         }
 
-        const payload = STATE.goals.map((goal) => {
-            const value = getInput(goal.id);
-            return {
-                goal_id: goal.id,
-                status: value.status || "missed",
-                comment: (value.comment || "").trim() || null,
-                actual_value: value.actual_value === "" ? null : Number(value.actual_value)
-            };
-        });
+        STATE.isSaving = true;
 
-        const doneCount = payload.filter((item) => item.status === "done").length;
-        const partialCount = payload.filter((item) => item.status === "partial").length;
-        const missedCount = payload.filter((item) => item.status === "missed").length;
-        const adherence = Math.round(((doneCount + partialCount * 0.5) / (STATE.goals.length || 1)) * 100);
+        try {
+            const payload = STATE.goals.map((goal) => {
+                const value = getInput(goal.id);
+                return {
+                    goal_id: goal.id,
+                    status: value.status || "missed",
+                    comment: (value.comment || "").trim() || null,
+                    actual_value: value.actual_value === "" ? null : Number(value.actual_value)
+                };
+            });
 
-        let checkinId = STATE.checkinId;
+            const doneCount = payload.filter((item) => item.status === "done").length;
+            const partialCount = payload.filter((item) => item.status === "partial").length;
+            const missedCount = payload.filter((item) => item.status === "missed").length;
+            const adherence = Math.round(((doneCount + partialCount * 0.5) / (STATE.goals.length || 1)) * 100);
 
-        if (checkinId) {
-            const { error } = await updateDailyCheckinRecord(checkinId, adherence, doneCount, partialCount, missedCount);
+            let checkinId = STATE.checkinId;
+            const wasExistingCheckin = Boolean(checkinId);
 
-            if (error) {
-                showToast(`Could not update check-in: ${getSupabaseErrorMessage(error)}`);
-                console.error("update checkin error:", error);
-                return;
+            if (checkinId) {
+                const { error } = await updateDailyCheckinRecord(checkinId, adherence, doneCount, partialCount, missedCount);
+
+                if (error) {
+                    showToast(`Could not update check-in: ${getSupabaseErrorMessage(error)}`);
+                    console.error("update checkin error:", error);
+                    return;
+                }
+            } else {
+                const { id, error } = await insertDailyCheckinRecord(adherence, doneCount, partialCount, missedCount);
+
+                if (error || !id) {
+                    showToast(`Could not submit check-in: ${getSupabaseErrorMessage(error)}`);
+                    console.error("insert checkin error:", error);
+                    return;
+                }
+
+                checkinId = id;
+                STATE.checkinId = checkinId;
+
+                // Ensure metrics are written even if insert fallback used the minimal payload.
+                const updateAfterInsert = await updateDailyCheckinRecord(checkinId, adherence, doneCount, partialCount, missedCount);
+                if (updateAfterInsert.error) {
+                    console.warn("Post-insert metric update warning:", updateAfterInsert.error);
+                }
             }
-        } else {
-            const { id, error } = await insertDailyCheckinRecord(adherence, doneCount, partialCount, missedCount);
 
-            if (error || !id) {
-                showToast(`Could not submit check-in: ${getSupabaseErrorMessage(error)}`);
-                console.error("insert checkin error:", error);
-                return;
-            }
-
-            checkinId = id;
-            STATE.checkinId = checkinId;
-
-            // Ensure metrics are written even if insert fallback used the minimal payload.
-            const updateAfterInsert = await updateDailyCheckinRecord(checkinId, adherence, doneCount, partialCount, missedCount);
-            if (updateAfterInsert.error) {
-                console.warn("Post-insert metric update warning:", updateAfterInsert.error);
-            }
-        }
-
-        const deleteResult = await window.supabaseClient
-            .from("daily_checkin_entries")
-            .delete()
-            .eq("daily_checkin_id", checkinId);
-
-        if (deleteResult.error) {
-            await window.supabaseClient
+            const deleteResult = await window.supabaseClient
                 .from("daily_checkin_entries")
                 .delete()
-                .eq("checkin_id", checkinId);
-        }
+                .eq("daily_checkin_id", checkinId);
 
-        const entries = payload.map((item) => ({
-            daily_checkin_id: checkinId,
-            goal_id: item.goal_id,
-            status: item.status,
-            comment: item.comment,
-            actual_value: item.actual_value
-        }));
+            if (deleteResult.error) {
+                await window.supabaseClient
+                    .from("daily_checkin_entries")
+                    .delete()
+                    .eq("checkin_id", checkinId);
+            }
 
-        let insert = await window.supabaseClient
-            .from("daily_checkin_entries")
-            .insert(entries);
+            const entries = payload.map((item) => ({
+                daily_checkin_id: checkinId,
+                goal_id: item.goal_id,
+                status: item.status,
+                comment: item.comment,
+                actual_value: item.actual_value
+            }));
 
-        if (insert.error) {
-            insert = await window.supabaseClient
+            let insert = await window.supabaseClient
                 .from("daily_checkin_entries")
-                .insert(entries.map((item) => ({
-                    checkin_id: checkinId,
-                    goal_id: item.goal_id,
-                    status: item.status,
-                    comment: item.comment,
-                    actual_value: item.actual_value
-                })));
-        }
+                .insert(entries);
 
-        if (insert.error) {
-            showToast(`Could not save check-in entries: ${getSupabaseErrorMessage(insert.error)}`);
-            console.error("insert entries error:", insert.error);
-            return;
-        }
+            if (insert.error) {
+                insert = await window.supabaseClient
+                    .from("daily_checkin_entries")
+                    .insert(entries.map((item) => ({
+                        checkin_id: checkinId,
+                        goal_id: item.goal_id,
+                        status: item.status,
+                        comment: item.comment,
+                        actual_value: item.actual_value
+                    })));
+            }
 
-        const nextUrl = `checkin_success.html?date=${encodeURIComponent(STATE.selectedDate)}&adherence=${encodeURIComponent(adherence)}&done=${encodeURIComponent(doneCount)}&partial=${encodeURIComponent(partialCount)}&missed=${encodeURIComponent(missedCount)}`;
-        window.location.href = nextUrl;
+            if (insert.error) {
+                showToast(`Could not save check-in entries: ${getSupabaseErrorMessage(insert.error)}`);
+                console.error("insert entries error:", insert.error);
+                return;
+            }
+
+            clearAutosaveTimer();
+            STATE.hasPendingChanges = false;
+
+            const submit = el("submitCheckinBtn");
+            if (submit && !wasExistingCheckin) {
+                submit.innerHTML = '<i data-lucide="save"></i> Update Check-in';
+                refreshIcons();
+            }
+
+            if (redirectOnSuccess) {
+                const nextUrl = `checkin_success.html?date=${encodeURIComponent(STATE.selectedDate)}&adherence=${encodeURIComponent(adherence)}&done=${encodeURIComponent(doneCount)}&partial=${encodeURIComponent(partialCount)}&missed=${encodeURIComponent(missedCount)}`;
+                window.location.href = nextUrl;
+                return;
+            }
+
+            if (showSuccessToast) {
+                showToast(isAutosave ? "Auto-saved" : "Check-in saved");
+            }
+
+            await loadSubmittedDates();
+            renderDateStrip();
+        } finally {
+            STATE.isSaving = false;
+        }
     }
 
     function bindDateChange() {
@@ -690,6 +765,7 @@
                 const value = getInput(goalId);
                 value.status = status;
                 renderGoalGroups();
+                markPendingChanges();
                 return;
             }
 
@@ -760,6 +836,7 @@
 
         closeGoalNoteModal();
         renderGoalGroups();
+        markPendingChanges();
     }
 
     function bindGoalNoteModal() {
@@ -831,9 +908,11 @@
         const submit = el("submitCheckinBtn");
         if (submit) {
             submit.addEventListener("click", async () => {
-                await saveCheckin();
-                await loadSubmittedDates();
-                renderDateStrip();
+                await saveCheckin({
+                    redirectOnSuccess: false,
+                    showSuccessToast: true,
+                    isAutosave: false
+                });
             });
         }
 
@@ -851,12 +930,11 @@
     }
 
     function setGreeting() {
-        const name = STATE.access?.profile?.first_name || STATE.access?.user?.user_metadata?.given_name || "";
         const greeting = el("checkinGreeting");
         if (!greeting) return;
         const hour = new Date().getHours();
-        const part = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
-        greeting.textContent = `Good ${part}${name ? `, ${name}` : ""} 👋`;
+        const part = hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : hour < 21 ? "Evening" : "Night";
+        greeting.textContent = `Good ${part} 👋`;
     }
 
     async function init() {

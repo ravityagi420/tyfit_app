@@ -76,7 +76,7 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     font-size: clamp(28px, 4vw, 38px);
     line-height: 1.08;
     letter-spacing: -0.03em;
-    font-weight: 800;
+    font-weight: 600;
 }
 
 .checkin-subtitle {
@@ -665,14 +665,6 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     box-shadow: 0 16px 24px rgba(108, 99, 255, 0.24);
 }
 
-.checkin-submit-helper {
-    margin: 0;
-    text-align: center;
-    color: #667085;
-    font-size: 12px;
-    font-weight: 600;
-}
-
 .checkin-sheet-backdrop,
 .checkin-modal-overlay {
     position: fixed;
@@ -959,15 +951,17 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 }
 
 .summary-ring-value {
-    font-size: 25px;
-    font-weight: 800;
+    font-size: 22px;
+    font-weight: 700;
     fill: #2F2B56;
+    transform: translateY(3px);
 }
 
 .summary-ring-label {
     font-size: 10px;
     fill: #5A5E73;
-    font-weight: 600;
+    font-weight: 500;
+    transform: translateY(3px);
 }
 
 .summary-divider {
@@ -1367,10 +1361,6 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
         min-width: 240px;
     }
 
-    .checkin-submit-helper {
-        text-align: right;
-    }
-
     .checkin-week-strip {
         display: flex;
     }
@@ -1547,14 +1537,6 @@ body[data-page="daily-checkin"] {
     justify-content: center;
 }
 
-.checkin-submit-helper {
-    margin: 0;
-    color: #667085;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: center;
-}
-
 .checkin-sticky-submit .checkin-secondary-btn,
 .checkin-cta-primary {
     min-height: 52px;
@@ -1700,12 +1682,6 @@ body[data-page="daily-checkin"] {
     }
 }
 
-@media (min-width: 1024px) {
-    .checkin-submit-helper {
-        text-align: right;
-    }
-}
-
 body[data-page="daily-checkin"] .checkin-hero-card {
     background: transparent;
     border: none;
@@ -1733,6 +1709,15 @@ body[data-page="daily-checkin"] .checkin-title-row > div {
 body[data-page="daily-checkin"] .checkin-subtitle {
     margin-left: auto;
     margin-right: auto;
+}
+
+body[data-page="daily-checkin"] .checkin-sticky-submit {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    margin-top: 8px;
 }
 
 body[data-page="daily-checkin"] .checkin-group {
@@ -1893,8 +1878,9 @@ body[data-page="daily-checkin"] .checkin-status-circle-dot {
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
-body[data-page="daily-checkin"] .checkin-status-circle-dot i {
-    width: 13px;
+body[data-page="daily-checkin"] .checkin-status-circle-dot i,
+body[data-page="daily-checkin"] .checkin-status-circle-dot svg {
+    width: 13x;
     height: 13px;
     opacity: 1;
 }
@@ -1903,24 +1889,30 @@ body[data-page="daily-checkin"] .checkin-status-circle-btn[data-status="done"] .
     border-color: #2ECC71;
 }
 
-body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="done"] .checkin-status-circle-dot i {
+body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="done"] .checkin-status-circle-dot i,
+body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="done"] .checkin-status-circle-dot svg {
     color: #2ECC71;
+    stroke: #2ECC71;
 }
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn[data-status="partial"] .checkin-status-circle-dot {
     border-color: #FFB800;
 }
 
-body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="partial"] .checkin-status-circle-dot i {
+body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="partial"] .checkin-status-circle-dot i,
+body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="partial"] .checkin-status-circle-dot svg {
     color: #FFB800;
+    stroke: #FFB800;
 }
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn[data-status="missed"] .checkin-status-circle-dot {
     border-color: #FF5E7D;
 }
 
-body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="missed"] .checkin-status-circle-dot i {
+body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="missed"] .checkin-status-circle-dot i,
+body[data-page="daily-checkin"] .checkin-status-circle-btn:not(.is-active)[data-status="missed"] .checkin-status-circle-dot svg {
     color: #FF5E7D;
+    stroke: #FF5E7D;
 }
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active[data-status="done"] .checkin-status-circle-dot {
@@ -1944,20 +1936,22 @@ body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active[data-status
     box-shadow: 0 1px 4px rgba(255, 94, 125, 0.14);
 }
 
-body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active .checkin-status-circle-dot i {
+body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active .checkin-status-circle-dot i,
+body[data-page="daily-checkin"] .checkin-status-circle-btn.is-active .checkin-status-circle-dot svg {
     opacity: 1;
     color: #FFFFFF;
+    stroke: #FFFFFF;
 }
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn[data-status="done"] .checkin-status-circle-dot i {
-    width: 13px;
-    height: 13px;
+    width: 9px;
+    height: 9px;
 }
 
 body[data-page="daily-checkin"] .checkin-status-circle-btn[data-status="partial"] .checkin-status-circle-dot i,
 body[data-page="daily-checkin"] .checkin-status-circle-btn[data-status="missed"] .checkin-status-circle-dot i {
-    width: 12px;
-    height: 12px;
+    width: 9px;
+    height: 9px;
 }
 
 body[data-page="daily-checkin"] .checkin-note-modal-overlay {
@@ -2072,5 +2066,288 @@ body[data-page="daily-checkin"] .checkin-note-modal-actions {
         max-width: none;
         border-radius: 18px 18px 0 0;
         padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+}
+
+/* ── 2026 Premium Daily Check-in Layout Redesign ────────────── */
+
+/* ── 1. Greeting Section ─────────────────────────────────────── */
+body[data-page="daily-checkin"] .checkin-greeting-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0 0;
+}
+
+body[data-page="daily-checkin"] .checkin-greeting-left {
+    flex: 1;
+    min-width: 0;
+}
+
+body[data-page="daily-checkin"] .checkin-greeting {
+    margin: 0;
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 600;
+    color: #17172F;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+body[data-page="daily-checkin"] .checkin-subtitle {
+    margin: 5px 0 0;
+    font-size: 13.5px;
+    color: #667085;
+    line-height: 1.4;
+    text-align: left;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: none;
+}
+
+.checkin-manage-goals-pill {
+    height: 36px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(108, 99, 255, 0.28);
+    background: #FFFFFF;
+    color: #4D45CD;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(108, 99, 255, 0.07);
+    cursor: pointer;
+}
+
+.checkin-manage-goals-pill i,
+.checkin-manage-goals-pill svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.checkin-manage-goals-pill:hover {
+    background: rgba(108, 99, 255, 0.07);
+    border-color: rgba(108, 99, 255, 0.44);
+    box-shadow: 0 6px 16px rgba(108, 99, 255, 0.14);
+    transform: translateY(-1px);
+}
+
+/* ── 2. Today's Progress Card — compact refinements ──────────── */
+body[data-page="daily-checkin"] .today-summary-card {
+    transition: box-shadow 0.2s ease;
+}
+
+body[data-page="daily-checkin"] .summary-ring {
+    width: 100px;
+    height: 100px;
+}
+
+/* ── 3. Calendar Section ─────────────────────────────────────── */
+body[data-page="daily-checkin"] .checkin-calendar-section {
+    background: #FFFFFF;
+    border: 1px solid rgba(108, 99, 255, 0.13);
+    border-radius: 20px;
+    padding: 12px 14px;
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.05);
+}
+
+body[data-page="daily-checkin"] .checkin-week-nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.checkin-week-pill {
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid rgba(108, 99, 255, 0.22);
+    background: rgba(108, 99, 255, 0.06);
+    color: #4D45CD;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.checkin-week-pill i,
+.checkin-week-pill svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.checkin-week-pill:hover {
+    background: rgba(108, 99, 255, 0.12);
+    border-color: rgba(108, 99, 255, 0.36);
+    transform: translateY(-1px);
+}
+
+body[data-page="daily-checkin"] .checkin-selected-date {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #8A86B8;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ── Date dot — explicit rule to ensure visibility ──────────── */
+body[data-page="daily-checkin"] .checkin-date-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #6C63FF;
+    margin: 3px auto 0;
+    display: block;
+}
+
+body[data-page="daily-checkin"] .checkin-date-pill.is-active .checkin-date-dot {
+    background: #FFFFFF;
+}
+
+/* ── Compact date strip pills — 7-column centered grid ──────── */
+body[data-page="daily-checkin"] .checkin-date-scroll {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    overflow-x: visible;
+    gap: 6px;
+    padding: 2px 0 4px;
+}
+
+body[data-page="daily-checkin"] .checkin-date-pill {
+    min-width: 0;
+    width: 100%;
+    padding: 7px 4px 6px;
+    border-radius: 13px;
+    font-size: 10px;
+    letter-spacing: 0.01em;
+    transition: all 0.18s ease;
+    text-align: center;
+}
+
+body[data-page="daily-checkin"] .checkin-date-pill strong {
+    font-size: 13px;
+}
+
+body[data-page="daily-checkin"] .checkin-date-pill.is-active {
+    box-shadow: 0 8px 18px rgba(108, 99, 255, 0.22);
+}
+
+body[data-page="daily-checkin"] .checkin-date-pill:not(.is-active):hover {
+    border-color: rgba(108, 99, 255, 0.28);
+    background: rgba(108, 99, 255, 0.04);
+    transform: translateY(-1px);
+}
+
+/* ── 4. Goal Groups — hover + transition polish ──────────────── */
+body[data-page="daily-checkin"] .checkin-group-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #17172F;
+    margin: 0 0 8px 2px;
+}
+
+body[data-page="daily-checkin"] .checkin-goal-list-card {
+    transition: box-shadow 0.2s ease;
+}
+
+body[data-page="daily-checkin"] .checkin-goal-row-compact {
+    transition: background 0.15s ease;
+}
+
+body[data-page="daily-checkin"] .checkin-goal-row-compact:hover {
+    background: rgba(108, 99, 255, 0.022);
+}
+
+body[data-page="daily-checkin"] .checkin-status-circle-btn {
+    transition: transform 0.15s ease;
+}
+
+body[data-page="daily-checkin"] .checkin-status-circle-btn:hover {
+    transform: scale(1.08);
+}
+
+body[data-page="daily-checkin"] .checkin-status-circle-dot {
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+/* ── 5. Submit button ────────────────────────────────────────── */
+body[data-page="daily-checkin"] .checkin-sticky-submit {
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    margin-top: 4px;
+    margin-bottom: 28px;
+}
+
+body[data-page="daily-checkin"] .checkin-sticky-submit .checkin-secondary-btn {
+    transition: all 0.2s ease;
+}
+
+body[data-page="daily-checkin"] .checkin-sticky-submit .checkin-secondary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 32px rgba(108, 99, 255, 0.32);
+}
+
+/* ── Mobile overflow fix — prevent page-level zoom-out ──────── */
+body[data-page="daily-checkin"] .tyfit-main {
+    overflow-x: hidden;
+}
+
+body[data-page="daily-checkin"] .tyfit-main-inner {
+    overflow-x: hidden;
+}
+
+body[data-page="daily-checkin"] .checkin-shell {
+    overflow-x: hidden;
+}
+
+/* Force grid children to honour available width */
+body[data-page="daily-checkin"] .summary-ring-section,
+body[data-page="daily-checkin"] .summary-counts-section {
+    min-width: 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    body[data-page="daily-checkin"] .checkin-greeting-section {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    body[data-page="daily-checkin"] .checkin-greeting {
+        font-size: 20px;
+    }
+
+    .checkin-manage-goals-pill span {
+        display: inline;
+    }
+}
+
+@media (min-width: 1024px) {
+    body[data-page="daily-checkin"] .checkin-sticky-submit {
+        justify-items: end;
+    }
+
+    body[data-page="daily-checkin"] .checkin-sticky-submit .checkin-secondary-btn {
+        width: auto;
+        min-width: 240px;
     }
 }

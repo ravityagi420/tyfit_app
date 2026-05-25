@@ -86,6 +86,8 @@
 
             <div class="tyfit-main-inner">
                 <div class="checkin-shell">
+
+                    <!-- Admin user selector (shown by JS for admin accounts only) -->
                     <section class="checkin-toolbar-card checkin-hidden" id="checkinUserToolbar">
                         <div class="checkin-user-select-wrap">
                             <label for="checkinUserSelect">Select User</label>
@@ -93,21 +95,19 @@
                         </div>
                     </section>
 
-                    <section class="checkin-toolbar-card">
-                        <div class="checkin-date-scroll" id="checkinDateStrip"></div>
-                        <p class="checkin-selected-date" id="checkinSelectedDateText"></p>
-                    </section>
-
-                    <section class="checkin-hero-card">
-                        <div class="checkin-title-row">
-                            <div>
-                                <h1 class="checkin-greeting" id="checkinGreeting">Good morning 👋</h1>
-                                <p class="checkin-subtitle">Let's track your day. Small steps, big results.</p>
-                            </div>
-                            <button type="button" class="checkin-secondary-btn" id="manageGoalsBtn"><i data-lucide="settings-2"></i> Manage Goals</button>
+                    <!-- 1. Greeting Section -->
+                    <section class="checkin-greeting-section">
+                        <div class="checkin-greeting-left">
+                            <h1 class="checkin-greeting" id="checkinGreeting">Good morning 👋</h1>
+                            <p class="checkin-subtitle">Let's track your day. Small steps, big results.</p>
                         </div>
+                        <button type="button" class="checkin-manage-goals-pill" id="manageGoalsBtn">
+                            <i data-lucide="settings-2"></i>
+                            <span>Manage Goals</span>
+                        </button>
                     </section>
 
+                    <!-- 2. Today's Progress Card -->
                     <section class="today-summary-card" id="progressCard">
                         <h3 class="summary-card-title" id="progressCardTitle">Today's Progress</h3>
                         <div class="summary-ring-section">
@@ -134,7 +134,7 @@
                                 <span class="count-number"><strong id="metricDone">0</strong> Done</span>
                             </div>
                             <div class="summary-count">
-                                <div class="count-icon partial"><i data-lucide="alert-circle"></i></div>
+                                <div class="count-icon partial"><i data-lucide="plus"></i></div>
                                 <span class="count-number"><strong id="metricPartial">0</strong> Partial</span>
                             </div>
                             <div class="summary-count">
@@ -144,12 +144,31 @@
                         </div>
                     </section>
 
+                    <!-- 3. Week Navigator (above calendar card) -->
+                    <div class="checkin-week-nav-row">
+                        <button type="button" class="checkin-week-pill" id="checkinWeekBtn" aria-label="Select week">
+                            <i data-lucide="calendar-days"></i>
+                            <span id="checkinWeekLabel">This Week</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <p class="checkin-selected-date" id="checkinSelectedDateText"></p>
+                    </div>
+
+                    <!-- Calendar Strip -->
+                    <section class="checkin-calendar-section">
+                        <div class="checkin-date-scroll" id="checkinDateStrip"></div>
+                    </section>
+
+                    <!-- 4. Check-in Goal Groups (rendered by JS) -->
                     <div id="checkinGroupsWrap" class="checkin-shell"></div>
 
+                    <!-- 5. Submit -->
                     <div class="checkin-sticky-submit" id="submitWrap">
-                        <button type="button" class="checkin-secondary-btn" id="submitCheckinBtn"><i data-lucide="send"></i> Submit Check-in</button>
-                        <p class="checkin-submit-helper">You can edit your check-in until 11:59 PM</p>
+                        <button type="button" class="checkin-secondary-btn" id="submitCheckinBtn">
+                            <i data-lucide="send"></i> Submit Check-in
+                        </button>
                     </div>
+
                 </div>
             </div>
         </main>
