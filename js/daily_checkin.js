@@ -5,6 +5,7 @@
         access: null,
         targetUserId: "",
         selectedDate: "",
+        weekCalendarMonth: null,
         goals: [],
         goalInputs: {},
         checkinId: "",
@@ -122,6 +123,7 @@
         if (key.includes("diet")) return "utensils-crossed";
         if (key.includes("supplement")) return "pill";
         if (key.includes("activity")) return "dumbbell";
+        if (key.includes("lifestyle")) return "heart-plus";
         return "target";
     }
 
@@ -240,6 +242,53 @@
         if (missedNode) missedNode.textContent = String(missed);
     }
 
+    function startOfWeek(date) {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        const day = (d.getDay() + 6) % 7; // Monday-first week
+        d.setDate(d.getDate() - day);
+        return d;
+    }
+
+    function isSameWeek(dateA, dateB) {
+        return formatISODate(startOfWeek(dateA)) === formatISODate(startOfWeek(dateB));
+    }
+
+    function getWeekDates(isoDate) {
+        const selected = parseDate(isoDate) || new Date();
+        const today = new Date();
+        const isCurrentWeek = isSameWeek(selected, today);
+        const start = isCurrentWeek
+            ? (() => {
+                const s = new Date(today);
+                s.setHours(0, 0, 0, 0);
+                s.setDate(today.getDate() - 6);
+                return s;
+            })()
+            : startOfWeek(selected);
+        const days = [];
+        for (let i = 0; i < 7; i += 1) {
+            const date = new Date(start);
+            date.setDate(start.getDate() + i);
+            days.push(date);
+        }
+        return days;
+    }
+
+    function formatWeekLabel(isoDate) {
+        const selected = parseDate(isoDate) || new Date();
+        const today = new Date();
+        if (isSameWeek(selected, today)) {
+            return "This week";
+        }
+        const week = getWeekDates(isoDate);
+        const first = week[0];
+        const last = week[6];
+        const firstText = first.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        const lastText = last.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        return `${firstText} - ${lastText}`;
+    }
+
     function renderGoalGroups() {
         const wrap = el("checkinGroupsWrap");
         const submitWrap = el("submitWrap");
@@ -321,28 +370,28 @@
     function renderDateStrip() {
         const strip = el("checkinDateStrip");
         const selectedDateText = el("checkinSelectedDateText");
+        const weekLabel = el("checkinWeekLabel");
         if (!strip) return;
 
         const selectedDate = STATE.selectedDate;
-        const today = new Date();
-        const days = [];
+        const weekDates = getWeekDates(selectedDate);
+        const todayIso = formatISODate(new Date());
 
-        for (let i = 6; i >= 0; i -= 1) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
+        strip.innerHTML = weekDates.map((date) => {
             const iso = formatISODate(date);
             const label = date.toLocaleDateString(undefined, { weekday: "short" });
             const day = date.getDate();
             const month = date.toLocaleDateString(undefined, { month: "short" });
-            days.push({ iso, label, day, month });
-        }
-
-        strip.innerHTML = days.map((item) => {
-            const active = item.iso === selectedDate ? "is-active" : "";
-            const hasCheckin = STATE.checkinsByDate.has(item.iso);
+            const active = iso === selectedDate ? "is-active" : "";
+            const hasCheckin = STATE.checkinsByDate.has(iso);
             const dot = hasCheckin ? '<span class="checkin-date-dot" aria-hidden="true"></span>' : "";
-            return `<button type="button" class="checkin-date-pill ${active}" data-checkin-date="${item.iso}"><span>${item.label}</span><strong>${item.day}</strong><span>${item.month}</span>${dot}</button>`;
+            const isFuture = iso > todayIso;
+            return `<button type="button" class="checkin-date-pill ${active}" data-checkin-date="${iso}" ${isFuture ? "disabled" : ""}><span>${label}</span><strong>${day}</strong><span>${month}</span>${dot}</button>`;
         }).join("");
+
+        if (weekLabel) {
+            weekLabel.textContent = formatWeekLabel(selectedDate);
+        }
 
         if (selectedDateText) {
             const parsed = parseDate(selectedDate);
@@ -355,11 +404,126 @@
 
         const activeNode = strip.querySelector(".checkin-date-pill.is-active");
         if (activeNode) {
-            activeNode.scrollIntoView({ behavior: "smooth", inline: "end", block: "nearest" });
-            return;
+            activeNode.scrollIntoView({ behavior: "smooth", inline: "nearest", block: "nearest" });
+        }
+    }
+
+    function closeWeekCalendar() {
+        const backdrop = el("checkinWeekCalendarBackdrop");
+        const panel = el("checkinWeekCalendar");
+        if (!backdrop || !panel) return;
+        backdrop.classList.add("checkin-hidden");
+        panel.classList.add("checkin-hidden");
+        panel.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    function renderWeekCalendar() {
+        const title = el("checkinWeekCalendarMonth");
+        const grid = el("checkinWeekCalendarGrid");
+        if (!title || !grid) return;
+
+        const monthDate = STATE.weekCalendarMonth || parseDate(STATE.selectedDate) || new Date();
+        const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+        const dayOffset = (monthStart.getDay() + 6) % 7; // Monday-first grid
+        const gridStart = new Date(monthStart);
+        gridStart.setDate(monthStart.getDate() - dayOffset);
+
+        title.textContent = monthStart.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+        const selectedIso = STATE.selectedDate;
+        const html = [];
+
+        for (let i = 0; i < 42; i += 1) {
+            const date = new Date(gridStart);
+            date.setDate(gridStart.getDate() + i);
+            const iso = formatISODate(date);
+            const isOutside = date.getMonth() !== monthStart.getMonth();
+            const isSelected = iso === selectedIso;
+            const isFuture = iso > formatISODate(new Date());
+            const hasStatus = STATE.checkinsByDate.has(iso);
+            const dot = hasStatus ? '<span class="checkin-week-calendar-day-dot" aria-hidden="true"></span>' : "";
+            html.push(`<button type="button" class="checkin-week-calendar-day ${isOutside ? "is-outside" : ""} ${isSelected ? "is-selected" : ""} ${isFuture ? "is-disabled" : ""}" data-week-calendar-date="${iso}" ${isFuture ? "disabled" : ""}><span>${date.getDate()}</span>${dot}</button>`);
         }
 
-        strip.scrollLeft = strip.scrollWidth;
+        grid.innerHTML = html.join("");
+    }
+
+    function openWeekCalendar() {
+        const backdrop = el("checkinWeekCalendarBackdrop");
+        const panel = el("checkinWeekCalendar");
+        if (!backdrop || !panel) return;
+
+        const selected = parseDate(STATE.selectedDate) || new Date();
+        STATE.weekCalendarMonth = new Date(selected.getFullYear(), selected.getMonth(), 1);
+        renderWeekCalendar();
+        backdrop.classList.remove("checkin-hidden");
+        panel.classList.remove("checkin-hidden");
+        panel.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        refreshIcons();
+    }
+
+    function bindWeekCalendar() {
+        const weekBtn = el("checkinWeekBtn");
+        const backdrop = el("checkinWeekCalendarBackdrop");
+        const panel = el("checkinWeekCalendar");
+        const prev = el("checkinWeekCalendarPrev");
+        const next = el("checkinWeekCalendarNext");
+        const grid = el("checkinWeekCalendarGrid");
+
+        if (weekBtn) {
+            weekBtn.addEventListener("click", openWeekCalendar);
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener("click", closeWeekCalendar);
+        }
+
+        if (panel) {
+            panel.addEventListener("click", (event) => {
+                event.stopPropagation();
+            });
+        }
+
+        if (prev) {
+            prev.addEventListener("click", () => {
+                const current = STATE.weekCalendarMonth || new Date();
+                STATE.weekCalendarMonth = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+                renderWeekCalendar();
+            });
+        }
+
+        if (next) {
+            next.addEventListener("click", () => {
+                const current = STATE.weekCalendarMonth || new Date();
+                STATE.weekCalendarMonth = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+                renderWeekCalendar();
+            });
+        }
+
+        if (grid) {
+            grid.addEventListener("click", async (event) => {
+                const btn = event.target.closest("[data-week-calendar-date]");
+                if (!btn) return;
+
+                if (btn.hasAttribute("disabled")) return;
+
+                STATE.selectedDate = btn.getAttribute("data-week-calendar-date") || STATE.selectedDate;
+                closeWeekCalendar();
+                renderDateStrip();
+                await loadGoals();
+                await loadCheckinForDate();
+                renderGoalGroups();
+                refreshIcons();
+            });
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeWeekCalendar();
+            }
+        });
     }
 
     function updateProgressCardTitle(selectedDate) {
@@ -462,28 +626,19 @@
     async function loadEntries(checkinId) {
         const map = {};
 
-        let query = window.supabaseClient
-            .from("daily_checkin_entries")
-            .select("*")
-            .eq("checkin_id", checkinId);
+        const [checkinRows, dailyRows] = await Promise.all([
+            loadEntriesByColumn(checkinId, "checkin_id"),
+            loadEntriesByColumn(checkinId, "daily_checkin_id")
+        ]);
 
-        let { data, error } = await query;
+        const rows = mergeEntryRows([...(checkinRows.data || []), ...(dailyRows.data || [])]);
+        const hasFatalError = [checkinRows.error, dailyRows.error].some((error) => error && !isMissingColumnError(error));
 
-        if (error) {
-            const fallback = await window.supabaseClient
-                .from("daily_checkin_entries")
-                .select("*")
-                .eq("daily_checkin_id", checkinId);
-            data = fallback.data;
-            error = fallback.error;
-        }
-
-        if (error) {
-            console.error("load entries error:", error);
+        if (hasFatalError && !rows.length) {
             return map;
         }
 
-        (data || []).forEach((row) => {
+        rows.forEach((row) => {
             map[String(row.goal_id)] = {
                 status: row.status || "",
                 comment: row.comment || "",
@@ -494,6 +649,59 @@
         });
 
         return map;
+    }
+
+    function isMissingColumnError(error) {
+        const message = String(error?.message || "").toLowerCase();
+        if (!message) return false;
+        return (message.includes("column") && message.includes("does not exist"))
+            || message.includes("schema cache");
+    }
+
+    function mergeEntryRows(rows) {
+        const deduped = new Map();
+        (rows || []).forEach((row) => {
+            if (!row) return;
+            const key = row.id
+                ? `id:${row.id}`
+                : `goal:${row.goal_id}|status:${row.status || ""}|comment:${row.comment || ""}|actual:${row.actual_value ?? ""}`;
+            deduped.set(key, row);
+        });
+        return Array.from(deduped.values());
+    }
+
+    async function loadEntriesByColumn(checkinId, columnName) {
+        const result = await window.supabaseClient
+            .from("daily_checkin_entries")
+            .select("*")
+            .eq(columnName, checkinId);
+
+        if (result.error && !isMissingColumnError(result.error)) {
+            console.error(`load entries (${columnName}) error:`, result.error);
+        }
+
+        return {
+            data: result.data || [],
+            error: result.error || null
+        };
+    }
+
+    async function clearEntriesForCheckin(checkinId) {
+        const [byDaily, byCheckin] = await Promise.all([
+            window.supabaseClient
+                .from("daily_checkin_entries")
+                .delete()
+                .eq("daily_checkin_id", checkinId),
+            window.supabaseClient
+                .from("daily_checkin_entries")
+                .delete()
+                .eq("checkin_id", checkinId)
+        ]);
+
+        const fatalErrors = [byDaily.error, byCheckin.error].filter((error) => error && !isMissingColumnError(error));
+        if (fatalErrors.length) {
+            console.warn("clear entries warning:", fatalErrors[0]);
+        }
     }
 
     async function loadCheckinForDate() {
@@ -670,19 +878,10 @@
                 }
             }
 
-            const deleteResult = await window.supabaseClient
-                .from("daily_checkin_entries")
-                .delete()
-                .eq("daily_checkin_id", checkinId);
-
-            if (deleteResult.error) {
-                await window.supabaseClient
-                    .from("daily_checkin_entries")
-                    .delete()
-                    .eq("checkin_id", checkinId);
-            }
+            await clearEntriesForCheckin(checkinId);
 
             const entries = payload.map((item) => ({
+                checkin_id: checkinId,
                 daily_checkin_id: checkinId,
                 goal_id: item.goal_id,
                 status: item.status,
@@ -698,7 +897,7 @@
                 insert = await window.supabaseClient
                     .from("daily_checkin_entries")
                     .insert(entries.map((item) => ({
-                        checkin_id: checkinId,
+                        daily_checkin_id: checkinId,
                         goal_id: item.goal_id,
                         status: item.status,
                         comment: item.comment,
@@ -939,15 +1138,15 @@
 
     async function init() {
         bindDateChange();
+        bindWeekCalendar();
         bindGoalInteractions();
         bindGoalNoteModal();
         bindActionSheet();
         bindStaticActions();
 
         const params = new URLSearchParams(window.location.search);
-        const qDate = params.get("date");
         const todayIso = formatISODate(new Date());
-        STATE.selectedDate = qDate && parseDate(qDate) ? qDate : todayIso;
+        STATE.selectedDate = todayIso;
 
         if (typeof window.getAccessState !== "function") {
             showToast("Auth state is not ready yet.");

@@ -99,7 +99,7 @@
                     <section class="checkin-greeting-section">
                         <div class="checkin-greeting-left">
                             <h1 class="checkin-greeting" id="checkinGreeting">Good morning 👋</h1>
-                            <p class="checkin-subtitle">Let's track your day. Small steps, big results.</p>
+                            <p class="checkin-subtitle">Track today, grow stronger.</p>
                         </div>
                         <button type="button" class="checkin-manage-goals-pill" id="manageGoalsBtn">
                             <i data-lucide="settings-2"></i>
@@ -217,6 +217,29 @@
             <button type="button" class="checkin-pill-btn" id="goalNoteCancelBtn">Cancel</button>
             <button type="button" class="checkin-secondary-btn" id="goalNoteSaveBtn">Save Note</button>
         </div>
+    </section>
+
+    <div class="checkin-week-calendar-backdrop checkin-hidden" id="checkinWeekCalendarBackdrop"></div>
+    <section class="checkin-week-calendar checkin-hidden" id="checkinWeekCalendar" aria-hidden="true" aria-labelledby="checkinWeekCalendarMonth">
+        <div class="checkin-week-calendar-head">
+            <button type="button" class="checkin-week-calendar-nav" id="checkinWeekCalendarPrev" aria-label="Previous month">
+                <i data-lucide="chevron-left"></i>
+            </button>
+            <h4 id="checkinWeekCalendarMonth">Month Year</h4>
+            <button type="button" class="checkin-week-calendar-nav" id="checkinWeekCalendarNext" aria-label="Next month">
+                <i data-lucide="chevron-right"></i>
+            </button>
+        </div>
+        <div class="checkin-week-calendar-weekdays" aria-hidden="true">
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+            <span>Sun</span>
+        </div>
+        <div class="checkin-week-calendar-grid" id="checkinWeekCalendarGrid"></div>
     </section>
 
     <div class="tyfit-toast" id="appToast" aria-live="polite"></div>

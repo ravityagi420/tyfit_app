@@ -922,14 +922,14 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     background: #FFFFFF;
     box-shadow: 0 14px 35px rgba(108, 99, 255, 0.08);
     padding: 20px;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
 }
 
 .summary-card-title {
     grid-column: 1 / -1;
-    margin: 0 0 2px;
-    font-size: 16px;
-    font-weight: 600;
+    margin: 0px;
+    font-size: 14px;
+    font-weight: 500;
     color: #242648;
     text-align: left;
 }
@@ -1785,7 +1785,7 @@ body[data-page="daily-checkin"] .checkin-goal-title-line {
 body[data-page="daily-checkin"] .checkin-goal-title-line h4 {
     margin: 0;
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 600;
     color: #17172F;
     line-height: 1.15;
     white-space: nowrap;
@@ -2107,7 +2107,7 @@ body[data-page="daily-checkin"] .checkin-subtitle {
 
 .checkin-manage-goals-pill {
     height: 36px;
-    border-radius: 999px;
+    border-radius: 500px;
     border: 1.5px solid rgba(108, 99, 255, 0.28);
     background: #FFFFFF;
     color: #4D45CD;
@@ -2163,15 +2163,14 @@ body[data-page="daily-checkin"] .checkin-week-nav-row {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 10px;
 }
 
 .checkin-week-pill {
     height: 32px;
     border-radius: 999px;
     border: 1px solid rgba(108, 99, 255, 0.22);
-    background: rgba(108, 99, 255, 0.06);
-    color: #4D45CD;
+    background: #fff;
+    color: #262445;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -2196,8 +2195,8 @@ body[data-page="daily-checkin"] .checkin-week-nav-row {
 }
 
 body[data-page="daily-checkin"] .checkin-selected-date {
-    margin: 0;
-    font-size: 11.5px;
+    margin: 0 5px;
+    font-size: 12px;
     font-weight: 600;
     color: #8A86B8;
     text-align: right;
@@ -2252,14 +2251,26 @@ body[data-page="daily-checkin"] .checkin-date-pill:not(.is-active):hover {
     transform: translateY(-1px);
 }
 
+body[data-page="daily-checkin"] .checkin-date-pill:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* ── 4. Goal Groups — hover + transition polish ──────────────── */
 body[data-page="daily-checkin"] .checkin-group-title {
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 18px;
+    font-weight: 600;
     letter-spacing: 0;
     text-transform: none;
     color: #17172F;
-    margin: 0 0 8px 2px;
+    margin: 5px 10px;
+}
+
+body[data-page="daily-checkin"] .checkin-group-title i,
+body[data-page="daily-checkin"] .checkin-group-title i svg {
+    color: rgba(108, 99, 255, 1);
+    stroke: rgba(108, 99, 255, 1);
 }
 
 body[data-page="daily-checkin"] .checkin-goal-list-card {
@@ -2349,5 +2360,156 @@ body[data-page="daily-checkin"] .summary-counts-section {
     body[data-page="daily-checkin"] .checkin-sticky-submit .checkin-secondary-btn {
         width: auto;
         min-width: 240px;
+    }
+}
+
+/* ── Week Calendar Picker ───────────────────────────────────── */
+body[data-page="daily-checkin"] .checkin-week-calendar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 14, 39, 0.34);
+    backdrop-filter: blur(4px);
+    z-index: 2250;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(92vw, 380px);
+    background: #FFFFFF;
+    border: 1px solid rgba(108, 99, 255, 0.18);
+    border-radius: 18px;
+    box-shadow: 0 28px 56px rgba(17, 24, 39, 0.16);
+    padding: 14px;
+    z-index: 2251;
+    display: grid;
+    gap: 10px;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-head h4 {
+    margin: 0;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #1D2144;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-nav {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid rgba(108, 99, 255, 0.22);
+    background: #FFFFFF;
+    color: #4D45CD;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-nav:hover {
+    background: rgba(108, 99, 255, 0.1);
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-nav i,
+body[data-page="daily-checkin"] .checkin-week-calendar-nav svg {
+    width: 16px;
+    height: 16px;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-weekdays span {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #8A8FA3;
+    text-transform: uppercase;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day {
+    min-height: 42px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: #FFFFFF;
+    color: #262445;
+    font-size: 12px;
+    font-weight: 700;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 2px;
+    transition: all 0.2s ease;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day:hover {
+    border-color: rgba(108, 99, 255, 0.26);
+    background: rgba(108, 99, 255, 0.05);
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day.is-outside {
+    color: #B7BAC9;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day.is-selected {
+    background: linear-gradient(135deg, #6C63FF 0%, #8B7CFF 100%);
+    color: #FFFFFF;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day.is-disabled {
+    opacity: 0.4;
+    color: #B7BAC9;
+    cursor: not-allowed;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day.is-disabled:hover {
+    border-color: transparent;
+    background: #FFFFFF;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #6C63FF;
+    display: block;
+}
+
+body[data-page="daily-checkin"] .checkin-week-calendar-day.is-selected .checkin-week-calendar-day-dot {
+    background: #FFFFFF;
+}
+
+@media (max-width: 767px) {
+    body[data-page="daily-checkin"] .checkin-week-calendar {
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        transform: translate(-50%, -50%);
+        width: min(92vw, 380px);
+        max-width: 380px;
+        border-radius: 18px;
+        padding-bottom: 14px;
+        max-height: calc(100dvh - 36px);
+        overflow: hidden;
     }
 }
