@@ -638,7 +638,7 @@ body[data-page="home"] #motivationCard {
 }
 
 .tyfit-hero-cta {
-    margin-top: 2px;
+    margin-top: 5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2717,146 +2717,218 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
     }
 }
 
-/* ── Profile Completion Card ────────────────────────────────── */
-.tyfit-profile-completion-card {
-    margin: 18px 0 26px;
-    padding: 16px 18px;
-    border-radius: 22px;
+/* ── Profile Completion Card (Premium Compact Ring) ─────────── */
+.tp-profile-completion-card {
+    margin: 10px 0;
+    padding: 12px 14px;
+    border-radius: 18px;
     border: 1px solid #E4DFFF;
     background: linear-gradient(135deg, #FFFFFF 0%, #FAF9FF 100%);
-    box-shadow: 0 10px 26px rgba(108, 99, 255, 0.08);
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    box-shadow: 0 10px 24px rgba(108, 99, 255, 0.08);
+    display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 12px;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.tyfit-profile-completion-card.is-warning {
+.tp-profile-completion-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(108, 99, 255, 0.12);
+}
+
+/* 0–40 %: danger (red) */
+.tp-profile-completion-card.is-danger {
     border-color: #F7D7D7;
     background: linear-gradient(135deg, #FFFFFF 0%, #FFF7F7 100%);
-    box-shadow: 0 10px 26px rgba(239, 68, 68, 0.07);
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.08);
 }
 
-.tyfit-profile-completion-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
+/* 41–70 %: warning (dark amber / yellow) */
+.tp-profile-completion-card.is-warning {
+    border-color: #FDE68A;
+    background: linear-gradient(135deg, #FFFFFF 0%, #FFFDF0 100%);
+    box-shadow: 0 10px 24px rgba(180, 83, 9, 0.08);
+}
+
+.tp-profile-completion-left {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tp-profile-completion-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
     background: #F0EDFF;
     color: #6C63FF;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-.tyfit-profile-completion-card.is-warning .tyfit-profile-completion-icon {
+.tp-profile-completion-card.is-danger .tp-profile-completion-icon {
     background: #FFF0F0;
     color: #EF4444;
 }
 
-.tyfit-profile-completion-icon svg {
-    width: 23px;
-    height: 23px;
-    stroke-width: 2.4;
+.tp-profile-completion-card.is-warning .tp-profile-completion-icon {
+    background: #FEF9E7;
+    color: #B45309;
 }
 
-.tyfit-profile-completion-copy h3 {
+.tp-profile-completion-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.3;
+}
+
+.tp-profile-completion-copy h3 {
     margin: 0;
-    font-size: 15.5px;
-    font-weight: 750;
+    font-size: 14.5px;
+    font-weight: 500;
     color: #111827;
     letter-spacing: -0.02em;
+    line-height: 1.1;
 }
 
-.tyfit-profile-completion-copy p {
-    margin: 4px 0 0;
-    font-size: 12.8px;
-    line-height: 1.35;
+.tp-profile-completion-copy p {
+    margin: 3px 0 0;
+    font-size: 10px;
+    line-height: 1.3;
     color: #667085;
-    font-weight: 500;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.tyfit-profile-completion-progress {
-    min-width: 142px;
+.tp-profile-completion-right {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
-.tyfit-profile-completion-track {
-    width: 84px;
-    height: 5px;
-    border-radius: 999px;
-    background: #ECEAFB;
-    overflow: hidden;
+.tp-profile-ring-wrap {
+    position: relative;
+    width: 54px;
+    height: 54px;
 }
 
-.tyfit-profile-completion-track span {
+.tp-progress-ring {
+    width: 54px;
+    height: 54px;
     display: block;
-    height: 100%;
-    width: 0%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #6C63FF 0%, #9B7CFF 100%);
-    transition: width 0.3s ease;
 }
 
-.tyfit-profile-completion-card.is-warning .tyfit-profile-completion-track {
-    background: #FBE8E8;
+.tp-progress-ring-bg {
+    fill: none;
+    stroke: #EAE7FB;
+    stroke-width: 4;
 }
 
-.tyfit-profile-completion-card.is-warning .tyfit-profile-completion-track span {
-    background: linear-gradient(90deg, #EF4444 0%, #FB7185 100%);
+.tp-progress-ring-progress {
+    fill: none;
+    stroke: #6C63FF;
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.25s ease;
 }
 
-.tyfit-profile-completion-progress strong {
-    min-width: 40px;
-    font-size: 18px;
-    font-weight: 800;
+.tp-profile-completion-card.is-danger .tp-progress-ring-bg {
+    stroke: #FBE8E8;
+}
+
+.tp-profile-completion-card.is-danger .tp-progress-ring-progress {
+    stroke: #EF4444;
+}
+
+.tp-profile-completion-card.is-warning .tp-progress-ring-bg {
+    stroke: #FDE68A;
+}
+
+.tp-profile-completion-card.is-warning .tp-progress-ring-progress {
+    stroke: #B45309;
+}
+
+#profileCompletionPercent {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 600;
     color: #111827;
-    text-align: right;
 }
 
-.tyfit-profile-completion-chevron {
-    width: 22px;
-    height: 22px;
+.tp-profile-chevron {
+    width: 20px;
+    height: 20px;
     color: #111827;
-    opacity: 0.85;
+    opacity: 0.82;
 }
 
-@media (max-width: 640px) {
-    .tyfit-profile-completion-card {
-        margin: 16px 0 24px;
-        padding: 14px 14px;
+@media (min-width: 640px) {
+    .tp-profile-completion-card {
+        margin: 18px 0 26px;
+        padding: 14px 16px;
         border-radius: 20px;
-        grid-template-columns: auto 1fr auto;
-        gap: 12px;
+        gap: 14px;
     }
 
-    .tyfit-profile-completion-icon {
+    .tp-profile-completion-icon {
         width: 44px;
         height: 44px;
-        border-radius: 15px;
     }
 
-    .tyfit-profile-completion-copy h3 {
-        font-size: 14.5px;
+    .tp-profile-completion-copy h3 {
+        font-size: 15px;
     }
 
-    .tyfit-profile-completion-copy p {
-        font-size: 12px;
+    .tp-profile-completion-copy p {
+        font-size: 12.5px;
     }
+}
 
-    .tyfit-profile-completion-progress {
-        min-width: 78px;
-        gap: 8px;
-    }
+/* ── Home hero card: today's check-in ring ──────────────────── */
+.tyfit-hero-ring-wrap {
+    position: relative;
+    flex-shrink: 0;
+    margin-left: auto;
+    z-index: 2;
+}
 
-    .tyfit-profile-completion-track {
-        display: none;
-    }
+.tyfit-hero-ring {
+    width: 104px;
+    height: 104px;
+    display: block;
+    filter: drop-shadow(0 6px 18px rgba(108, 99, 255, 0.22));
+}
 
-    .tyfit-profile-completion-progress strong {
-        font-size: 17px;
-        min-width: 42px;
+.tyfit-hero-ring text {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.tyfit-hero-ring-value {
+    font-size: 20px;
+    font-weight: 600;
+    fill: #1A1F36;
+}
+
+.tyfit-hero-ring-label {
+    font-size: 11px;
+    font-weight: 500;
+    fill: #5A5E73;
+}
+
+@media (max-width: 400px) {
+    .tyfit-hero-ring {
+        width: 86px;
+        height: 86px;
     }
 }

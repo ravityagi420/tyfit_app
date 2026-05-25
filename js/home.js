@@ -535,9 +535,9 @@ function calculateProfileCompletion(profile, userAbout) {
 
 async function renderProfileCompletionCard(userId) {
     const card = document.getElementById("profileCompletionCard");
-    const bar = document.getElementById("profileCompletionBar");
+    const ring = document.getElementById("profileCompletionRingProgress");
     const percent = document.getElementById("profileCompletionPercent");
-    if (!card || !bar || !percent) return;
+    if (!card || !ring || !percent) return;
 
     try {
         const [{ data: profile }, { data: userAbout }] = await Promise.all([
@@ -553,8 +553,13 @@ async function renderProfileCompletionCard(userId) {
         }
 
         card.hidden = false;
-        card.classList.toggle("is-warning", completion < 50);
-        bar.style.width = `${completion}%`;
+        card.classList.remove("is-danger", "is-warning");
+        if (completion <= 40) card.classList.add("is-danger");
+        else if (completion <= 70) card.classList.add("is-warning");
+        const clamped = Math.max(0, Math.min(100, completion));
+        const circumference = 2 * Math.PI * 22;
+        ring.style.strokeDasharray = `${circumference}`;
+        ring.style.strokeDashoffset = `${circumference * (1 - clamped / 100)}`;
         percent.textContent = `${completion}%`;
         card.onclick = () => { window.location.href = "profile_edit.html"; };
         if (window.lucide) window.lucide.createIcons();
@@ -591,9 +596,77 @@ async function hydrateNameFromProfile() {
         });
 
         renderProfileCompletionCard(user.id);
+        renderHeroCheckinRing(user.id);
     } catch (error) {
         console.warn("hydrateNameFromProfile warning:", error?.message || error);
         renderHome(homeData);
+    }
+}
+
+async function renderHeroCheckinRing(userId) {
+    const ring = document.getElementById("heroCheckinRingProgress");
+    const percentNode = document.getElementById("heroCheckinPercent");
+    if (!ring || !percentNode) return;
+
+    try {
+        const today = new Date().toISOString().slice(0, 10);
+
+        // Fetch today's checkin
+        const { data: checkin } = await window.supabaseClient
+            .from("daily_checkins")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("checkin_date", today)
+            .maybeSingle();
+
+        if (!checkin?.id) return; // No checkin logged today — ring stays empty
+
+        // Fetch all goals for denominator (no is_active filter — matches daily_checkin.js)
+        const { data: goals } = await window.supabaseClient
+            .from("checkin_goals")
+            .select("id")
+            .eq("user_id", userId);
+
+        const total = goals?.length || 0;
+        if (!total) return;
+
+        // Fetch entries — try both FK column names (DB schema may differ)
+        const [byCheckinId, byDailyCheckinId] = await Promise.all([
+            window.supabaseClient.from("daily_checkin_entries").select("status").eq("checkin_id", checkin.id),
+            window.supabaseClient.from("daily_checkin_entries").select("status").eq("daily_checkin_id", checkin.id)
+        ]);
+
+        const isMissingCol = (err) => {
+            const msg = String(err?.message || "").toLowerCase();
+            return (msg.includes("column") && msg.includes("does not exist")) || msg.includes("schema cache");
+        };
+
+        const allEntries = [
+            ...((byCheckinId.error && isMissingCol(byCheckinId.error)) ? [] : (byCheckinId.data || [])),
+            ...((byDailyCheckinId.error && isMissingCol(byDailyCheckinId.error)) ? [] : (byDailyCheckinId.data || []))
+        ];
+
+        let done = 0, partial = 0;
+        allEntries.forEach(e => {
+            if (e.status === "done") done++;
+            else if (e.status === "partial") partial++;
+        });
+
+        const adherence = Math.round(((done + partial * 0.5) / total) * 100);
+        const clamped = Math.max(0, Math.min(100, adherence));
+        const circumference = 2 * Math.PI * 40;
+        const progress = circumference * (clamped / 100);
+
+        ring.style.strokeDasharray = `${progress} ${circumference}`;
+
+        // Colour tiers: red 0-40, amber 41-70, purple 71+
+        if (clamped <= 40) ring.style.stroke = "#EF4444";
+        else if (clamped <= 70) ring.style.stroke = "#B45309";
+        else ring.style.stroke = "url(#heroCheckinRingGrad)";
+
+        percentNode.textContent = `${adherence}%`;
+    } catch (err) {
+        console.warn("renderHeroCheckinRing error:", err?.message || err);
     }
 }
 

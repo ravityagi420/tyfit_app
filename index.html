@@ -150,29 +150,52 @@
                                 <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/recovery-moon.svg" alt="" aria-hidden="true">Recovery</span>
                             </div>
 
-                            <a class="tyfit-hero-cta" href="training_plan.html">
-                                Continue Today &rarr;
+                            <a class="tyfit-hero-cta" href="daily_checkin.html">
+                                Log My Day &rarr;
                             </a>
+                        </div>
+
+                        <!-- Today's check-in ring -->
+                        <div class="tyfit-hero-ring-wrap" aria-hidden="true">
+                            <svg class="tyfit-hero-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="heroCheckinRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
+                                        <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="60" cy="60" r="40" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="10"/>
+                                <circle id="heroCheckinRingProgress" cx="60" cy="60" r="40" fill="none" stroke="url(#heroCheckinRingGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 251.33" transform="rotate(-90 60 60)"/>
+                                <text x="60" y="60" text-anchor="middle" dominant-baseline="central" class="tyfit-hero-ring-value" id="heroCheckinPercent">—</text>
+                            </svg>
                         </div>
                     </div>
                 </section>
 
                 <!-- Profile Completion Card -->
-                <section class="tyfit-profile-completion-card" id="profileCompletionCard" hidden>
-                    <div class="tyfit-profile-completion-icon">
-                        <i data-lucide="user-round-check"></i>
-                    </div>
-                    <div class="tyfit-profile-completion-copy">
-                        <h3>Complete Your Profile</h3>
-                        <p>Get more accurate recommendations</p>
-                    </div>
-                    <div class="tyfit-profile-completion-progress">
-                        <div class="tyfit-profile-completion-track">
-                            <span id="profileCompletionBar"></span>
+                <section class="tp-profile-completion-card" id="profileCompletionCard" hidden>
+                    <div class="tp-profile-completion-left">
+                        <div class="tp-profile-completion-icon">
+                            <i data-lucide="user-star"></i>
                         </div>
-                        <strong id="profileCompletionPercent">0%</strong>
+                        <div class="tp-profile-completion-copy">
+                            <h3>Complete Your Profile</h3>
+                            <p>Get more accurate recommendations</p>
+                        </div>
                     </div>
-                    <i class="tyfit-profile-completion-chevron" data-lucide="chevron-right"></i>
+
+                    <div class="tp-profile-completion-right">
+                        <div class="tp-profile-ring-wrap" aria-hidden="true">
+                            <svg class="tp-progress-ring" width="54" height="54" viewBox="0 0 54 54">
+                                <circle class="tp-progress-ring-bg" cx="27" cy="27" r="22"></circle>
+                                <circle class="tp-progress-ring-progress" id="profileCompletionRingProgress" cx="27" cy="27" r="22" transform="rotate(-90 27 27)"></circle>
+                            </svg>
+                            <span id="profileCompletionPercent">0%</span>
+                        </div>
+
+                        <i class="tp-profile-chevron" data-lucide="chevron-right"></i>
+                    </div>
                 </section>
 
                 <section class="tyfit-section">
