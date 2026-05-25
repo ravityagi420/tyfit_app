@@ -2722,9 +2722,9 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
     margin: 10px 0;
     padding: 12px 14px;
     border-radius: 18px;
-    border: 1px solid #E4DFFF;
-    background: linear-gradient(135deg, #FFFFFF 0%, #FAF9FF 100%);
-    box-shadow: 0 10px 24px rgba(108, 99, 255, 0.08);
+    border: 1px solid #D9F2E5;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F7FDF9 55%, #F2FBF6 100%);
+    box-shadow: 0 10px 24px rgba(34, 168, 97, 0.09);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2735,7 +2735,7 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
 
 .tp-profile-completion-card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 30px rgba(108, 99, 255, 0.12);
+    box-shadow: 0 14px 30px rgba(34, 168, 97, 0.14);
 }
 
 /* 0–40 %: danger (red) */
@@ -2763,8 +2763,8 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
     width: 42px;
     height: 42px;
     border-radius: 13px;
-    background: #F0EDFF;
-    color: #6C63FF;
+    background: #EAF8F1;
+    color: #22A861;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2828,13 +2828,13 @@ body[data-page="profile"] .tyfit-logout-card > span svg {
 
 .tp-progress-ring-bg {
     fill: none;
-    stroke: #EAE7FB;
+    stroke: #D9F2E5;
     stroke-width: 4;
 }
 
 .tp-progress-ring-progress {
     fill: none;
-    stroke: #6C63FF;
+    stroke: #22A861;
     stroke-width: 4;
     stroke-linecap: round;
     transition: stroke-dashoffset 0.25s ease;
