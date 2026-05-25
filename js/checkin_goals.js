@@ -4,7 +4,11 @@
         targetUserId: "",
         goals: [],
         editingGoalId: null,
-        users: []
+        pendingDeleteGoalId: null,
+        users: [],
+        currentFilter: "all",
+        swipeHandlersBound: false,
+        suppressCardClickUntil: 0
     };
 
     function el(id) {
@@ -46,10 +50,99 @@
 
     function categoryClass(category) {
         const key = String(category || "").toLowerCase();
-        if (key.includes("diet")) return "checkin-tag--diet";
-        if (key.includes("supplement")) return "checkin-tag--supplement";
-        if (key.includes("activity")) return "checkin-tag--activity";
-        return "checkin-tag--lifestyle";
+        if (key.includes("diet")) return "goal-label--diet";
+        return "goal-label--lifestyle";
+    }
+
+    function normalizeGoalCategory(category) {
+        const key = String(category || "").trim().toLowerCase();
+        return key === "diet" ? "Diet" : "Lifestyle";
+    }
+
+    const DIET_COLOR_CLASSES = [
+        "goal-icon--diet-1",
+        "goal-icon--diet-2",
+        "goal-icon--diet-3",
+        "goal-icon--diet-4",
+        "goal-icon--diet-5",
+        "goal-icon--diet-6",
+        "goal-icon--diet-7",
+        "goal-icon--diet-8"
+    ];
+
+    const LIFESTYLE_COLOR_CLASSES = [
+        "goal-icon--life-1",
+        "goal-icon--life-2",
+        "goal-icon--life-3",
+        "goal-icon--life-4",
+        "goal-icon--life-5",
+        "goal-icon--life-6",
+        "goal-icon--life-7",
+        "goal-icon--life-8"
+    ];
+
+    function hashText(text) {
+        const value = String(text || "");
+        let hash = 0;
+        for (let i = 0; i < value.length; i += 1) {
+            hash = ((hash << 5) - hash) + value.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+
+    function pickByHash(text, palette) {
+        if (!Array.isArray(palette) || !palette.length) return "goal-icon--purple";
+        const index = hashText(text) % palette.length;
+        return palette[index];
+    }
+
+    function getGoalIcon(goal) {
+        const name = String(goal.goal_name || "").toLowerCase();
+        const category = String(goal.goal_category || "").toLowerCase();
+
+        // Always honor these mappings first, regardless of category.
+        if (name.includes("water") || name.includes("hydrat")) return "droplet";
+        if (name.includes("supplement") || name.includes("supplements") || name.includes("pill") || name.includes("vitamin")) return "pill-bottle";
+
+        // Diet goal icons
+        if (category.includes("diet")) {
+            if (name.includes("protein")) return "cup-soda";
+
+            if (name.includes("snack")) return "cookie";
+            if (name.includes("dinner")) return "cooking-pot";
+            if (name.includes("lunch")) return "sandwich";
+            if (name.includes("breakfast")) return "croissant";
+            if (name.includes("salad") || name.includes("vegetable") || name.includes("veggie")) return "salad";
+            if (name.includes("pizza")) return "pizza";
+            if (name.includes("soup")) return "soup";
+
+            return "utensils";
+        }
+
+        // Lifestyle goal icons
+        if (category.includes("lifestyle")) {
+            if (name.includes("step") || name.includes("walk")) return "footprints";
+            if (name.includes("sleep")) return "heart-plus";
+            if (name.includes("meditat")) return "heart";
+            if (name.includes("yoga")) return "flower";
+            if (name.includes("workout") || name.includes("exercise") || name.includes("train")) return "activity";
+            return "target";
+        }
+
+        return "target";
+    }
+
+    function getGoalIconColor(goal) {
+        const category = String(goal.goal_category || "").toLowerCase();
+        const key = `${goal.goal_name || ""}|${goal.id || ""}`;
+
+        // Diet and Lifestyle both use fixed multi-color palettes.
+        if (category.includes("diet")) {
+            return pickByHash(key, DIET_COLOR_CLASSES);
+        }
+
+        return pickByHash(key, LIFESTYLE_COLOR_CLASSES);
     }
 
     function normalizeGoal(row) {
@@ -57,7 +150,7 @@
             id: row.id,
             user_id: row.user_id,
             goal_name: row.goal_name || row.name || "Untitled Goal",
-            goal_category: row.goal_category || row.category || "Lifestyle",
+            goal_category: normalizeGoalCategory(row.goal_category || row.category || "Lifestyle"),
             target_value: row.target_value ?? null,
             target_unit: row.target_unit || ""
         };
@@ -70,7 +163,13 @@
 
         if (!tableBody || !cardList || !panel) return;
 
-        if (!STATE.goals.length) {
+        // Filter goals
+        const filteredGoals = STATE.goals.filter(goal => {
+            if (STATE.currentFilter === "all") return true;
+            return String(goal.goal_category).toLowerCase() === String(STATE.currentFilter).toLowerCase();
+        });
+
+        if (!filteredGoals.length) {
             tableBody.innerHTML = "";
             cardList.innerHTML = "";
             panel.classList.add("checkin-hidden");
@@ -79,32 +178,44 @@
 
         panel.classList.remove("checkin-hidden");
 
-        tableBody.innerHTML = STATE.goals.map((goal) => {
+        // Desktop table
+        tableBody.innerHTML = filteredGoals.map((goal) => {
             return `<tr>
                 <td><strong>${escapeHtml(goal.goal_name)}</strong></td>
-                <td><span class="checkin-tag ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span></td>
+                <td><span class="goal-label ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span></td>
                 <td>${escapeHtml(targetText(goal))}</td>
                 <td>
-                    <div class="checkin-goal-actions">
-                        <button type="button" class="checkin-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
-                        <button type="button" class="checkin-icon-btn danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash2"></i></button>
+                    <div class="goal-actions">
+                        <button type="button" class="goal-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
+                        <button type="button" class="goal-icon-btn goal-icon-btn--danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash2"></i></button>
                     </div>
                 </td>
             </tr>`;
         }).join("");
 
-        cardList.innerHTML = STATE.goals.map((goal) => {
-            return `<article class="checkin-goal-card">
-                <div class="checkin-goal-meta">
-                    <span class="checkin-tag ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span>
-                    <div class="checkin-goal-actions">
-                        <button type="button" class="checkin-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
-                        <button type="button" class="checkin-icon-btn danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash2"></i></button>
-                    </div>
+        // Mobile cards
+        cardList.innerHTML = filteredGoals.map((goal) => {
+            const iconName = getGoalIcon(goal);
+            const iconColorClass = getGoalIconColor(goal);
+            return `<div class="goal-card-row" data-goal-id="${goal.id}">
+                <div class="goal-card-swipe-delete" aria-hidden="true">
+                    <i data-lucide="trash-2"></i>
+                    <span>Delete</span>
                 </div>
-                <h4>${escapeHtml(goal.goal_name)}</h4>
-                <p>${escapeHtml(goal.goal_category)} • ${escapeHtml(targetText(goal))}</p>
-            </article>`;
+                <article class="goal-card" data-goal-id="${goal.id}">
+                    <div class="goal-card-icon ${iconColorClass}">
+                        <i data-lucide="${iconName}"></i>
+                    </div>
+                    <div class="goal-card-content">
+                        <span class="goal-label ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span>
+                        <h4>${escapeHtml(goal.goal_name)}</h4>
+                        <p>${escapeHtml(goalCardSubtitle(goal))}</p>
+                    </div>
+                    <div class="goal-card-action">
+                        <i data-lucide="chevron-right"></i>
+                    </div>
+                </article>
+            </div>`;
         }).join("");
 
         refreshIcons();
@@ -125,40 +236,81 @@
         if (el("goalTypeInput")) el("goalTypeInput").value = "binary";
         el("goalTargetValueInput").value = "";
         el("goalTargetUnitInput").value = "";
-        if (el("goalTargetTextInput")) el("goalTargetTextInput").value = "";
-        if (el("goalGreenRuleInput")) el("goalGreenRuleInput").value = "";
-        if (el("goalYellowRuleInput")) el("goalYellowRuleInput").value = "";
-        if (el("goalRedRuleInput")) el("goalRedRuleInput").value = "";
         applyGoalCategoryRules("Diet");
     }
 
     function shouldHideTargetFields(category) {
-        void category;
-        return false;
+        // If Diet, hide all fields except Goal Name
+        return String(category || "").toLowerCase() === "diet";
     }
 
     function applyGoalCategoryRules(category) {
+        const isDiet = String(category || "").toLowerCase() === "diet";
+        const goalTypeField = el("goalTypeField");
         const targetValueField = el("goalTargetValueField");
         const targetUnitField = el("goalTargetUnitField");
-        const hideTargets = shouldHideTargetFields(category);
 
+        // Toggle visibility based on category
+        if (goalTypeField) {
+            goalTypeField.classList.toggle("checkin-hidden", isDiet);
+        }
         if (targetValueField) {
-            targetValueField.classList.toggle("checkin-hidden", hideTargets);
+            targetValueField.classList.toggle("checkin-hidden", isDiet);
         }
         if (targetUnitField) {
-            targetUnitField.classList.toggle("checkin-hidden", hideTargets);
+            targetUnitField.classList.toggle("checkin-hidden", isDiet);
         }
 
-        if (hideTargets) {
-            const targetValueInput = el("goalTargetValueInput");
-            const targetUnitInput = el("goalTargetUnitInput");
-            if (targetValueInput) {
-                targetValueInput.value = "";
-            }
-            if (targetUnitInput) {
-                targetUnitInput.value = "";
-            }
+        // If Diet, clear the fields
+        if (isDiet) {
+            if (el("goalTypeInput")) el("goalTypeInput").value = "binary";
+            el("goalTargetValueInput").value = "";
+            el("goalTargetUnitInput").value = "";
+        } else {
+            // For Lifestyle, apply Goal Type rules
+            applyGoalTypeRules();
         }
+    }
+
+    function applyGoalTypeRules() {
+        const goalTypeInput = el("goalTypeInput");
+        const targetValueField = el("goalTargetValueField");
+        const targetUnitField = el("goalTargetUnitField");
+
+        if (!goalTypeInput) return;
+
+        const isNumeric = goalTypeInput.value === "numeric";
+
+        // Show Target Value and Unit only for Numeric type
+        if (targetValueField) {
+            targetValueField.classList.toggle("checkin-hidden", !isNumeric);
+        }
+        if (targetUnitField) {
+            targetUnitField.classList.toggle("checkin-hidden", !isNumeric);
+        }
+
+        // Clear values if hiding
+        if (!isNumeric) {
+            el("goalTargetValueInput").value = "";
+            el("goalTargetUnitInput").value = "";
+        }
+    }
+
+    function inferLifestyleGoalType(goal) {
+        const hasTargetValue = goal.target_value !== null && goal.target_value !== undefined && String(goal.target_value).trim() !== "";
+        const hasTargetUnit = String(goal.target_unit || "").trim() !== "";
+        return hasTargetValue || hasTargetUnit ? "numeric" : "binary";
+    }
+
+    function goalCardSubtitle(goal) {
+        const category = normalizeGoalCategory(goal.goal_category);
+        if (category === "Diet") {
+            return "Diet Plan";
+        }
+        if (inferLifestyleGoalType(goal) === "binary") {
+            return "Yes/No";
+        }
+        return targetText(goal);
     }
 
     function openGoalModal(goal) {
@@ -169,14 +321,13 @@
         if (goal) {
             el("goalModalTitle").textContent = "Edit Goal";
             el("goalNameInput").value = goal.goal_name || "";
-            el("goalCategoryInput").value = goal.goal_category || "Lifestyle";
-            if (el("goalTypeInput")) el("goalTypeInput").value = "numeric";
+            const normalizedCategory = normalizeGoalCategory(goal.goal_category);
+            el("goalCategoryInput").value = normalizedCategory;
+            if (el("goalTypeInput")) {
+                el("goalTypeInput").value = normalizedCategory === "Lifestyle" ? inferLifestyleGoalType(goal) : "binary";
+            }
             el("goalTargetValueInput").value = goal.target_value ?? "";
             el("goalTargetUnitInput").value = goal.target_unit || "";
-            if (el("goalTargetTextInput")) el("goalTargetTextInput").value = "";
-            if (el("goalGreenRuleInput")) el("goalGreenRuleInput").value = "";
-            if (el("goalYellowRuleInput")) el("goalYellowRuleInput").value = "";
-            if (el("goalRedRuleInput")) el("goalRedRuleInput").value = "";
             applyGoalCategoryRules(el("goalCategoryInput").value);
         } else {
             el("goalModalTitle").textContent = "Add Goal";
@@ -193,6 +344,24 @@
         if (!modal) return;
         modal.classList.add("checkin-hidden");
         modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    function openDeleteGoalModal(goalId) {
+        const overlay = el("goalDeleteModalOverlay");
+        if (!overlay || !goalId) return;
+        STATE.pendingDeleteGoalId = goalId;
+        overlay.classList.remove("checkin-hidden");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeDeleteGoalModal() {
+        const overlay = el("goalDeleteModalOverlay");
+        if (!overlay) return;
+        overlay.classList.add("checkin-hidden");
+        overlay.setAttribute("aria-hidden", "true");
+        STATE.pendingDeleteGoalId = null;
         document.body.style.overflow = "";
     }
 
@@ -250,12 +419,13 @@
 
     function readGoalFormPayload() {
         const goalCategory = String(el("goalCategoryInput").value || "Lifestyle").trim();
-        const hideTargets = shouldHideTargetFields(goalCategory);
+        const isDiet = goalCategory.toLowerCase() === "diet";
+        
         return {
             goal_name: String(el("goalNameInput").value || "").trim(),
             goal_category: goalCategory,
-            target_value: hideTargets ? null : (el("goalTargetValueInput").value === "" ? null : Number(el("goalTargetValueInput").value)),
-            target_unit: hideTargets ? "" : String(el("goalTargetUnitInput").value || "").trim()
+            target_value: isDiet ? null : (el("goalTargetValueInput").value === "" ? null : Number(el("goalTargetValueInput").value)),
+            target_unit: isDiet ? "" : String(el("goalTargetUnitInput").value || "").trim()
         };
     }
 
@@ -312,8 +482,6 @@
 
     async function deleteGoal(goalId) {
         if (!goalId) return;
-        const ok = window.confirm("Delete this goal?");
-        if (!ok) return;
 
         const { error } = await window.supabaseClient
             .from("checkin_goals")
@@ -330,12 +498,172 @@
         await loadGoals();
     }
 
+    async function confirmDeleteGoal() {
+        if (!STATE.pendingDeleteGoalId) {
+            closeDeleteGoalModal();
+            return;
+        }
+        const goalId = STATE.pendingDeleteGoalId;
+        closeDeleteGoalModal();
+        await deleteGoal(goalId);
+    }
+
+    function setupGoalCardSwipeDelete() {
+        if (STATE.swipeHandlersBound) return;
+        if (!("ontouchstart" in window)) return;
+
+        STATE.swipeHandlersBound = true;
+
+        let activeCard = null;
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let isSwiping = false;
+
+        function resetCard(card) {
+            if (!card) return;
+            card.style.transform = "";
+            const row = card.closest(".goal-card-row");
+            if (row) {
+                row.classList.remove("is-swiping");
+                row.classList.remove("is-swipe-ready");
+            }
+        }
+
+        document.addEventListener("touchstart", (event) => {
+            if (!window.matchMedia("(max-width: 991px)").matches) return;
+
+            const card = event.target.closest(".goal-card");
+            if (!card) return;
+
+            activeCard = card;
+            startX = event.touches[0].clientX;
+            startY = event.touches[0].clientY;
+            currentX = startX;
+            isSwiping = false;
+            resetCard(activeCard);
+        }, { passive: true });
+
+        document.addEventListener("touchmove", (event) => {
+            if (!window.matchMedia("(max-width: 991px)").matches) return;
+            if (!activeCard) return;
+
+            currentX = event.touches[0].clientX;
+            const currentY = event.touches[0].clientY;
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+
+            if (Math.abs(deltaX) <= Math.abs(deltaY) || Math.abs(deltaX) < 18) {
+                return;
+            }
+
+            isSwiping = true;
+            const row = activeCard.closest(".goal-card-row");
+            if (!row) return;
+
+            const leftSwipe = Math.min(0, deltaX);
+            const clamped = Math.max(leftSwipe, -136);
+            activeCard.style.transform = `translateX(${clamped}px)`;
+            row.classList.add("is-swiping");
+            row.classList.toggle("is-swipe-ready", clamped <= -96);
+            event.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener("touchend", async () => {
+            if (!window.matchMedia("(max-width: 991px)").matches) {
+                activeCard = null;
+                isSwiping = false;
+                return;
+            }
+
+            if (!activeCard) return;
+
+            const card = activeCard;
+            const row = card.closest(".goal-card-row");
+            const deltaX = currentX - startX;
+            const shouldDelete = isSwiping && deltaX <= -96 && row;
+
+            resetCard(card);
+            activeCard = null;
+
+            if (!shouldDelete || !row) {
+                isSwiping = false;
+                return;
+            }
+
+            STATE.suppressCardClickUntil = Date.now() + 260;
+            const goalId = row.getAttribute("data-goal-id");
+            const goal = STATE.goals.find((item) => String(item.id) === String(goalId));
+            if (goal) {
+                openDeleteGoalModal(goal.id);
+            }
+
+            isSwiping = false;
+        });
+    }
+
+    function setupFilterDropdown() {
+        const filterBtn = el("goalFilterBtn");
+        const filterMenu = el("goalFilterMenu");
+        const filterOptions = document.querySelectorAll(".goal-filter-option");
+        const filterLabel = el("goalFilterLabel");
+
+        if (!filterBtn || !filterMenu) return;
+
+        filterBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isHidden = filterMenu.hasAttribute("hidden");
+            if (isHidden) {
+                filterMenu.removeAttribute("hidden");
+                filterBtn.setAttribute("aria-expanded", "true");
+            } else {
+                filterMenu.setAttribute("hidden", "");
+                filterBtn.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        filterOptions.forEach((option) => {
+            option.addEventListener("click", () => {
+                const filter = option.getAttribute("data-filter");
+                STATE.currentFilter = filter;
+
+                // Update UI
+                filterOptions.forEach((opt) => opt.classList.remove("active"));
+                option.classList.add("active");
+
+                const filterText = {
+                    "all": "All Goals",
+                    "diet": "Diet",
+                    "lifestyle": "Lifestyle"
+                };
+                filterLabel.textContent = filterText[filter] || "All Goals";
+
+                // Close menu
+                filterMenu.setAttribute("hidden", "");
+                filterBtn.setAttribute("aria-expanded", "false");
+
+                // Re-render goals
+                renderGoals();
+            });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!filterBtn.contains(e.target) && !filterMenu.contains(e.target)) {
+                filterMenu.setAttribute("hidden", "");
+                filterBtn.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+
     function bindEvents() {
-        ["addGoalBtn", "mobileAddGoalBtn"].forEach((id) => {
+        // Handle all add goal buttons
+        ["heroAddGoalBtn", "addGoalBtn", "mobileAddGoalBtn"].forEach((id) => {
             const node = el(id);
             if (node) node.addEventListener("click", () => openGoalModal(null));
         });
 
+        // Handle modal close
         ["goalModalClose", "goalModalCancelBtn"].forEach((id) => {
             const node = el(id);
             if (node) node.addEventListener("click", closeGoalModal);
@@ -345,6 +673,25 @@
         if (overlay) {
             overlay.addEventListener("click", (event) => {
                 if (event.target === overlay) closeGoalModal();
+            });
+        }
+
+        ["goalDeleteModalClose", "goalDeleteModalCancelBtn"].forEach((id) => {
+            const node = el(id);
+            if (node) node.addEventListener("click", closeDeleteGoalModal);
+        });
+
+        const deleteOverlay = el("goalDeleteModalOverlay");
+        if (deleteOverlay) {
+            deleteOverlay.addEventListener("click", (event) => {
+                if (event.target === deleteOverlay) closeDeleteGoalModal();
+            });
+        }
+
+        const confirmDeleteBtn = el("goalDeleteModalConfirmBtn");
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener("click", async () => {
+                await confirmDeleteGoal();
             });
         }
 
@@ -370,23 +717,48 @@
             });
         }
 
-        document.addEventListener("click", async (event) => {
-            const btn = event.target.closest("[data-goal-id][data-action]");
-            if (!btn) return;
-            const goalId = btn.getAttribute("data-goal-id");
-            const action = btn.getAttribute("data-action");
-            const goal = STATE.goals.find((item) => String(item.id) === String(goalId));
-            if (!goal) return;
+        const goalTypeInput = el("goalTypeInput");
+        if (goalTypeInput) {
+            goalTypeInput.addEventListener("change", applyGoalTypeRules);
+        }
 
-            if (action === "edit") {
-                openGoalModal(goal);
-                return;
+        // Handle goal card clicks for mobile and edit/delete buttons
+        document.addEventListener("click", async (event) => {
+            // Edit/delete buttons
+            const btn = event.target.closest("[data-goal-id][data-action]");
+            if (btn) {
+                const goalId = btn.getAttribute("data-goal-id");
+                const action = btn.getAttribute("data-action");
+                const goal = STATE.goals.find((item) => String(item.id) === String(goalId));
+                if (!goal) return;
+
+                if (action === "edit") {
+                    openGoalModal(goal);
+                    return;
+                }
+
+                if (action === "delete") {
+                    openDeleteGoalModal(goal.id);
+                }
             }
 
-            if (action === "delete") {
-                await deleteGoal(goal.id);
+            // Goal card click (mobile) - open edit modal
+            const card = event.target.closest(".goal-card");
+            if (card && !event.target.closest("[data-action]")) {
+                if (Date.now() < STATE.suppressCardClickUntil) {
+                    return;
+                }
+                const goalId = card.getAttribute("data-goal-id");
+                const goal = STATE.goals.find((item) => String(item.id) === String(goalId));
+                if (goal) {
+                    openGoalModal(goal);
+                }
             }
         });
+
+        // Setup filter dropdown
+        setupFilterDropdown();
+        setupGoalCardSwipeDelete();
     }
 
     async function init() {

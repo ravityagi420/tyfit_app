@@ -13,7 +13,8 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
-    <link href="css/checkin.css?v=20260525b" rel="stylesheet">
+    <link href="css/checkin.css?v=20260525s" rel="stylesheet">
+    <link href="css/goal-tracking.css?v=20260525x" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-goals">
     <header class="tyfit-mobile-topbar">
@@ -101,31 +102,43 @@
             </div>
 
             <div class="tyfit-main-inner">
-                <div class="checkin-shell">
-                    <section class="checkin-hero-card">
-                        <p class="checkin-eyebrow">GOAL TRACKING</p>
-                        <div class="checkin-title-row">
-                            <div>
-                                <h1 class="checkin-title">Daily Goals</h1>
-                                <p class="checkin-subtitle">Track habits, consistency and lifestyle adherence.</p>
-                            </div>
-                            <button type="button" class="checkin-secondary-btn" id="addGoalBtn"><i data-lucide="plus"></i> Add Goal</button>
-                        </div>
-                    </section>
+                <div class="goal-tracking-shell">
+                    <a href="daily_checkin.html" class="goal-back-btn" aria-label="Back to Daily Check-in">
+                        <i data-lucide="arrow-left"></i>
+                        <span>Back to Daily Check-in</span>
+                    </a>
 
-                    <section class="checkin-toolbar-card checkin-hidden" id="goalUserToolbar">
-                        <div class="checkin-user-select-wrap">
+                    <!-- Admin User Selector -->
+                    <section class="goal-toolbar-card checkin-hidden" id="goalUserToolbar">
+                        <div class="goal-user-select-wrap">
                             <label for="goalUserSelect">Select User</label>
-                            <div class="checkin-select-control">
+                            <div class="goal-select-control">
                                 <select id="goalUserSelect"></select>
                                 <i data-lucide="chevron-down"></i>
                             </div>
                         </div>
                     </section>
 
-                    <section class="checkin-panel checkin-hidden" id="goalPanel">
-                        <div class="checkin-goals-table-wrap" id="goalTableWrap">
-                            <table class="checkin-goals-table">
+                    <!-- Your Goals Section -->
+                    <section class="goal-panel checkin-hidden" id="goalPanel">
+                        <div class="goal-section-header">
+                            <h2 class="goal-section-title">Your Goals</h2>
+                            <div class="goal-filter-dropdown">
+                                <button type="button" class="goal-filter-btn" id="goalFilterBtn" aria-expanded="false">
+                                    <span id="goalFilterLabel">All Goals</span>
+                                    <i data-lucide="chevron-down"></i>
+                                </button>
+                                <div class="goal-filter-menu" id="goalFilterMenu" hidden>
+                                    <button type="button" class="goal-filter-option active" data-filter="all">All Goals</button>
+                                    <button type="button" class="goal-filter-option" data-filter="Diet">Diet</button>
+                                    <button type="button" class="goal-filter-option" data-filter="Lifestyle">Lifestyle</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Desktop Table (hidden on mobile) -->
+                        <div class="goal-table-wrap" id="goalTableWrap">
+                            <table class="goal-table">
                                 <thead>
                                     <tr>
                                         <th>Goal Name</th>
@@ -137,7 +150,9 @@
                                 <tbody id="goalTableBody"></tbody>
                             </table>
                         </div>
-                        <div class="checkin-mobile-goal-list" id="goalCardList"></div>
+
+                        <!-- Mobile Goal Cards List -->
+                        <div class="goal-cards-list" id="goalCardList"></div>
                     </section>
                 </div>
             </div>
@@ -152,7 +167,7 @@
         <a href="profile.html"><i data-lucide="user"></i><span>Profile</span></a>
     </nav>
 
-    <div class="checkin-floating-add"><button type="button" class="checkin-secondary-btn" id="mobileAddGoalBtn" aria-label="Add Goal"><i data-lucide="plus"></i></button></div>
+    <div class="goal-floating-add"><button type="button" class="goal-floating-btn" id="mobileAddGoalBtn" aria-label="Add Goal"><i data-lucide="plus"></i></button></div>
 
     <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
     <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
@@ -182,47 +197,43 @@
                     <label for="goalCategoryInput">Goal Category</label>
                     <select id="goalCategoryInput">
                         <option value="Diet">Diet</option>
-                        <option value="Activity">Activity</option>
-                        <option value="Supplement">Supplement</option>
                         <option value="Lifestyle">Lifestyle</option>
                     </select>
                 </div>
-                <div class="checkin-form-field">
+                <div class="checkin-form-field checkin-hidden" id="goalTypeField">
                     <label for="goalTypeInput">Goal Type</label>
                     <select id="goalTypeInput">
                         <option value="binary">Yes/No</option>
                         <option value="numeric">Numeric</option>
-                        <option value="habit">Habit</option>
                     </select>
                 </div>
-                <div class="checkin-form-field" id="goalTargetValueField">
+                <div class="checkin-form-field checkin-hidden" id="goalTargetValueField">
                     <label for="goalTargetValueInput">Target Value</label>
                     <input type="number" step="0.01" id="goalTargetValueInput" placeholder="e.g. 2.5">
                 </div>
-                <div class="checkin-form-field" id="goalTargetUnitField">
+                <div class="checkin-form-field checkin-hidden" id="goalTargetUnitField">
                     <label for="goalTargetUnitInput">Target Unit</label>
                     <input type="text" id="goalTargetUnitInput" placeholder="e.g. litres, steps">
-                </div>
-                <div class="checkin-form-field checkin-span-2">
-                    <label for="goalTargetTextInput">Target Text</label>
-                    <input type="text" id="goalTargetTextInput" placeholder="e.g. Take after breakfast">
-                </div>
-                <div class="checkin-form-field">
-                    <label for="goalGreenRuleInput">Green Rule</label>
-                    <input type="text" id="goalGreenRuleInput" placeholder="e.g. Completed in full">
-                </div>
-                <div class="checkin-form-field">
-                    <label for="goalYellowRuleInput">Yellow Rule</label>
-                    <input type="text" id="goalYellowRuleInput" placeholder="e.g. Completed partially">
-                </div>
-                <div class="checkin-form-field checkin-span-2">
-                    <label for="goalRedRuleInput">Red Rule</label>
-                    <input type="text" id="goalRedRuleInput" placeholder="e.g. Missed completely">
                 </div>
             </div>
             <div class="checkin-modal-actions">
                 <button type="button" class="checkin-pill-btn checkin-modal-cancel-btn" id="goalModalCancelBtn">Cancel</button>
                 <button type="button" class="checkin-secondary-btn checkin-modal-save-btn" id="goalModalSaveBtn"><i data-lucide="save"></i> Save Goal</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="checkin-modal-overlay checkin-hidden" id="goalDeleteModalOverlay" aria-hidden="true">
+        <section class="checkin-modal" role="dialog" aria-modal="true" aria-labelledby="goalDeleteModalTitle">
+            <div class="checkin-modal-head">
+                <div class="checkin-modal-title-wrap">
+                    <h3 id="goalDeleteModalTitle">Delete Goal?</h3>
+                </div>
+                <button type="button" class="checkin-icon-btn" id="goalDeleteModalClose" aria-label="Close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="checkin-modal-actions">
+                <button type="button" class="checkin-pill-btn checkin-modal-cancel-btn" id="goalDeleteModalCancelBtn">Cancel</button>
+                <button type="button" class="checkin-secondary-btn checkin-modal-save-btn" id="goalDeleteModalConfirmBtn"><i data-lucide="trash-2"></i> Delete</button>
             </div>
         </section>
     </div>
@@ -235,6 +246,6 @@
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/shell.js"></script>
-    <script src="js/checkin_goals.js?v=20260525a"></script>
+    <script src="js/checkin_goals.js?v=20260525z"></script>
 </body>
 </html>

@@ -1325,14 +1325,15 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     }
 
     body[data-page="checkin-goals"] .checkin-modal-overlay {
-        padding: 0;
-        align-items: flex-end;
+        padding: 14px;
+        align-items: center;
+        justify-content: center;
     }
 
     body[data-page="checkin-goals"] .checkin-modal {
-        width: 100%;
-        border-radius: 24px 24px 0 0;
-        max-height: 95dvh;
+        width: min(100%, 500px);
+        border-radius: 24px;
+        max-height: 90dvh;
     }
 }
 
@@ -1670,15 +1671,16 @@ body[data-page="daily-checkin"] {
     }
 
     body[data-page="checkin-goals"] .checkin-modal-overlay {
-        padding: 0;
-        align-items: flex-end;
+        padding: 14px;
+        align-items: center;
+        justify-content: center;
     }
 
     body[data-page="checkin-goals"] .checkin-modal {
-        width: 100%;
+        width: min(100%, 500px);
         max-width: none;
-        max-height: 95dvh;
-        border-radius: 24px 24px 0 0;
+        max-height: 90dvh;
+        border-radius: 24px;
     }
 }
 
