@@ -1186,7 +1186,7 @@ body[data-page="home"] #motivationCard {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 7px;
     padding: 14px;
     min-height: unset;
     border-radius: var(--tyfit-card-radius);
@@ -1283,6 +1283,20 @@ body[data-page="home"] #motivationCard {
     color: var(--tyfit-text);
     line-height: 1.35;
     word-break: break-word;
+}
+
+.tyfit-tool-card .tool-card-subtitle {
+    margin: -2px 0 0;
+    max-width: 100%;
+    color: #7B8498;
+    font-size: 10.5px;
+    line-height: 1.25;
+    font-weight: 500;
+    text-wrap: balance;
+}
+
+body[data-page="home"] .tyfit-tool-card .tool-card-subtitle {
+    display: block !important;
 }
 
 .tyfit-tool-card > [data-lucide="chevron-right"] {
@@ -2238,7 +2252,7 @@ body[data-page="home"] .tyfit-motivation-right {
     }
 
     .tyfit-tools-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
     }
 
@@ -2252,6 +2266,11 @@ body[data-page="home"] .tyfit-motivation-right {
         text-align: center;
         gap: 8px;
         min-height: unset;
+    }
+
+    .tyfit-tool-card .tool-card-subtitle {
+        font-size: 9.5px;
+        line-height: 1.2;
     }
 
     .tyfit-tool-card h5.tool-card-title {
@@ -2801,37 +2820,190 @@ body.tyfit-calc-modal-open {
 .tyfit-calc-modal-dialog {
     position: relative;
     z-index: 1;
-    width: min(100%, 520px);
-    border-radius: 24px;
+    width: min(100%, 560px);
+    max-height: min(760px, calc(100svh - 40px));
+    border-radius: 26px;
     border: 1px solid #e8ebf4;
     background: linear-gradient(180deg, #ffffff 0%, #f6f8ff 100%);
     box-shadow: 0 26px 60px rgba(15, 23, 42, 0.24);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .tyfit-calc-modal-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 36px 1fr 36px;
     align-items: center;
-    justify-content: space-between;
-    padding: 18px 18px 12px;
+    gap: 14px;
+    padding: 18px 18px 14px;
     border-bottom: 1px solid #edf0f8;
+    flex-shrink: 0;
 }
 
 .tyfit-calc-modal-header h4 {
     margin: 0;
     font-size: 18px;
     color: #1a1f36;
-    font-weight: 700;
+    font-weight: 500;
+    text-align: center;
+}
+
+.tyfit-calc-back-btn {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #4f5970;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    padding: 0;
+}
+
+.tyfit-calc-back-btn:hover {
+    box-shadow: none;
+    transform: none;
+    color: #2f3852;
 }
 
 .tyfit-calc-modal-body {
-    padding: 22px 22px 26px;
+    padding: 20px 22px 24px;
+    overflow: auto;
 }
 
 .tyfit-calc-modal-body p {
     margin: 0;
     font-size: 15px;
     color: #5b647b;
+}
+
+.tyfit-calc-intro {
+    display: grid;
+    gap: 7px;
+    margin-bottom: 16px;
+}
+
+.tyfit-calc-intro span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #F1EEFF;
+    color: #5B54E8;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.tyfit-calc-intro svg {
+    width: 13px;
+    height: 13px;
+}
+
+.tyfit-calc-form {
+    display: grid;
+    gap: 12px;
+}
+
+.tyfit-calc-field-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.tyfit-calc-form label {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.tyfit-calc-form label span {
+    color: #667085;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.tyfit-calc-form input,
+.tyfit-calc-form select {
+    width: 100%;
+    min-height: 46px;
+    border: 1px solid #E6EAF3;
+    border-radius: 14px;
+    background: #FFFFFF;
+    color: #17172F;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0 12px;
+    outline: none;
+}
+
+.tyfit-calc-form input:focus,
+.tyfit-calc-form select:focus {
+    border-color: rgba(108, 99, 255, 0.55);
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+}
+
+.tyfit-calc-result {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #17133D 0%, #3E2FB4 100%);
+    color: #FFFFFF;
+    box-shadow: 0 16px 32px rgba(63, 47, 180, 0.22);
+}
+
+.tyfit-calc-result-main {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tyfit-calc-result-main span {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.tyfit-calc-result-main strong {
+    color: #FFFFFF;
+    font-size: 32px;
+    line-height: 1;
+    font-weight: 800;
+    text-align: right;
+}
+
+.tyfit-calc-result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.tyfit-calc-result-grid span {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    padding: 10px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.tyfit-calc-result-grid strong {
+    color: #FFFFFF;
+    font-size: 16px;
+    line-height: 1.1;
 }
 
 @media (max-width: 767px) {
@@ -2845,6 +3017,7 @@ body.tyfit-calc-modal-open {
         width: 100%;
         max-width: none;
         height: 100svh;
+        max-height: none;
         border-radius: 0;
         border: 0;
         display: flex;
@@ -2854,10 +3027,34 @@ body.tyfit-calc-modal-open {
     .tyfit-calc-modal-header {
         padding: 16px;
         border-bottom: 1px solid #edf0f8;
+        grid-template-columns: 32px 1fr 32px;
+        gap: 10px;
     }
 
     .tyfit-calc-modal-body {
-        padding: 20px 16px;
+        padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
+        flex: 1;
+        overflow: auto;
+    }
+
+    .tyfit-calc-field-row {
+        gap: 9px;
+    }
+
+    .tyfit-calc-form input,
+    .tyfit-calc-form select {
+        min-height: 48px;
+        font-size: 16px;
+    }
+
+    .tyfit-calc-result-main {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .tyfit-calc-result-main strong {
+        text-align: left;
+        font-size: 30px;
     }
 }
 
@@ -3795,8 +3992,9 @@ body[data-page="home"] .tyfit-journey-meta-grid strong {
 
 /* Home onboarding hero matched to the mountain focus design. */
 body[data-page="home"] .tyfit-journey-home-card.is-onboarding {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: center;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
     min-height: 292px;
     padding: 26px 28px;
     border-radius: 26px;
@@ -3869,7 +4067,7 @@ body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-journey-hom
     color: #4B5563;
     font-size: clamp(22px, 7vw, 30px);
     line-height: 0.98;
-    font-weight: 650;
+    font-weight: 600;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     white-space: nowrap;
     overflow-wrap: normal;

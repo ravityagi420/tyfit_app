@@ -6,12 +6,12 @@ const homeData = {
     motivationText: "Stay consistent today,\nthank yourself tomorrow.",
     notifications: [],
     tools: [
-        { title: "Diet Chart", subtitle: "View your diet and nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
-        { title: "Training Plan", subtitle: "Your workout made simple", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
-        { title: "Journey", subtitle: "View your mountain progress", href: "journey.html", icon: "mountain", colorClass: "icon-food" },
-        { title: "BMR Calculator", subtitle: "Calculate your daily BMR", href: "#", icon: "calculator", colorClass: "icon-bmr", comingSoon: true },
-        { title: "Macro Calculator", subtitle: "Track your macros easily", href: "#", icon: "pie-chart", colorClass: "icon-macro", comingSoon: true },
-        { title: "Calorie Calculator", subtitle: "Count your calories", href: "#", icon: "flame", colorClass: "icon-calorie", comingSoon: true }
+        { title: "Diet Chart", subtitle: "Track nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
+        { title: "Training Plan", subtitle: "Custom workouts", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
+        { title: "Journey", subtitle: "Your progress", href: "journey.html", icon: "mountain", colorClass: "icon-food" },
+        { title: "BMR Calculator", subtitle: "Know your BMR", href: "#", icon: "calculator", colorClass: "icon-bmr", calculator: "bmr" },
+        { title: "Macro Calculator", subtitle: "Plan macros", href: "#", icon: "pie-chart", colorClass: "icon-macro", calculator: "macro" },
+        { title: "Goal Calculator", subtitle: "Set your goal", href: "#", icon: "target", colorClass: "icon-reminder", calculator: "goal" }
     ]
 };
 
@@ -85,7 +85,6 @@ if (document.body) {
 
 let quickAccessExpanded = false;
 let isHomeUserLoggedIn = false;
-let activeCalculatorName = "BMR Calculator";
 
 function showToast(message) {
     const toast = byId("appToast");
@@ -152,7 +151,7 @@ function renderHome(data) {
             const href = isComingSoon ? "#" : (tool.appendToday ? `${tool.href}?date=${today}` : tool.href);
             const dataAttrs = isComingSoon
                 ? ' data-coming-soon="true"'
-                : (href === "#" ? ` data-calculator="${tool.title}"` : "");
+                : (tool.calculator ? ` data-calculator="${tool.calculator}" data-calculator-title="${tool.title}"` : (href === "#" ? ` data-calculator="${tool.title}"` : ""));
             const cardClass = isComingSoon ? "tyfit-tool-card tyfit-tool-card--coming-soon" : "tyfit-tool-card";
             const badge = isComingSoon ? '<span class="tyfit-coming-soon-label">Coming Soon</span>' : "";
             return `
@@ -182,7 +181,7 @@ function renderJourneyOnboarding() {
     hero.innerHTML = `
         <div class="tyfit-journey-home-copy">
             <span class="tyfit-hero-badge"><i data-lucide="sparkles"></i>Today's Focus</span>
-            <h4 class="tyfit-journey-home-title">Small habits.<span>Big transformation.</span></h4>
+            <h4 class="tyfit-journey-home-title">Small Habits<span>Big Transformation.</span></h4>
             <div class="tyfit-hero-chips" aria-label="Today's focus goals">
                 <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/nutrition-leaf.svg" alt="" aria-hidden="true">Nutrition</span>
                 <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/training-dumbbell.svg" alt="" aria-hidden="true">Training</span>
@@ -190,7 +189,6 @@ function renderJourneyOnboarding() {
             </div>
             <div class="tyfit-journey-home-actions">
                 <a class="tyfit-hero-cta" href="daily_checkin.html">Log My Day <i data-lucide="arrow-right" aria-hidden="true"></i></a>
-                <span class="tyfit-journey-reassurance"><i data-lucide="clock-3" aria-hidden="true"></i>It only takes 1 minute</span>
             </div>
         </div>
     `;
@@ -297,28 +295,414 @@ function applySidebarTooltipData() {
     });
 }
 
-function openCalculatorComingSoon(name) {
-    const modal = byId("calculatorComingSoonModal");
-    const textEl = byId("calculatorComingSoonText");
-    const titleEl = byId("calculatorComingSoonTitle");
-    if (!modal) return;
+const homeCalculatorState = {
+    active: "bmr",
+    returnTo: "",
+    macroDiet: "balanced",
+    macroValues: {
+        calories: "2300",
+        protein: "30",
+        carbs: "40",
+        fats: "30"
+    },
+    goalValues: {
+        currentWeight: "61",
+        targetWeight: "55",
+        weeks: "12",
+        tdee: "2346",
+        gender: "male"
+    }
+};
 
-    activeCalculatorName = name || "Calculator";
-    if (textEl) textEl.textContent = activeCalculatorName;
-    if (titleEl) titleEl.textContent = activeCalculatorName;
+function calculatorTitle(type) {
+    if (type === "macro") return "Macro Calculator";
+    if (type === "goal") return "Goal Calculator";
+    return "BMR Calculator";
+}
 
+function setCalculatorError(field, message) {
+    const row = document.querySelector(`#calculatorModal [data-field="${field}"]`);
+    if (!row) return;
+    const error = row.querySelector(".calc-error");
+    row.classList.toggle("is-invalid", Boolean(message));
+    if (error) error.textContent = message || "";
+}
+
+function clearCalculatorErrors(fields) {
+    fields.forEach((field) => setCalculatorError(field, ""));
+}
+
+function openCalculatorModal(type, options = {}) {
+    const modal = byId("calculatorModal");
+    const title = byId("calculatorModalTitle");
+    const backBtn = byId("calculatorBackBtn");
+    if (!modal || !window.TyfitCalculators) return;
+    homeCalculatorState.active = type || "bmr";
+    homeCalculatorState.returnTo = options.returnTo || "";
+    if (title) title.textContent = calculatorTitle(homeCalculatorState.active);
+    if (backBtn) {
+        backBtn.hidden = !window.matchMedia("(max-width: 767px)").matches;
+    }
     modal.hidden = false;
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("tyfit-calc-modal-open");
-    setTimeout(refreshIcons, 0);
+    renderCalculatorModal();
 }
 
-function closeCalculatorComingSoon() {
-    const modal = byId("calculatorComingSoonModal");
+function closeCalculatorModal() {
+    const modal = byId("calculatorModal");
+    const backBtn = byId("calculatorBackBtn");
     if (!modal) return;
     modal.hidden = true;
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("tyfit-calc-modal-open");
+    if (backBtn) backBtn.hidden = true;
+    homeCalculatorState.returnTo = "";
+}
+
+function calculatorField({ field, icon, label, hint, control }) {
+    return `
+        <label class="calc-field-row" data-field="${field}">
+            <span class="calc-icon-tile"><i data-lucide="${icon}"></i></span>
+            <span class="calc-field-label"><strong>${label}</strong></span>
+            ${control}
+            <small class="calc-error"></small>
+        </label>
+    `;
+}
+
+function bmrMarkup() {
+    return `
+        <form id="homeBmrForm" novalidate>
+            <section class="calc-card calc-input-card">
+                ${calculatorField({ field: "activity", icon: "activity", label: "Activity Level", hint: "Training frequency", control: '<select name="activity"><option value="1.2">Sedentary</option><option value="1.375">Light Exercise</option><option value="1.55" selected>Moderate Exercise</option><option value="1.725">Heavy Exercise</option><option value="1.9">Athlete / Very Active</option></select>' })}
+                ${calculatorField({ field: "gender", icon: "user", label: "Gender", hint: "Formula adjustment", control: '<select name="gender"><option value="male" selected>Male</option><option value="female">Female</option></select>' })}
+                ${calculatorField({ field: "age", icon: "calendar-days", label: "Age", hint: "10–100 years", control: '<span class="calc-control"><input name="age" type="number" inputmode="numeric" min="10" max="100" value="34"><em class="calc-control-unit">years</em></span>' })}
+                ${calculatorField({ field: "weight", icon: "scale", label: "Weight", hint: "Kilograms", control: '<span class="calc-control"><input name="weight" type="number" inputmode="decimal" min="25" max="300" step="0.1" value="61"><em class="calc-control-unit">kg</em></span>' })}
+                ${calculatorField({ field: "height", icon: "ruler", label: "Height", hint: "Centimeters", control: '<span class="calc-control"><input name="height" type="number" inputmode="decimal" min="90" max="250" step="0.1" value="167"><em class="calc-control-unit">cm</em></span>' })}
+                ${calculatorField({ field: "bodyFat", icon: "percent", label: "Body Fat Percentage", hint: "Optional", control: '<input name="bodyFat" type="number" inputmode="decimal" min="3" max="70" step="0.1" placeholder="Optional">' })}
+            </section>
+        </form>
+        <div class="tyfit-calc-modal-actions"><button class="calc-primary-btn" type="button" id="homeCalculateBmrBtn">Calculate My Calories <i data-lucide="arrow-right"></i></button></div>
+    `;
+}
+
+function bmrValues() {
+    const data = new FormData(byId("homeBmrForm"));
+    const bodyFatRaw = String(data.get("bodyFat") || "").trim();
+    return {
+        activityMultiplier: Number(data.get("activity")),
+        gender: String(data.get("gender") || "male"),
+        age: Number(data.get("age")),
+        weightKg: Number(data.get("weight")),
+        heightCm: Number(data.get("height")),
+        bodyFatPercent: bodyFatRaw === "" ? "" : Number(bodyFatRaw)
+    };
+}
+
+function validateBmrInput(input) {
+    let valid = true;
+    clearCalculatorErrors(["age", "weight", "height", "bodyFat"]);
+    const calc = window.TyfitCalculators;
+    if (!calc.inRange(input.age, 10, 100)) {
+        setCalculatorError("age", "Age must be between 10 and 100.");
+        valid = false;
+    }
+    if (!calc.inRange(input.weightKg, 25, 300)) {
+        setCalculatorError("weight", "Weight must be between 25 and 300 kg.");
+        valid = false;
+    }
+    if (!calc.inRange(input.heightCm, 90, 250)) {
+        setCalculatorError("height", "Height must be between 90 and 250 cm.");
+        valid = false;
+    }
+    if (input.bodyFatPercent !== "" && !calc.inRange(input.bodyFatPercent, 3, 70)) {
+        setCalculatorError("bodyFat", "Body fat must be between 3% and 70%.");
+        valid = false;
+    }
+    return valid;
+}
+
+function calculateHomeBmr() {
+    const calc = window.TyfitCalculators;
+    const input = bmrValues();
+    if (!validateBmrInput(input)) return;
+    const bmr = calc.calculateBmr(input);
+    const tdee = calc.calculateTdee(bmr, input.activityMultiplier);
+
+    if (homeCalculatorState.returnTo === "macro") {
+        homeCalculatorState.macroValues.calories = String(tdee);
+        homeCalculatorState.returnTo = "";
+        openCalculatorModal("macro");
+        showToast("TDEE imported from BMR");
+        return;
+    }
+    if (homeCalculatorState.returnTo === "goal") {
+        homeCalculatorState.goalValues.tdee = String(tdee);
+        homeCalculatorState.returnTo = "";
+        openCalculatorModal("goal");
+        showToast("TDEE imported from BMR");
+        return;
+    }
+
+    byId("calculatorModalBody").innerHTML = `
+        <div class="calc-result-ring"><div><strong>${tdee}</strong><span>kcal/day</span></div></div>
+        <p class="calc-result-subtitle">Your Total Daily Energy Expenditure (TDEE)</p>
+        <div class="calc-result-grid">
+            <article class="calc-result-card"><span>Basal Metabolic Rate (BMR)</span><strong>${bmr}</strong></article>
+            <article class="calc-result-card"><span>Total Daily Energy Expenditure (TDEE)</span><strong>${tdee}</strong></article>
+        </div>
+        <div class="calc-action-grid">
+            <button class="calc-secondary-btn" type="button" data-open-calculator="macro">Macro Calculator</button>
+            <button class="calc-secondary-btn" type="button" data-open-calculator="goal">Goal Calculator</button>
+            <a class="calc-primary-btn" href="portal/diet_chart.html">Create Diet Plan</a>
+        </div>
+    `;
+    byId("calculatorModalTitle").textContent = "Your result";
+    window.TyfitCalculators.refreshIcons();
+}
+
+function macroMarkup() {
+    return `
+        <section class="calc-card macro-ring-card">
+            <div class="macro-ring" id="homeMacroRing"><div class="macro-ring-center"><div><strong id="homeMacroCaloriesValue">${homeCalculatorState.macroValues.calories}</strong><span>kcal<br>Total Calories</span></div></div></div>
+        </section>
+        <form id="homeMacroForm" novalidate>
+            <section class="calc-card" style="padding:16px;">
+                <div class="macro-input-row" data-field="calories">
+                    <label for="homeMacroCalories">Calories</label>
+                    <input id="homeMacroCalories" name="calories" type="number" inputmode="numeric" min="800" max="6000" value="${homeCalculatorState.macroValues.calories}">
+                    <small class="calc-error"></small>
+                    <button class="calc-inline-link" type="button" id="homeUnknownCaloriesBtn">Don’t know your total calories?</button>
+                </div>
+                <div class="diet-grid" id="homeDietGrid"></div>
+                <div class="custom-ratio-grid" id="homeCustomRatioGrid" hidden>
+                    <label>Protein %<input name="protein" type="number" inputmode="numeric" value="${homeCalculatorState.macroValues.protein}"></label>
+                    <label>Carbs %<input name="carbs" type="number" inputmode="numeric" value="${homeCalculatorState.macroValues.carbs}"></label>
+                    <label>Fats %<input name="fats" type="number" inputmode="numeric" value="${homeCalculatorState.macroValues.fats}"></label>
+                </div>
+            </section>
+        </form>
+        <section class="macro-card-grid" id="homeMacroCards"></section>
+        <div class="tyfit-calc-modal-actions"><button class="calc-primary-btn" type="button" id="homeApplyMacrosBtn">Apply &amp; See Results</button></div>
+    `;
+}
+
+function macroRatio() {
+    const calc = window.TyfitCalculators;
+    if (homeCalculatorState.macroDiet !== "custom") return calc.DIET_TYPES[homeCalculatorState.macroDiet];
+    const data = new FormData(byId("homeMacroForm"));
+    return {
+        label: "Custom",
+        protein: Number(data.get("protein")),
+        carbs: Number(data.get("carbs")),
+        fats: Number(data.get("fats"))
+    };
+}
+
+function macroCard(label, grams, percent, kcal, color) {
+    return `<article class="macro-card"><div class="macro-card-head"><span>${label}</span><strong>${grams}g</strong></div><span>${percent}% · ${kcal} kcal</span><div class="macro-progress"><i style="width:${percent}%;background:${color};"></i></div></article>`;
+}
+
+function renderHomeDietOptions() {
+    const calc = window.TyfitCalculators;
+    byId("homeDietGrid").innerHTML = Object.entries(calc.DIET_TYPES).map(([key, item]) => `
+        <button class="diet-option ${key === homeCalculatorState.macroDiet ? "is-active" : ""}" type="button" data-diet="${key}">
+            <strong>${item.label}</strong>
+            <span>${item.protein}:${item.carbs}:${item.fats} Protein:Carbs:Fats</span>
+        </button>
+    `).join("");
+    byId("homeCustomRatioGrid").hidden = homeCalculatorState.macroDiet !== "custom";
+}
+
+function updateMacroState() {
+    const form = byId("homeMacroForm");
+    if (!form) return;
+    const data = new FormData(form);
+    homeCalculatorState.macroValues.calories = String(data.get("calories") || "");
+    homeCalculatorState.macroValues.protein = String(data.get("protein") || "30");
+    homeCalculatorState.macroValues.carbs = String(data.get("carbs") || "40");
+    homeCalculatorState.macroValues.fats = String(data.get("fats") || "30");
+}
+
+function renderHomeMacros() {
+    updateMacroState();
+    const calc = window.TyfitCalculators;
+    const total = Number(homeCalculatorState.macroValues.calories);
+    const ratio = macroRatio();
+    const macro = calc.calculateMacros(calc.inRange(total, 800, 6000) ? total : 0, ratio);
+    const p = macro.ratio.protein;
+    const c = macro.ratio.carbs;
+    const f = macro.ratio.fats;
+    byId("homeMacroCaloriesValue").textContent = calc.inRange(total, 800, 6000) ? String(Math.round(total)) : "0";
+    byId("homeMacroRing").style.background = calc.inRange(total, 800, 6000)
+        ? `conic-gradient(#F85F7A 0 ${p}%, #22C55E ${p}% ${p + c}%, #F59E0B ${p + c}% ${p + c + f}%, #E9EAF2 ${p + c + f}% 100%)`
+        : "conic-gradient(#E9EAF2 0 100%)";
+    byId("homeMacroCards").innerHTML = [
+        macroCard("Protein", macro.proteinGrams, p, macro.proteinCalories, "#F85F7A"),
+        macroCard("Carbs", macro.carbGrams, c, macro.carbCalories, "#22C55E"),
+        macroCard("Fats", macro.fatGrams, f, macro.fatCalories, "#F59E0B")
+    ].join("");
+}
+
+function validateHomeMacros() {
+    const calc = window.TyfitCalculators;
+    const row = document.querySelector("#calculatorModal [data-field='calories']");
+    const error = row?.querySelector(".calc-error");
+    row?.classList.remove("is-invalid");
+    if (error) error.textContent = "";
+    const total = Number(homeCalculatorState.macroValues.calories);
+    const ratio = macroRatio();
+    if (!calc.inRange(total, 800, 6000)) {
+        row?.classList.add("is-invalid");
+        if (error) error.textContent = "Calories must be between 800 and 6000.";
+        return false;
+    }
+    if (homeCalculatorState.macroDiet === "custom" && Math.round(ratio.protein + ratio.carbs + ratio.fats) !== 100) {
+        row?.classList.add("is-invalid");
+        if (error) error.textContent = "Custom protein, carbs, and fats must total 100%.";
+        return false;
+    }
+    return true;
+}
+
+function goalMarkup() {
+    return `
+        <form id="homeGoalForm" novalidate>
+            <section class="calc-card calc-input-card">
+                ${calculatorField({ field: "currentWeight", icon: "scale", label: "Current Body Weight", hint: "Kilograms", control: `<input name="currentWeight" type="number" inputmode="decimal" min="25" max="300" step="0.1" value="${homeCalculatorState.goalValues.currentWeight}">` })}
+                ${calculatorField({ field: "targetWeight", icon: "target", label: "Target Body Weight", hint: "Kilograms", control: `<input name="targetWeight" type="number" inputmode="decimal" min="25" max="300" step="0.1" value="${homeCalculatorState.goalValues.targetWeight}">` })}
+                ${calculatorField({ field: "weeks", icon: "calendar-range", label: "Time to Reach Goal", hint: "Weeks", control: `<input name="weeks" type="number" inputmode="numeric" min="1" max="104" value="${homeCalculatorState.goalValues.weeks}">` })}
+                ${calculatorField({ field: "tdee", icon: "flame", label: "TDEE", hint: "kcal/day", control: `<input name="tdee" type="number" inputmode="numeric" min="800" max="6000" value="${homeCalculatorState.goalValues.tdee}">` })}
+                ${calculatorField({ field: "gender", icon: "user", label: "Gender", hint: "Low-calorie warning", control: `<select name="gender"><option value="male" ${homeCalculatorState.goalValues.gender === "male" ? "selected" : ""}>Male</option><option value="female" ${homeCalculatorState.goalValues.gender === "female" ? "selected" : ""}>Female</option></select>` })}
+            </section>
+        </form>
+        <section class="calc-helper-card"><p>Don’t know your TDEE?</p><button type="button" class="calc-link-btn" id="homeUnknownTdeeBtn">Calculate BMR</button></section>
+        <div class="tyfit-calc-modal-actions"><button class="calc-primary-btn" type="button" id="homeCalculateGoalBtn">Calculate My Goal <i data-lucide="arrow-right"></i></button></div>
+    `;
+}
+
+function goalValues() {
+    const data = new FormData(byId("homeGoalForm"));
+    return {
+        currentWeight: Number(data.get("currentWeight")),
+        targetWeight: Number(data.get("targetWeight")),
+        weeks: Number(data.get("weeks")),
+        tdee: Number(data.get("tdee")),
+        gender: String(data.get("gender") || "male")
+    };
+}
+
+function updateGoalState() {
+    const values = goalValues();
+    Object.assign(homeCalculatorState.goalValues, {
+        currentWeight: String(values.currentWeight || ""),
+        targetWeight: String(values.targetWeight || ""),
+        weeks: String(values.weeks || ""),
+        tdee: String(values.tdee || ""),
+        gender: values.gender
+    });
+}
+
+function validateHomeGoal(values) {
+    const calc = window.TyfitCalculators;
+    let valid = true;
+    clearCalculatorErrors(["currentWeight", "targetWeight", "weeks", "tdee"]);
+    if (!calc.inRange(values.currentWeight, 25, 300)) {
+        setCalculatorError("currentWeight", "Current weight must be between 25 and 300 kg.");
+        valid = false;
+    }
+    if (!calc.inRange(values.targetWeight, 25, 300)) {
+        setCalculatorError("targetWeight", "Target weight must be between 25 and 300 kg.");
+        valid = false;
+    }
+    if (values.targetWeight === values.currentWeight) {
+        setCalculatorError("targetWeight", "Target weight should be different.");
+        valid = false;
+    }
+    if (!calc.inRange(values.weeks, 1, 104)) {
+        setCalculatorError("weeks", "Timeline must be between 1 and 104 weeks.");
+        valid = false;
+    }
+    if (!calc.inRange(values.tdee, 800, 6000)) {
+        setCalculatorError("tdee", "TDEE must be between 800 and 6000 kcal.");
+        valid = false;
+    }
+    return valid;
+}
+
+function renderGoalResult() {
+    updateGoalState();
+    const calc = window.TyfitCalculators;
+    const input = goalValues();
+    if (!validateHomeGoal(input)) return;
+    const result = calc.calculateGoal(input);
+    byId("calculatorModalTitle").textContent = "Goal Result";
+    byId("calculatorModalBody").innerHTML = `
+        <div class="calc-result-card" style="background:linear-gradient(135deg,#6C63FF,#8B7CFF);color:#fff;border:0;">
+            <span style="color:rgba(255,255,255,.78);">Your Target Calories</span>
+            <strong style="color:#fff;font-size:38px;">${result.targetCalories}</strong>
+            <span style="color:rgba(255,255,255,.78);">kcal per day</span>
+        </div>
+        <p class="goal-pill">${result.dailyChange} kcal ${result.type}</p>
+        <section class="safety-meter"><div class="safety-track"><i class="safety-pointer" style="left:${Math.min(100, (result.dailyChange / 1000) * 100)}%;"></i></div><div class="safety-labels"><span>0</span><span>250</span><span>500</span><span>750</span><span>1000</span></div></section>
+        <article class="calc-helper-card" style="align-items:flex-start;display:grid;"><p>${result.status}</p><span style="color:#667085;font-size:13px;line-height:1.45;">${result.message}</span></article>
+        <section class="goal-timeline"><span><strong>${input.currentWeight}kg</strong>Now</span><span><strong>${result.halfwayWeight}kg</strong>Week ${Math.round(input.weeks / 2)}</span><span><strong>${input.targetWeight}kg</strong>Week ${input.weeks} · Goal</span></section>
+        ${result.dailyChange > 1000 ? '<div class="calc-warning">This is too aggressive. Consider increasing your timeline.</div>' : ""}
+        ${result.veryLow ? '<div class="calc-warning">Calories are very low. Consider a longer timeline or consult a professional.</div>' : ""}
+        <div class="calc-action-grid"><a class="calc-primary-btn" href="portal/diet_chart.html">View My Plan</a><button class="calc-secondary-btn" type="button" data-open-calculator="goal">Recalculate</button></div>
+    `;
+}
+
+function renderCalculatorModal() {
+    const body = byId("calculatorModalBody");
+    const title = byId("calculatorModalTitle");
+    const backBtn = byId("calculatorBackBtn");
+    if (!body || !title || !window.TyfitCalculators) return;
+    title.textContent = calculatorTitle(homeCalculatorState.active);
+    body.innerHTML = homeCalculatorState.active === "macro" ? macroMarkup() : homeCalculatorState.active === "goal" ? goalMarkup() : bmrMarkup();
+    bindCalculatorModal();
+    window.TyfitCalculators.refreshIcons();
+    if (backBtn) {
+        backBtn.hidden = !window.matchMedia("(max-width: 767px)").matches;
+    }
+}
+
+function bindCalculatorModal() {
+    if (homeCalculatorState.active === "bmr") {
+        byId("homeCalculateBmrBtn")?.addEventListener("click", calculateHomeBmr);
+        return;
+    }
+    if (homeCalculatorState.active === "macro") {
+        renderHomeDietOptions();
+        renderHomeMacros();
+        byId("homeMacroForm")?.addEventListener("input", renderHomeMacros);
+        byId("homeMacroForm")?.addEventListener("change", renderHomeMacros);
+        byId("homeDietGrid")?.addEventListener("click", (event) => {
+            const option = event.target.closest("[data-diet]");
+            if (!option) return;
+            homeCalculatorState.macroDiet = option.dataset.diet;
+            renderHomeDietOptions();
+            renderHomeMacros();
+        });
+        byId("homeUnknownCaloriesBtn")?.addEventListener("click", () => {
+            updateMacroState();
+            openCalculatorModal("bmr", { returnTo: "macro" });
+        });
+        byId("homeApplyMacrosBtn")?.addEventListener("click", () => {
+            updateMacroState();
+            if (!validateHomeMacros()) return;
+            showToast("Macros calculated.");
+        });
+        return;
+    }
+    byId("homeGoalForm")?.addEventListener("input", updateGoalState);
+    byId("homeGoalForm")?.addEventListener("change", updateGoalState);
+    byId("homeUnknownTdeeBtn")?.addEventListener("click", () => {
+        updateGoalState();
+        openCalculatorModal("bmr", { returnTo: "goal" });
+    });
+    byId("homeCalculateGoalBtn")?.addEventListener("click", renderGoalResult);
 }
 
 function applyGuestHomeIntro(isLoggedIn) {
@@ -491,7 +875,7 @@ function bindShellInteractions() {
         const calcTrigger = event.target.closest("[data-calculator]");
         if (calcTrigger) {
             event.preventDefault();
-            openCalculatorComingSoon(calcTrigger.dataset.calculator || calcTrigger.dataset.title || "Calculator");
+            openCalculatorModal(calcTrigger.dataset.calculator || "bmr");
             return;
         }
 
@@ -519,6 +903,22 @@ function bindShellInteractions() {
     if (quickAddBtn) quickAddBtn.addEventListener("click", openSheet);
     if (sheetClose) sheetClose.addEventListener("click", closeSheet);
     if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
+    byId("calculatorBackBtn")?.addEventListener("click", closeCalculatorModal);
+    byId("calculatorModalClose")?.addEventListener("click", closeCalculatorModal);
+    byId("calculatorModal")?.addEventListener("click", (event) => {
+        if (event.target.matches("[data-calculator-close]")) {
+            closeCalculatorModal();
+            return;
+        }
+        const open = event.target.closest("[data-open-calculator]");
+        if (open) {
+            event.preventDefault();
+            openCalculatorModal(open.dataset.openCalculator || "bmr");
+        }
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeCalculatorModal();
+    });
 
     if (desktopNotifBtn) desktopNotifBtn.addEventListener("click", () => toggleMenu(desktopNotifMenu));
     if (mobileNotifBtn) mobileNotifBtn.addEventListener("click", () => toggleMenu(mobileNotifMenu));
@@ -620,13 +1020,6 @@ function bindShellInteractions() {
         }
     });
 
-    byId("calculatorComingSoonClose")?.addEventListener("click", closeCalculatorComingSoon);
-    byId("calculatorComingSoonModal")?.addEventListener("click", (event) => {
-        if (event.target.matches("[data-calc-close]")) closeCalculatorComingSoon();
-    });
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") closeCalculatorComingSoon();
-    });
 }
 
 /* ── Profile Completion Card ────────────────────────────────── */
