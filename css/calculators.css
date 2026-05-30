@@ -379,6 +379,12 @@ body.tyfit-calculator-page {
     height: 18px;
 }
 
+.calc-ok-btn {
+    width: min(50%, 724px);
+    background:#0F9D58;
+    height: 48px;
+}
+
 .tyfit-calc-modal-actions {
     position: sticky;
     bottom: -24px;
@@ -507,6 +513,18 @@ body.tyfit-calculator-page {
     font-weight: 700;
 }
 
+.calc-result-hero {
+    display: grid;
+    place-items: center;
+    margin: 6px auto 14px;
+}
+
+.calc-result-hero img {
+    width: min(200px, 58vw);
+    height: auto;
+    display: block;
+}
+
 .calc-result-subtitle {
     margin: -8px auto 16px;
     max-width: 310px;
@@ -522,17 +540,22 @@ body.tyfit-calculator-page {
     gap: 10px;
 }
 
+.calc-result-grid--single {
+    grid-template-columns: 1fr;
+}
+
 .calc-result-card {
     padding: 14px;
     border: 1px solid var(--calc-border);
     border-radius: 18px;
     background: #FFFFFF;
+    text-align: center;
 }
 
 .calc-result-card span {
-    color: var(--calc-muted);
-    font-size: 12px;
-    font-weight: 700;
+    color: var(--calc-text);
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .calc-result-card strong {
@@ -541,6 +564,13 @@ body.tyfit-calculator-page {
     color: var(--calc-text);
     font-size: 24px;
     font-weight: 800;
+}
+
+.calc-result-card .calc-result-unit {
+    margin-top: 4px;
+    color: var(--calc-muted);
+    font-size: 12px;
+    font-weight: 400;
 }
 
 .calc-action-grid {

@@ -10,10 +10,12 @@ const homeData = {
         { title: "Training Plan", subtitle: "Custom workouts", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
         { title: "Journey", subtitle: "Your progress", href: "journey.html", icon: "mountain", colorClass: "icon-food" },
         { title: "BMR Calculator", subtitle: "Know your BMR", href: "#", icon: "calculator", colorClass: "icon-bmr", calculator: "bmr" },
-        { title: "Macro Calculator", subtitle: "Plan macros", href: "#", icon: "pie-chart", colorClass: "icon-macro", calculator: "macro" },
-        { title: "Goal Calculator", subtitle: "Set your goal", href: "#", icon: "target", colorClass: "icon-reminder", calculator: "goal" }
+        { title: "Macro Calculator", subtitle: "Plan macros", href: "#", icon: "pie-chart", colorClass: "icon-macro", comingSoon: true, hideComingSoonBadge: true },
+        { title: "Goal Calculator", subtitle: "Set your goal", href: "#", icon: "target", colorClass: "icon-reminder", comingSoon: true, hideComingSoonBadge: true }
     ]
 };
+
+const disabledCalculators = new Set(["macro", "goal"]);
 
 function byId(id) {
     return document.getElementById(id);
@@ -153,7 +155,7 @@ function renderHome(data) {
                 ? ' data-coming-soon="true"'
                 : (tool.calculator ? ` data-calculator="${tool.calculator}" data-calculator-title="${tool.title}"` : (href === "#" ? ` data-calculator="${tool.title}"` : ""));
             const cardClass = isComingSoon ? "tyfit-tool-card tyfit-tool-card--coming-soon" : "tyfit-tool-card";
-            const badge = isComingSoon ? '<span class="tyfit-coming-soon-label">Coming Soon</span>' : "";
+            const badge = (isComingSoon && !tool.hideComingSoonBadge) ? '<span class="tyfit-coming-soon-label">Coming Soon</span>' : "";
             return `
                 <a class="${cardClass}" href="${href}" data-title="${tool.title}"${dataAttrs}>
                     ${badge}
@@ -297,6 +299,7 @@ function applySidebarTooltipData() {
 
 const homeCalculatorState = {
     active: "bmr",
+    resultView: "",
     returnTo: "",
     macroDiet: "balanced",
     macroValues: {
@@ -338,6 +341,7 @@ function openCalculatorModal(type, options = {}) {
     const backBtn = byId("calculatorBackBtn");
     if (!modal || !window.TyfitCalculators) return;
     homeCalculatorState.active = type || "bmr";
+    homeCalculatorState.resultView = "";
     homeCalculatorState.returnTo = options.returnTo || "";
     if (title) title.textContent = calculatorTitle(homeCalculatorState.active);
     if (backBtn) {
@@ -357,6 +361,7 @@ function closeCalculatorModal() {
     modal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("tyfit-calc-modal-open");
     if (backBtn) backBtn.hidden = true;
+    homeCalculatorState.resultView = "";
     homeCalculatorState.returnTo = "";
 }
 
@@ -383,7 +388,7 @@ function bmrMarkup() {
                 ${calculatorField({ field: "bodyFat", icon: "percent", label: "Body Fat Percentage", hint: "Optional", control: '<input name="bodyFat" type="number" inputmode="decimal" min="3" max="70" step="0.1" placeholder="Optional">' })}
             </section>
         </form>
-        <div class="tyfit-calc-modal-actions"><button class="calc-primary-btn" type="button" id="homeCalculateBmrBtn">Calculate My Calories <i data-lucide="arrow-right"></i></button></div>
+        <div class="tyfit-calc-modal-actions"><button class="calc-primary-btn" type="button" id="homeCalculateBmrBtn">Calculate <i data-lucide="arrow-right"></i></button></div>
     `;
 }
 
@@ -445,20 +450,23 @@ function calculateHomeBmr() {
         return;
     }
 
+    homeCalculatorState.resultView = "bmr";
     byId("calculatorModalBody").innerHTML = `
-        <div class="calc-result-ring"><div><strong>${tdee}</strong><span>kcal/day</span></div></div>
-        <p class="calc-result-subtitle">Your Total Daily Energy Expenditure (TDEE)</p>
-        <div class="calc-result-grid">
-            <article class="calc-result-card"><span>Basal Metabolic Rate (BMR)</span><strong>${bmr}</strong></article>
-            <article class="calc-result-card"><span>Total Daily Energy Expenditure (TDEE)</span><strong>${tdee}</strong></article>
+        <div class="calc-result-hero"><img src="assets/calculator/tyfit-bmr-calculator-icon-transparent.svg" alt="BMR result icon"></div>
+        <div class="calc-result-grid calc-result-grid--single">
+            <article class="calc-result-card"><span>Basal Metabolic Rate (BMR)</span><strong>${bmr}</strong><span class="calc-result-unit">Calories per day</span></article>
+            <article class="calc-result-card"><span>Total Daily Energy Expenditure</span><strong>${tdee}</strong><span class="calc-result-unit">Calories per day</span></article>
         </div>
         <div class="calc-action-grid">
-            <button class="calc-secondary-btn" type="button" data-open-calculator="macro">Macro Calculator</button>
-            <button class="calc-secondary-btn" type="button" data-open-calculator="goal">Goal Calculator</button>
-            <a class="calc-primary-btn" href="portal/diet_chart.html">Create Diet Plan</a>
+            <button class="calc-primary-btn calc-ok-btn" type="button" id="homeBmrResultOkBtn">Okay</button>
         </div>
     `;
-    byId("calculatorModalTitle").textContent = "Your result";
+    byId("calculatorModalTitle").textContent = "BMR Result";
+    const closeBtn = byId("calculatorModalClose");
+    const backBtn = byId("calculatorBackBtn");
+    if (closeBtn) closeBtn.hidden = true;
+    if (backBtn) backBtn.hidden = false;
+    byId("homeBmrResultOkBtn")?.addEventListener("click", () => openCalculatorModal("bmr"));
     window.TyfitCalculators.refreshIcons();
 }
 
@@ -658,11 +666,14 @@ function renderCalculatorModal() {
     const body = byId("calculatorModalBody");
     const title = byId("calculatorModalTitle");
     const backBtn = byId("calculatorBackBtn");
+    const closeBtn = byId("calculatorModalClose");
     if (!body || !title || !window.TyfitCalculators) return;
+    homeCalculatorState.resultView = "";
     title.textContent = calculatorTitle(homeCalculatorState.active);
     body.innerHTML = homeCalculatorState.active === "macro" ? macroMarkup() : homeCalculatorState.active === "goal" ? goalMarkup() : bmrMarkup();
     bindCalculatorModal();
     window.TyfitCalculators.refreshIcons();
+    if (closeBtn) closeBtn.hidden = false;
     if (backBtn) {
         backBtn.hidden = !window.matchMedia("(max-width: 767px)").matches;
     }
@@ -856,6 +867,11 @@ function bindShellInteractions() {
         sheetBackdrop.hidden = true;
     }
 
+    document.querySelectorAll('[data-calculator="macro"], [data-calculator="goal"]').forEach((item) => {
+        item.classList.add("is-disabled-calc");
+        item.setAttribute("aria-disabled", "true");
+    });
+
     document.addEventListener("click", (event) => {
         const subtitleLogin = event.target.closest("#homeSubtitleLoginLink");
         if (subtitleLogin) {
@@ -869,12 +885,18 @@ function bindShellInteractions() {
         const comingSoonTrigger = event.target.closest("[data-coming-soon]");
         if (comingSoonTrigger) {
             event.preventDefault();
+            showToast("Coming Soon");
             return;
         }
 
         const calcTrigger = event.target.closest("[data-calculator]");
         if (calcTrigger) {
             event.preventDefault();
+            const calcType = String(calcTrigger.dataset.calculator || "").toLowerCase();
+            if (disabledCalculators.has(calcType)) {
+                showToast("Coming Soon");
+                return;
+            }
             openCalculatorModal(calcTrigger.dataset.calculator || "bmr");
             return;
         }
@@ -903,7 +925,13 @@ function bindShellInteractions() {
     if (quickAddBtn) quickAddBtn.addEventListener("click", openSheet);
     if (sheetClose) sheetClose.addEventListener("click", closeSheet);
     if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
-    byId("calculatorBackBtn")?.addEventListener("click", closeCalculatorModal);
+    byId("calculatorBackBtn")?.addEventListener("click", () => {
+        if (homeCalculatorState.resultView === "bmr") {
+            openCalculatorModal("bmr");
+            return;
+        }
+        closeCalculatorModal();
+    });
     byId("calculatorModalClose")?.addEventListener("click", closeCalculatorModal);
     byId("calculatorModal")?.addEventListener("click", (event) => {
         if (event.target.matches("[data-calculator-close]")) {

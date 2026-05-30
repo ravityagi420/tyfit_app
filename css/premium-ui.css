@@ -269,6 +269,15 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
     color: #6C63FF;
 }
 
+.sidebar-nav-item.is-disabled-calc {
+    opacity: 0.82;
+}
+
+.sidebar-nav-item.is-disabled-calc:hover {
+    background: #F7F8FC;
+    color: #4C5367;
+}
+
 /* Mountain journey home card */
 .tyfit-journey-home-card {
     display: grid;
