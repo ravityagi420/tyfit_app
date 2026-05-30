@@ -3796,6 +3796,7 @@ body[data-page="home"] .tyfit-journey-meta-grid strong {
 /* Home onboarding hero matched to the mountain focus design. */
 body[data-page="home"] .tyfit-journey-home-card.is-onboarding {
     grid-template-columns: minmax(0, 1fr);
+    align-items: center;
     min-height: 292px;
     padding: 26px 28px;
     border-radius: 26px;
@@ -3966,7 +3967,7 @@ body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-cta sv
 
     body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-journey-home-copy {
         width: 100%;
-        justify-content: flex-start;
+        justify-content: center;
         gap: 7px;
     }
 
