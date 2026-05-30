@@ -2003,22 +2003,45 @@ body[data-page="diet-chart"] .tp-page-subtitle {
    ============================================ */
 
 .diet-user-toolbar {
+    display: grid;
+    gap: 8px;
+}
+
+.diet-admin-toolbar-row {
+    display: grid;
+    gap: 8px;
+}
+
+.diet-admin-toolbar-head {
     display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    align-items: center;
+}
+
+.diet-admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(108, 99, 255, 0.11);
+    border: 1px solid rgba(108, 99, 255, 0.22);
+    color: #4D45CD;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 20px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.diet-admin-badge i {
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
 }
 
 .diet-user-select-wrap {
-    flex: 1 1 320px;
-}
-
-.diet-user-select-wrap label {
-    font-size: 15px;
-    font-weight: 400;
-    color: #1A1F36;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    width: 100%;
 }
 
 .diet-chart-switcher {
@@ -2698,45 +2721,59 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 }
 
 .diet-user-select-control {
-    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #DDD8FF;
+    border-radius: 12px;
+    background: #F3F1FF;
 }
 
 .diet-user-select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    width: 100%;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    background-color: #ffffff;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-    padding: 11px 42px 11px 12px;
-    font-size: 15px;
-    font-weight: 400;
-    color: #1A1F36;
+    width: auto;
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4B3FC7;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     min-height: 44px;
 }
 
 .diet-user-select option {
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 15px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .diet-user-select:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    border-color: transparent;
+    box-shadow: none;
 }
 
-.diet-user-select-icon {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #64748b;
+.diet-user-leading-icon {
+    width: 15px;
+    height: 15px;
+    color: rgba(108, 99, 255, 0.58);
+    flex-shrink: 0;
+}
+
+.diet-user-chevron {
+    width: 14px;
+    height: 14px;
+    color: rgba(108, 99, 255, 0.72);
     pointer-events: none;
-    font-size: 12px;
+    flex-shrink: 0;
 }
 
 /* ============================================

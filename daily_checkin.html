@@ -12,8 +12,8 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
-    <link href="css/checkin.css?v=20260525g" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260527a" rel="stylesheet">
+    <link href="css/checkin.css?v=20260530c" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="daily-checkin">
     <header class="tyfit-mobile-topbar">
@@ -89,9 +89,15 @@
 
                     <!-- Admin user selector (shown by JS for admin accounts only) -->
                     <section class="checkin-toolbar-card checkin-hidden" id="checkinUserToolbar">
-                        <div class="checkin-user-select-wrap">
-                            <label for="checkinUserSelect">Select User</label>
-                            <div class="checkin-select-control"><select id="checkinUserSelect"></select><i data-lucide="chevron-down"></i></div>
+                        <div class="checkin-admin-toolbar-row">
+                            <div class="checkin-admin-toolbar-head">
+                                <span class="checkin-admin-badge"><i data-lucide="shield-check"></i> Admin View</span>
+                            </div>
+                            <div class="checkin-admin-user-select">
+                                <i data-lucide="user-round-search" class="checkin-admin-contact-icon"></i>
+                                <select id="checkinUserSelect"></select>
+                                <i data-lucide="chevron-down" class="checkin-admin-chevron"></i>
+                            </div>
                         </div>
                     </section>
 
@@ -173,14 +179,7 @@
             </div>
         </main>
     </div>
-
-    <nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">
-        <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
-        <a href="portal/diet_chart.html"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-        <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
-        <a href="training_plan.html"><i data-lucide="dumbbell"></i><span>Training</span></a>
-        <a href="profile.html"><i data-lucide="user"></i><span>Profile</span></a>
-    </nav>
+    <div data-tyfit-bottom-nav></div>
 
     <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
     <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
@@ -250,6 +249,7 @@
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/shell.js"></script>
-    <script src="js/daily_checkin.js?v=20260525d"></script>
+    <script src="js/journey.js?v=20260530a"></script>
+    <script src="js/daily_checkin.js?v=20260530e"></script>
 </body>
 </html>

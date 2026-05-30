@@ -43,29 +43,39 @@ a:focus {
 .back-to-top {
     position: fixed;
     display: none;
-    background: #80d0e8;
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
     text-align: center;
     line-height: 1;
-    font-size: 22px;
+    font-size: 20px;
     right: 15px;
     bottom: 15px;
-    transition: background 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     z-index: 9;
 }
 
 .back-to-top:hover {
-    background: #343148;
+    background: #f8fafc;
+    border-color: rgba(15, 23, 42, 0.18);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+    transform: translateY(-1px);
 }
 
 .back-to-top:hover i {
-    color: #80d0e8;
+    color: #16a34a;
 }
 
 .back-to-top i {
-    color: #343148;
-    padding-top: 10px;
+    color: #16a34a;
+    padding-top: 0;
+    line-height: 1;
 }
 
 
@@ -2152,6 +2162,12 @@ a:focus {
         padding-bottom: 70px;
     }
 
+    body.tyfit-app input:not([type="checkbox"]):not([type="radio"]),
+    body.tyfit-app select,
+    body.tyfit-app textarea {
+        font-size: 16px !important;
+    }
+
     .admin-section input,
     .admin-section select,
     .admin-section textarea,
@@ -2579,6 +2595,12 @@ body.tyfit-auth-locked .row {
     .navbar-toggler {
         display: none !important;
     }
+
+    .tbn-item svg {
+        width: 20px;
+        height: 20px;
+    }
+
     /* Ensure back-to-top clears the bottom nav */
     .back-to-top {
         bottom: 78px;
@@ -2946,6 +2968,7 @@ body.tyfit-auth-locked .row {
     width: 100%;
     max-width: 680px;
     margin: 0 auto;
+    overflow: visible;
 }
 
 .tyfit-profile-header {
@@ -2979,6 +3002,7 @@ body.tyfit-auth-locked .row {
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    overflow: visible;
 }
 
 .tyfit-profile-card-head {
@@ -3261,6 +3285,7 @@ body.tyfit-auth-locked .row {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 6px;
+    align-items: start;
 }
 
 .tyfit-avatar-option {
@@ -3323,7 +3348,7 @@ body.tyfit-auth-locked .row {
     border: 1.5px solid #e2e8f0;
     border-radius: 10px;
     padding: 0 12px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: #0f172a;
     background: #f8fafc;
@@ -3354,6 +3379,8 @@ body.tyfit-auth-locked .row {
 .tyfit-field-select {
     padding-right: 32px;
     cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .tyfit-select-arrow {
@@ -3564,11 +3591,15 @@ span.flatpickr-weekday {
     left: 0;
     width: 300px;
     max-width: 94vw;
+    max-height: min(72vh, 520px);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
     background: #fff;
     border: 1.5px solid #e2e8f0;
     border-radius: 14px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.13);
-    z-index: 999;
+    z-index: 9999;
     overflow: hidden;
     opacity: 0;
     transform: translateY(-8px) scale(0.98);
@@ -3605,7 +3636,7 @@ span.flatpickr-weekday {
     border: 1.5px solid #e2e8f0;
     border-radius: 8px;
     padding: 0 10px 0 30px;
-    font-size: 13px;
+    font-size: 16px;
     outline: none;
     background: #f8fafc;
     font-family: inherit;
@@ -3620,8 +3651,11 @@ span.flatpickr-weekday {
     list-style: none;
     margin: 0;
     padding: 6px 0;
-    max-height: 220px;
+    min-height: 280px;
+    max-height: none;
+    flex: 1 1 auto;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .tyfit-cc-item {
@@ -3663,6 +3697,21 @@ span.flatpickr-weekday {
     color: #64748b;
     font-size: 12px;
     flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+    .tyfit-phone-wrap .tyfit-cc-dropdown {
+        left: 0;
+        right: 0;
+        width: auto;
+        max-width: none;
+        max-height: min(70dvh, 520px);
+    }
+
+    /* Keep input text at >=16px to avoid iOS auto-zoom on focus */
+    .tyfit-cc-search {
+        font-size: 16px;
+    }
 }
 
 /* ── Measurement (height/weight) ── */
@@ -3924,6 +3973,16 @@ span.flatpickr-weekday {
 
     .tyfit-avatar-grid {
         grid-template-columns: repeat(6, 1fr);
+        gap: 4px;
+    }
+
+    .tyfit-avatar-option {
+        padding: 2px;
+        border-width: 1.5px;
+    }
+
+    .tyfit-profile-main {
+        background: transparent;
     }
 
     .tyfit-cc-dropdown {

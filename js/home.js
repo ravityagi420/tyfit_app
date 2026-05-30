@@ -8,7 +8,7 @@ const homeData = {
     tools: [
         { title: "Diet Chart", subtitle: "View your diet and nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
         { title: "Training Plan", subtitle: "Your workout made simple", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
-        { title: "Progress", subtitle: "Track daily consistency", href: "checkin_summary.html", icon: "activity", colorClass: "icon-food", appendToday: true },
+        { title: "Journey", subtitle: "View your mountain progress", href: "journey.html", icon: "mountain", colorClass: "icon-food" },
         { title: "BMR Calculator", subtitle: "Calculate your daily BMR", href: "#", icon: "calculator", colorClass: "icon-bmr", comingSoon: true },
         { title: "Macro Calculator", subtitle: "Track your macros easily", href: "#", icon: "pie-chart", colorClass: "icon-macro", comingSoon: true },
         { title: "Calorie Calculator", subtitle: "Count your calories", href: "#", icon: "flame", colorClass: "icon-calorie", comingSoon: true }
@@ -17,6 +17,16 @@ const homeData = {
 
 function byId(id) {
     return document.getElementById(id);
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    }[char]));
 }
 
 function refreshIcons() {
@@ -162,6 +172,116 @@ function renderHome(data) {
         }
 
         refreshIcons();
+    }
+}
+
+function renderJourneyOnboarding() {
+    const hero = byId("homeJourneyHero");
+    if (!hero) return;
+    hero.className = "tyfit-hero-card tyfit-journey-home-card is-onboarding";
+    hero.innerHTML = `
+        <div class="tyfit-journey-home-copy">
+            <span class="tyfit-hero-badge"><i data-lucide="sparkles"></i>Today's Focus</span>
+            <h4 class="tyfit-journey-home-title">Small Habits<span>Big Transformation.</span></h4>
+            <div class="tyfit-hero-chips" aria-label="Today's focus goals">
+                <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/nutrition-leaf.svg" alt="" aria-hidden="true">Nutrition</span>
+                <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/training-dumbbell.svg" alt="" aria-hidden="true">Training</span>
+                <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/recovery-moon.svg" alt="" aria-hidden="true">Recovery</span>
+            </div>
+            <div class="tyfit-journey-home-actions">
+                <a class="tyfit-hero-cta" href="daily_checkin.html">Log My Day <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+            </div>
+        </div>
+    `;
+    refreshIcons();
+}
+
+function renderJourneyStatus({ journey, todayCheckin, todayEvent }) {
+    const hero = byId("homeJourneyHero");
+    if (!hero || !window.tyfitJourney) return;
+
+    const progress = window.tyfitJourney.progressForXp(journey?.total_xp || 0);
+    const checkedToday = Boolean(todayCheckin?.id);
+    const streak = Number(journey?.current_streak) || 0;
+    const currentStage = progress.current;
+    const nextLabel = progress.next ? `${progress.remainingXp} XP to ${progress.next.name}` : "Summit reached";
+    const editHref = `daily_checkin.html?date=${window.tyfitJourney.todayISO()}`;
+
+    hero.className = `tyfit-hero-card tyfit-journey-home-card ${checkedToday ? "is-complete" : "is-pending"}`;
+    hero.innerHTML = `
+        <div class="tyfit-journey-home-copy">
+            <span class="tyfit-hero-badge">
+                <i data-lucide="${checkedToday ? "check-circle-2" : "mountain"}"></i>
+                ${checkedToday ? "Check-in complete" : "Conquer Everest"}
+            </span>
+            <h4 class="tyfit-journey-home-title">${streak || 1} Day Streak</h4>
+            <p class="tyfit-journey-home-text">${checkedToday ? "Great job showing up today." : "Keep it going! You're doing great."}</p>
+
+            <div class="tyfit-journey-status-box">
+                <strong>${checkedToday ? "Checked in today" : "Not checked in today"}</strong>
+                <span>${checkedToday ? `${Number(todayEvent?.xp_awarded || 0) ? `+${todayEvent.xp_awarded} XP earned today.` : "Today is counted."}` : "Complete your check-in to keep your streak alive."}</span>
+            </div>
+
+            <div class="tyfit-journey-home-actions">
+                <a class="tyfit-hero-cta" href="${checkedToday ? "journey.html" : "daily_checkin.html"}">${checkedToday ? "View Journey" : "Complete Check-in"}</a>
+                ${checkedToday ? `<a class="tyfit-journey-secondary-link" href="${editHref}">Edit Today's Check-in</a>` : ""}
+            </div>
+        </div>
+
+        <div class="tyfit-journey-home-progress">
+            <img src="${escapeHtml(currentStage.asset)}" alt="" class="tyfit-journey-stage-img" aria-hidden="true">
+            <div class="tyfit-journey-stage-row">
+                <div>
+                    <span>Stage ${currentStage.stage}</span>
+                    <strong>${escapeHtml(currentStage.name)}</strong>
+                </div>
+                <em>${escapeHtml(journey?.current_title || currentStage.title)}</em>
+            </div>
+            <div class="tyfit-journey-progress-track" aria-label="Journey progress">
+                <span style="width:${progress.percent}%"></span>
+            </div>
+            <div class="tyfit-journey-meta-grid">
+                <span><strong>${Number(journey?.total_xp) || 0}</strong>Total XP</span>
+                <span><strong>${Number(journey?.longest_streak) || 0}</strong>Longest</span>
+                <span><strong>${escapeHtml(nextLabel)}</strong>Next</span>
+            </div>
+        </div>
+    `;
+    refreshIcons();
+}
+
+async function renderJourneyHero(userId) {
+    if (!userId || !window.tyfitJourney) {
+        renderJourneyOnboarding();
+        return;
+    }
+
+    try {
+        const today = window.tyfitJourney.todayISO();
+        const [journey, todayCheckin, todayEvent] = await Promise.all([
+            window.tyfitJourney.fetchJourney(userId),
+            window.tyfitJourney.hasCheckedIn(userId, today),
+            window.tyfitJourney.fetchJourneyEvent(userId, today)
+        ]);
+
+        if (!journey && !todayCheckin) {
+            renderJourneyOnboarding();
+            return;
+        }
+
+        renderJourneyStatus({
+            journey: journey || {
+                total_xp: 0,
+                current_streak: 0,
+                longest_streak: 0,
+                current_title: "Starter"
+            },
+            todayCheckin,
+            todayEvent
+        });
+    } catch (error) {
+        console.warn("renderJourneyHero warning:", error?.message || error);
+        renderJourneyOnboarding();
     }
 }
 
@@ -597,12 +717,14 @@ async function hydrateNameFromProfile() {
     try {
         if (!window.tyfitProfile?.getCurrentUser) {
             renderHome(homeData);
+            renderJourneyHero(null);
             return;
         }
 
         const user = await window.tyfitProfile.getCurrentUser();
         if (!user?.id) {
             renderHome(homeData);
+            renderJourneyHero(null);
             return;
         }
 
@@ -621,10 +743,11 @@ async function hydrateNameFromProfile() {
         });
 
         renderProfileCompletionCard(user.id);
-        renderHeroCheckinRing(user.id);
+        renderJourneyHero(user.id);
     } catch (error) {
         console.warn("hydrateNameFromProfile warning:", error?.message || error);
         renderHome(homeData);
+        renderJourneyHero(null);
     }
 }
 
@@ -632,6 +755,10 @@ async function renderHeroCheckinRing(userId) {
     const ring = document.getElementById("heroCheckinRingProgress");
     const percentNode = document.getElementById("heroCheckinPercent");
     if (!ring || !percentNode) return;
+
+    const circumference = 2 * Math.PI * 40;
+    ring.style.strokeDasharray = `0 ${circumference}`;
+    percentNode.textContent = "0%";
 
     try {
         const today = new Date().toISOString().slice(0, 10);
@@ -679,7 +806,6 @@ async function renderHeroCheckinRing(userId) {
 
         const adherence = Math.round(((done + partial * 0.5) / total) * 100);
         const clamped = Math.max(0, Math.min(100, adherence));
-        const circumference = 2 * Math.PI * 40;
         const progress = circumference * (clamped / 100);
 
         ring.style.strokeDasharray = `${progress} ${circumference}`;

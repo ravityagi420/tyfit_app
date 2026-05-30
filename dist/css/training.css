@@ -62,6 +62,104 @@ body[data-page="training-plan"] .tyfit-main-inner {
   font-weight: 400;
 }
 
+.tp-user-toolbar {
+  margin: 10px 0 16px;
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.tp-admin-toolbar-row {
+  display: grid;
+  gap: 8px;
+}
+
+.tp-admin-toolbar-head {
+  display: flex;
+  align-items: center;
+}
+
+.tp-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(108, 99, 255, 0.11);
+  border: 1px solid rgba(108, 99, 255, 0.22);
+  color: #4D45CD;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 20px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tp-admin-badge i {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.tp-user-select-wrap {
+  width: 100%;
+  max-width: none;
+}
+
+.tp-user-select-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  width: 100%;
+  border: 1px solid #DDD8FF;
+  border-radius: 12px;
+  background: #F3F1FF;
+}
+
+.tp-user-select {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #4B3FC7;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.3;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+
+.tp-user-select option {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tp-user-select:focus {
+  box-shadow: none;
+}
+
+.tp-user-leading-icon {
+  width: 15px;
+  height: 15px;
+  color: rgba(108, 99, 255, 0.58);
+  flex-shrink: 0;
+}
+
+.tp-user-chevron {
+  width: 14px;
+  height: 14px;
+  color: rgba(108, 99, 255, 0.72);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
 .tp-back-btn,
 .tp-icon-action,
 .tp-modal-close {
@@ -152,6 +250,7 @@ body[data-page="training-plan"] .tyfit-main-inner {
   position: relative;
   display: inline-flex;
   z-index: 1;
+  border-top: 1px solid var(--tp-border);
 }
 
 .tp-plan-card-wrap:has(.tp-plan-card-menu.is-open) {
@@ -1016,14 +1115,21 @@ body[data-page="training-plan"] .tyfit-main-inner {
 @keyframes tpSpin { to { transform: rotate(360deg); } }
 
 /* Modal / full-screen on mobile */
-.tp-modal-overlay { position:fixed; inset:0; z-index:220; display:flex; align-items:flex-end; justify-content:center; background: rgba(16,24,40,.45); }
+.tp-modal-overlay { position:fixed; inset:0; z-index:220; display:flex; align-items:center; justify-content:center; background: rgba(16,24,40,.45); padding: 12px; }
 .tp-modal-overlay[hidden] { display:none; }
-.tp-modal { width:100%; max-height:93dvh; background:#fff; border-radius:24px 24px 0 0; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 -18px 60px rgba(16,24,40,.18); }
+.tp-modal { width:min(100%, 720px); max-height:93dvh; background:#fff; border-radius:24px; overflow:hidden; display:flex; flex-direction:column; box-shadow: 0 18px 60px rgba(16,24,40,.18); }
 .tp-modal-header { padding: 22px 20px 16px; border-bottom: 1px solid var(--tp-border); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-shrink:0; background:#fff; }
 .tp-modal-header-main { display:flex; align-items:center; gap:13px; min-width:0; }
 .tp-modal-badge { width:44px; height:44px; border-radius: 15px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .tp-modal-badge svg { width:21px; height:21px; stroke-width:2.2; }
-.tp-modal-header h3 { margin:0; color:var(--tp-text); font-size:22px; font-weight:750; letter-spacing:-.03em; }
+.tp-modal-header h3 {
+  margin: 0;
+  color: #1A1F36;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
 .tp-modal-header p { margin:4px 0 0; color:var(--tp-muted); font-size:14px; line-height:1.45; }
 .tp-modal-close { width:42px; height:42px; border-radius:14px; flex-shrink:0; }
 .tp-modal-close svg { width:20px; height:20px; }
@@ -1039,7 +1145,7 @@ body[data-page="training-plan"] .tyfit-main-inner {
   inset: 0;
   z-index: 260;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
 }
 
@@ -1054,10 +1160,10 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-plan-card-sheet-panel {
   position: relative;
   z-index: 1;
-  width: min(100%, 440px);
-  border-radius: 18px 18px 0 0;
+  width: min(92vw, 440px);
+  border-radius: 18px;
   background: #ffffff;
-  box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.26);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.26);
   padding: 14px;
 }
 
@@ -1072,8 +1178,9 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-plan-card-sheet-title {
   margin: 0;
   font-size: 15px;
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: 400;
+  color: #1A1F36;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .tp-plan-card-sheet-close {
@@ -1303,6 +1410,8 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-form-group textarea { padding-top:13px; min-height:82px; resize:vertical; }
 .tp-form-group input:focus, .tp-form-group textarea:focus { border-color:#9CC7FF; box-shadow:0 0 0 4px rgba(15,111,234,.10); }
 
+.tp-catalog-search-row input { font-size: 16px; }
+
 /* Responsive */
 @media (min-width: 768px) {
   .tp-days-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1316,16 +1425,17 @@ body[data-page="training-plan"] .tyfit-main-inner {
 }
 @media (max-width: 1024px) {
   .tp-modal-overlay {
-    align-items: stretch;
-    background: #fff;
+    align-items: center;
+    background: rgba(16, 24, 40, 0.45);
+    padding: 12px;
   }
   .tp-modal {
-    width: 100%;
-    max-width: none;
-    height: 100dvh;
-    max-height: 100dvh;
-    border-radius: 0;
-    box-shadow: none;
+    width: min(100%, 640px);
+    max-width: 640px;
+    height: auto;
+    max-height: calc(100svh - 24px);
+    border-radius: 20px;
+    box-shadow: 0 16px 44px rgba(16, 24, 40, 0.22);
   }
   .tp-modal-header {
     padding-top: max(18px, env(safe-area-inset-top));
@@ -1363,6 +1473,20 @@ body[data-page="training-plan"] .tyfit-main-inner {
     position: sticky;
     bottom: 0;
     padding-bottom: calc(14px + max(env(safe-area-inset-bottom), 14px));
+  }
+
+  .tp-form-group input,
+  .tp-form-group textarea,
+  .tp-user-select,
+  .tp-catalog-search-row input {
+    font-size: 16px;
+  }
+
+  .tp-form-group input,
+  .tp-form-group textarea,
+  .tp-user-select,
+  .tp-catalog-search-row input {
+    border-radius: 16px;
   }
 }
 @media (max-width: 767px) {
@@ -1497,35 +1621,65 @@ body[data-page="training-plan"] .tyfit-main-inner {
     min-width: 184px;
   }
   .tp-form-row { grid-template-columns:1fr; }
-  .tp-modal-overlay { background:#fff; }
-  .tp-modal { height:100dvh; max-height:100dvh; border-radius:0; box-shadow:none; }
-  .tp-modal-header { padding-top: max(18px, env(safe-area-inset-top)); }
+  .tp-modal-overlay {
+    background: rgba(16, 24, 40, 0.45);
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+  }
+  .tp-modal {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .tp-modal-header {
+    padding-top: calc(12px + env(safe-area-inset-top));
+  }
+  .tp-modal-body {
+    padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  }
   .tp-modal-footer { position: sticky; bottom:0; }
 
   #inputDialogOverlay,
   #confirmDialogOverlay {
     background: rgba(16, 24, 40, 0.45);
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
   }
 
   .tp-input-dialog,
   .tp-confirm-dialog {
-    height: auto;
-    max-height: calc(100svh - 20px);
-    border-radius: 18px;
-    box-shadow: 0 14px 34px rgba(16, 24, 40, 0.22);
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .tp-input-dialog .tp-modal-body,
   .tp-confirm-dialog .tp-modal-body {
-    max-height: calc(100svh - 210px);
+    max-height: none;
   }
 
   .tp-input-dialog .tp-modal-footer,
   .tp-confirm-dialog .tp-modal-footer {
     padding-bottom: calc(14px + max(env(safe-area-inset-bottom), 16px));
+  }
+
+  .tp-catalog-search-row input,
+  .tp-form-group input,
+  .tp-form-group textarea,
+  .tp-user-select {
+    font-size: 16px;
+  }
+
+  .tp-catalog-search-row input {
+    min-height: 56px;
   }
 
   .tp-detail-facts { grid-template-columns:1fr; }

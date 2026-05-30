@@ -127,12 +127,12 @@ function updatePreviewImage() {
     if (!previewEl) return;
     if (PROFILE_EDIT_STATE.mode === "upload") {
         if (PROFILE_EDIT_STATE.previewObjectUrl) { previewEl.src = PROFILE_EDIT_STATE.previewObjectUrl; return; }
-        const existingUrl = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
-        if (existingUrl) {
-            previewEl.src = window.tyfitProfile.resolveProfileImage({
-                ...PROFILE_EDIT_STATE.profile,
-                avatar_key: ""
-            }, PROFILE_EDIT_STATE.userAbout);
+        const existingUri = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
+        if (existingUri && window.tyfitProfile.isStoragePath(existingUri)) {
+            previewEl.src = window.tyfitProfile.resolveProfileImage(
+                { ...PROFILE_EDIT_STATE.profile, avatar_key: "" },
+                PROFILE_EDIT_STATE.userAbout
+            );
             return;
         }
     }
@@ -385,7 +385,7 @@ function openCCDropdown() {
     btn?.setAttribute("aria-expanded", "true");
     _ccDropdownOpen = true;
     const searchEl = pe("profileCCSearch");
-    if (searchEl) { searchEl.value = ""; renderCCList(""); setTimeout(() => searchEl.focus(), 50); }
+    if (searchEl) { searchEl.value = ""; renderCCList(""); }
 }
 
 function closeCCDropdown() {
@@ -650,19 +650,32 @@ async function autoSaveProfilePicture() {
     const previewEl = pe("profilePreviewImage");
     if (previewEl) previewEl.style.opacity = "0.55";
     try {
-        let profilePictureUrl = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
+        let profilePictureUri = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
+
         if (PROFILE_EDIT_STATE.mode === "upload" && PROFILE_EDIT_STATE.uploadedFile) {
+            const oldUri = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
             const uploaded = await window.tyfitProfile.uploadProfilePicture(
                 PROFILE_EDIT_STATE.uploadedFile,
-                PROFILE_EDIT_STATE.user.id
+                PROFILE_EDIT_STATE.user.id,
+                oldUri
             );
-            profilePictureUrl = uploaded.publicUrl || uploaded.path;
+            profilePictureUri = uploaded.path;
+        } else if (PROFILE_EDIT_STATE.mode === "avatar") {
+            profilePictureUri = PROFILE_EDIT_STATE.selectedAvatarKey || "avatar-5.svg";
         }
+
+        // Preserve all existing form fields when saving picture to prevent data loss
         const profilePatch = {
-            profile_picture_url: PROFILE_EDIT_STATE.mode === "avatar" ? null : (profilePictureUrl || null)
+            profile_picture_url: profilePictureUri || null,
+            first_name: (pe("profileFirstName")?.value || "").trim(),
+            last_name: (pe("profileLastName")?.value || "").trim(),
+            email: (pe("profileEmail")?.value || "").trim(),
+            phone_country_code: (pe("profilePhoneCode")?.value || "").trim(),
+            phone_number: (pe("profilePhoneNumber")?.value || "").replace(/\D/g, "").trim(),
+            country: (pe("profileCountry")?.value || "").trim()
         };
         const userAboutPatch = {
-            avatar_key: PROFILE_EDIT_STATE.selectedAvatarKey || null
+            avatar_key: PROFILE_EDIT_STATE.mode === "avatar" ? (PROFILE_EDIT_STATE.selectedAvatarKey || null) : null
         };
         await window.tyfitProfile.saveProfileEdits({
             userId: PROFILE_EDIT_STATE.user.id,
@@ -698,18 +711,24 @@ async function handleProfileSave(event) {
         if (!profilePatch.first_name || !profilePatch.last_name) throw new Error("First name and last name are required.");
 
         if (!PROFILE_EDIT_STATE.selectedAvatarKey && !PROFILE_EDIT_STATE.profile?.profile_picture_url && !PROFILE_EDIT_STATE.uploadedFile) {
-            PROFILE_EDIT_STATE.selectedAvatarKey = window.tyfitProfile.getRandomAvatar().key;
+            PROFILE_EDIT_STATE.selectedAvatarKey = window.tyfitProfile.getDefaultAvatar().key;
         }
 
-        let profilePictureUrl = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
+        let profilePictureUri = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
         if (PROFILE_EDIT_STATE.mode === "upload" && PROFILE_EDIT_STATE.uploadedFile) {
-            const uploaded = await window.tyfitProfile.uploadProfilePicture(PROFILE_EDIT_STATE.uploadedFile, PROFILE_EDIT_STATE.user.id);
-            profilePictureUrl = uploaded.publicUrl || uploaded.path;
+            const oldUri = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
+            const uploaded = await window.tyfitProfile.uploadProfilePicture(
+                PROFILE_EDIT_STATE.uploadedFile,
+                PROFILE_EDIT_STATE.user.id,
+                oldUri
+            );
+            profilePictureUri = uploaded.path;
+        } else if (PROFILE_EDIT_STATE.mode === "avatar") {
+            profilePictureUri = PROFILE_EDIT_STATE.selectedAvatarKey || "avatar-5.svg";
         }
 
-        userAboutPatch.avatar_key = PROFILE_EDIT_STATE.selectedAvatarKey || null;
-        profilePatch.profile_picture_url = profilePictureUrl || null;
-        if (PROFILE_EDIT_STATE.mode === "avatar") profilePatch.profile_picture_url = null;
+        userAboutPatch.avatar_key = PROFILE_EDIT_STATE.mode === "avatar" ? (PROFILE_EDIT_STATE.selectedAvatarKey || null) : null;
+        profilePatch.profile_picture_url = profilePictureUri || null;
 
         await window.tyfitProfile.saveProfileEdits({ userId: PROFILE_EDIT_STATE.user.id, profilePatch, userAboutPatch });
 
@@ -718,7 +737,6 @@ async function handleProfileSave(event) {
         PROFILE_EDIT_STATE.uploadedFile = null;
 
         if (PROFILE_EDIT_STATE.previewObjectUrl) { URL.revokeObjectURL(PROFILE_EDIT_STATE.previewObjectUrl); PROFILE_EDIT_STATE.previewObjectUrl = ""; }
-
         updatePreviewImage();
         updateDisplayName();
         showProfileStatus("Profile updated successfully.", "success");
@@ -872,14 +890,21 @@ async function loadProfileEditPage() {
 
         PROFILE_EDIT_STATE.profile = profile || { id: user.id, email: user.email || "" };
         PROFILE_EDIT_STATE.userAbout = hydratedAbout;
-        PROFILE_EDIT_STATE.selectedAvatarKey = hydratedAbout.avatar_key || window.tyfitProfile.getRandomAvatar().key;
+
+        // Determine selected avatar key: prefer profile_picture_uri if it's an avatar key,
+        // then fall back to user_about.avatar_key, then the default avatar
+        const savedUri = PROFILE_EDIT_STATE.profile?.profile_picture_url || "";
+        const uriIsAvatarKey = savedUri && window.tyfitProfile.isAvatarKey(savedUri);
+        PROFILE_EDIT_STATE.selectedAvatarKey = uriIsAvatarKey
+            ? savedUri
+            : (hydratedAbout.avatar_key || window.tyfitProfile.getDefaultAvatar().key);
 
         const avatarGrid = pe("profileAvatarGrid");
         window.tyfitProfile.renderAvatarPicker(avatarGrid, PROFILE_EDIT_STATE.selectedAvatarKey);
 
         fillProfileForm(PROFILE_EDIT_STATE.profile, hydratedAbout, user);
 
-        const preferredMode = PROFILE_EDIT_STATE.profile?.profile_picture_url ? "upload" : "avatar";
+        const preferredMode = (savedUri && window.tyfitProfile.isStoragePath(savedUri)) ? "upload" : "avatar";
         setPhotoPickerMode(preferredMode);
 
         if (skeleton) skeleton.style.display = "none";

@@ -64,7 +64,42 @@ body[data-page="training-plan"] .tyfit-main-inner {
 
 .tp-user-toolbar {
   margin: 10px 0 16px;
+  display: grid;
+  gap: 8px;
   width: 100%;
+}
+
+.tp-admin-toolbar-row {
+  display: grid;
+  gap: 8px;
+}
+
+.tp-admin-toolbar-head {
+  display: flex;
+  align-items: center;
+}
+
+.tp-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(108, 99, 255, 0.11);
+  border: 1px solid rgba(108, 99, 255, 0.22);
+  color: #4D45CD;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 20px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.tp-admin-badge i {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
 }
 
 .tp-user-select-wrap {
@@ -72,72 +107,57 @@ body[data-page="training-plan"] .tyfit-main-inner {
   max-width: none;
 }
 
-.tp-user-select-wrap label {
-  display: block;
-  margin: 0 0 8px;
-  font-size: 15px;
-  font-weight: 400;
-  color: #1A1F36;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
 .tp-user-select-control {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
   width: 100%;
-}
-
-.tp-user-select-control > i,
-.tp-user-select-control > svg,
-.tp-user-select-control [data-lucide] {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  color: #64748b;
-  pointer-events: none;
-  z-index: 1;
+  border: 1px solid #DDD8FF;
+  border-radius: 12px;
+  background: #F3F1FF;
 }
 
 .tp-user-select {
-  width: 100%;
-  min-height: 44px;
-  border-radius: 12px;
-  border: 1px solid #d7e2ef;
-  background: #fff;
-  color: #1A1F36;
-  padding: 0 40px 0 12px;
-  font-size: 15px;
-  font-weight: 400;
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #4B3FC7;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1;
+  line-height: 1.3;
   appearance: none;
+  -webkit-appearance: none;
   outline: none;
 }
 
 .tp-user-select option {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 15px;
-  font-weight: 400;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .tp-user-select:focus {
-  border-color: #9dbbf2;
-  box-shadow: 0 0 0 3px rgba(15, 111, 234, 0.12);
+  box-shadow: none;
 }
 
-.tp-user-select-control i,
-.tp-user-select-control svg,
-.tp-user-select-control [data-lucide] {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+.tp-user-leading-icon {
   width: 15px;
   height: 15px;
-  color: #64748b;
+  color: rgba(108, 99, 255, 0.58);
+  flex-shrink: 0;
+}
+
+.tp-user-chevron {
+  width: 14px;
+  height: 14px;
+  color: rgba(108, 99, 255, 0.72);
   pointer-events: none;
+  flex-shrink: 0;
 }
 
 .tp-back-btn,
@@ -230,6 +250,7 @@ body[data-page="training-plan"] .tyfit-main-inner {
   position: relative;
   display: inline-flex;
   z-index: 1;
+  border-top: 1px solid var(--tp-border);
 }
 
 .tp-plan-card-wrap:has(.tp-plan-card-menu.is-open) {
@@ -1389,6 +1410,8 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-form-group textarea { padding-top:13px; min-height:82px; resize:vertical; }
 .tp-form-group input:focus, .tp-form-group textarea:focus { border-color:#9CC7FF; box-shadow:0 0 0 4px rgba(15,111,234,.10); }
 
+.tp-catalog-search-row input { font-size: 16px; }
+
 /* Responsive */
 @media (min-width: 768px) {
   .tp-days-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1450,6 +1473,20 @@ body[data-page="training-plan"] .tyfit-main-inner {
     position: sticky;
     bottom: 0;
     padding-bottom: calc(14px + max(env(safe-area-inset-bottom), 14px));
+  }
+
+  .tp-form-group input,
+  .tp-form-group textarea,
+  .tp-user-select,
+  .tp-catalog-search-row input {
+    font-size: 16px;
+  }
+
+  .tp-form-group input,
+  .tp-form-group textarea,
+  .tp-user-select,
+  .tp-catalog-search-row input {
+    border-radius: 16px;
   }
 }
 @media (max-width: 767px) {
@@ -1632,6 +1669,17 @@ body[data-page="training-plan"] .tyfit-main-inner {
   .tp-input-dialog .tp-modal-footer,
   .tp-confirm-dialog .tp-modal-footer {
     padding-bottom: calc(14px + max(env(safe-area-inset-bottom), 16px));
+  }
+
+  .tp-catalog-search-row input,
+  .tp-form-group input,
+  .tp-form-group textarea,
+  .tp-user-select {
+    font-size: 16px;
+  }
+
+  .tp-catalog-search-row input {
+    min-height: 56px;
   }
 
   .tp-detail-facts { grid-template-columns:1fr; }

@@ -60,7 +60,7 @@ const CATALOG_THEME_MAP = {
 function byId(id) { return document.getElementById(id); }
 function targetUserId() {
   if (TP.isAdmin) {
-    return TP.selectedUserId || TP.currentUserId;
+    return TP.selectedUserId || "";
   }
   return TP.currentUserId;
 }
@@ -282,7 +282,7 @@ async function init() {
     TP.currentUserId = user.id;
     TP.activeAdminId = user.id;
     TP.isAdmin = Boolean(accessState?.isAdmin || (typeof window.isAdminUser === "function" && window.isAdminUser(user)));
-    TP.selectedUserId = user.id;
+    TP.selectedUserId = TP.isAdmin ? "" : user.id;
 
     await hydrateDesktopHeader(user);
     bindShell();
@@ -291,17 +291,23 @@ async function init() {
     if (TP.isAdmin) {
       await loadTrainingUsersList();
       setTrainingUserToolbarVisible(true);
-      if (TP.selectedUserId) {
-        const selectEl = byId("trainingUserSelect");
-        if (selectEl) {
-          selectEl.value = TP.selectedUserId;
-        }
+      const selectEl = byId("trainingUserSelect");
+      if (selectEl) {
+        selectEl.value = "";
       }
     } else {
       setTrainingUserToolbarVisible(false);
     }
 
-    await fetchAndRenderPlans();
+    if (TP.isAdmin && !TP.selectedUserId) {
+      TP.plans = [];
+      TP.selectedPlanId = null;
+      TP.days = [];
+      renderPlanSelector();
+      renderMainContent();
+    } else {
+      await fetchAndRenderPlans();
+    }
     bindTrainingHistory();
     applyHistoryState();
   } catch (err) {
@@ -402,10 +408,15 @@ async function hydrateDesktopHeader(user) {
 
 /* ── DB helpers with title/day_name first and fallback to name ───────── */
 async function dbFetchPlans() {
+  const userId = targetUserId();
+  if (!userId) {
+    return [];
+  }
+
   const { data, error } = await window.supabaseClient
     .from("training_plans")
     .select("*")
-    .eq("user_id", targetUserId())
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data || [];
@@ -661,6 +672,13 @@ function renderMainContent(loading = false) {
   const el = byId("planContent");
   if (!el) return;
   if (loading) { el.innerHTML = `<div class="tp-spinner"><i data-lucide="loader-circle"></i> Loading days…</div>`; setIcons(); return; }
+
+  if (TP.isAdmin && !TP.selectedUserId) {
+    el.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="contact-round"></i></div><h4>Select a client to view training plans</h4><p>Use the admin dropdown above to load a client's workout plans and exercises.</p></div>`;
+    setIcons();
+    return;
+  }
+
   if (!TP.selectedPlanId || TP.plans.length === 0) {
     el.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="dumbbell"></i></div><h4>No training plan yet</h4><p>Create your first workout routine and add up to seven training days.</p><button class="tp-btn tp-btn-primary" id="emptyCreatePlanBtn"><i data-lucide="plus"></i>Create Plan</button></div>`;
     setIcons(); byId("emptyCreatePlanBtn")?.addEventListener("click", handleCreatePlan); return;
@@ -1127,6 +1145,11 @@ function bindExerciseRowSwipeActions() {
 
 /* ── CRUD handlers ─────────────────── */
 async function handleCreatePlan() {
+  if (TP.isAdmin && !TP.selectedUserId) {
+    showToast("Select a client first.");
+    return;
+  }
+
   if (TP.plans.length >= MAX_TRAINING_PLANS) {
     showToast("Maximum 3 training plans allowed.");
     return;
@@ -1636,7 +1659,7 @@ async function loadTrainingUsersList() {
   if (TP.isAdmin && TP.users.length <= 1) {
     console.warn("Admin can currently see only one profile row. Check Supabase RLS policy on profiles SELECT for admin role.");
   }
-  selectEl.innerHTML = '<option value="">Select user...</option>';
+  selectEl.innerHTML = '<option value="">Select</option>';
 
   TP.users.forEach((user) => {
     const fullName = (user.full_name || user.email || "Unnamed User").trim();
@@ -1647,10 +1670,6 @@ async function loadTrainingUsersList() {
     option.textContent = `${fullName} - ${roleLabel}`;
     selectEl.appendChild(option);
   });
-
-  if (!TP.selectedUserId && TP.users.length) {
-    TP.selectedUserId = TP.users[0].id;
-  }
 }
 
 async function handleTrainingUserSelection(userId) {

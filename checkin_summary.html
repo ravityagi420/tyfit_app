@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
-    <link href="css/checkin.css?v=20260525b" rel="stylesheet">
+    <link href="css/checkin.css?v=20260530d" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-summary">
     <header class="tyfit-mobile-topbar">
@@ -89,7 +89,10 @@
                                 <h1 class="checkin-title">Check-in Summary</h1>
                                 <p class="checkin-subtitle">Review your consistency timeline and edit any day when needed.</p>
                             </div>
-                            <button type="button" class="checkin-secondary-btn" id="summaryEditDayBtn"><i data-lucide="pencil"></i> Edit Day</button>
+                            <div class="checkin-title-actions">
+                                <a class="checkin-secondary-btn" href="journey.html"><i data-lucide="mountain"></i> View Journey</a>
+                                <button type="button" class="checkin-secondary-btn" id="summaryEditDayBtn"><i data-lucide="pencil"></i> Edit Day</button>
+                            </div>
                         </div>
                     </section>
 
@@ -124,14 +127,7 @@
             </div>
         </main>
     </div>
-
-    <nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">
-        <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
-        <a href="portal/diet_chart.html"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-        <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
-        <a href="training_plan.html"><i data-lucide="dumbbell"></i><span>Training</span></a>
-        <a href="profile.html"><i data-lucide="user"></i><span>Profile</span></a>
-    </nav>
+    <div data-tyfit-bottom-nav></div>
 
     <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
     <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">

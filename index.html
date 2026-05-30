@@ -12,7 +12,7 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260525h" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260530k" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="home">
     <header class="tyfit-mobile-topbar">
@@ -134,42 +134,10 @@
                     <p id="homeSubtitle">Let’s build consistency today</p>
                 </section>
 
-                <section class="tyfit-hero-card" aria-label="Motivation hero">
-                    <div class="tyfit-hero-inline">
-                        <div class="tyfit-hero-content">
-                            <span class="tyfit-hero-badge">
-                                <i data-lucide="sparkles"></i>
-                                Today's Focus
-                            </span>
-
-                            <h4 id="heroTitle" class="tyfit-hero-title">Small habits.<br><span>Big transformation.</span></h4>
-
-                            <div class="tyfit-hero-chips" aria-label="Today's focus goals">
-                                <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/nutrition-leaf.svg" alt="" aria-hidden="true">Nutrition</span>
-                                <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/training-dumbbell.svg" alt="" aria-hidden="true">Training</span>
-                                <span class="tyfit-hero-chip"><img src="assets/tyfit_img/custom_icons/recovery-moon.svg" alt="" aria-hidden="true">Recovery</span>
-                            </div>
-
-                            <a class="tyfit-hero-cta" href="daily_checkin.html">
-                                Log My Day &rarr;
-                            </a>
-                        </div>
-
-                        <!-- Today's check-in ring -->
-                        <div class="tyfit-hero-ring-wrap" aria-hidden="true">
-                            <svg class="tyfit-hero-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="heroCheckinRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
-                                        <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
-                                    </linearGradient>
-                                </defs>
-                                <circle cx="60" cy="60" r="40" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="10"/>
-                                <circle id="heroCheckinRingProgress" cx="60" cy="60" r="40" fill="none" stroke="url(#heroCheckinRingGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 251.33" transform="rotate(-90 60 60)"/>
-                                <text x="60" y="60" text-anchor="middle" dominant-baseline="central" class="tyfit-hero-ring-value" id="heroCheckinPercent">—</text>
-                            </svg>
-                        </div>
+                <section class="tyfit-hero-card tyfit-journey-home-card is-loading" id="homeJourneyHero" aria-label="Journey status">
+                    <div class="tyfit-journey-home-loading">
+                        <span class="tyfit-page-loader__spinner" aria-hidden="true"></span>
+                        <span>Loading journey...</span>
                     </div>
                 </section>
 
@@ -205,6 +173,13 @@
                     </div>
                     <div class="tyfit-tools-grid" id="homeToolsGrid"></div>
                 </section>
+
+                <nav class="tyfit-legal-links" aria-label="Legal links">
+                    <a href="privacy-policy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms</a>
+                    <a href="cookie-policy.html">Cookie Policy</a>
+                    <a href="data-processing.html">Data Processing</a>
+                </nav>
 
                 <section class="tyfit-gdpr-section" aria-label="GDPR compliant">
                     <img
@@ -290,6 +265,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/login.js?v=20260525m"></script>
-    <script src="js/home.js?v=20260525z"></script>
+    <script src="js/journey.js?v=20260530a"></script>
+    <script src="js/home.js?v=20260530a"></script>
 </body>
 </html>

@@ -113,17 +113,6 @@ function renderMacroBars(item) {
     const carbs = Number(item?.carbs) || 0;
     const protein = Number(item?.protein) || 0;
     const fats = Number(item?.fats) || 0;
-    const fibre = item?.fibre === null || item?.fibre === undefined || item?.fibre === ""
-        ? null
-        : Number(item.fibre);
-
-    const fibreHtml = fibre !== null && !Number.isNaN(fibre)
-        ? `
-            <span class="diet-view-macro fibre">
-                <i class="fa fa-seedling" aria-hidden="true"></i> Fi:${formatNumber(fibre)} gms
-            </span>
-        `
-        : "";
 
     return `
         <div class="food-macro-bars">
@@ -136,7 +125,6 @@ function renderMacroBars(item) {
             <span class="diet-view-macro fats">
                 <i class="fa fa-tint" aria-hidden="true"></i> F:${formatNumber(fats)} gms
             </span>
-            ${fibreHtml}
         </div>
     `;
 }
@@ -509,8 +497,7 @@ async function deleteFoodItem(foodId) {
         return;
     }
 
-    if (!canEditFoodItem(item)) {
-        await showDialogAlert("You don't have permission to delete this food item.", { title: "Access Denied" });
+    if (!canDeleteFoodItem(item)) {
         return;
     }
 
@@ -552,6 +539,10 @@ function canEditFoodItem(item) {
     return Boolean(item.is_custom && item.created_by_user_id === foodCatalogState.currentUserId);
 }
 
+function canDeleteFoodItem(item) {
+    return Boolean(foodCatalogState.isAdmin);
+}
+
 function renderFoodCatalogTable(items) {
     const container = getEl("foodCatalogTableContainer");
     if (!container) {
@@ -579,14 +570,19 @@ function renderFoodCatalogTable(items) {
         const foodName = escapeHtml(item.food_name);
         const foodUnit = escapeHtml(item.unit_of_quantity || "");
         const canEdit = canEditFoodItem(item);
-        const actionButtons = canEdit ? `
+        const canDelete = canDeleteFoodItem(item);
+        const actionButtons = (canEdit || canDelete) ? `
                             <div class="food-row-actions food-row-actions-desktop">
+                                ${canEdit ? `
                                 <button type="button" class="food-action-btn food-action-btn-edit js-edit-food" data-food-id="${foodId}" aria-label="Edit ${foodName}" title="Edit">
                                     <i class="fa fa-pen"></i>
                                 </button>
+                                ` : ""}
+                                ${canDelete ? `
                                 <button type="button" class="food-action-btn food-action-btn-delete js-delete-food" data-food-id="${foodId}" aria-label="Delete ${foodName}" title="Delete">
                                     <i class="fa fa-trash"></i>
                                 </button>
+                                ` : ""}
                             </div>
                             <div class="food-row-actions-mobile">
                                 <div class="food-item-menu-wrap" data-food-id="${foodId}">
@@ -594,12 +590,16 @@ function renderFoodCatalogTable(items) {
                                         <i class="fa fa-ellipsis-v"></i>
                                     </button>
                                     <div class="food-item-menu" data-food-id="${foodId}">
+                                        ${canEdit ? `
                                         <button type="button" class="food-item-menu-item js-food-action-edit" data-food-id="${foodId}">
                                             <i class="fa fa-pen"></i> Edit item
                                         </button>
+                                        ` : ""}
+                                        ${canDelete ? `
                                         <button type="button" class="food-item-menu-item danger js-food-action-delete" data-food-id="${foodId}">
                                             <i class="fa fa-trash"></i> Delete
                                         </button>
+                                        ` : ""}
                                     </div>
                                 </div>
                             </div>` : "";
@@ -623,7 +623,7 @@ function renderFoodCatalogTable(items) {
                     <div class="diet-view-item-macros">
                         ${macroChart}
                     </div>
-                    ${canEdit ? '<div class="food-catalog-swipe-overlay diet-swipe-overlay"><i class="fa fa-trash-alt"></i></div>' : ""}
+                    ${canDelete ? '<div class="food-catalog-swipe-overlay diet-swipe-overlay"><i class="fa fa-trash-alt"></i></div>' : ""}
                 </div>
             </div>
         `;
@@ -753,7 +753,7 @@ function setupFoodCatalogMobileInteractions(container) {
     });
 
     // Add swipe delete on touch devices up to 991px (mobile + tablet) — admin only
-    if ('ontouchstart' in window) {
+    if ('ontouchstart' in window && foodCatalogState.isAdmin) {
         addFoodCatalogSwipeDelete();
     }
 }
@@ -784,6 +784,10 @@ function addFoodCatalogSwipeDelete() {
 
         swipeElement = card;
         swipeOverlay = swipeElement.querySelector('.food-catalog-swipe-overlay');
+        if (!swipeOverlay) {
+            swipeElement = null;
+            return;
+        }
         startX = event.touches[0].clientX;
         startY = event.touches[0].clientY;
         currentX = startX;

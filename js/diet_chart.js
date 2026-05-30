@@ -3301,7 +3301,7 @@ async function loadUsersList() {
         console.warn("Admin can currently see only one profile row. Check Supabase RLS policy on profiles SELECT for admin role.");
     }
 
-    selectEl.innerHTML = '<option value="">Select user...</option>';
+    selectEl.innerHTML = '<option value="">Select</option>';
     DIET_STATE.users.forEach((user) => {
         const fullName = (user.full_name || "Unnamed User").trim();
         const roleText = user.role ? user.role.replace(/[_-]/g, " ") : "user";
@@ -4438,6 +4438,9 @@ function resetDietChartPage() {
     }
 
     hidePageStatus();
+    if (DIET_STATE.isAdmin) {
+        showPageStatus("Select a client from the admin dropdown to view diet data.", "info");
+    }
     renderDietChartSelector();
     setSelectedDietChartName("Diet Chart");
     setDietDirty(false);
@@ -4580,6 +4583,7 @@ async function handleUserSelection(userId) {
         DIET_STATE.activeChartIsLocked = false;
         hideLoadingSpinner();
         setEditorVisibility(false);
+        showPageStatus("Select a client from the dropdown to load diet charts.", "info");
         return;
     }
 

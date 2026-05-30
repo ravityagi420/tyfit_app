@@ -71,6 +71,9 @@
             const value = Number.isFinite(num) ? (Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.00$/, "")) : String(goal.target_value);
             return `Target: ${value}${goal.target_unit ? ` ${goal.target_unit}` : ""}`;
         }
+        if (String(goal.goal_category || "").toLowerCase().includes("diet")) {
+            return "Target: Diet plan";
+        }
         return "Target not set";
     }
 
@@ -187,6 +190,15 @@
         }
     }
 
+    function flushPendingChanges() {
+        if (!STATE.hasPendingChanges || STATE.isSaving) return;
+        return saveCheckin({
+            redirectOnSuccess: false,
+            showSuccessToast: false,
+            isAutosave: true
+        });
+    }
+
     async function runAutosaveIfNeeded() {
         STATE.autosaveTimer = null;
         if (!STATE.hasPendingChanges || STATE.isSaving) return;
@@ -200,6 +212,9 @@
     function markPendingChanges() {
         STATE.hasPendingChanges = true;
         clearAutosaveTimer();
+        if (!STATE.checkinId) {
+            return;
+        }
         STATE.autosaveTimer = setTimeout(() => {
             runAutosaveIfNeeded().catch((error) => {
                 console.error("autosave error:", error);
@@ -295,6 +310,21 @@
         const manageBtn = el("manageGoalsBtn");
         if (!wrap || !submitWrap) return;
 
+        if (STATE.access?.isAdmin && !STATE.targetUserId) {
+            wrap.innerHTML = `<section class="checkin-empty-card">
+                <span class="checkin-empty-icon"><i data-lucide="user-round-search"></i></span>
+                <h3>Select a client to begin</h3>
+                <p>Pick a client from the admin dropdown above to load their goals, progress, and daily check-in details.</p>
+            </section>`;
+            submitWrap.classList.add("checkin-hidden");
+            if (manageBtn) {
+                manageBtn.disabled = true;
+                manageBtn.innerHTML = '<i data-lucide="settings-2"></i> Manage Goals';
+            }
+            refreshIcons();
+            return;
+        }
+
         if (!STATE.goals.length) {
             wrap.innerHTML = `<section class="checkin-empty-card">
                 <span class="checkin-empty-icon"><i data-lucide="target"></i></span>
@@ -304,6 +334,7 @@
             </section>`;
             submitWrap.classList.add("checkin-hidden");
             if (manageBtn) {
+                manageBtn.disabled = false;
                 manageBtn.innerHTML = '<i data-lucide="plus"></i> Add Goal';
             }
             refreshIcons();
@@ -312,6 +343,7 @@
 
         submitWrap.classList.remove("checkin-hidden");
         if (manageBtn) {
+            manageBtn.disabled = false;
             manageBtn.innerHTML = '<i data-lucide="settings-2"></i> Manage Goals';
         }
 
@@ -551,29 +583,53 @@
         const select = el("checkinUserSelect");
         if (!toolbar || !select || !STATE.access?.isAdmin) return;
 
-        const { data, error } = await window.supabaseClient
+        // Try with role/is_admin columns first; fall back to basic columns if those don't exist
+        let data = null;
+        let usedExtendedCols = false;
+        const extendedResult = await window.supabaseClient
             .from("profiles")
             .select("id, first_name, last_name, full_name, email, role, is_admin")
             .order("full_name", { ascending: true });
 
-        if (error) {
-            console.warn("daily checkin user list warning:", error.message || error);
-            return;
+        if (!extendedResult.error) {
+            data = extendedResult.data;
+            usedExtendedCols = true;
+        } else {
+            const basicResult = await window.supabaseClient
+                .from("profiles")
+                .select("id, first_name, last_name, full_name, email")
+                .order("full_name", { ascending: true });
+
+            if (basicResult.error) {
+                console.warn("daily checkin user list warning:", basicResult.error.message || basicResult.error);
+                return;
+            }
+            data = basicResult.data;
         }
 
-        STATE.users = (data || []).filter((item) => item?.id).filter((item) => {
+        STATE.users = (data || []).filter((item) => {
+            if (!item?.id) return false;
             if (item.id === STATE.access.user.id) return true;
-            if (item.is_admin === true) return false;
-            const role = String(item.role || "").toLowerCase();
-            return role !== "admin";
+            if (usedExtendedCols) {
+                if (item.is_admin === true) return false;
+                const role = String(item.role || "").toLowerCase();
+                if (role === "admin") return false;
+            }
+            return true;
         });
 
-        select.innerHTML = STATE.users.map((user) => `<option value="${user.id}">${escapeHtml(buildUserLabel(user))}</option>`).join("");
-        STATE.targetUserId = select.value || STATE.access.user.id;
+        select.innerHTML = `<option value="">Select</option>${STATE.users.map((user) => `<option value="${user.id}">${escapeHtml(buildUserLabel(user))}</option>`).join("")}`;
+        STATE.targetUserId = "";
         toolbar.classList.remove("checkin-hidden");
+        refreshIcons();
     }
 
     async function loadSubmittedDates() {
+        if (!STATE.targetUserId) {
+            STATE.checkinsByDate = new Map();
+            return;
+        }
+
         const { data, error } = await window.supabaseClient
             .from("daily_checkins")
             .select("checkin_date")
@@ -589,6 +645,12 @@
     }
 
     async function loadGoals() {
+        if (!STATE.targetUserId) {
+            STATE.goals = [];
+            STATE.goalInputs = {};
+            return;
+        }
+
         const { data, error } = await window.supabaseClient
             .from("checkin_goals")
             .select("*")
@@ -607,6 +669,10 @@
     }
 
     async function getExistingCheckin() {
+        if (!STATE.targetUserId) {
+            return null;
+        }
+
         const { data, error } = await window.supabaseClient
             .from("daily_checkins")
             .select("*")
@@ -707,6 +773,16 @@
     async function loadCheckinForDate() {
         clearAutosaveTimer();
         STATE.hasPendingChanges = false;
+
+        if (!STATE.targetUserId) {
+            STATE.checkinId = "";
+            const submitWithoutTarget = el("submitCheckinBtn");
+            if (submitWithoutTarget) {
+                submitWithoutTarget.innerHTML = '<i data-lucide="save"></i> Save Check-in';
+            }
+            return;
+        }
+
         const checkin = await getExistingCheckin();
         STATE.checkinId = checkin?.id || "";
 
@@ -825,6 +901,11 @@
 
         if (STATE.isSaving) return;
 
+        if (STATE.access?.isAdmin && !STATE.targetUserId) {
+            showToast("Select a client first.");
+            return;
+        }
+
         if (!STATE.goals.length) {
             showToast("Add goals first.");
             return;
@@ -911,6 +992,21 @@
                 return;
             }
 
+            let journeyResult = { awarded: false, reason: wasExistingCheckin ? "checkin-update" : "unavailable" };
+            if (!isAutosave && !wasExistingCheckin && window.tyfitJourney?.awardJourneyProgressIfEligible) {
+                try {
+                    journeyResult = await window.tyfitJourney.awardJourneyProgressIfEligible({
+                        userId: STATE.targetUserId,
+                        dailyCheckinId: checkinId,
+                        checkinDate: STATE.selectedDate,
+                        overallScore: adherence
+                    });
+                } catch (error) {
+                    console.warn("journey award warning:", error?.message || error);
+                    journeyResult = { awarded: false, reason: "award-error" };
+                }
+            }
+
             clearAutosaveTimer();
             STATE.hasPendingChanges = false;
 
@@ -921,7 +1017,24 @@
             }
 
             if (redirectOnSuccess) {
-                const nextUrl = `checkin_success.html?date=${encodeURIComponent(STATE.selectedDate)}&adherence=${encodeURIComponent(adherence)}&done=${encodeURIComponent(doneCount)}&partial=${encodeURIComponent(partialCount)}&missed=${encodeURIComponent(missedCount)}`;
+                const params = new URLSearchParams({
+                    date: STATE.selectedDate,
+                    adherence: String(adherence),
+                    score: String(adherence),
+                    done: String(doneCount),
+                    partial: String(partialCount),
+                    missed: String(missedCount),
+                    state: wasExistingCheckin ? "updated" : "submitted",
+                    journey_awarded: journeyResult.awarded ? "1" : "0"
+                });
+                if (journeyResult.awarded) {
+                    params.set("xp", String(journeyResult.xpAwarded || journeyResult.event?.xp_awarded || 0));
+                    params.set("streak", String(journeyResult.journey?.current_streak || journeyResult.event?.streak_after || 0));
+                    params.set("stage", String(journeyResult.journey?.current_stage || journeyResult.event?.stage_after || 1));
+                    params.set("title", journeyResult.journey?.current_title || journeyResult.event?.title_after || "");
+                    params.set("total_xp", String(journeyResult.journey?.total_xp || 0));
+                }
+                const nextUrl = `checkin_success.html?${params.toString()}`;
                 window.location.href = nextUrl;
                 return;
             }
@@ -1100,6 +1213,10 @@
         const manage = el("manageGoalsBtn");
         if (manage) {
             manage.addEventListener("click", () => {
+                if (STATE.access?.isAdmin && !STATE.targetUserId) {
+                    showToast("Select a client first.");
+                    return;
+                }
                 window.location.href = getManageGoalsHref();
             });
         }
@@ -1108,7 +1225,7 @@
         if (submit) {
             submit.addEventListener("click", async () => {
                 await saveCheckin({
-                    redirectOnSuccess: false,
+                    redirectOnSuccess: true,
                     showSuccessToast: true,
                     isAutosave: false
                 });
@@ -1124,8 +1241,21 @@
                 await loadGoals();
                 await loadCheckinForDate();
                 renderGoalGroups();
+                refreshIcons();
             });
         }
+    }
+
+    function bindUnloadFlush() {
+        window.addEventListener("pagehide", () => {
+            flushPendingChanges();
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                flushPendingChanges();
+            }
+        });
     }
 
     function setGreeting() {
@@ -1143,6 +1273,7 @@
         bindGoalNoteModal();
         bindActionSheet();
         bindStaticActions();
+        bindUnloadFlush();
 
         const params = new URLSearchParams(window.location.search);
         const todayIso = formatISODate(new Date());
@@ -1160,8 +1291,15 @@
         }
 
         STATE.targetUserId = STATE.access.user.id;
-        if (STATE.access.isAdmin) {
+        const isAdmin = Boolean(
+            STATE.access.isAdmin ||
+            (typeof window.isAdminUser === "function" && window.isAdminUser(STATE.access.user))
+        );
+        STATE.access = { ...STATE.access, isAdmin };
+        if (isAdmin) {
             await loadUsersForAdmin();
+            refreshIcons();
+            STATE.targetUserId = "";
 
             const userFromQuery = params.get("user");
             if (userFromQuery) {

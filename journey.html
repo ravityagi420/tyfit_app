@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Journey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track your Tyfit mountain journey">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260530k" rel="stylesheet">
+</head>
+<body class="tyfit-app" data-page="journey">
+    <header class="tyfit-mobile-topbar">
+        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
+        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home">
+            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span>
+        </a>
+        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown"><button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i></button></div>
+    </header>
+
+    <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
+        <div class="sidebar-inner">
+            <div class="tyfit-mobile-drawer-head">
+                <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu"><i data-lucide="x"></i></button>
+                <a class="tyfit-logo-link" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a>
+            </div>
+            <div class="sidebar-menu">
+                <p class="sidebar-section-label">MAIN</p>
+                <a href="index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                <a href="portal/diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                <a href="training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">TOOLS</p>
+                <a href="daily_checkin.html" class="sidebar-nav-item"><i data-lucide="clipboard-check"></i><span>Daily Check-in</span></a>
+                <a href="journey.html" class="sidebar-nav-item active"><i data-lucide="mountain"></i><span>Journey</span></a>
+                <a href="checkin_summary.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i><span>Check-in Summary</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">ACCOUNT</p>
+                <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+            </div>
+        </div>
+    </aside>
+    <div class="tyfit-mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
+
+    <div class="tyfit-layout" id="tyfitLayout">
+        <aside class="tyfit-sidebar sidebar" id="tyfitSidebar">
+            <div class="sidebar-inner">
+                <div class="tyfit-sidebar-head"><a class="tyfit-logo-link sidebar-logo" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a></div>
+                <div class="sidebar-menu">
+                    <p class="sidebar-section-label">MAIN</p>
+                    <a href="index.html" class="sidebar-nav-item"><i data-lucide="home"></i><span>Home</span></a>
+                    <a href="portal/diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                    <a href="training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">TOOLS</p>
+                    <a href="daily_checkin.html" class="sidebar-nav-item"><i data-lucide="clipboard-check"></i><span>Daily Check-in</span></a>
+                    <a href="journey.html" class="sidebar-nav-item active"><i data-lucide="mountain"></i><span>Journey</span></a>
+                    <a href="checkin_summary.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i><span>Check-in Summary</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">ACCOUNT</p>
+                    <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                </div>
+            </div>
+        </aside>
+
+        <button class="tyfit-sidebar-toggle-floating" id="sidebarCollapseBtn" aria-label="Toggle sidebar"><i data-lucide="panel-left-close"></i></button>
+
+        <main class="tyfit-main">
+            <div class="tyfit-main-inner">
+                <section class="journey-page-head">
+                    <p>My Journey</p>
+                    <h1>Conquer Everest</h1>
+                </section>
+
+                <section class="journey-hero-panel" id="journeyHeroPanel">
+                    <div class="tyfit-journey-home-loading">
+                        <span class="tyfit-page-loader__spinner" aria-hidden="true"></span>
+                        <span>Loading journey...</span>
+                    </div>
+                </section>
+
+                <section class="journey-stats-grid" id="journeyStatsGrid"></section>
+
+                <section class="journey-card">
+                    <div class="journey-section-head">
+                        <h2>Milestone Path</h2>
+                    </div>
+                    <div class="journey-milestone-list" id="journeyMilestones"></div>
+                </section>
+
+                <section class="journey-card">
+                    <div class="journey-section-head">
+                        <h2>Recent Streak</h2>
+                        <span>Last 14 days</span>
+                    </div>
+                    <div class="journey-calendar" id="journeyCalendar"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div data-tyfit-bottom-nav></div>
+    <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
+    <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
+        <header><h4>Quick Actions</h4><button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close"><i data-lucide="x"></i></button></header>
+        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i> Log Progress</button>
+        <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
+    </section>
+    <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="lib/lucide/lucide.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/login.js?v=20260523l"></script>
+    <script src="js/profile-utils.js?v=20260423d"></script>
+    <script src="js/shell.js"></script>
+    <script src="js/journey.js?v=20260530a"></script>
+    <script src="js/journey_page.js?v=20260530a"></script>
+</body>
+</html>

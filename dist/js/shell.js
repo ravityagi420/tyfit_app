@@ -28,6 +28,15 @@
         loaderVisibleAt = Date.now();
     }
 
+    function isInternalLink(link) {
+        if (!link || !link.getAttribute) return false;
+        if (link.target && link.target !== '_self') return false;
+        if (link.hasAttribute('download')) return false;
+
+        const url = new URL(link.getAttribute('href'), window.location.href);
+        return url.origin === window.location.origin && url.href !== window.location.href;
+    }
+
     function unmountPageLoader() {
         const loader = byId('tyfitPageLoader');
         if (!loader) return;
@@ -41,6 +50,19 @@
             loader.classList.add('is-leaving');
             setTimeout(() => loader.remove(), 220);
         }, wait);
+    }
+
+    function unmountPageLoaderWhenReady() {
+        if (document.readyState === 'complete') {
+            refreshIcons();
+            unmountPageLoader();
+            return;
+        }
+
+        window.addEventListener('load', () => {
+            refreshIcons();
+            unmountPageLoader();
+        }, { once: true });
     }
 
     function refreshIcons() {
@@ -174,6 +196,48 @@
         showToast._t = setTimeout(() => toast.classList.remove('is-show'), 2200);
     }
 
+    function getRootPrefix() {
+        return window.location.pathname.includes('/portal/') ? '../' : '';
+    }
+
+    function getActiveBottomNavKey() {
+        const page = document.body?.dataset?.page || '';
+        if (page === 'home') return 'home';
+        if (page === 'diet-chart') return 'diet';
+        if (page === 'training-plan') return 'training';
+        if (page === 'journey') return 'profile';
+        if (page === 'profile' || page === 'profile-edit' || page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') {
+            return 'profile';
+        }
+        return '';
+    }
+
+    function mountBottomNav() {
+        const placeholder = document.querySelector('[data-tyfit-bottom-nav]');
+        if (!placeholder || document.querySelector('.tyfit-mobile-bottom-nav')) return;
+
+        const prefix = getRootPrefix();
+        const active = getActiveBottomNavKey();
+        const navItems = [
+            { key: 'home', href: `${prefix}index.html`, icon: 'home', label: 'Home' },
+            { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'clipboard-list', label: 'Diet Chart' },
+            { key: 'training', href: `${prefix}training_plan.html`, icon: 'dumbbell', label: 'Training' },
+            { key: 'profile', href: `${prefix}profile.html`, icon: 'user', label: 'Profile' },
+        ];
+
+        placeholder.outerHTML = [
+            '<nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">',
+            navItems.slice(0, 2).map((item) => (
+                `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
+            )).join(''),
+            '<button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>',
+            navItems.slice(2).map((item) => (
+                `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
+            )).join(''),
+            '</nav>',
+        ].join('');
+    }
+
     if (document.body) {
         mountPageLoader();
     } else {
@@ -183,6 +247,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        mountBottomNav();
         optimizeImages();
 
         document.querySelectorAll('.tyfit-sidebar .sidebar-nav-item').forEach((item) => {
@@ -282,9 +347,33 @@
             });
         });
 
+        document.addEventListener('click', function (event) {
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+            const link = event.target.closest('a[href]');
+            if (!isInternalLink(link)) return;
+
+            event.preventDefault();
+            mountPageLoader();
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    window.location.href = new URL(link.getAttribute('href'), window.location.href).href;
+                }, 60);
+            });
+        }, true);
+
         document.querySelectorAll('.tyfit-sheet-action').forEach(btn => {
             btn.addEventListener('click', () => {
-                showToast((btn.dataset.action === 'meal' ? 'Add Meal' : 'Log Weight') + ' clicked.');
+                const action = String(btn.dataset.action || '').toLowerCase();
+                const inPortal = window.location.pathname.includes('/portal/');
+                const checkinHref = inPortal ? '../daily_checkin.html' : 'daily_checkin.html';
+
+                if (action === 'checkin' || action === 'meal') {
+                    closeSheet();
+                    window.location.href = checkinHref;
+                    return;
+                }
+
+                showToast('Log Weight clicked.');
                 closeSheet();
             });
         });
@@ -293,10 +382,6 @@
         refreshIcons();
 
         document.addEventListener('component-loaded', refreshIcons);
-
-        window.addEventListener('load', () => {
-            refreshIcons();
-            unmountPageLoader();
-        }, { once: true });
+        unmountPageLoaderWhenReady();
     });
 }());

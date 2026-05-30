@@ -5,8 +5,14 @@ import { minify } from "html-minifier-terser";
 const projectRoot = process.cwd();
 const distDir = path.join(projectRoot, "dist");
 
-const SKIP_DIRS = new Set(["node_modules", ".git", "dist"]);
-const SKIP_FILES = new Set(["package-lock.json"]);
+const SKIP_DIRS = new Set(["node_modules", ".git", "dist", ".tmp", ".vscode", "scripts"]);
+const SKIP_FILES = new Set([
+  ".DS_Store",
+  ".gitignore",
+  "package.json",
+  "package-lock.json",
+  "README.md",
+]);
 
 const htmlOptions = {
   collapseWhitespace: true,

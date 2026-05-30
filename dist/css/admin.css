@@ -1,4 +1,17 @@
 /* ============================================
+   FOOD CATALOG - FONT OVERRIDE (match sidebar Inter)
+   ============================================ */
+body[data-page="food-catalog"],
+body[data-page="food-catalog"] .food-catalog-entry-card,
+body[data-page="food-catalog"] .diet-view-item-name,
+body[data-page="food-catalog"] .diet-view-item-qty,
+body[data-page="food-catalog"] .catalog-section-label,
+body[data-page="food-catalog"] .food-catalog-sticky-controls {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 400;
+}
+
+/* ============================================
    ADMIN PAGES - TAB BAR STYLES
    ============================================ */
 
@@ -136,6 +149,40 @@
     margin-right: auto;
 }
 
+body[data-page="diet-chart"] .tp-hero-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 0 8px 18px;
+}
+
+body[data-page="diet-chart"] .tp-eyebrow {
+    margin: 0 0 4px;
+    color: #0f6fea;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+}
+
+body[data-page="diet-chart"] .tp-page-title {
+    margin: 0;
+    color: #101828;
+    font-size: clamp(30px, 4vw, 42px);
+    line-height: 1.04;
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    display: block;
+}
+
+body[data-page="diet-chart"] .tp-page-subtitle {
+    margin: 8px 0 0;
+    color: #667085;
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 400;
+}
+
 /* ============================================
    DIET CHART PAGE - MEAL CARDS
    ============================================ */
@@ -256,13 +303,12 @@
    ============================================ */
 
 .food-list-card {
-    height: 100%;
-}
-
-.food-list-card {
-    background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
-    border-top: 4px solid #2b6cb0;
-    border-radius: 14px;
+    height: auto;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
 }
 
 .food-form-modal-content {
@@ -282,7 +328,7 @@
 
 .food-form-modal-content .modal-header {
     border-bottom: 1px solid #e2e8f0;
-    background: linear-gradient(180deg, #fffaf0 0%, #fff3d6 100%);
+    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
     border-radius: 14px 14px 0 0;
 }
 
@@ -799,6 +845,15 @@
 .catalog-search-input:focus {
     border-color: #7bafd4 !important;
     background: #fff;
+}
+
+#selectFoodModal .catalog-search-wrap .catalog-search-suggestions {
+    z-index: 1065;
+    max-height: 240px;
+}
+
+#selectFoodModal .catalog-search-wrap .food-search-suggestion-item.is-active {
+    background-color: #f3f8ff;
 }
 
 /* ── Diet-themed catalog pick cards ── */
@@ -1948,15 +2003,45 @@
    ============================================ */
 
 .diet-user-toolbar {
+    display: grid;
+    gap: 8px;
+}
+
+.diet-admin-toolbar-row {
+    display: grid;
+    gap: 8px;
+}
+
+.diet-admin-toolbar-head {
     display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    align-items: center;
+}
+
+.diet-admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(108, 99, 255, 0.11);
+    border: 1px solid rgba(108, 99, 255, 0.22);
+    color: #4D45CD;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 20px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.diet-admin-badge i {
+    width: 11px;
+    height: 11px;
+    flex-shrink: 0;
 }
 
 .diet-user-select-wrap {
-    flex: 1 1 320px;
+    width: 100%;
 }
 
 .diet-chart-switcher {
@@ -2047,6 +2132,21 @@
     color: #475569;
 }
 
+.tp-plan-card-menu-btn.is-pinned,
+.tp-plan-card-menu-btn:disabled {
+    cursor: default;
+    color: var(--diet-accent);
+}
+
+.tp-plan-card-menu-btn.is-pinned svg {
+    width: 10px;
+    height: 10px;
+    stroke-width: 1.9;
+    transform: rotate(30deg);
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
 .tp-plan-card-menu {
     position: absolute;
     top: 30px;
@@ -2070,7 +2170,7 @@
     inset: 0;
     z-index: 1200;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -2085,10 +2185,10 @@
 .tp-plan-card-sheet-panel {
     position: relative;
     z-index: 1;
-    width: min(100%, 440px);
-    border-radius: 18px 18px 0 0;
+    width: min(92vw, 440px);
+    border-radius: 18px;
     background: #ffffff;
-    box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.26);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.26);
     padding: 14px;
 }
 
@@ -2103,8 +2203,9 @@
 .tp-plan-card-sheet-title {
     margin: 0;
     font-size: 15px;
-    font-weight: 700;
-    color: #0f172a;
+    font-weight: 400;
+    color: #1A1F36;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .tp-plan-card-sheet-close {
@@ -2326,12 +2427,83 @@
     color: #dc2626;
 }
 
-.diet-empty-state {
+#dietChartEmptyState.tp-empty-state {
+    padding: 48px 22px;
     text-align: center;
-    padding: 32px 16px;
-    border: 1px dashed #c7d6e5;
-    border-radius: 12px;
-    background-color: #f8fbff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+}
+
+#dietChartEmptyState .tp-empty-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 22px;
+    background: #eaf3ff;
+    color: #0f6fea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline: auto;
+    line-height: 0;
+}
+
+#dietChartEmptyState .tp-empty-icon i[data-lucide],
+#dietChartEmptyState .tp-empty-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke-width: 1.9;
+    display: block;
+    margin: auto;
+}
+
+#dietChartEmptyState h4 {
+    margin: 10px 0;
+    color: #101828;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+#dietChartEmptyState p {
+    margin: 10px 0 15px;
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 32ch;
+}
+
+#dietChartEmptyState .tp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 13px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+#dietChartEmptyState .tp-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.3;
+}
+
+#dietChartEmptyState .tp-btn-primary {
+    background: #0f6fea;
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(15, 111, 234, 0.18);
+}
+
+#dietChartEmptyState .tp-btn-primary:hover {
+    background: #0d63d4;
 }
 
 .diet-header-card {
@@ -2549,37 +2721,59 @@
 }
 
 .diet-user-select-control {
-    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #DDD8FF;
+    border-radius: 12px;
+    background: #F3F1FF;
 }
 
 .diet-user-select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    background-color: #ffffff;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-    padding: 11px 42px 11px 12px;
+    width: auto;
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: none;
+    padding: 0;
     font-size: 14px;
     font-weight: 600;
-    color: #0f172a;
+    color: #4B3FC7;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     min-height: 44px;
 }
 
-.diet-user-select:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+.diet-user-select option {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
 }
 
-.diet-user-select-icon {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #64748b;
+.diet-user-select:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.diet-user-leading-icon {
+    width: 15px;
+    height: 15px;
+    color: rgba(108, 99, 255, 0.58);
+    flex-shrink: 0;
+}
+
+.diet-user-chevron {
+    width: 14px;
+    height: 14px;
+    color: rgba(108, 99, 255, 0.72);
     pointer-events: none;
-    font-size: 12px;
+    flex-shrink: 0;
 }
 
 /* ============================================
@@ -2748,9 +2942,10 @@
     inset: 0;
     z-index: 220;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     background: rgba(16, 24, 40, 0.45);
+    padding: 12px;
 }
 
 .diet-chart-input-overlay.tp-modal-overlay[hidden] {
@@ -2758,14 +2953,14 @@
 }
 
 .diet-chart-input-overlay .tp-modal {
-    width: 100%;
-    max-height: 93dvh;
+    width: min(100%, 560px);
+    max-height: calc(100svh - 24px);
     background: #fff;
-    border-radius: 24px 24px 0 0;
+    border-radius: 20px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 -18px 60px rgba(16, 24, 40, 0.18);
+    box-shadow: 0 16px 44px rgba(16, 24, 40, 0.22);
 }
 
 .diet-chart-input-overlay .tp-modal-header {
@@ -2804,10 +2999,11 @@
 
 .diet-chart-input-overlay .tp-modal-header h3 {
     margin: 0;
-    color: #111827;
-    font-size: 22px;
-    font-weight: 750;
-    letter-spacing: -0.03em;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .diet-chart-input-overlay .tp-modal-body {
@@ -2989,6 +3185,30 @@
     min-width: 0;
 }
 
+.diet-meal-replacement-badge {
+    border: 1px solid rgba(29, 78, 216, 0.2);
+    background: #eef4ff;
+    color: #1d4ed8;
+    border-radius: 999px;
+    height: 30px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.diet-meal-replacement-badge svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.2;
+}
+
+.diet-meal-replacement-badge:hover {
+    background: #dbeafe;
+}
+
 .diet-meal-name-inline-input {
     min-width: 180px;
     max-width: 280px;
@@ -3160,6 +3380,547 @@
 .diet-view-add-meal-btn:hover {
     border-color: #3b82f6;
     color: #3b82f6;
+}
+
+.diet-meal-replacement-overlay[hidden] {
+    display: none !important;
+}
+
+.diet-meal-replacement-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+}
+
+.diet-meal-replacement-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(6px);
+}
+
+.diet-meal-replacement-modal {
+    position: relative;
+    z-index: 1;
+    width: min(94vw, 720px);
+    max-height: min(92vh, 860px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 22px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    border: 1px solid #e8ecf3;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.diet-meal-replacement-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    border-bottom: 1px solid #eceff5;
+    padding: 16px 18px 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
+    border-radius: 22px 22px 0 0;
+}
+
+.diet-meal-replacement-body {
+    padding: 16px;
+    background: linear-gradient(180deg, #f8fafc 0%, #f5f8fd 100%);
+    overflow-y: auto;
+}
+
+.diet-meal-replacement-title-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+}
+
+.diet-meal-replacement-title-wrap h3 {
+    margin: 0;
+    color: #111827;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.diet-meal-replacement-subtitle {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.diet-meal-replacement-badge-title {
+    display: none;
+}
+
+.diet-meal-replacement-badge-title svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.1;
+}
+
+.diet-meal-replacement-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #64748b;
+    opacity: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.diet-meal-replacement-close:hover {
+    color: #6c63ff;
+    background: #f4f2ff;
+    border-color: #dcd8ff;
+}
+
+.diet-meal-replacement-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+.diet-replacement-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.diet-replacement-actions .tp-btn {
+    min-height: 42px;
+    border-radius: 14px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.diet-replacement-actions .tp-btn-primary {
+    background: linear-gradient(135deg, #6c63ff, #7c72ff);
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.diet-replacement-actions .tp-btn-primary:hover {
+    filter: brightness(0.96);
+    transform: translateY(-1px);
+}
+
+.diet-replacement-actions .tp-btn-danger {
+    background: #fff5f5;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.diet-replacement-actions .tp-btn-danger:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+.diet-replacement-hint {
+    display: none;
+}
+
+.diet-replacement-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.diet-replacement-row {
+    --replacement-accent: #6c63ff;
+    --replacement-accent-soft: #f4f2ff;
+    --replacement-accent-line: #ddd9ff;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 20px;
+    background: #ffffff;
+    border: 1px solid #e8ecf3;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.diet-replacement-row-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.diet-replacement-row-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--replacement-accent-line);
+    background: var(--replacement-accent-soft);
+    color: var(--replacement-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.diet-replacement-row-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.1;
+}
+
+.diet-replacement-row-name-wrap {
+    min-width: 0;
+}
+
+.diet-replacement-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.diet-replacement-input-wrapper .form-control {
+    flex: 1;
+    padding-right: 34px;
+}
+
+.diet-replacement-input-label {
+    position: absolute;
+    right: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    pointer-events: none;
+    background: transparent;
+}
+
+.diet-replacement-row .form-control {
+    border: 1px solid #e8ecf3;
+    border-radius: 15px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 400;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 11px 12px;
+    box-shadow: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.diet-replacement-row .form-control:focus {
+    border-color: #bcb5ff;
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+}
+
+.diet-replacement-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.diet-replacement-metric-card {
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid var(--replacement-accent-line);
+    background: linear-gradient(180deg, #ffffff 0%, var(--replacement-accent-soft) 100%);
+}
+
+.diet-replacement-metric-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 7px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.diet-replacement-metric-label svg {
+    width: 13px;
+    height: 13px;
+    color: var(--replacement-accent);
+}
+
+.diet-replacement-text-wrap textarea.form-control {
+    min-height: 94px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.diet-replacement-row textarea.form-control {
+    background: #fbfcfe;
+}
+
+.diet-replacement-row-delete {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    color: #ef4444;
+    background: #fff5f5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.diet-replacement-row-delete svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.1;
+}
+
+.diet-replacement-row-delete:hover {
+    background: #fee2e2;
+    border-color: #f87171;
+    color: #dc2626;
+}
+
+.diet-replacement-add-row {
+    margin-top: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, #6c63ff, #7c72ff);
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 10px 24px rgba(108, 99, 255, 0.26);
+}
+
+.diet-replacement-add-row svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.3;
+}
+
+.diet-replacement-add-row:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.97);
+}
+
+.diet-replacement-view-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+}
+
+.diet-replacement-card {
+    --replacement-accent: #6c63ff;
+    --replacement-accent-soft: #f4f2ff;
+    --replacement-accent-line: #ddd9ff;
+    border-radius: 20px;
+    border: 1px solid #e8ecf3;
+    padding: 16px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.diet-replacement-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.diet-replacement-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid var(--replacement-accent-line);
+    background: var(--replacement-accent-soft);
+    color: var(--replacement-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.diet-replacement-card-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.1;
+}
+
+.diet-replacement-card-title {
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.diet-replacement-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.diet-replacement-card-stat {
+    padding: 10px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--replacement-accent-soft) 100%);
+    border: 1px solid var(--replacement-accent-line);
+}
+
+.diet-replacement-card-stat-label {
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.diet-replacement-card-stat-label svg {
+    width: 13px;
+    height: 13px;
+    color: var(--replacement-accent);
+}
+
+.diet-replacement-card-stat-value {
+    margin-top: 4px;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.diet-replacement-card-ingredients {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 15px;
+    border: 1px solid var(--replacement-accent-line);
+    background: var(--replacement-accent-soft);
+}
+
+.diet-replacement-card-ingredients-label {
+    margin: 0 0 8px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.diet-replacement-ingredients-list {
+    margin: 0;
+    padding-left: 18px;
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.diet-replacement-view-note {
+    margin: 14px 2px 4px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.diet-replacement-theme-green {
+    --replacement-accent: #16a34a;
+    --replacement-accent-soft: #ecfdf3;
+    --replacement-accent-line: #bbf7d0;
+}
+
+.diet-replacement-theme-red {
+    --replacement-accent: #ef4444;
+    --replacement-accent-soft: #fff1f2;
+    --replacement-accent-line: #fecdd3;
+}
+
+.diet-replacement-theme-blue {
+    --replacement-accent: #2563eb;
+    --replacement-accent-soft: #eff6ff;
+    --replacement-accent-line: #bfdbfe;
+}
+
+.diet-replacement-theme-yellow {
+    --replacement-accent: #ca8a04;
+    --replacement-accent-soft: #fffbeb;
+    --replacement-accent-line: #fde68a;
+}
+
+.diet-replacement-theme-purple {
+    --replacement-accent: #6c63ff;
+    --replacement-accent-soft: #f4f2ff;
+    --replacement-accent-line: #ddd9ff;
+}
+
+@media (max-width: 767px) {
+    .diet-meal-replacement-body {
+        padding: 14px;
+    }
+
+    .diet-replacement-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .diet-replacement-actions {
+        justify-content: stretch;
+    }
+
+    .diet-replacement-actions .tp-btn {
+        flex: 1 1 100%;
+    }
+
+    .diet-replacement-view-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 992px) {
+    .diet-meal-replacement-header {
+        padding: 18px 22px 16px;
+    }
+}
+
+.diet-replacement-empty {
+    border-radius: 16px;
+    border: 1px dashed #d7dfeb;
+    background: #ffffff;
+    color: #64748b;
+    padding: 24px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 400;
 }
 
 .diet-view-meal-content {
@@ -3338,7 +4099,7 @@
     inset: 0;
     z-index: 1300;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -3353,10 +4114,10 @@
 .diet-qty-sheet-panel {
     position: relative;
     z-index: 1;
-    width: min(100%, 460px);
-    border-radius: 20px 20px 0 0;
+    width: min(92vw, 460px);
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.22);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.22);
     padding: 16px;
 }
 
@@ -3370,9 +4131,10 @@
 
 .diet-qty-sheet-title {
     margin: 0;
-    color: #0f172a;
-    font-size: 16px;
-    font-weight: 650;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .diet-qty-sheet-close {
@@ -3476,7 +4238,7 @@
     inset: 0;
     z-index: 1310;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
@@ -3491,10 +4253,10 @@
 .diet-catalog-qty-sheet-panel {
     position: relative;
     z-index: 1;
-    width: min(100%, 460px);
-    border-radius: 20px 20px 0 0;
+    width: min(92vw, 460px);
+    border-radius: 20px;
     background: #ffffff;
-    box-shadow: 0 -16px 38px rgba(15, 23, 42, 0.22);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.22);
     padding: 16px;
 }
 
@@ -3508,9 +4270,10 @@
 
 .diet-catalog-qty-sheet-title {
     margin: 0;
-    color: #0f172a;
-    font-size: 16px;
-    font-weight: 650;
+    color: #1A1F36;
+    font-size: 15px;
+    font-weight: 400;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .diet-catalog-qty-sheet-close {
@@ -3868,6 +4631,11 @@
         gap: 8px;
     }
 
+    .diet-meal-replacement-badge {
+        height: 28px;
+        padding: 0 8px;
+    }
+
     .diet-meal-menu-btn {
         width: 30px;
         height: 30px;
@@ -3881,6 +4649,70 @@
     .diet-meal-menu-item {
         font-size: 12px;
         padding: 8px 9px;
+    }
+
+    .diet-meal-replacement-modal {
+        max-width: none;
+        width: 100vw;
+        height: 100dvh;
+        max-height: none;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .diet-meal-replacement-overlay {
+        padding: 0;
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    .diet-meal-replacement-body {
+        padding: 14px;
+    }
+
+    .diet-replacement-actions {
+        padding-bottom: calc(env(safe-area-inset-bottom) + 4px);
+        gap: 8px;
+    }
+
+    .diet-replacement-row {
+        padding: 12px;
+    }
+
+    .diet-replacement-row-head {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 8px;
+    }
+
+    .diet-replacement-row-icon,
+    .diet-replacement-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    .diet-replacement-row .form-control {
+        height: 42px;
+        font-size: 14px;
+    }
+
+    .diet-replacement-row textarea.form-control {
+        height: auto;
+        min-height: 112px;
+    }
+
+    .diet-replacement-row-delete {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+    }
+
+    .diet-replacement-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .diet-replacement-ingredients-list {
+        font-size: 12px;
     }
 
     .diet-meal-name-inline-input {
@@ -4318,11 +5150,14 @@
     }
 
     .diet-chart-input-overlay.tp-modal-overlay {
-        align-items: flex-end;
+        align-items: center;
+        padding: 10px;
     }
 
     .diet-chart-input-overlay .tp-modal {
-        border-radius: 24px 24px 0 0;
+        border-radius: 18px;
+        width: min(100%, 560px);
+        max-height: calc(100svh - 20px);
     }
 
     .diet-user-select-wrap {
@@ -4410,6 +5245,26 @@
 @media (max-width: 991px) {
     .food-macro-bars {
         justify-content: center;
+    }
+
+    .food-catalog-entry-card {
+        margin: 0;
+    }
+
+    .food-catalog-entry-card .food-macro-bars {
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    .food-catalog-entry-card .diet-view-macro {
+        flex: 1 1 0;
+        justify-content: center;
+        white-space: nowrap;
+        font-size: 11px;
+        padding: 4px 6px;
     }
 
     .food-row-bottom {
@@ -4622,9 +5477,17 @@ body.food-auth-pending .food-page-skeleton {
     position: sticky;
     top: 56px;
     z-index: 26;
-    background: #fff;
-    padding: 8px 0 6px;
-    margin-bottom: 10px;
+    background: linear-gradient(180deg, #f8fbff 0%, rgba(248, 251, 255, 0.9) 72%, rgba(248, 251, 255, 0) 100%);
+    padding: 4px 0 10px;
+    margin-bottom: 8px;
+}
+
+.food-table-wrapper {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
 }
 
 .food-load-more-wrap {

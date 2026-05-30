@@ -18,8 +18,8 @@
     <link href="../lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="../css/style.css?v=20260524a" rel="stylesheet">
-    <link href="../css/admin.css?v=20260524h" rel="stylesheet">
+    <link href="../css/style.css?v=20260527a" rel="stylesheet">
+    <link href="../css/admin.css?v=20260530i" rel="stylesheet">
     <link href="../css/premium-ui.css" rel="stylesheet">
 </head>
 
@@ -164,15 +164,18 @@
             <div class="row">
                 <div class="col-12">
                     <div class="diet-user-toolbar mb-3" id="dietUserToolbar" hidden>
-                        <div class="diet-user-select-wrap">
-                            <label for="dietUserSelect" class="mb-2">Select User</label>
-                            <div class="diet-user-select-control">
-                                <select id="dietUserSelect" class="form-control diet-user-select">
-                                    <option value="">Select user...</option>
-                                </select>
-                                <span class="diet-user-select-icon" aria-hidden="true">
-                                    <i class="fa fa-chevron-down"></i>
-                                </span>
+                        <div class="diet-admin-toolbar-row">
+                            <div class="diet-admin-toolbar-head">
+                                <span class="diet-admin-badge"><i data-lucide="shield-check"></i> Admin View</span>
+                            </div>
+                            <div class="diet-user-select-wrap">
+                                <div class="diet-user-select-control">
+                                    <i data-lucide="contact-round" class="diet-user-leading-icon" aria-hidden="true"></i>
+                                    <select id="dietUserSelect" class="form-control diet-user-select">
+                                        <option value="">Select</option>
+                                    </select>
+                                    <i data-lucide="chevron-down" class="diet-user-chevron" aria-hidden="true"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -475,14 +478,7 @@
 
         </main><!-- /.tyfit-main -->
     </div><!-- /.tyfit-layout -->
-
-    <nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">
-        <a href="../index.html"><i data-lucide="home"></i><span>Home</span></a>
-        <a href="diet_chart.html" class="is-active"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-        <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
-        <a href="../training_plan.html"><i data-lucide="dumbbell"></i><span>Training</span></a>
-        <a href="../profile.html"><i data-lucide="user"></i><span>Profile</span></a>
-    </nav>
+    <div data-tyfit-bottom-nav></div>
 
     <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
     <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
@@ -547,6 +543,6 @@
     <script src="../js/supabase-client.js"></script>
     <script src="../js/login.js?v=20260523l"></script>
     <script src="../js/shell.js"></script>
-    <script src="../js/diet_chart.js?v=20260524e"></script>
+    <script src="../js/diet_chart.js?v=20260530f"></script>
 </body>
 </html>

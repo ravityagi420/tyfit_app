@@ -1,7 +1,8 @@
 (function () {
     "use strict";
 
-    const PROFILE_PICTURE_BUCKET = "profile-pictures";
+    const PROFILE_PICTURE_BUCKET = "profile-images";
+    const DEFAULT_AVATAR_KEY = "avatar-5.svg";
     const REQUIRED_PROFILE_FIELDS = [
         "first_name",
         "last_name",
@@ -73,10 +74,106 @@
         ];
     }
 
+    function getDefaultAvatar() {
+        const avatars = getAvatarList();
+        return avatars.find((a) => a.key === DEFAULT_AVATAR_KEY) || avatars[0];
+    }
+
     function getRandomAvatar() {
         const avatars = getAvatarList();
         const index = Math.floor(Math.random() * avatars.length);
         return avatars[index];
+    }
+
+    function isAvatarKey(value) {
+        if (!value) return false;
+        return getAvatarList().some((a) => a.key === value);
+    }
+
+    function isStoragePath(value) {
+        if (!value) return false;
+        if (/^https?:\/\//i.test(value)) return false;
+        if (isAvatarKey(value)) return false;
+        return true;
+    }
+
+    async function compressImage(file, targetKB, maxDimension) {
+        const target = targetKB || 40;
+        const maxDim = maxDimension || 512;
+        return new Promise(function (resolve, reject) {
+            var img = new Image();
+            var objectUrl = URL.createObjectURL(file);
+
+            img.onload = function () {
+                URL.revokeObjectURL(objectUrl);
+
+                var width = img.width;
+                var height = img.height;
+
+                if (width > maxDim || height > maxDim) {
+                    var ratio = Math.min(maxDim / width, maxDim / height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+                }
+
+                var canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                var targetBytes = target * 1024;
+                var lo = 0.1;
+                var hi = 0.92;
+                var lastBlob = null;
+
+                var tryQuality = function (q) {
+                    return new Promise(function (res) {
+                        canvas.toBlob(function (blob) { res(blob); }, "image/jpeg", q);
+                    });
+                };
+
+                var search = async function () {
+                    for (var i = 0; i < 8; i++) {
+                        var mid = (lo + hi) / 2;
+                        var blob = await tryQuality(mid);
+                        if (!blob) break;
+                        lastBlob = blob;
+                        if (blob.size <= targetBytes) {
+                            lo = mid;
+                        } else {
+                            hi = mid;
+                        }
+                    }
+                    if (!lastBlob || lastBlob.size > 50 * 1024) {
+                        lastBlob = await tryQuality(0.1);
+                    }
+                    var baseName = (file.name || "profile").replace(/\.[^.]+$/, "") || "profile";
+                    var cleanBase = baseName.replace(/[^a-zA-Z0-9._-]/g, "-");
+                    resolve(new File([lastBlob], cleanBase + ".jpg", { type: "image/jpeg" }));
+                };
+
+                search().catch(reject);
+            };
+
+            img.onerror = function () {
+                URL.revokeObjectURL(objectUrl);
+                reject(new Error("Failed to load image for compression."));
+            };
+
+            img.src = objectUrl;
+        });
+    }
+
+    async function deleteOldProfileImage(oldUri) {
+        if (!isStoragePath(oldUri)) {
+            return;
+        }
+        try {
+            await window.supabaseClient.storage.from(PROFILE_PICTURE_BUCKET).remove([oldUri]);
+        } catch (e) {
+            console.warn("Could not delete old profile image:", e.message || e);
+        }
     }
 
     function getStoragePublicUrl(path) {
@@ -102,11 +199,13 @@
         };
         const about = normalizeAboutRow(merged);
 
+        // Uploaded photo stored as storage path or full URL
         if (hasValue(merged.profile_picture_url)) {
             const value = String(merged.profile_picture_url);
-            if (/^https?:\/\//i.test(value)) {
-                return value;
-            }
+            // Could be an avatar key stored here (legacy migration path)
+            const avatarSrc = resolveAvatarByKey(value);
+            if (avatarSrc) return avatarSrc;
+            if (/^https?:\/\//i.test(value)) return value;
             return getStoragePublicUrl(value);
         }
 
@@ -117,7 +216,9 @@
         if (hasValue(about.avatar_key)) {
             return resolveAvatarByKey(about.avatar_key);
         }
-        return getAvatarList()[0]?.src || "";
+
+        // Default avatar for new users
+        return withBasePath("assets/avatars/" + DEFAULT_AVATAR_KEY);
     }
 
     async function getCurrentUser() {
@@ -154,6 +255,17 @@
 
         if (error) {
             console.error("fetchProfile error:", error.message);
+
+            // If profile_picture_url column is missing, retry without it
+            if (String(error.message || "").includes("profile_picture_url")) {
+                const fallback = await window.supabaseClient
+                    .from("profiles")
+                    .select("id, first_name, last_name, full_name, email, phone_country_code, phone_number, country, role, date_of_birth")
+                    .eq("id", userId)
+                    .maybeSingle();
+                if (!fallback.error) return fallback.data || null;
+            }
+
             throw new Error("Failed to load profile.");
         }
 
@@ -266,26 +378,37 @@
         `).join("");
     }
 
-    async function uploadProfilePicture(file, userId) {
+    async function uploadProfilePicture(file, userId, oldUri) {
         if (!file || !userId) {
             throw new Error("Missing file or user.");
         }
 
-        const rawName = String(file.name || "profile.jpg");
+        // Compress if image is larger than 50 KB
+        let fileToUpload = file;
+        if (file.size > 50 * 1024) {
+            fileToUpload = await compressImage(file);
+        }
+
+        const rawName = String(fileToUpload.name || "profile.jpg");
         const cleanName = rawName.replace(/[^a-zA-Z0-9._-]/g, "-");
         const filePath = `${userId}/${Date.now()}-${cleanName}`;
 
         const { error } = await window.supabaseClient
             .storage
             .from(PROFILE_PICTURE_BUCKET)
-            .upload(filePath, file, {
+            .upload(filePath, fileToUpload, {
                 cacheControl: "3600",
                 upsert: true,
-                contentType: file.type || "image/jpeg"
+                contentType: fileToUpload.type || "image/jpeg"
             });
 
         if (error) {
             throw new Error(error.message || "Image upload failed.");
+        }
+
+        // Delete the previous uploaded image if it was a storage path
+        if (oldUri) {
+            await deleteOldProfileImage(oldUri);
         }
 
         return {
@@ -374,16 +497,16 @@
             return userAbout;
         }
 
-        const randomAvatar = getRandomAvatar();
+        const defaultAvatar = getDefaultAvatar();
         const nextAbout = {
             ...userAbout,
-            avatar_key: randomAvatar.key
+            avatar_key: defaultAvatar.key
         };
 
         try {
-            await upsertUserAbout(userId, { avatar_key: randomAvatar.key });
+            await upsertUserAbout(userId, { avatar_key: defaultAvatar.key });
         } catch (error) {
-            console.warn("Unable to persist random avatar:", error.message || error);
+            console.warn("Unable to persist default avatar:", error.message || error);
         }
 
         return nextAbout;
@@ -405,10 +528,14 @@
         isProfileComplete,
         renderProfileCompletionCard,
         getAvatarList,
+        getDefaultAvatar,
         getRandomAvatar,
+        isAvatarKey,
+        isStoragePath,
         resolveProfileImage,
         renderAvatarPicker,
         uploadProfilePicture,
+        deleteOldProfileImage,
         saveProfileEdits,
         loadProfileEditPage,
         ensureAvatarAssignment,

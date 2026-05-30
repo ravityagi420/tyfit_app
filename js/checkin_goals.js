@@ -45,6 +45,9 @@
             const clean = Number.isFinite(value) ? (Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.00$/, "")) : String(goal.target_value);
             return `${clean}${goal.target_unit ? ` ${goal.target_unit}` : ""}`.trim();
         }
+        if (String(goal.goal_category || "").toLowerCase().includes("diet")) {
+            return "Target: Diet plan";
+        }
         return "Not set";
     }
 
@@ -370,22 +373,39 @@
         const select = el("goalUserSelect");
         if (!toolbar || !select || !STATE.access?.isAdmin) return;
 
-        const { data, error } = await window.supabaseClient
+        // Try with role/is_admin columns first; fall back to basic columns if those don't exist
+        let data = null;
+        let usedExtendedCols = false;
+        const extendedResult = await window.supabaseClient
             .from("profiles")
             .select("id, first_name, last_name, full_name, email, role, is_admin")
             .order("full_name", { ascending: true });
 
-        if (error) {
-            console.warn("Goal user list warning:", error.message || error);
-            return;
+        if (!extendedResult.error) {
+            data = extendedResult.data;
+            usedExtendedCols = true;
+        } else {
+            const basicResult = await window.supabaseClient
+                .from("profiles")
+                .select("id, first_name, last_name, full_name, email")
+                .order("full_name", { ascending: true });
+
+            if (basicResult.error) {
+                console.warn("Goal user list warning:", basicResult.error.message || basicResult.error);
+                return;
+            }
+            data = basicResult.data;
         }
 
         const users = (data || []).filter((item) => {
             if (!item?.id) return false;
             if (item.id === STATE.access.user.id) return true;
-            if (item.is_admin === true) return false;
-            const role = String(item.role || "").toLowerCase();
-            return role !== "admin";
+            if (usedExtendedCols) {
+                if (item.is_admin === true) return false;
+                const role = String(item.role || "").toLowerCase();
+                if (role === "admin") return false;
+            }
+            return true;
         });
 
         STATE.users = users;

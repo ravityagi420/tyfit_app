@@ -12,24 +12,25 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260523f" rel="stylesheet">
-    <link href="css/checkin.css?v=20260525f" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260530k" rel="stylesheet">
+    <link href="css/checkin.css?v=20260530e" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-success">
     <div class="checkin-success-page">
         <!-- Purple Success Header with Floating Icon -->
         <div class="success-hero">
+            <img src="assets/gamification/confetti-overlay.svg" alt="" class="success-confetti-overlay" id="successConfetti" aria-hidden="true" hidden>
             <!-- Floating Success Icon -->
             <div class="success-floating-icon">
-                <img src="assets/status/checkin_success_illustration.svg" alt="Check-in success" class="success-icon-illustration">
+                <img src="assets/gamification/mountain-stage-1.svg" alt="Mountain journey progress" class="success-icon-illustration" id="successJourneyImage">
             </div>
         </div>
 
         <!-- White Content Panel -->
         <div class="success-content">
             <!-- Title Section -->
-            <h1 class="success-title">Check-in Submitted!</h1>
-            <p class="success-subtitle">Great job staying consistent 💪</p>
+            <h1 class="success-title" id="successTitle">Amazing!</h1>
+            <p class="success-subtitle" id="successSubtitle">You completed your check-in</p>
 
             <!-- Today's Summary Card -->
             <div class="today-summary-card">
@@ -71,10 +72,20 @@
                 </div>
             </div>
 
+            <div class="success-journey-card" id="successJourneyCard">
+                <span class="success-journey-badge" id="successJourneyBadge">Journey Progress</span>
+                <div class="success-journey-main">
+                    <strong id="successXpAward">+0 XP</strong>
+                    <span id="successStreak">0 Day Streak</span>
+                </div>
+                <div class="tyfit-journey-progress-track"><span id="successJourneyProgress" style="width:0%"></span></div>
+                <p id="successJourneyText">Your mountain journey is growing.</p>
+            </div>
+
             <!-- Action Buttons -->
             <div class="success-buttons">
-                <a href="checkin_summary.html" class="success-btn primary" id="viewHistoryBtn">
-                    <i data-lucide="history"></i> View History
+                <a href="journey.html" class="success-btn primary" id="viewJourneyBtn">
+                    <i data-lucide="mountain"></i> View My Journey
                 </a>
                 <a href="index.html" class="success-btn secondary">
                     <i data-lucide="home"></i> Back to Home
@@ -87,6 +98,7 @@
     <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
-    <script src="js/checkin_success.js?v=20260525c"></script>
+    <script src="js/journey.js?v=20260530a"></script>
+    <script src="js/checkin_success.js?v=20260530a"></script>
 </body>
 </html>

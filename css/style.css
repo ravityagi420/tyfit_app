@@ -2162,6 +2162,12 @@ a:focus {
         padding-bottom: 70px;
     }
 
+    body.tyfit-app input:not([type="checkbox"]):not([type="radio"]),
+    body.tyfit-app select,
+    body.tyfit-app textarea {
+        font-size: 16px !important;
+    }
+
     .admin-section input,
     .admin-section select,
     .admin-section textarea,
@@ -3342,7 +3348,7 @@ body.tyfit-auth-locked .row {
     border: 1.5px solid #e2e8f0;
     border-radius: 10px;
     padding: 0 12px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: #0f172a;
     background: #f8fafc;
@@ -3373,6 +3379,8 @@ body.tyfit-auth-locked .row {
 .tyfit-field-select {
     padding-right: 32px;
     cursor: pointer;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .tyfit-select-arrow {
