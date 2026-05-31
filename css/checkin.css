@@ -938,106 +938,110 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 
 /* ===== Success Page Premium Theme ===== */
 .checkin-success-page {
-    display: flex;
-    flex-direction: column;
     min-height: 100vh;
-    background: #FFFFFF;
+    background: #FAFAFD;
+    color: #111827;
+    padding: 18px 16px 96px;
+}
+
+.tyfit-confetti-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.success-content {
+    width: min(100%, 460px);
+    margin: 0 auto;
+    display: grid;
+    gap: 14px;
 }
 
 .success-hero {
-    height: 220px;
-    background: linear-gradient(135deg, #8B7CFF 0%, #6C63FF 55%, #5146E8 100%);
     position: relative;
-    overflow: visible;
+    min-height: 238px;
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid #E7E4FF;
+    background: #F3EEFF;
+    box-shadow: 0 18px 40px rgba(108, 99, 255, 0.08);
 }
 
-.success-hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("../assets/status/streak_confetti.svg");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    opacity: 0.75;
-    border-radius: 0 0 32px 32px;
-}
-
-.success-floating-icon {
-    position: absolute;
-    left: 50%;
-    bottom: -45px;
-    transform: translateX(-50%);
-    width: 126px;
-    height: 126px;
-    border-radius: 50%;
-    background: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 18px 45px rgba(38, 30, 110, 0.18);
-    z-index: 5;
-}
-
-.success-floating-icon i {
-    width: 62px;
-    height: 62px;
-    color: #6C63FF;
-    stroke-width: 2.2;
-}
-
-.success-floating-badge {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #2ECC71;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.28);
-}
-
-.success-floating-badge i {
-    width: 20px;
-    height: 20px;
-    color: #FFFFFF;
-}
-.success-icon-illustration {
+.success-hero-image {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    min-height: 238px;
+    object-fit: cover;
+    display: block;
 }
-.success-content {
+
+.success-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0) 42%, rgba(17, 24, 39, 0.36) 100%);
+}
+
+.success-check-pin,
+.success-icon-circle {
     background: #FFFFFF;
-    margin-top: -24px;
-    padding: 88px 24px 28px;
-    border-radius: 32px 32px 0 0;
-    position: relative;
-    z-index: 2;
-    max-width: 430px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+    color: #22C55E;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 16px 32px rgba(34, 197, 94, 0.18);
+}
+
+.success-check-pin {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+}
+
+.success-check-pin svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 3;
+}
+
+.success-title-block {
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 2px 8px 4px;
+}
+
+.success-icon-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+}
+
+.success-icon-circle svg {
+    width: 34px;
+    height: 34px;
+    stroke-width: 2.4;
 }
 
 .success-title {
-    margin: 0 0 8px;
-    font-size: 26px;
-    font-weight: 600;
-    color: #17172F;
-    text-align: center;
-    line-height: 1.1;
+    margin: 0;
+    color: #111827;
+    font-size: 28px;
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: 0;
 }
 
 .success-subtitle {
-    margin: 0 0 28px;
-    font-size: 15px;
+    margin: 0;
     color: #667085;
-    text-align: center;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 600;
 }
 
 .today-summary-card {
@@ -1156,42 +1160,238 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     color: #262445;
 }
 
-.success-confetti-overlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none;
-    opacity: 0.82;
-    z-index: 2;
+body[data-page="checkin-success"] .today-summary-card {
+    display: grid;
+    gap: 16px;
+    padding: 18px;
+    grid-template-columns: none;
+    align-items: stretch;
+    border-radius: 24px;
+    background: #FFFFFF;
+    border: 1px solid #E7E4FF;
+    box-shadow: 0 18px 40px rgba(108,99,255,0.08);
+    margin-bottom: 0;
+}
+
+body[data-page="checkin-success"] .summary-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+body[data-page="checkin-success"] .summary-card-title {
+    grid-column: auto;
+    margin: 0;
+    color: #111827;
+    font-size: 17px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+body[data-page="checkin-success"] .summary-card-head span,
+body[data-page="checkin-success"] .summary-insight-text {
+    color: #667085;
+    font-size: 12px;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .summary-card-head span {
+    flex-shrink: 0;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #F3EEFF;
+    color: #6C63FF;
+}
+
+body[data-page="checkin-success"] .summary-progress-layout {
+    display: grid;
+    grid-template-columns: minmax(112px, 0.9fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: center;
+}
+
+body[data-page="checkin-success"] .summary-ring-label {
+    fill: #667085;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .count-icon.done {
+    background: #22C55E;
+}
+
+body[data-page="checkin-success"] .count-icon.partial {
+    background: #F59E0B;
+}
+
+body[data-page="checkin-success"] .count-icon.missed {
+    background: #EF4444;
+}
+
+body[data-page="checkin-success"] .count-number {
+    font-size: 13px;
+    color: #667085;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .count-number strong {
+    color: #111827;
+}
+
+body[data-page="checkin-success"] .summary-insight-text {
+    margin: -4px 0 0;
+}
+
+.success-motivation-card,
+.success-streak-card,
+.success-next-card,
+.success-journey-card {
+    border-radius: 24px;
+    background: #FFFFFF;
+    border: 1px solid #E7E4FF;
+    box-shadow: 0 18px 40px rgba(108,99,255,0.08);
+}
+
+.success-motivation-card {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    padding: 16px;
+}
+
+.success-motivation-card img {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    border-radius: 18px;
+    background: #ECFDF3;
+}
+
+.success-motivation-card h2,
+.success-next-card h2 {
+    margin: 0 0 5px;
+    color: #111827;
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 800;
+}
+
+.success-motivation-card p,
+.success-next-card p {
+    margin: 0;
+    color: #667085;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 600;
+}
+
+.success-streak-card {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+}
+
+.success-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.success-card-head span {
+    display: block;
+    color: #667085;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.success-card-head strong {
+    display: block;
+    margin-top: 4px;
+    color: #111827;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.success-best-streak {
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: #F3EEFF;
+    color: #6C63FF !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+.success-week-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.success-week-day {
+    aspect-ratio: 1;
+    min-width: 0;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #F3F4F6;
+    color: #98A2B3;
+}
+
+.success-week-day svg {
+    width: 14px;
+    height: 14px;
+}
+
+.success-week-day.is-done {
+    background: rgba(34, 197, 94, .14);
+    color: #22C55E;
+}
+
+.success-week-day.is-partial {
+    background: rgba(245, 158, 11, .16);
+    color: #F59E0B;
+}
+
+.success-next-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: center;
+    padding: 16px;
+    cursor: pointer;
+}
+
+.success-next-card > svg {
+    width: 22px;
+    height: 22px;
+    color: #6C63FF;
+}
+
+.success-next-card span {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    margin-bottom: 8px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #F3EEFF;
+    color: #6C63FF;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 800;
 }
 
 .success-journey-card {
     display: grid;
     gap: 10px;
-    margin: -4px 0 18px;
     padding: 16px;
-    border-radius: 20px;
-    background:
-        radial-gradient(280px 120px at 100% 0%, rgba(108, 99, 255, 0.12), rgba(108, 99, 255, 0) 70%),
-        linear-gradient(135deg, #FFFFFF 0%, #F8F6FF 100%);
-    border: 1px solid rgba(108, 99, 255, 0.14);
-    box-shadow: 0 14px 30px rgba(108, 99, 255, 0.08);
-}
-
-.success-journey-badge {
-    width: fit-content;
-    max-width: 100%;
-    padding: 7px 10px;
-    border-radius: 999px;
-    background: #F1EEFF;
-    color: #5B54E8;
-    font-size: 11px;
-    line-height: 1;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
 }
 
 .success-journey-main {
@@ -1202,8 +1402,8 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 }
 
 .success-journey-main strong {
-    color: #17172F;
-    font-size: 28px;
+    color: #111827;
+    font-size: 24px;
     line-height: 1;
     font-weight: 800;
 }
@@ -1220,11 +1420,12 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 .success-buttons {
     display: grid;
     gap: 10px;
+    margin-top: 2px;
 }
 
 .success-btn {
-    min-height: 52px;
-    border-radius: 16px;
+    min-height: 56px;
+    border-radius: 18px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1264,30 +1465,6 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 }
 
 @media (max-width: 767px) {
-    .success-hero {
-        height: 190px;
-    }
-
-    .success-floating-icon {
-        width: 106px;
-        height: 106px;
-        bottom: -38px;
-    }
-
-    .success-icon-illustration {
-        width: 92%;
-        height: 92%;
-    }
-
-    .success-content {
-        padding: 82px 18px 24px;
-    }
-
-    .summary-ring {
-        width: 100px;
-        height: 100px;
-    }
-
     .success-journey-main {
         align-items: flex-start;
         flex-direction: column;
@@ -1297,17 +1474,167 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     .success-journey-main strong {
         font-size: 25px;
     }
-}
-
-@media (min-width: 768px) {
-    .success-content {
-        padding: 88px 24px 32px;
+    .success-title {
+        font-size: 26px;
     }
 }
 
-@media (min-width: 768px) {
-    .checkin-success-main {
-        padding: 80px 24px 32px;
+@media (max-width: 1023px) {
+    .checkin-success-page {
+        padding: 0 0 96px;
+    }
+
+    .success-content {
+        width: 100%;
+        max-width: none;
+        position: relative;
+        gap: 12px;
+    }
+
+    .success-hero {
+        width: 100%;
+        min-height: 286px;
+        border-radius: 0;
+        border: 0;
+        margin: 0;
+        box-shadow: none;
+    }
+
+    .success-hero-image {
+        min-height: 286px;
+    }
+
+    .success-title-block {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        min-height: 286px;
+        z-index: 4;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        padding: 18px 20px;
+    }
+
+    .success-title,
+    .success-subtitle {
+        color: #FFFFFF;
+        text-shadow: 0 8px 22px rgba(17, 24, 39, 0.38);
+    }
+
+    body[data-page="checkin-success"] .today-summary-card {
+        position: relative;
+        z-index: 5;
+        display: grid;
+        gap: 16px;
+        padding: 18px;
+        border-radius: 24px;
+        background: #FFFFFF;
+        border: 1px solid #E7E4FF;
+        box-shadow: 0 18px 40px rgba(108,99,255,0.08);
+        margin-top: -56px;
+        width: calc(100% - 24px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body[data-page="checkin-success"] .summary-progress-layout {
+        display: grid;
+        grid-template-columns: minmax(112px, 0.9fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: center;
+    }
+
+    body[data-page="checkin-success"] .summary-ring-section,
+    body[data-page="checkin-success"] .summary-counts-section {
+        min-width: 0;
+    }
+
+    .success-motivation-card {
+        grid-template-columns: 48px minmax(0, 1fr) 56px;
+        align-items: center;
+        gap: 12px;
+        width: calc(100% - 24px);
+        margin-left: auto;
+        margin-right: auto;
+        background: linear-gradient(135deg, #F4FCF7 0%, #EDF9F2 100%);
+        border-color: rgba(34, 197, 94, 0.2);
+        box-shadow: 0 10px 24px rgba(34, 197, 94, 0.08);
+    }
+
+    .success-motivation-star {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: #E8F8EE;
+        color: #16A34A;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .success-motivation-star svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 2.2;
+    }
+
+    .success-motivation-copy h2 {
+        margin-bottom: 4px;
+    }
+
+    .success-motivation-leaf {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        object-fit: contain;
+        background: #ECFDF3;
+    }
+
+    .success-streak-card,
+    .success-journey-card,
+    .success-buttons {
+        width: calc(100% - 24px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    .checkin-success-page {
+        padding-top: 28px;
+    }
+}
+
+@media (max-width: 390px) {
+    .success-hero {
+        min-height: 208px;
+    }
+
+    .success-hero-image {
+        min-height: 208px;
+    }
+
+    body[data-page="checkin-success"] .summary-progress-layout {
+        gap: 12px;
+        grid-template-columns: 104px minmax(0, 1fr);
+    }
+
+    body[data-page="checkin-success"] .summary-ring {
+        width: 98px;
+        height: 98px;
+    }
+
+    body[data-page="checkin-success"] .summary-card-head {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .success-card-head {
+        flex-direction: column;
+        gap: 8px;
     }
 }
 

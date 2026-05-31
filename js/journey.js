@@ -2,12 +2,12 @@
     "use strict";
 
     const STAGES = [
-        { stage: 1, threshold: 0, name: "Base Camp", title: "Starter", asset: "assets/gamification/mountain-stage-1.svg" },
-        { stage: 2, threshold: 500, name: "Trail Start", title: "Climber", asset: "assets/gamification/mountain-stage-2.svg" },
-        { stage: 3, threshold: 1500, name: "Snow Line", title: "Consistent", asset: "assets/gamification/mountain-stage-3.svg" },
-        { stage: 4, threshold: 3000, name: "High Camp 1", title: "Athlete", asset: "assets/gamification/mountain-stage-4.svg" },
-        { stage: 5, threshold: 5500, name: "High Camp 2", title: "Champion", asset: "assets/gamification/mountain-stage-5.svg" },
-        { stage: 6, threshold: 9000, name: "Summit", title: "Legend", asset: "assets/gamification/mountain-stage-6.svg" }
+        { stage: 1, threshold: 0, name: "Base Camp", title: "Base Camp", subtitle: "You’ve taken the first step.", asset: "assets/gamification/mountain-stage-1.png" },
+        { stage: 2, threshold: 500, name: "Trailblazer", title: "Trailblazer", subtitle: "You’re building momentum.", asset: "assets/gamification/mountain-stage-2.png" },
+        { stage: 3, threshold: 1500, name: "Ascent", title: "Ascent", subtitle: "You’re rising above the rest.", asset: "assets/gamification/mountain-stage-3.png" },
+        { stage: 4, threshold: 3000, name: "Summit Push", title: "Summit Push", subtitle: "You’re almost there.", asset: "assets/gamification/mountain-stage-4.png" },
+        { stage: 5, threshold: 5500, name: "Peak Achiever", title: "Peak Achiever", subtitle: "You’ve reached new heights.", asset: "assets/gamification/mountain-stage-5.png" },
+        { stage: 6, threshold: 9000, name: "Summit Master", title: "Summit Master", subtitle: "You’re an inspiration.", asset: "assets/gamification/mountain-stage-6.png" }
     ];
 
     function todayISO() {

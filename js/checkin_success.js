@@ -9,12 +9,6 @@
         }
     }
 
-    function ringColorForScore(score) {
-        if (score < 40) return "#FF5E7D";
-        if (score <= 75) return "#FFB800";
-        return "#22A861";
-    }
-
     function updateProgressRing(score) {
         const ring = document.querySelector(".summary-ring-progress");
         if (!ring) return;
@@ -23,24 +17,24 @@
         const circumference = 2 * Math.PI * 54; // radius = 54
         const offset = circumference * (1 - (clamped / 100));
         ring.style.strokeDasharray = `${circumference - offset} ${circumference}`;
-        ring.style.stroke = ringColorForScore(clamped);
     }
 
     function setSummary(data) {
-        const score = Math.max(0, Math.min(100, Number(data.score || 0)));
         const done = Number(data.done || 0);
         const partial = Number(data.partial || 0);
         const missed = Number(data.missed || 0);
+        const total = done + partial + missed;
+        const score = total > 0 ? Math.round(((done + partial * 0.5) / total) * 100) : 0;
 
-        // Update visible elements
         const scoreEl = el("successScoreValue");
         if (scoreEl) scoreEl.textContent = `${Math.round(score)}%`;
         
         if (el("successDone")) el("successDone").textContent = String(done);
         if (el("successPartial")) el("successPartial").textContent = String(partial);
         if (el("successMissed")) el("successMissed").textContent = String(missed);
+        setText("successInsightPill", `${done + partial} of ${total} tasks completed`);
+        setText("successInsightText", score >= 80 ? "Strong finish. Your routine is stacking up." : "Keep going! You’re almost there.");
 
-        // Update progress ring
         updateProgressRing(score);
     }
 
@@ -51,34 +45,88 @@
 
     function renderUpdatedState() {
         setText("successTitle", "Check-in Updated");
-        setText("successSubtitle", "Your day has been updated");
+        setText("successSubtitle", "Your day has been updated.");
         setText("successJourneyBadge", "Progress counted");
         setText("successXpAward", "No new XP");
         setText("successStreak", "Today was already counted");
         setText("successJourneyText", "No new streak XP because this check-in date was already counted.");
         const progress = el("successJourneyProgress");
         if (progress) progress.style.width = "100%";
-        const confetti = el("successConfetti");
-        if (confetti) confetti.hidden = true;
         const btn = el("viewJourneyBtn");
         if (btn) btn.innerHTML = '<i data-lucide="activity"></i> View Progress';
+    }
+
+    function startConfetti() {
+        const canvas = el("tyfitConfettiCanvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        const colors = ["#6C63FF", "#8B7CFF", "#22C55E", "#F59E0B", "#EF4444", "#60A5FA"];
+        const start = performance.now();
+        const duration = 2200;
+        const particles = Array.from({ length: 110 }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: -20 - Math.random() * 180,
+            size: 5 + Math.random() * 8,
+            speed: 2 + Math.random() * 3.5,
+            drift: -1 + Math.random() * 2,
+            rotation: Math.random() * Math.PI,
+            spin: -0.12 + Math.random() * 0.24,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            circle: Math.random() > 0.72
+        }));
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * ratio;
+        canvas.height = window.innerHeight * ratio;
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        canvas.hidden = false;
+        function frame(now) {
+            const alpha = Math.max(0, 1 - ((now - start) / duration));
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            particles.forEach((p) => {
+                p.x += p.drift;
+                p.y += p.speed;
+                p.rotation += p.spin;
+                ctx.save();
+                ctx.globalAlpha = Math.min(1, alpha + 0.15);
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation);
+                ctx.fillStyle = p.color;
+                if (p.circle) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size * 0.45, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+                }
+                ctx.restore();
+            });
+            if (now - start < duration) {
+                requestAnimationFrame(frame);
+            } else {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                canvas.hidden = true;
+            }
+        }
+        requestAnimationFrame(frame);
     }
 
     function renderAwardState({ xp, streak, stage, title, totalXp }) {
         const progress = window.tyfitJourney?.progressForXp(totalXp || 0);
         const stageInfo = progress?.current || window.tyfitJourney?.STAGES?.[(Number(stage) || 1) - 1];
-        setText("successTitle", "Amazing!");
-        setText("successSubtitle", "You completed your check-in");
+        setText("successTitle", "Check-in Successful!");
+        setText("successSubtitle", "Great job! Consistency is your superpower.");
         setText("successJourneyBadge", title || stageInfo?.title || "Journey Progress");
         setText("successXpAward", `+${Number(xp) || 0} XP`);
         setText("successStreak", `${Number(streak) || 1} Day Streak`);
         setText("successJourneyText", progress?.next ? `${progress.remainingXp} XP to ${progress.next.name}.` : "Summit reached. Legendary consistency.");
         const progressNode = el("successJourneyProgress");
         if (progressNode) progressNode.style.width = `${progress?.percent ?? 0}%`;
-        const confetti = el("successConfetti");
-        if (confetti) confetti.hidden = false;
         const img = el("successJourneyImage");
         if (img && stageInfo?.asset) img.src = stageInfo.asset;
+        if (Number(xp) > 0) startConfetti();
     }
 
     async function hydrateJourneyState(params) {
