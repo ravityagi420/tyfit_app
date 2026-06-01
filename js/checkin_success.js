@@ -24,10 +24,14 @@
         const partial = Number(data.partial || 0);
         const missed = Number(data.missed || 0);
         const total = done + partial + missed;
-        const score = total > 0 ? Math.round(((done + partial * 0.5) / total) * 100) : 0;
+        const queryScore = Number(data.score);
+        const score = Number.isFinite(queryScore) && queryScore > 0
+            ? Math.max(0, Math.min(100, Math.round(queryScore)))
+            : (total > 0 ? Math.round(((done + partial * 0.5) / total) * 100) : 0);
 
         const scoreEl = el("successScoreValue");
         if (scoreEl) scoreEl.textContent = `${Math.round(score)}%`;
+        setText("successWorkouts", `${done}/${total || 0}`);
         
         if (el("successDone")) el("successDone").textContent = String(done);
         if (el("successPartial")) el("successPartial").textContent = String(partial);
@@ -43,15 +47,38 @@
         if (node) node.textContent = value;
     }
 
-    function renderUpdatedState() {
+    function formatDisplayDate(dateISO) {
+        const date = dateISO ? new Date(`${dateISO}T00:00:00`) : new Date();
+        if (Number.isNaN(date.getTime())) return "";
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    }
+
+    function resolveStageView({ totalXp, stage }) {
+        const numericTotalXp = Number(totalXp) || 0;
+        const progress = window.tyfitJourney?.progressForXp(numericTotalXp);
+        const stageIndex = Math.max(0, Math.min(5, (Number(stage) || 1) - 1));
+        const stageInfo = progress?.current || window.tyfitJourney?.STAGES?.[stageIndex];
+        return { progress, stageInfo };
+    }
+
+    function setHeroStageImage(stageInfo) {
+        const image = el("successJourneyImage");
+        if (!image || !stageInfo?.asset) return;
+        image.src = stageInfo.asset;
+        image.alt = `${stageInfo.name || "Mountain"} journey stage`;
+        image.removeAttribute("aria-hidden");
+    }
+
+    function renderUpdatedState({ stageInfo, progress } = {}) {
         setText("successTitle", "Check-in Updated");
         setText("successSubtitle", "Your day has been updated.");
         setText("successJourneyBadge", "Progress counted");
         setText("successXpAward", "No new XP");
         setText("successStreak", "Today was already counted");
         setText("successJourneyText", "No new streak XP because this check-in date was already counted.");
-        const progress = el("successJourneyProgress");
-        if (progress) progress.style.width = "100%";
+        setHeroStageImage(stageInfo);
+        const progressNode = el("successJourneyProgress");
+        if (progressNode) progressNode.style.width = `${Number(progress?.percent) || 100}%`;
         const btn = el("viewJourneyBtn");
         if (btn) btn.innerHTML = '<i data-lucide="activity"></i> View Progress';
     }
@@ -64,11 +91,11 @@
         const colors = ["#6C63FF", "#8B7CFF", "#22C55E", "#F59E0B", "#EF4444", "#60A5FA"];
         const start = performance.now();
         const duration = 2200;
-        const particles = Array.from({ length: 110 }, () => ({
+        const particles = Array.from({ length: 56 }, () => ({
             x: Math.random() * window.innerWidth,
             y: -20 - Math.random() * 180,
-            size: 5 + Math.random() * 8,
-            speed: 2 + Math.random() * 3.5,
+            size: 4 + Math.random() * 6,
+            speed: 1.6 + Math.random() * 2.8,
             drift: -1 + Math.random() * 2,
             rotation: Math.random() * Math.PI,
             spin: -0.12 + Math.random() * 0.24,
@@ -113,29 +140,40 @@
         requestAnimationFrame(frame);
     }
 
-    function renderAwardState({ xp, streak, stage, title, totalXp }) {
-        const progress = window.tyfitJourney?.progressForXp(totalXp || 0);
-        const stageInfo = progress?.current || window.tyfitJourney?.STAGES?.[(Number(stage) || 1) - 1];
+    function renderAwardState({ xp, streak, stage, title, totalXp, awarded }) {
+        const { progress, stageInfo } = resolveStageView({ totalXp, stage });
+        setHeroStageImage(stageInfo);
         setText("successTitle", "Check-in Successful!");
-        setText("successSubtitle", "Great job! Consistency is your superpower.");
+        setText("successSubtitle", "Way to show up for yourself today!");
         setText("successJourneyBadge", title || stageInfo?.title || "Journey Progress");
         setText("successXpAward", `+${Number(xp) || 0} XP`);
         setText("successStreak", `${Number(streak) || 1} Day Streak`);
         setText("successJourneyText", progress?.next ? `${progress.remainingXp} XP to ${progress.next.name}.` : "Summit reached. Legendary consistency.");
         const progressNode = el("successJourneyProgress");
         if (progressNode) progressNode.style.width = `${progress?.percent ?? 0}%`;
-        const img = el("successJourneyImage");
-        if (img && stageInfo?.asset) img.src = stageInfo.asset;
-        if (Number(xp) > 0) startConfetti();
+        if (awarded && Number(xp) > 0) startConfetti();
+    }
+
+    function renderWeekRow(events, today) {
+        const row = el("successWeekRow");
+        if (!row || !window.tyfitJourney) return;
+        const eventMap = new Map((events || []).map((event) => [String(event.checkin_date), event]));
+        const labels = ["M", "T", "W", "T", "F", "S", "S"];
+        const days = [];
+        for (let i = 6; i >= 0; i -= 1) {
+            const date = window.tyfitJourney.addDaysISO(today, -i);
+            const event = eventMap.get(date);
+            const score = Number(event?.adherence_score ?? 0);
+            const state = event ? (score >= 50 ? "done" : "partial") : "missed";
+            const icon = state === "done" ? "check" : (state === "partial" ? "minus" : "circle");
+            days.push(`<span class="success-week-day is-${state}"><i><svg data-lucide="${icon}"></svg></i><span>${labels[6 - i]}</span></span>`);
+        }
+        row.innerHTML = days.join("");
     }
 
     async function hydrateJourneyState(params) {
         const isUpdated = params.get("state") === "updated";
-        if (isUpdated) {
-            renderUpdatedState();
-            return;
-        }
-
+        const wasAwarded = params.get("journey_awarded") === "1" || params.get("firstCheckinAwarded") === "true";
         const queryXp = params.get("xp");
         const queryStreak = params.get("streak");
         const queryStage = params.get("stage");
@@ -150,13 +188,39 @@
             userId = sessionResult?.data?.session?.user?.id || "";
             const date = params.get("date");
             if (userId && window.tyfitJourney) {
-                [journey, event] = await Promise.all([
+                let events = [];
+                [journey, event, events] = await Promise.all([
                     window.tyfitJourney.fetchJourney(userId),
-                    date ? window.tyfitJourney.fetchJourneyEvent(userId, date) : Promise.resolve(null)
+                    date ? window.tyfitJourney.fetchJourneyEvent(userId, date) : Promise.resolve(null),
+                    window.tyfitJourney.fetchRecentEvents(userId, 7)
                 ]);
+                renderWeekRow(events, date || window.tyfitJourney.todayISO());
             }
         } catch (error) {
             console.warn("journey success hydrate warning:", error?.message || error);
+        }
+
+        if (!el("successWeekRow")?.children.length && window.tyfitJourney) {
+            const fallbackDate = params.get("date") || window.tyfitJourney.todayISO();
+            const fallbackScore = Number(params.get("score") || params.get("adherence") || 0);
+            const fallbackEvents = isUpdated ? [] : [{ checkin_date: fallbackDate, adherence_score: fallbackScore || 100 }];
+            renderWeekRow(fallbackEvents, fallbackDate);
+        }
+
+        const currentStreak = Number(journey?.current_streak || event?.streak_after || queryStreak || 0);
+        const longestStreak = Number(journey?.longest_streak || currentStreak || 0);
+        setText("successStreakNumber", String(currentStreak || 1));
+        setText("successStreakDays", `${currentStreak || 1} days`);
+        const best = el("successBestStreak");
+        if (best) best.innerHTML = `Best Streak: <strong>${longestStreak || currentStreak || 1} days</strong>`;
+
+        if (isUpdated) {
+            const { progress, stageInfo } = resolveStageView({
+                totalXp: queryTotalXp || journey?.total_xp || 0,
+                stage: queryStage || journey?.current_stage || event?.stage_after || 1
+            });
+            renderUpdatedState({ stageInfo, progress });
+            return;
         }
 
         renderAwardState({
@@ -164,7 +228,8 @@
             streak: queryStreak || journey?.current_streak || event?.streak_after || 1,
             stage: queryStage || journey?.current_stage || event?.stage_after || 1,
             title: queryTitle || journey?.current_title || event?.title_after || "",
-            totalXp: queryTotalXp || journey?.total_xp || 0
+            totalXp: queryTotalXp || journey?.total_xp || 0,
+            awarded: wasAwarded
         });
     }
 
@@ -201,6 +266,7 @@
 
     async function init() {
         const params = new URLSearchParams(window.location.search);
+        setText("successDateText", formatDisplayDate(params.get("date")));
         const fromQuery = {
             score: params.get("score") || params.get("adherence"),
             done: params.get("done"),

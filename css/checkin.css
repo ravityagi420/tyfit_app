@@ -1638,6 +1638,1168 @@ body[data-page="checkin-success"] .summary-insight-text {
     }
 }
 
+/* Screenshot-matched check-in success screen */
+body[data-page="checkin-success"] {
+    background: #F8F9FF;
+}
+
+body[data-page="checkin-success"] .checkin-success-page {
+    min-height: 100vh;
+    padding: 0 0 18px;
+    background:
+        radial-gradient(520px 420px at 50% 0%, rgba(240, 236, 255, 0.78), rgba(248, 249, 255, 0) 68%),
+        #F8F9FF;
+    overflow-x: hidden;
+}
+
+body[data-page="checkin-success"] .success-content {
+    width: min(100%, 430px);
+    margin: 0 auto;
+    gap: 0;
+    padding: 0 18px 16px;
+}
+
+.success-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 40px;
+    padding: 8px 8px 0;
+    color: #050816;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.success-status-bar span:last-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.success-status-bar svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 3;
+}
+
+body[data-page="checkin-success"] .success-hero {
+    min-height: 370px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    padding-top: 20px;
+}
+
+body[data-page="checkin-success"] .success-icon-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #22C55E, #17B864);
+    color: #FFFFFF;
+    box-shadow:
+        0 0 0 12px rgba(34, 197, 94, 0.1),
+        0 0 0 24px rgba(34, 197, 94, 0.045),
+        0 16px 30px rgba(34, 197, 94, 0.2);
+    z-index: 2;
+}
+
+body[data-page="checkin-success"] .success-icon-circle svg {
+    width: 42px;
+    height: 42px;
+    stroke-width: 3;
+}
+
+body[data-page="checkin-success"] .success-title {
+    margin-top: 30px;
+    color: #070B22;
+    font-size: clamp(23px, 5.9vw, 27px);
+    line-height: 1.12;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: none;
+    z-index: 2;
+}
+
+body[data-page="checkin-success"] .success-subtitle {
+    margin-top: 8px;
+    color: #4D587C;
+    font-size: 13.5px;
+    line-height: 1.45;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: none;
+    z-index: 2;
+}
+
+.success-mountain-wrap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 202px;
+    bottom: auto;
+    height: 170px;
+    overflow: hidden;
+    border: 1px solid rgba(231, 228, 255, .72);
+    border-radius: 28px;
+    background: #FFFFFF;
+    box-shadow: 0 18px 38px rgba(49, 57, 108, .13);
+}
+
+body[data-page="checkin-success"] .success-hero-image {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    object-position: center 15%;
+    display: block;
+    filter: saturate(1.04) contrast(1.01);
+}
+
+.success-mountain-wrap::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 82px;
+    background: linear-gradient(180deg, rgba(248, 249, 255, 0), rgba(248, 249, 255, .82) 96%);
+}
+
+body[data-page="checkin-success"] .success-check-pin {
+    display: none;
+}
+
+body[data-page="checkin-success"] .success-check-pin svg {
+    width: 22px;
+    height: 22px;
+    rotate: 45deg;
+    stroke-width: 3;
+}
+
+body[data-page="checkin-success"] .today-summary-card,
+body[data-page="checkin-success"] .success-motivation-card,
+body[data-page="checkin-success"] .success-streak-card,
+body[data-page="checkin-success"] .success-next-card {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    margin: 0;
+    border: 1px solid rgba(231, 228, 255, .78);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 16px 34px rgba(49, 57, 108, .09);
+}
+
+body[data-page="checkin-success"] .today-summary-card {
+    margin-top: -10px;
+    padding: 17px 14px 15px;
+    gap: 16px;
+}
+
+body[data-page="checkin-success"] .summary-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+body[data-page="checkin-success"] .summary-card-title {
+    color: #070B22;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .summary-card-head > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #6C63FF;
+    background: transparent;
+    padding: 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+body[data-page="checkin-success"] .summary-card-head svg {
+    width: 17px;
+    height: 17px;
+}
+
+.success-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.success-summary-item {
+    min-width: 0;
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    padding: 0 6px;
+    border-right: 1px solid #E3E6F3;
+}
+
+.success-summary-item:last-child {
+    border-right: 0;
+}
+
+.success-summary-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-summary-icon svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 2.5;
+}
+
+.success-summary-icon.is-calories { background: #F0EAFF; color: #6C63FF; }
+.success-summary-icon.is-diet { background: #EAFBF0; color: #22C55E; }
+.success-summary-icon.is-workouts { background: #FFF7E8; color: #F59E0B; }
+.success-summary-icon.is-weight { background: #F0EAFF; color: #7C63FF; }
+
+.success-summary-item strong {
+    color: #070B22;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.success-summary-item em {
+    color: #586285;
+    font-size: 11.5px;
+    line-height: 1.1;
+    font-style: normal;
+    font-weight: 600;
+    text-align: center;
+}
+
+body[data-page="checkin-success"] .success-motivation-card {
+    margin-top: 12px;
+    min-height: 92px;
+    grid-template-columns: 44px minmax(0, 1fr) 54px;
+    gap: 12px;
+    padding: 14px 13px;
+    background: linear-gradient(135deg, #F0FFF6, #F7FFF9);
+    border-color: rgba(34, 197, 94, .16);
+    overflow: hidden;
+}
+
+body[data-page="checkin-success"] .success-motivation-star {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #22C55E, #16B862);
+    color: #FFFFFF;
+}
+
+body[data-page="checkin-success"] .success-motivation-star svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+}
+
+body[data-page="checkin-success"] .success-motivation-copy h2 {
+    margin: 0 0 6px;
+    color: #16803E;
+    font-size: 14.5px;
+    line-height: 1.18;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .success-motivation-copy p {
+    color: #4D587C;
+    font-size: 12.8px;
+    line-height: 1.42;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .success-motivation-leaf {
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
+    opacity: .22;
+    background: transparent;
+    border-radius: 0;
+    transform: translateX(10px) scale(1.15);
+}
+
+body[data-page="checkin-success"] .success-streak-card {
+    margin-top: 14px;
+    padding: 17px 15px;
+}
+
+body[data-page="checkin-success"] .success-streak-card h2,
+body[data-page="checkin-success"] .success-next-section h2 {
+    margin: 0 0 15px;
+    color: #070B22;
+    font-size: 16px;
+    line-height: 1.15;
+    font-weight: 700;
+}
+
+.success-streak-layout {
+    display: grid;
+    grid-template-columns: 100px 1px minmax(0, 1fr);
+    gap: 15px;
+    align-items: center;
+}
+
+.success-streak-left {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+}
+
+.success-streak-left span {
+    grid-row: span 2;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    background: #EAF8F0;
+    color: #22C55E;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-streak-left span svg {
+    width: 25px;
+    height: 25px;
+    fill: currentColor;
+}
+
+.success-streak-left strong {
+    color: #070B22;
+    font-size: 28px;
+    line-height: .9;
+    font-weight: 700;
+}
+
+.success-streak-left em {
+    color: #22C55E;
+    font-size: 13px;
+    line-height: 1;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.success-streak-divider {
+    width: 1px;
+    height: 64px;
+    background: #DDE2F0;
+}
+
+.success-week-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.success-week-day {
+    display: grid;
+    justify-items: center;
+    gap: 7px;
+    aspect-ratio: auto;
+    background: transparent;
+    color: #5B6486;
+    border-radius: 0;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.success-week-day i {
+    width: 27px;
+    height: 27px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #EEF0F8;
+    color: #9AA3BF;
+}
+
+.success-week-day i svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 3;
+}
+
+.success-week-day.is-done i,
+.success-week-day.is-partial i {
+    background: #22C55E;
+    color: #FFFFFF;
+    box-shadow: 0 8px 16px rgba(34, 197, 94, .18);
+}
+
+.success-week-day.is-missed i {
+    border: 1.5px solid #CBD1E4;
+    background: #FFFFFF;
+    color: #A5ADC6;
+}
+
+.success-streak-right p {
+    margin: 12px 0 0;
+    color: #586285;
+    font-size: 13px;
+    line-height: 1.2;
+    font-weight: 600;
+}
+
+.success-streak-right p strong {
+    color: #6C63FF;
+}
+
+.success-next-section {
+    margin-top: 20px;
+}
+
+body[data-page="checkin-success"] .success-next-card {
+    min-height: 90px;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 13px;
+    padding: 16px 14px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.success-next-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: #F0EAFF;
+    color: #6C63FF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-next-icon svg {
+    width: 23px;
+    height: 23px;
+    stroke-width: 2.5;
+}
+
+body[data-page="checkin-success"] .success-next-card strong {
+    display: block;
+    margin-bottom: 7px;
+    color: #070B22;
+    font-size: 15px;
+    line-height: 1.15;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .success-next-card p {
+    color: #4D587C;
+    font-size: 13px;
+    line-height: 1.42;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .success-next-card > svg {
+    color: #6C63FF;
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.5;
+}
+
+body[data-page="checkin-success"] .success-buttons {
+    width: 100%;
+    margin-top: 18px;
+    gap: 10px;
+}
+
+body[data-page="checkin-success"] .success-btn {
+    min-height: 52px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .success-btn.primary {
+    justify-content: center;
+    background: linear-gradient(135deg, #5C35FF, #9A5CFF);
+    box-shadow: 0 18px 34px rgba(108, 99, 255, .26);
+}
+
+body[data-page="checkin-success"] .success-btn.primary svg {
+    position: absolute;
+    right: 22px;
+}
+
+body[data-page="checkin-success"] .success-btn.secondary {
+    color: #6C43FF;
+    border: 1.5px solid rgba(108, 99, 255, .38);
+    background: rgba(255, 255, 255, .86);
+}
+
+.success-bottom-nav {
+    margin-top: 16px;
+    min-height: 88px;
+    padding: 13px 11px 9px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 -4px 28px rgba(20, 30, 80, .09);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+}
+
+.success-bottom-nav a {
+    min-width: 0;
+    color: #68708F;
+    text-decoration: none;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.success-bottom-nav svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2;
+}
+
+.success-bottom-nav .is-active {
+    color: #6C43FF;
+}
+
+.success-bottom-nav .is-active > span:first-child {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #5C35FF, #8B7CFF);
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-bottom-nav .is-active svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 3;
+}
+
+.success-home-indicator {
+    width: 134px;
+    height: 5px;
+    border-radius: 999px;
+    background: #000000;
+    margin: -14px auto 0;
+    position: relative;
+    z-index: 2;
+}
+
+@media (min-width: 768px) {
+    body[data-page="checkin-success"] .success-content {
+        width: min(100%, 430px);
+    }
+}
+
+@media (max-width: 390px) {
+    body[data-page="checkin-success"] .success-content {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    body[data-page="checkin-success"] .success-hero {
+        margin-left: 0;
+        margin-right: 0;
+        min-height: 356px;
+    }
+
+    .success-mountain-wrap {
+        left: 0;
+        right: 0;
+        top: 198px;
+        height: 158px;
+        border-radius: 24px;
+    }
+
+    .success-summary-item {
+        padding: 0 5px;
+    }
+
+    .success-summary-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .success-summary-item strong {
+        font-size: 17px;
+    }
+
+    .success-summary-item em {
+        font-size: 11px;
+    }
+
+    .success-streak-layout {
+        grid-template-columns: 98px 1px minmax(0, 1fr);
+        gap: 13px;
+    }
+
+    .success-week-row {
+        gap: 5px;
+    }
+
+    .success-week-day i {
+        width: 27px;
+        height: 27px;
+    }
+
+    body[data-page="checkin-success"] .summary-card-head {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+}
+
+/* Responsive success screen refinements */
+body[data-page="checkin-success"] {
+    background: #FAFAFD;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body[data-page="checkin-success"] .checkin-success-page {
+    min-height: 100vh;
+    padding: 0 20px 112px;
+    background:
+        radial-gradient(760px 520px at 72% -8%, rgba(139, 124, 255, 0.16), rgba(250, 250, 253, 0) 62%),
+        radial-gradient(560px 360px at 18% 0%, rgba(34, 197, 94, 0.08), rgba(250, 250, 253, 0) 58%),
+        #FAFAFD;
+    overflow-x: hidden;
+}
+
+body[data-page="checkin-success"] .success-content {
+    width: min(100%, 1120px);
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 18px;
+    color: #111827;
+}
+
+body[data-page="checkin-success"] .success-hero {
+    grid-column: 1 / -1;
+    position: relative;
+    justify-self: center;
+    width: 100vw;
+    min-height: clamp(380px, 42vw, 500px);
+    margin: 0 calc(50% - 50vw);
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-content: start;
+    gap: 0;
+    border: 0;
+    border-radius: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(248,247,255,.9));
+    box-shadow: 0 18px 40px rgba(108, 99, 255, .08);
+    overflow: hidden;
+}
+
+body[data-page="checkin-success"] .success-hero-copy {
+    position: relative;
+    z-index: 9;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    text-align: center;
+    margin-top: 50px;
+}
+
+body[data-page="checkin-success"] .success-icon-circle {
+    width: 68px;
+    height: 68px;
+    box-shadow:
+        0 0 0 12px rgba(34, 197, 94, 0.12),
+        0 0 0 28px rgba(34, 197, 94, 0.075),
+        0 0 0 46px rgba(34, 197, 94, 0.035),
+        0 18px 36px rgba(34, 197, 94, 0.22);
+}
+
+body[data-page="checkin-success"] .success-icon-circle svg {
+    width: 38px;
+    height: 38px;
+}
+
+body[data-page="checkin-success"] .success-title {
+    margin: 28px 0 0;
+    font-size: clamp(25px, 3.2vw, 38px);
+    line-height: 1.08;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-align: center;
+    color: #FFFFFF;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, .34);
+}
+
+body[data-page="checkin-success"] .success-subtitle {
+    margin: 9px 0 0;
+    max-width: 36ch;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 400;
+    color: rgba(255, 255, 255, .88);
+    text-align: center;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .34);
+}
+
+body[data-page="checkin-success"] .success-mountain-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    z-index: 1;
+}
+
+body[data-page="checkin-success"] .success-hero-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    object-fit: cover;
+    object-position: center 15%;
+}
+
+body[data-page="checkin-success"] .success-mountain-wrap::after {
+    inset: 0;
+    height: auto;
+    border-radius: 0;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 18%),
+        rgba(0, 0, 0, .60);
+    pointer-events: none;
+}
+
+body[data-page="checkin-success"] .today-summary-card,
+body[data-page="checkin-success"] .success-motivation-card,
+body[data-page="checkin-success"] .success-streak-card,
+body[data-page="checkin-success"] .success-next-card {
+    border: 1px solid rgba(231, 228, 255, .86);
+    border-radius: 24px;
+    background: #FFFFFF;
+    box-shadow: 0 18px 40px rgba(108, 99, 255, .08);
+}
+
+body[data-page="checkin-success"] .today-summary-card {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 720px);
+    margin: -110.5px auto 0;
+    padding: 20px;
+    z-index: 11;
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    gap: 18px;
+    align-items: center;
+}
+
+body[data-page="checkin-success"] .summary-card-title {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #242648;
+    text-align: left;
+}
+
+body[data-page="checkin-success"] .summary-ring {
+    width: 100px;
+    height: 100px;
+}
+
+body[data-page="checkin-success"] .summary-ring text {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body[data-page="checkin-success"] .summary-ring-value {
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .summary-ring-label,
+body[data-page="checkin-success"] .count-number {
+    font-weight: 400;
+}
+
+body[data-page="checkin-success"] .count-number strong {
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .success-motivation-card {
+    display: none !important;
+}
+
+body[data-page="checkin-success"] .success-motivation-copy h2,
+body[data-page="checkin-success"] .success-streak-card h2,
+body[data-page="checkin-success"] .success-next-section h2,
+body[data-page="checkin-success"] .success-next-card strong {
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .success-motivation-copy p,
+body[data-page="checkin-success"] .success-next-card p,
+body[data-page="checkin-success"] .success-streak-right p {
+    font-weight: 400;
+}
+
+body[data-page="checkin-success"] .success-streak-right p {
+    margin-top: 8px;
+}
+
+body[data-page="checkin-success"] .success-streak-card {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(420px 180px at 8% 0%, rgba(255, 181, 71, .20), rgba(255, 255, 255, 0) 70%),
+        linear-gradient(135deg, #FFFFFF 0%, #FFFCF7 44%, #F8F7FF 100%);
+}
+
+body[data-page="checkin-success"] .success-streak-layout {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(132px, 168px) 1px minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
+    z-index: 1;
+}
+
+body[data-page="checkin-success"] .success-streak-card::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -100px;
+    width: 220px;
+    height: 220px;
+    border-radius: 999px;
+    background: rgba(108, 99, 255, .08);
+    pointer-events: none;
+}
+
+body[data-page="checkin-success"] .success-streak-card h2 {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+body[data-page="checkin-success"] .success-streak-left span {
+    background:
+        radial-gradient(circle at 50% 36%, rgba(255,255,255,.92) 0 18%, rgba(255,255,255,0) 19%),
+        linear-gradient(145deg, #FFF6E2 0%, #FFD36A 46%, #FF7A00 100%);
+    color: #F97316;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.78), inset 0 -9px 18px rgba(255, 122, 0, .16), 0 10px 20px rgba(249, 115, 22, .20);
+}
+
+body[data-page="checkin-success"] .success-streak-left {
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 159, 28, .14);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .62);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 24px rgba(255, 159, 28, .06);
+}
+
+body[data-page="checkin-success"] .success-streak-left span svg {
+    width: 23px;
+    height: 23px;
+    stroke: #EA580C;
+    fill: #FB923C;
+    stroke-width: 2.2;
+    filter: drop-shadow(0 1px 2px rgba(194, 65, 12, .20));
+}
+
+body[data-page="checkin-success"] .success-streak-left span {
+    width: 44px;
+    height: 44px;
+}
+
+body[data-page="checkin-success"] .success-streak-left strong {
+    font-size: 26px;
+}
+
+body[data-page="checkin-success"] .success-streak-left em {
+    font-size: 12px;
+}
+
+body[data-page="checkin-success"] .success-streak-left strong,
+body[data-page="checkin-success"] .success-streak-left em {
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .success-streak-left em {
+    color: #FF7A00;
+}
+
+body[data-page="checkin-success"] .success-week-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(30px, 1fr));
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid rgba(231, 228, 255, .72);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .58);
+    align-items: start;
+}
+
+body[data-page="checkin-success"] .success-week-day {
+    min-width: 0;
+    gap: 5px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #667085;
+    font-size: 10.5px;
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .success-week-day i {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #E7E4FF;
+    background: #FFFFFF;
+    color: #98A2B3;
+    box-shadow: 0 7px 16px rgba(108, 99, 255, .08);
+}
+
+body[data-page="checkin-success"] .success-week-day.is-done i {
+    border-color: rgba(34, 197, 94, .18);
+    background: linear-gradient(135deg, #22C55E, #16A34A);
+    color: #FFFFFF;
+    box-shadow: 0 10px 18px rgba(34, 197, 94, .18);
+}
+
+body[data-page="checkin-success"] .success-week-day.is-partial i {
+    border-color: rgba(245, 158, 11, .22);
+    background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    color: #FFFFFF;
+    box-shadow: 0 10px 18px rgba(245, 158, 11, .16);
+}
+
+body[data-page="checkin-success"] .success-week-day.is-missed i {
+    border-color: #E4E7EC;
+    background: #FFFFFF;
+    color: #B8C0D4;
+}
+
+body[data-page="checkin-success"] .success-next-section {
+    grid-column: 1 / 2;
+    margin: 0;
+}
+
+body[data-page="checkin-success"] .success-next-card {
+    min-height: 112px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(108, 99, 255, .18);
+    background:
+        radial-gradient(240px 120px at 100% 0%, rgba(108, 99, 255, .13), rgba(255,255,255,0) 70%),
+        linear-gradient(135deg, #FFFFFF 0%, #F8F7FF 100%);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+body[data-page="checkin-success"] .success-next-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(108, 99, 255, .28);
+    box-shadow: 0 22px 44px rgba(108, 99, 255, .12);
+}
+
+body[data-page="checkin-success"] .success-next-icon {
+    background: linear-gradient(135deg, #F0EAFF, #E9E5FF);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 12px 20px rgba(108,99,255,.12);
+}
+
+body[data-page="checkin-success"] .success-next-card > svg {
+    width: 34px;
+    height: 34px;
+    padding: 8px;
+    border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 10px 22px rgba(108, 99, 255, .12);
+}
+
+body[data-page="checkin-success"] .success-next-card strong {
+    font-size: 16px;
+}
+
+body[data-page="checkin-success"] .success-buttons {
+    grid-column: 2 / 3;
+    align-self: end;
+    margin: 0;
+    gap: 12px;
+}
+
+body[data-page="checkin-success"] .success-btn {
+    min-height: 52px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .success-status-bar,
+body[data-page="checkin-success"] .success-bottom-nav,
+body[data-page="checkin-success"] .success-home-indicator {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    body[data-page="checkin-success"] .checkin-success-page {
+        padding: 0 16px 112px;
+    }
+
+    body[data-page="checkin-success"] .success-content {
+        width: min(100%, 640px);
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    body[data-page="checkin-success"] .success-hero {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        min-height: 400px;
+        padding: 0;
+    }
+
+    body[data-page="checkin-success"] .success-hero-copy {
+        justify-items: center;
+        text-align: center;
+    }
+
+    body[data-page="checkin-success"] .success-subtitle {
+        max-width: none;
+    }
+
+    body[data-page="checkin-success"] .success-mountain-wrap {
+        height: 100%;
+        bottom: auto;
+    }
+
+    body[data-page="checkin-success"] .today-summary-card,
+    body[data-page="checkin-success"] .success-motivation-card,
+    body[data-page="checkin-success"] .success-streak-card,
+    body[data-page="checkin-success"] .success-next-section,
+    body[data-page="checkin-success"] .success-buttons {
+        grid-column: 1 / -1;
+    }
+
+    body[data-page="checkin-success"] .today-summary-card {
+        justify-self: stretch;
+        width: 100%;
+        margin: -106.5px 0 0;
+    }
+}
+
+@media (max-width: 480px) {
+    body[data-page="checkin-success"] .checkin-success-page {
+        padding: 0 14px 104px;
+    }
+
+    body[data-page="checkin-success"] .success-content {
+        width: min(100%, 430px);
+    }
+
+    body[data-page="checkin-success"] .success-hero {
+        min-height: 342px;
+        padding: 0;
+        border-radius: 0;
+    }
+
+    body[data-page="checkin-success"] .success-title {
+        font-size: 24px;
+    }
+
+    body[data-page="checkin-success"] .success-subtitle {
+        font-size: 13px;
+    }
+
+    body[data-page="checkin-success"] .success-mountain-wrap {
+        height: 100%;
+        padding: 0;
+        border-radius: 0;
+        bottom: auto;
+    }
+
+    body[data-page="checkin-success"] .success-hero-image,
+    body[data-page="checkin-success"] .success-mountain-wrap::after {
+        border-radius: 0;
+    }
+
+    body[data-page="checkin-success"] .today-summary-card {
+        margin-top: -106.5px;
+    }
+
+    body[data-page="checkin-success"] .success-streak-layout {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    body[data-page="checkin-success"] .success-streak-divider {
+        display: none;
+    }
+
+    body[data-page="checkin-success"] .success-streak-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    body[data-page="checkin-success"] .success-streak-left span {
+        grid-row: auto;
+    }
+
+    body[data-page="checkin-success"] .success-streak-left em {
+        align-self: end;
+        margin-left: -6px;
+    }
+
+    body[data-page="checkin-success"] .success-week-row {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 4px;
+        padding: 7px;
+    }
+
+    body[data-page="checkin-success"] .success-week-day i {
+        width: 22px;
+        height: 22px;
+    }
+
+    body[data-page="checkin-success"] .success-week-day {
+        padding: 0;
+        border-radius: 0;
+    }
+}
+
 .checkin-cta-secondary {
     min-height: 52px;
     border-radius: 18px;

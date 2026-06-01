@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260530m" rel="stylesheet">
-    <link href="css/checkin.css?v=20260530e" rel="stylesheet">
+    <link href="css/checkin.css?v=20260601b" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-success">
     <div class="checkin-success-page">
@@ -21,60 +21,53 @@
 
         <main class="success-content">
             <section class="success-hero">
-                <img src="assets/gamification/mountain-stage-1.png" alt="" class="success-hero-image" id="successJourneyImage" aria-hidden="true">
-                <div class="success-hero-overlay"></div>
-                <div class="success-check-pin" aria-hidden="true">
-                    <i data-lucide="check"></i>
+                <div class="success-hero-copy">
+                    <div class="success-icon-circle" aria-hidden="true">
+                        <i data-lucide="check"></i>
+                    </div>
+                    <h1 class="success-title" id="successTitle">Check-in Successful!</h1>
+                    <p class="success-subtitle" id="successSubtitle">Way to show up for yourself today!</p>
                 </div>
-            </section>
-
-            <section class="success-title-block">
-                <div class="success-icon-circle" aria-hidden="true">
-                    <i data-lucide="check-circle-2"></i>
+                <div class="success-mountain-wrap">
+                    <img src="assets/gamification/mountain-stage-1.png?v=20260601-sunny" alt="" class="success-hero-image" id="successJourneyImage" aria-hidden="true">
+                    <span class="success-check-pin" aria-hidden="true"><i data-lucide="check"></i></span>
                 </div>
-                <h1 class="success-title" id="successTitle">Check-in Successful!</h1>
-                <p class="success-subtitle" id="successSubtitle">Great job! Consistency is your superpower.</p>
             </section>
 
             <section class="today-summary-card">
-                <div class="summary-card-head">
-                    <h3 class="summary-card-title">Today’s Progress</h3>
-                    <span id="successInsightPill">0 of 0 tasks completed</span>
+                <h3 class="summary-card-title" id="successSummaryTitle">Today's Progress</h3>
+                <div class="summary-ring-section">
+                    <svg class="summary-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="successRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
+                                <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="#EEEAFE" stroke-width="12"/>
+                        <circle class="summary-ring-progress" cx="60" cy="60" r="54" fill="none" stroke="url(#successRingGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 339.29" transform="rotate(-90 60 60)"/>
+                        <text x="60" y="56" text-anchor="middle" class="summary-ring-value" id="successScoreValue">0%</text>
+                        <text x="60" y="76" text-anchor="middle" class="summary-ring-label">Overall Score</text>
+                    </svg>
                 </div>
 
-                <div class="summary-progress-layout">
-                    <div class="summary-ring-section">
-                        <svg class="summary-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#6C63FF;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <circle cx="60" cy="60" r="54" fill="none" stroke="#EEEAFE" stroke-width="12"/>
-                            <circle class="summary-ring-progress" cx="60" cy="60" r="54" fill="none" stroke="url(#ringGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 339.29" transform="rotate(-90 60 60)"/>
-                            <text x="60" y="56" text-anchor="middle" class="summary-ring-value" id="successScoreValue">0%</text>
-                            <text x="60" y="76" text-anchor="middle" class="summary-ring-label">Completed</text>
-                        </svg>
-                    </div>
+                <div class="summary-divider"></div>
 
-                    <div class="summary-counts-section">
-                        <div class="summary-count">
-                            <div class="count-icon done"><i data-lucide="check"></i></div>
-                            <span class="count-number"><strong id="successDone">0</strong> Done</span>
-                        </div>
-                        <div class="summary-count">
-                            <div class="count-icon partial"><i data-lucide="minus"></i></div>
-                            <span class="count-number"><strong id="successPartial">0</strong> Partial</span>
-                        </div>
-                        <div class="summary-count">
-                            <div class="count-icon missed"><i data-lucide="x"></i></div>
-                            <span class="count-number"><strong id="successMissed">0</strong> Missed</span>
-                        </div>
+                <div class="summary-counts-section">
+                    <div class="summary-count">
+                        <div class="count-icon done"><i data-lucide="check"></i></div>
+                        <span class="count-number"><strong id="successDone">0</strong> Done</span>
+                    </div>
+                    <div class="summary-count">
+                        <div class="count-icon partial"><i data-lucide="plus"></i></div>
+                        <span class="count-number"><strong id="successPartial">0</strong> Partial</span>
+                    </div>
+                    <div class="summary-count">
+                        <div class="count-icon missed"><i data-lucide="x"></i></div>
+                        <span class="count-number"><strong id="successMissed">0</strong> Missed</span>
                     </div>
                 </div>
-
-                <p class="summary-insight-text" id="successInsightText">Keep going! You’re almost there.</p>
             </section>
 
             <section class="success-motivation-card">
@@ -87,31 +80,50 @@
             </section>
 
             <section class="success-streak-card">
-                <div class="success-card-head">
-                    <div>
-                        <span>Current Streak</span>
-                        <strong id="successStreakDays">0 days</strong>
+                <h2>Current Streak</h2>
+                <div class="success-streak-layout">
+                    <div class="success-streak-left">
+                        <span><i data-lucide="flame"></i></span>
+                        <strong id="successStreakNumber">0</strong>
+                        <em>Days</em>
                     </div>
-                    <span class="success-best-streak" id="successBestStreak">Best Streak: 0 days</span>
+                    <div class="success-streak-divider"></div>
+                    <div class="success-streak-right">
+                        <div class="success-week-row" id="successWeekRow" aria-label="Last 7 days"></div>
+                        <p id="successBestStreak">Best Streak: <strong>0 days</strong></p>
+                    </div>
                 </div>
-                <div class="success-week-row" id="successWeekRow" aria-label="Last 7 days"></div>
             </section>
 
-            <section class="success-journey-card" id="successJourneyCard">
-                <div class="success-journey-main">
-                    <strong id="successXpAward">+0 XP</strong>
-                    <span id="successStreak">0 Day Streak</span>
-                </div>
-                <div class="tyfit-journey-progress-track"><span id="successJourneyProgress" style="width:0%"></span></div>
+            <section class="success-next-section">
+                <h2>What’s Next?</h2>
+                <a href="journey.html" class="success-next-card" id="successJourneyCard">
+                    <span class="success-next-icon"><i data-lucide="goal"></i></span>
+                    <div>
+                        <strong>Your next goal awaits</strong>
+                        <p id="successJourneyText">Log your meals, crush your workouts, and move closer to your goals.</p>
+                        <span id="successXpAward" hidden>+0 XP</span>
+                        <span id="successStreak" hidden>0 Day Streak</span>
+                        <span id="successJourneyBadge" hidden>Journey Progress</span>
+                        <span id="successJourneyProgress" hidden></span>
+                    </div>
+                    <i data-lucide="chevron-right"></i>
+                </a>
             </section>
 
             <div class="success-buttons">
                 <a href="index.html" class="success-btn primary">
-                    <i data-lucide="home"></i> Back to Home
+                    Back to Home <i data-lucide="home"></i>
                 </a>
                 <a href="journey.html" class="success-btn secondary" id="viewJourneyBtn">
-                    <i data-lucide="mountain"></i> View Progress
+                    View Progress <i data-lucide="trending-up"></i>
                 </a>
+            </div>
+
+            <div class="success-hidden-metrics" hidden>
+                <span id="successInsightPill">0 of 0 tasks completed</span>
+                <span id="successInsightText">Keep going! You’re almost there.</span>
+                <span id="successStreakDays">0 days</span>
             </div>
         </main>
     </div>
@@ -120,9 +132,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
-    <script src="js/login.js?v=20260523l"></script>
     <script src="js/shell.js"></script>
-    <script src="js/journey.js?v=20260530a"></script>
-    <script src="js/checkin_success.js?v=20260530a"></script>
+    <script src="js/journey.js?v=20260601-sunny"></script>
+    <script src="js/checkin_success.js?v=20260601b"></script>
 </body>
 </html>
