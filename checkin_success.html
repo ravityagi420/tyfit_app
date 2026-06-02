@@ -13,46 +13,80 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260530m" rel="stylesheet">
-    <link href="css/checkin.css?v=20260601b" rel="stylesheet">
+    <link href="css/checkin.css?v=20260602-reset" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-success">
     <div class="checkin-success-page">
         <canvas id="tyfitConfettiCanvas" class="tyfit-confetti-canvas" hidden></canvas>
 
         <main class="success-content">
-            <section class="success-hero">
+            <section class="success-hero" aria-labelledby="successTitle">
+                <div class="success-mountain-wrap">
+                    <img src="assets/gamification/mountain-stage-1.png?v=20260602-climb" alt="" class="success-hero-image" id="successJourneyImage" aria-hidden="true">
+                </div>
                 <div class="success-hero-copy">
                     <div class="success-icon-circle" aria-hidden="true">
-                        <i data-lucide="check"></i>
+                        <img src="assets/gamification/icon-bonfire.svg" alt="">
                     </div>
+                    <div class="success-streak-pill"><span id="successHeroStreak">1 Day Streak</span></div>
                     <h1 class="success-title" id="successTitle">Check-in Successful!</h1>
-                    <p class="success-subtitle" id="successSubtitle">Way to show up for yourself today!</p>
-                </div>
-                <div class="success-mountain-wrap">
-                    <img src="assets/gamification/mountain-stage-1.png?v=20260601-sunny" alt="" class="success-hero-image" id="successJourneyImage" aria-hidden="true">
-                    <span class="success-check-pin" aria-hidden="true"><i data-lucide="check"></i></span>
+                    <p class="success-subtitle" id="successSubtitle">Great job showing up for yourself today. Consistency is your superpower.</p>
                 </div>
             </section>
 
-            <section class="today-summary-card">
-                <h3 class="summary-card-title" id="successSummaryTitle">Today's Progress</h3>
+            <section class="success-xp-card" aria-label="XP earned">
+                <span class="success-xp-sparkle sparkle-one" aria-hidden="true"></span>
+                <span class="success-xp-sparkle sparkle-two" aria-hidden="true"></span>
+                <span class="success-xp-sparkle sparkle-three" aria-hidden="true"></span>
+                <span class="success-xp-icon" aria-hidden="true"><i data-lucide="zap"></i></span>
+                <div>
+                    <span>You earned</span>
+                    <strong id="successXpAwardDisplay">+0 XP</strong>
+                </div>
+            </section>
+
+            <section class="today-summary-card success-climb-card" aria-label="Today's climb progress">
                 <div class="summary-ring-section">
                     <svg class="summary-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="successRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
-                                <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
+                                <stop offset="0%" style="stop-color:#22C55E;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#65D86F;stop-opacity:1" />
                             </linearGradient>
                         </defs>
-                        <circle cx="60" cy="60" r="54" fill="none" stroke="#EEEAFE" stroke-width="12"/>
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="#EBE7FF" stroke-width="12"/>
                         <circle class="summary-ring-progress" cx="60" cy="60" r="54" fill="none" stroke="url(#successRingGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 339.29" transform="rotate(-90 60 60)"/>
-                        <text x="60" y="56" text-anchor="middle" class="summary-ring-value" id="successScoreValue">0%</text>
-                        <text x="60" y="76" text-anchor="middle" class="summary-ring-label">Overall Score</text>
+                        <text x="60" y="55" text-anchor="middle" class="summary-ring-value" id="successScoreValue">0%</text>
+                        <text x="60" y="75" text-anchor="middle" class="summary-ring-label">Today’s Score</text>
                     </svg>
                 </div>
 
                 <div class="summary-divider"></div>
+
+                <div class="success-climb-main">
+                    <div class="success-climb-head">
+                        <h2 id="successClimbTitle">Great climb today! 🔥</h2>
+                        <span id="successJourneyBadge">Base Camp</span>
+                    </div>
+                    <div class="success-trail-visual" aria-hidden="true">
+                        <div class="success-trail-track">
+                            <svg class="success-trail-line is-base" viewBox="0 0 340 74" preserveAspectRatio="none" aria-hidden="true">
+                                <path d="M4 48 C42 28 74 57 111 42 C146 28 169 48 199 38 C231 27 250 52 278 44 C300 38 316 42 336 36" pathLength="100" />
+                            </svg>
+                            <span class="success-trail-fill" id="successJourneyProgress">
+                                <svg class="success-trail-line is-fill" viewBox="0 0 340 74" preserveAspectRatio="none" aria-hidden="true">
+                                    <path d="M4 48 C42 28 74 57 111 42 C146 28 169 48 199 38 C231 27 250 52 278 44 C300 38 316 42 336 36" pathLength="100" />
+                                </svg>
+                            </span>
+                            <span class="success-hiker" id="successTrailHiker"><img src="assets/gamification/icon-hiker.svg" alt=""></span>
+                            <span class="success-summit"><i data-lucide="flag"></i></span>
+                        </div>
+                    </div>
+                    <div class="success-xp-progress-row">
+                        <strong id="successStageXpText">0 / 500 XP</strong>
+                        <span id="successNextXpText">500 XP</span>
+                    </div>
+                </div>
 
                 <div class="summary-counts-section">
                     <div class="summary-count">
@@ -60,7 +94,7 @@
                         <span class="count-number"><strong id="successDone">0</strong> Done</span>
                     </div>
                     <div class="summary-count">
-                        <div class="count-icon partial"><i data-lucide="plus"></i></div>
+                        <div class="count-icon partial"><i data-lucide="minus"></i></div>
                         <span class="count-number"><strong id="successPartial">0</strong> Partial</span>
                     </div>
                     <div class="summary-count">
@@ -70,53 +104,39 @@
                 </div>
             </section>
 
-            <section class="success-motivation-card">
-                <span class="success-motivation-star" aria-hidden="true"><i data-lucide="star"></i></span>
-                <div class="success-motivation-copy">
-                    <h2>You’re on the right track!</h2>
-                    <p>Consistency is the key to transformation. Keep going, you’ve got this!</p>
-                </div>
-                <img src="assets/gamification/green-leaf.png" alt="" class="success-motivation-leaf" aria-hidden="true">
-            </section>
-
-            <section class="success-streak-card">
-                <h2>Current Streak</h2>
-                <div class="success-streak-layout">
-                    <div class="success-streak-left">
-                        <span><i data-lucide="flame"></i></span>
-                        <strong id="successStreakNumber">0</strong>
-                        <em>Days</em>
-                    </div>
-                    <div class="success-streak-divider"></div>
-                    <div class="success-streak-right">
-                        <div class="success-week-row" id="successWeekRow" aria-label="Last 7 days"></div>
-                        <p id="successBestStreak">Best Streak: <strong>0 days</strong></p>
-                    </div>
+            <section class="success-streak-card" aria-label="Current streak">
+                <span class="success-streak-fire" aria-hidden="true"><img src="assets/gamification/icon-bonfire.svg" alt=""></span>
+                <div>
+                    <strong><span id="successStreakNumber">1</span> Day Streak</strong>
+                    <p>Keep it going!</p>
                 </div>
             </section>
 
-            <section class="success-next-section">
-                <h2>What’s Next?</h2>
-                <a href="journey.html" class="success-next-card" id="successJourneyCard">
-                    <span class="success-next-icon"><i data-lucide="goal"></i></span>
-                    <div>
-                        <strong>Your next goal awaits</strong>
-                        <p id="successJourneyText">Log your meals, crush your workouts, and move closer to your goals.</p>
-                        <span id="successXpAward" hidden>+0 XP</span>
-                        <span id="successStreak" hidden>0 Day Streak</span>
-                        <span id="successJourneyBadge" hidden>Journey Progress</span>
-                        <span id="successJourneyProgress" hidden></span>
-                    </div>
-                    <i data-lucide="chevron-right"></i>
-                </a>
+            <section class="success-activity-card" aria-labelledby="successActivityTitle">
+                <div class="success-activity-head">
+                    <h2 id="successActivityTitle">Recent Activity</h2>
+                    <span>Last 7 Days</span>
+                </div>
+                <div class="success-week-row" id="successWeekRow" aria-label="Last 7 days"></div>
+                <div class="success-activity-legend" aria-hidden="true">
+                    <span><i class="legend-dot is-complete"></i>Completed</span>
+                    <span><i class="legend-dot is-partial"></i>Partial</span>
+                    <span><i class="legend-dot is-missed"></i>Missed</span>
+                    <span><i class="legend-dot is-today"></i>Today</span>
+                </div>
+            </section>
+
+            <section class="success-mini-note" aria-label="Motivation">
+                <span aria-hidden="true"><img src="assets/gamification/icon-mountains.svg" alt=""></span>
+                <p>Small steps today. Summits tomorrow.</p>
             </section>
 
             <div class="success-buttons">
-                <a href="index.html" class="success-btn primary">
-                    Back to Home <i data-lucide="home"></i>
+                <a href="journey.html" class="success-btn primary" id="viewJourneyBtn">
+                    Great! Let’s keep climbing <i data-lucide="mountain"></i>
                 </a>
-                <a href="journey.html" class="success-btn secondary" id="viewJourneyBtn">
-                    View Progress <i data-lucide="trending-up"></i>
+                <a href="index.html" class="success-btn secondary">
+                    View Dashboard
                 </a>
             </div>
 
@@ -124,6 +144,9 @@
                 <span id="successInsightPill">0 of 0 tasks completed</span>
                 <span id="successInsightText">Keep going! You’re almost there.</span>
                 <span id="successStreakDays">0 days</span>
+                <span id="successXpAward">+0 XP</span>
+                <span id="successStreak">0 Day Streak</span>
+                <span id="successJourneyText">Journey Progress</span>
             </div>
         </main>
     </div>
@@ -133,7 +156,7 @@
     <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/shell.js"></script>
-    <script src="js/journey.js?v=20260601-sunny"></script>
-    <script src="js/checkin_success.js?v=20260601b"></script>
+    <script src="js/journey.js?v=20260602-climb"></script>
+    <script src="js/checkin_success.js?v=20260602-climb"></script>
 </body>
 </html>

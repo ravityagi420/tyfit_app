@@ -14,9 +14,22 @@
         if (!ring) return;
 
         const clamped = Math.max(0, Math.min(100, Number(score) || 0));
+        const color = clamped < 40 ? "#FF5E7D" : (clamped <= 75 ? "#FFB800" : "#22A861");
         const circumference = 2 * Math.PI * 54; // radius = 54
         const offset = circumference * (1 - (clamped / 100));
         ring.style.strokeDasharray = `${circumference - offset} ${circumference}`;
+        ring.style.stroke = color;
+    }
+
+    function setTrailProgress(percent) {
+        const clamped = Math.max(0, Math.min(100, Number(percent) || 0));
+        const fill = el("successJourneyProgress");
+        const hiker = el("successTrailHiker");
+        if (fill) fill.style.width = `${clamped}%`;
+        if (hiker) {
+            hiker.style.left = `${clamped}%`;
+            hiker.style.setProperty("--trail-progress", `${clamped}%`);
+        }
     }
 
     function setSummary(data) {
@@ -31,6 +44,7 @@
 
         const scoreEl = el("successScoreValue");
         if (scoreEl) scoreEl.textContent = `${Math.round(score)}%`;
+        setText("successClimbTitle", score >= 80 ? "Great climb today! 🔥" : "Nice climb today!");
         setText("successWorkouts", `${done}/${total || 0}`);
         
         if (el("successDone")) el("successDone").textContent = String(done);
@@ -74,13 +88,13 @@
         setText("successSubtitle", "Your day has been updated.");
         setText("successJourneyBadge", "Progress counted");
         setText("successXpAward", "No new XP");
+        setText("successXpAwardDisplay", "No new XP");
         setText("successStreak", "Today was already counted");
         setText("successJourneyText", "No new streak XP because this check-in date was already counted.");
         setHeroStageImage(stageInfo);
-        const progressNode = el("successJourneyProgress");
-        if (progressNode) progressNode.style.width = `${Number(progress?.percent) || 100}%`;
+        renderStageProgress(progress);
         const btn = el("viewJourneyBtn");
-        if (btn) btn.innerHTML = '<i data-lucide="activity"></i> View Progress';
+        if (btn) btn.innerHTML = 'View Progress <i data-lucide="activity"></i>';
     }
 
     function startConfetti() {
@@ -91,7 +105,7 @@
         const colors = ["#6C63FF", "#8B7CFF", "#22C55E", "#F59E0B", "#EF4444", "#60A5FA"];
         const start = performance.now();
         const duration = 2200;
-        const particles = Array.from({ length: 56 }, () => ({
+        const particles = Array.from({ length: 104 }, () => ({
             x: Math.random() * window.innerWidth,
             y: -20 - Math.random() * 180,
             size: 4 + Math.random() * 6,
@@ -140,33 +154,70 @@
         requestAnimationFrame(frame);
     }
 
+    function renderStageProgress(progress) {
+        const current = progress?.current;
+        const next = progress?.next;
+        const currentXp = Number(progress?.currentXp) || 0;
+        const neededXp = Number(progress?.neededXp) || 0;
+        const percent = next ? Number(progress?.percent) || 0 : 100;
+
+        setText("successJourneyBadge", current?.name || "Base Camp");
+        if (next) {
+            setText("successStageXpText", `${Math.max(0, currentXp)} / ${neededXp} XP`);
+            setText("successNextXpText", `${neededXp} XP`);
+            setText("successJourneyText", `${progress.remainingXp} XP to ${next.name}.`);
+        } else {
+            setText("successStageXpText", "Summit reached");
+            setText("successNextXpText", "9000 XP");
+            setText("successJourneyText", "Summit reached. Legendary consistency.");
+        }
+        setTrailProgress(percent);
+        window.requestAnimationFrame(() => setTrailProgress(percent));
+    }
+
     function renderAwardState({ xp, streak, stage, title, totalXp, awarded }) {
         const { progress, stageInfo } = resolveStageView({ totalXp, stage });
         setHeroStageImage(stageInfo);
         setText("successTitle", "Check-in Successful!");
-        setText("successSubtitle", "Way to show up for yourself today!");
+        setText("successSubtitle", "Great job showing up for yourself today. Consistency is your superpower.");
         setText("successJourneyBadge", title || stageInfo?.title || "Journey Progress");
         setText("successXpAward", `+${Number(xp) || 0} XP`);
+        setText("successXpAwardDisplay", `+${Number(xp) || 0} XP`);
         setText("successStreak", `${Number(streak) || 1} Day Streak`);
-        setText("successJourneyText", progress?.next ? `${progress.remainingXp} XP to ${progress.next.name}.` : "Summit reached. Legendary consistency.");
-        const progressNode = el("successJourneyProgress");
-        if (progressNode) progressNode.style.width = `${progress?.percent ?? 0}%`;
+        setText("successHeroStreak", `${Number(streak) || 1} Day Streak`);
+        renderStageProgress(progress);
         if (awarded && Number(xp) > 0) startConfetti();
+    }
+
+    function formatDayShort(dateISO) {
+        const date = new Date(`${dateISO}T00:00:00`);
+        return date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+    }
+
+    function formatDayNumber(dateISO) {
+        const date = new Date(`${dateISO}T00:00:00`);
+        return date.toLocaleDateString("en-US", { day: "numeric" });
     }
 
     function renderWeekRow(events, today) {
         const row = el("successWeekRow");
         if (!row || !window.tyfitJourney) return;
         const eventMap = new Map((events || []).map((event) => [String(event.checkin_date), event]));
-        const labels = ["M", "T", "W", "T", "F", "S", "S"];
         const days = [];
         for (let i = 6; i >= 0; i -= 1) {
             const date = window.tyfitJourney.addDaysISO(today, -i);
             const event = eventMap.get(date);
             const score = Number(event?.adherence_score ?? 0);
+            const isToday = date === today;
             const state = event ? (score >= 50 ? "done" : "partial") : "missed";
-            const icon = state === "done" ? "check" : (state === "partial" ? "minus" : "circle");
-            days.push(`<span class="success-week-day is-${state}"><i><svg data-lucide="${icon}"></svg></i><span>${labels[6 - i]}</span></span>`);
+            const icon = state === "done" ? "check" : (state === "partial" ? "zap" : "mountain");
+            days.push(
+                `<span class="success-week-day is-${state}${isToday ? " is-today" : ""}">
+                    <em>${isToday ? "TODAY" : formatDayShort(date)}</em>
+                    <strong>${formatDayNumber(date)}</strong>
+                    <i><svg data-lucide="${icon}"></svg></i>
+                </span>`
+            );
         }
         row.innerHTML = days.join("");
     }
@@ -207,9 +258,10 @@
             renderWeekRow(fallbackEvents, fallbackDate);
         }
 
-        const currentStreak = Number(journey?.current_streak || event?.streak_after || queryStreak || 0);
+        const currentStreak = Number(queryStreak || event?.streak_after || journey?.current_streak || 0);
         const longestStreak = Number(journey?.longest_streak || currentStreak || 0);
         setText("successStreakNumber", String(currentStreak || 1));
+        setText("successHeroStreak", `${currentStreak || 1} Day Streak`);
         setText("successStreakDays", `${currentStreak || 1} days`);
         const best = el("successBestStreak");
         if (best) best.innerHTML = `Best Streak: <strong>${longestStreak || currentStreak || 1} days</strong>`;

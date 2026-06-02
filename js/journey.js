@@ -2,12 +2,12 @@
     "use strict";
 
     const STAGES = [
-        { stage: 1, threshold: 0, name: "Base Camp", title: "Base Camp", subtitle: "You’ve taken the first step.", asset: "assets/gamification/mountain-stage-1.png?v=20260601-sunny" },
-        { stage: 2, threshold: 500, name: "Trailblazer", title: "Trailblazer", subtitle: "You’re building momentum.", asset: "assets/gamification/mountain-stage-2.png?v=20260601-sunny" },
-        { stage: 3, threshold: 1500, name: "Ascent", title: "Ascent", subtitle: "You’re rising above the rest.", asset: "assets/gamification/mountain-stage-3.png?v=20260601-sunny" },
-        { stage: 4, threshold: 3000, name: "Summit Push", title: "Summit Push", subtitle: "You’re almost there.", asset: "assets/gamification/mountain-stage-4.png?v=20260601-sunny" },
-        { stage: 5, threshold: 5500, name: "Peak Achiever", title: "Peak Achiever", subtitle: "You’ve reached new heights.", asset: "assets/gamification/mountain-stage-5.png?v=20260601-sunny" },
-        { stage: 6, threshold: 9000, name: "Summit Master", title: "Summit Master", subtitle: "You’re an inspiration.", asset: "assets/gamification/mountain-stage-6.png?v=20260601-sunny" }
+        { stage: 1, threshold: 0, name: "Base Camp", title: "Base Camp", subtitle: "You’ve taken the first step.", asset: "assets/gamification/mountain-stage-1.png?v=20260602-climb" },
+        { stage: 2, threshold: 500, name: "Trailblazer", title: "Trailblazer", subtitle: "You’re building momentum.", asset: "assets/gamification/mountain-stage-2.png?v=20260602-climb" },
+        { stage: 3, threshold: 1500, name: "Ascent", title: "Ascent", subtitle: "You’re rising above the rest.", asset: "assets/gamification/mountain-stage-3.png?v=20260602-climb" },
+        { stage: 4, threshold: 3000, name: "Summit Push", title: "Summit Push", subtitle: "You’re almost there.", asset: "assets/gamification/mountain-stage-4.png?v=20260602-climb" },
+        { stage: 5, threshold: 5500, name: "Peak Achiever", title: "Peak Achiever", subtitle: "You’ve reached new heights.", asset: "assets/gamification/mountain-stage-5.png?v=20260602-climb" },
+        { stage: 6, threshold: 9000, name: "Summit Master", title: "Summit Master", subtitle: "You’re an inspiration.", asset: "assets/gamification/mountain-stage-6.png?v=20260602-climb" }
     ];
 
     function todayISO() {
