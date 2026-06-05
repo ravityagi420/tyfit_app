@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-1.5-flash";
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-2.0-flash";
 
 function jsonResponse(body: JsonRecord, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -80,6 +80,23 @@ function fallbackResponse(reply = "TyBot is having trouble right now. Please try
     replacementOptions: [],
     actions: [],
   };
+}
+
+function getSafeErrorReply(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || "");
+  if (message.includes("Missing GEMINI_API_KEY")) {
+    return "TyBot setup is missing the Gemini API key in Supabase Function Secrets.";
+  }
+  if (message.includes("Gemini request failed: 404")) {
+    return "TyBot could not find the configured Gemini model. Set Supabase Function Secret GEMINI_MODEL to gemini-2.0-flash and redeploy the function.";
+  }
+  if (message.includes("Gemini request failed: 401") || message.includes("Gemini request failed: 403")) {
+    return "TyBot could not authenticate with Gemini. Please check the GEMINI_API_KEY Supabase Function Secret.";
+  }
+  if (message.includes("Gemini request failed: 429")) {
+    return "TyBot is rate limited by Gemini right now. Please try again shortly.";
+  }
+  return "TyBot is having trouble right now. Please try again.";
 }
 
 function inferIntent(action: string, message: string) {
@@ -480,6 +497,9 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error("TyBot error:", error);
-    return jsonResponse(fallbackResponse(), 200);
+    return jsonResponse({
+      ...fallbackResponse(getSafeErrorReply(error)),
+      success: false,
+    }, 200);
   }
 });

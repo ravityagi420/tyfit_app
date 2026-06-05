@@ -418,7 +418,7 @@
         } catch (error) {
             removeTyping(typing);
             console.error("TyBot invoke error:", error);
-            addMessage("bot", "TyBot is having trouble right now. Please try again.");
+            addMessage("bot", error.message || "TyBot is having trouble right now. Please try again.");
         } finally {
             state.isSending = false;
         }
