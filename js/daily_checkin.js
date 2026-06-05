@@ -1217,15 +1217,23 @@
 
     function bindStaticActions() {
         const manage = el("manageGoalsBtn");
+        const manageFloating = el("manageGoalsFloatingBtn");
+
+        const openManageGoals = async () => {
+            if (STATE.access?.isAdmin && !STATE.targetUserId) {
+                showToast("Select a client first.");
+                return;
+            }
+            await flushPendingChanges();
+            window.location.href = getManageGoalsHref();
+        };
+
         if (manage) {
-            manage.addEventListener("click", async () => {
-                if (STATE.access?.isAdmin && !STATE.targetUserId) {
-                    showToast("Select a client first.");
-                    return;
-                }
-                await flushPendingChanges();
-                window.location.href = getManageGoalsHref();
-            });
+            manage.addEventListener("click", openManageGoals);
+        }
+
+        if (manageFloating) {
+            manageFloating.addEventListener("click", openManageGoals);
         }
 
         const submit = el("submitCheckinBtn");

@@ -832,7 +832,7 @@ function updateMobileBottomNav(accessState) {
     const iconEl = link.querySelector("i[data-lucide], svg[data-lucide], [data-lucide]");
 
     if (label === "diet chart" && iconEl) {
-      iconEl.setAttribute("data-lucide", "clipboard-list");
+      iconEl.setAttribute("data-lucide", "salad");
     }
 
     if (label === "training" && iconEl) {

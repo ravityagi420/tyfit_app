@@ -3918,6 +3918,23 @@ body[data-page="daily-checkin"] .checkin-selected-date {
     flex-shrink: 0;
 }
 
+body[data-page="daily-checkin"] .checkin-floating-action {
+    position: fixed;
+    right: max(18px, env(safe-area-inset-right));
+    bottom: calc(104px + env(safe-area-inset-bottom));
+    z-index: 94;
+}
+
+body[data-page="daily-checkin"] .checkin-floating-settings-btn {
+    width: 58px;
+    height: 58px;
+}
+
+body[data-page="daily-checkin"] .checkin-floating-settings-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
 /* ── Date dot — explicit rule to ensure visibility ──────────── */
 body[data-page="daily-checkin"] .checkin-date-dot {
     width: 6px;

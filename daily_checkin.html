@@ -101,16 +101,19 @@
                         </div>
                     </section>
 
-                    <!-- 1. Greeting Section -->
-                    <section class="checkin-greeting-section">
-                        <div class="checkin-greeting-left">
-                            <h1 class="checkin-greeting" id="checkinGreeting">Good morning 👋</h1>
-                            <p class="checkin-subtitle">Track today, grow stronger.</p>
-                        </div>
-                        <button type="button" class="checkin-manage-goals-pill" id="manageGoalsBtn">
-                            <i data-lucide="settings-2"></i>
-                            <span>Manage Goals</span>
+                    <!-- 1. Week Navigator (above calendar card) -->
+                    <div class="checkin-week-nav-row">
+                        <button type="button" class="checkin-week-pill" id="checkinWeekBtn" aria-label="Select week">
+                            <i data-lucide="calendar-days"></i>
+                            <span id="checkinWeekLabel">This Week</span>
+                            <i data-lucide="chevron-down"></i>
                         </button>
+                        <p class="checkin-selected-date" id="checkinSelectedDateText"></p>
+                    </div>
+
+                    <!-- Calendar Strip -->
+                    <section class="checkin-calendar-section">
+                        <div class="checkin-date-scroll" id="checkinDateStrip"></div>
                     </section>
 
                     <!-- 2. Today's Progress Card -->
@@ -150,22 +153,7 @@
                         </div>
                     </section>
 
-                    <!-- 3. Week Navigator (above calendar card) -->
-                    <div class="checkin-week-nav-row">
-                        <button type="button" class="checkin-week-pill" id="checkinWeekBtn" aria-label="Select week">
-                            <i data-lucide="calendar-days"></i>
-                            <span id="checkinWeekLabel">This Week</span>
-                            <i data-lucide="chevron-down"></i>
-                        </button>
-                        <p class="checkin-selected-date" id="checkinSelectedDateText"></p>
-                    </div>
-
-                    <!-- Calendar Strip -->
-                    <section class="checkin-calendar-section">
-                        <div class="checkin-date-scroll" id="checkinDateStrip"></div>
-                    </section>
-
-                    <!-- 4. Check-in Goal Groups (rendered by JS) -->
+                    <!-- 3. Check-in Goal Groups (rendered by JS) -->
                     <div id="checkinGroupsWrap" class="checkin-shell"></div>
 
                     <!-- 5. Submit -->
@@ -180,6 +168,12 @@
         </main>
     </div>
     <div data-tyfit-bottom-nav></div>
+
+    <div class="tyfit-floating-action checkin-floating-action" id="manageGoalsFloatingWrap">
+        <button type="button" class="tyfit-floating-plus checkin-floating-settings-btn" id="manageGoalsFloatingBtn" aria-label="Manage goals">
+            <i data-lucide="settings-2"></i>
+        </button>
+    </div>
 
     <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
     <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">

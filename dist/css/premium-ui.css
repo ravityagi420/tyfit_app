@@ -1928,7 +1928,7 @@ body[data-page="home"] .tyfit-motivation-right {
     height: 87px;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    align-items: center;
+    align-items: stretch;
     padding: 5px 6px 15px;
 }
 
@@ -2120,8 +2120,12 @@ body[data-page="home"] .tyfit-motivation-right {
     align-items: center;
     justify-content: center;
     gap: 4px;
+    height: 100%;
+    min-width: 0;
+    padding: 6px 0 2px;
     font-size: 13px;
     font-weight: 500;
+    line-height: 1.05;
     cursor: pointer;
 }
 
@@ -2184,14 +2188,14 @@ body[data-page="home"] .tyfit-motivation-right {
     width: 66px;
     height: 60px;
     margin: 0 auto;
-    border-radius: 24px;
-    color: var(--tyfit-primary) !important;
+    border-radius: 28px;
+    color: #5b616b !important;
     background:
-        radial-gradient(circle at 50% 34%, rgba(108, 99, 255, .14), rgba(108, 99, 255, .06) 48%, rgba(108, 99, 255, 0) 72%) !important;
+        radial-gradient(circle at 50% 34%, rgba(108, 99, 255, .07), rgba(108, 99, 255, .03) 48%, rgba(108, 99, 255, 0) 72%) !important;
     box-shadow: none;
     gap: 4px;
     font-size: 10.5px;
-    font-weight: 650;
+    font-weight: 550;
     letter-spacing: 0;
 }
 
@@ -2200,12 +2204,24 @@ body[data-page="home"] .tyfit-motivation-right {
     position: absolute;
     top: 6px;
     left: 50%;
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     border-radius: 999px;
     transform: translateX(-50%);
-    background: linear-gradient(180deg, rgba(108, 99, 255, .13), rgba(139, 124, 255, .07));
-    border: 1px solid rgba(108, 99, 255, .12);
+    background: linear-gradient(180deg, rgba(108, 99, 255, .065), rgba(139, 124, 255, .035));
+    border: 1px solid rgba(108, 99, 255, .08);
+}
+
+.tyfit-mobile-bottom-nav .tyfit-checkin-nav-btn::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 56px;
+    width: 30px;
+    height: 5px;
+    border-radius: 999px;
+    transform: translateX(-50%);
+    background: var(--tyfit-primary);
 }
 
 .tyfit-mobile-bottom-nav .tyfit-checkin-nav-btn svg {
@@ -2218,6 +2234,7 @@ body[data-page="home"] .tyfit-motivation-right {
 .tyfit-mobile-bottom-nav .tyfit-checkin-nav-btn span {
     position: relative;
     z-index: 1;
+    color: #5b616b !important;
 }
 
 .tyfit-floating-action {

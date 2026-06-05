@@ -226,7 +226,7 @@
         const active = getActiveBottomNavKey();
         const navItems = [
             { key: 'home', href: `${prefix}index.html`, icon: 'home', label: 'Home' },
-            { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'clipboard-list', label: 'Diet Chart' },
+            { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'salad', label: 'Diet Chart' },
             { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'clipboard-check', label: 'CheckIn' },
             { key: 'training', href: `${prefix}training_plan.html`, icon: 'dumbbell', label: 'Training' },
             { key: 'profile', href: `${prefix}profile.html`, icon: 'user', label: 'Profile' },

@@ -69,6 +69,10 @@ body[data-page="training-plan"] .tyfit-main-inner {
   width: 100%;
 }
 
+.tp-user-toolbar[hidden] {
+  display: none !important;
+}
+
 .tp-admin-toolbar-row {
   display: grid;
   gap: 8px;
