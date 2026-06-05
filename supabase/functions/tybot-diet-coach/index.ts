@@ -8,7 +8,27 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-2.0-flash";
+const GEMINI_MODELS = {
+  simple: "gemini-2.5-flash-lite",
+  reasoning: "gemini-2.5-flash",
+  fallback: "gemini-2.5-pro",
+} as const;
+
+type GeminiTaskType = "simple" | "reasoning";
+
+class GeminiRequestError extends Error {
+  status: number;
+  details: string;
+  model: string;
+
+  constructor(status: number, details: string, model: string) {
+    super(`Gemini request failed: ${status} ${details}`);
+    this.name = "GeminiRequestError";
+    this.status = status;
+    this.details = details;
+    this.model = model;
+  }
+}
 
 function jsonResponse(body: JsonRecord, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -87,16 +107,56 @@ function getSafeErrorReply(error: unknown) {
   if (message.includes("Missing GEMINI_API_KEY")) {
     return "TyBot setup is missing the Gemini API key in Supabase Function Secrets.";
   }
-  if (message.includes("Gemini request failed: 404")) {
-    return "TyBot could not find the configured Gemini model. Set Supabase Function Secret GEMINI_MODEL to gemini-2.0-flash and redeploy the function.";
-  }
   if (message.includes("Gemini request failed: 401") || message.includes("Gemini request failed: 403")) {
     return "TyBot could not authenticate with Gemini. Please check the GEMINI_API_KEY Supabase Function Secret.";
   }
-  if (message.includes("Gemini request failed: 429")) {
-    return "TyBot is rate limited by Gemini right now. Please try again shortly.";
+  if (message.includes("Gemini request failed: 404")) {
+    return "TyBot could not find one of the configured Gemini models. Please check that your Gemini API key has access to Gemini 2.5 models.";
+  }
+  if (message.includes("Gemini request failed: 429") || /quota|rate limit|RESOURCE_EXHAUSTED/i.test(message)) {
+    return "TyBot is temporarily busy. Please try again in a few minutes.";
   }
   return "TyBot is having trouble right now. Please try again.";
+}
+
+function isGeminiQuotaError(error: unknown) {
+  if (error instanceof GeminiRequestError && error.status === 429) {
+    return true;
+  }
+
+  const message = error instanceof Error ? error.message : String(error || "");
+  return /quota|rate limit|RESOURCE_EXHAUSTED/i.test(message);
+}
+
+function getGeminiModelChain(taskType: GeminiTaskType) {
+  const fullChain = [
+    GEMINI_MODELS.simple,
+    GEMINI_MODELS.reasoning,
+    GEMINI_MODELS.fallback,
+  ];
+  const startModel = taskType === "reasoning" ? GEMINI_MODELS.reasoning : GEMINI_MODELS.simple;
+  const startIndex = fullChain.indexOf(startModel);
+  return fullChain.slice(Math.max(0, startIndex));
+}
+
+function getGeminiTaskType(intent: string, action: string, message: string): GeminiTaskType {
+  const text = normalizeText(`${action} ${intent} ${message}`);
+  const reasoningIntents = new Set([
+    "create_diet_plan",
+    "suggest_replacement",
+    "improve_existing_diet",
+    "analyze_diet",
+  ]);
+
+  if (reasoningIntents.has(intent)) {
+    return "reasoning";
+  }
+
+  if (/(create|generate|build|replace|alternative|improve|analyze|review|tdee|activity|full diet|diet chart|meal structure)/i.test(text)) {
+    return "reasoning";
+  }
+
+  return "simple";
 }
 
 function inferIntent(action: string, message: string) {
@@ -281,14 +341,14 @@ function buildUserPrompt(params: {
   });
 }
 
-async function callGemini(systemPrompt: string, userPrompt: string, retryPrompt?: string) {
+async function callGeminiModel(model: string, systemPrompt: string, userPrompt: string, retryPrompt?: string) {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) {
     throw new Error("Missing GEMINI_API_KEY");
   }
 
   const prompt = retryPrompt ? `${userPrompt}\n\n${retryPrompt}` : userPrompt;
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -310,11 +370,39 @@ async function callGemini(systemPrompt: string, userPrompt: string, retryPrompt?
 
   if (!response.ok) {
     const details = await response.text();
-    throw new Error(`Gemini request failed: ${response.status} ${details}`);
+    throw new GeminiRequestError(response.status, details, model);
   }
 
   const payload = await response.json();
   return String(payload?.candidates?.[0]?.content?.parts?.map((part: JsonRecord) => part.text || "").join("") || "");
+}
+
+// Gemini model routing:
+// - Simple tasks start on gemini-2.5-flash-lite.
+// - Diet/replacement reasoning starts on gemini-2.5-flash.
+// - gemini-2.5-pro is reserved as the final quota/rate-limit fallback.
+// We only fallback for quota/rate-limit failures; normal validation/auth/model errors are returned immediately.
+async function callGeminiWithFallback(systemPrompt: string, userPrompt: string, taskType: GeminiTaskType, retryPrompt?: string) {
+  const modelChain = getGeminiModelChain(taskType);
+  let lastQuotaError: unknown = null;
+
+  for (const model of modelChain) {
+    try {
+      console.info(`TyBot Gemini model attempt: ${model} (${taskType})`);
+      const text = await callGeminiModel(model, systemPrompt, userPrompt, retryPrompt);
+      console.info(`TyBot Gemini model used: ${model}`);
+      return { text, model };
+    } catch (error) {
+      if (!isGeminiQuotaError(error)) {
+        throw error;
+      }
+
+      lastQuotaError = error;
+      console.warn(`TyBot Gemini quota/rate-limit on ${model}; trying next model.`);
+    }
+  }
+
+  throw lastQuotaError || new Error("Gemini quota/rate-limit fallback exhausted.");
 }
 
 Deno.serve(async (req) => {
@@ -452,6 +540,7 @@ Deno.serve(async (req) => {
     .limit(300);
 
   const intent = inferIntent(action, message);
+  const taskType = getGeminiTaskType(intent, action, message);
   const targetItem = findLikelyTargetItem(message, mealsWithItems);
   const foodCandidates = rankFoodCandidates(message, foods || [], intent === "suggest_replacement" ? 60 : 45);
 
@@ -468,12 +557,19 @@ Deno.serve(async (req) => {
   });
 
   try {
-    let text = await callGemini(buildSystemPrompt(), prompt);
+    const firstGeminiResult = await callGeminiWithFallback(buildSystemPrompt(), prompt, taskType);
+    let text = firstGeminiResult.text;
     let parsed: JsonRecord;
     try {
       parsed = extractJson(text);
     } catch (_firstError) {
-      text = await callGemini(buildSystemPrompt(), prompt, "Your previous response was invalid. Return valid JSON only, matching the requiredJsonShape exactly.");
+      const repairResult = await callGeminiWithFallback(
+        buildSystemPrompt(),
+        prompt,
+        taskType,
+        `Your previous response from ${firstGeminiResult.model} was invalid. Return valid JSON only, matching the requiredJsonShape exactly.`,
+      );
+      text = repairResult.text;
       parsed = extractJson(text);
     }
 
