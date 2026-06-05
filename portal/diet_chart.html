@@ -154,6 +154,23 @@
                 </div>
             </section>
 
+            <section class="tybot-entry-card" id="tybotDietCard" aria-label="TyBot AI coach">
+                <div class="tybot-entry-avatar" aria-hidden="true">
+                    <span class="tybot-entry-face">
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
+                <div class="tybot-entry-copy">
+                    <h3>Ask TyBot anything</h3>
+                    <p>Create plans, get smart replacements and improve your diet.</p>
+                </div>
+                <button type="button" class="tybot-entry-btn" id="tybotOpenBtn">
+                    <i data-lucide="sparkles"></i>
+                    <span>Ask TyBot</span>
+                </button>
+            </section>
+
             <div id="dietViewSaveBar" class="diet-view-save-bar" style="display: none;">
                 <span class="diet-view-save-text">You have unsaved changes</span>
                 <button type="button" id="dietViewSaveBtn" class="diet-view-save-btn">
@@ -492,6 +509,34 @@
         <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
     </section>
 
+    <div class="tybot-backdrop" id="tybotBackdrop" hidden></div>
+    <section class="tybot-sheet" id="tybotSheet" aria-hidden="true" aria-labelledby="tybotTitle">
+        <header class="tybot-header">
+            <div class="tybot-header-main">
+                <div class="tybot-avatar" aria-hidden="true">
+                    <span class="tybot-face">
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
+                <div>
+                    <h3 id="tybotTitle">TyBot</h3>
+                    <p>AI Nutrition Coach</p>
+                </div>
+            </div>
+            <button type="button" class="tybot-close" id="tybotCloseBtn" aria-label="Close TyBot">
+                <i data-lucide="x"></i>
+            </button>
+        </header>
+        <div class="tybot-messages" id="tybotMessages" aria-live="polite"></div>
+        <form class="tybot-composer" id="tybotComposer">
+            <input id="tybotInput" type="text" placeholder="Ask TyBot about your diet..." autocomplete="off">
+            <button type="submit" aria-label="Send message">
+                <i data-lucide="send"></i>
+            </button>
+        </form>
+    </section>
+
     <div class="tp-modal-overlay diet-chart-input-overlay" id="dietChartInputOverlay" hidden aria-hidden="true">
         <div class="tp-modal tp-input-dialog" role="dialog" aria-labelledby="dietChartInputTitle">
             <div class="tp-modal-header">
@@ -544,5 +589,6 @@
     <script src="../js/login.js?v=20260523l"></script>
     <script src="../js/shell.js?v=20260605-polish"></script>
     <script src="../js/diet_chart.js?v=20260530f"></script>
+    <script src="../assets/js/tybot-diet-coach.js?v=20260605a"></script>
 </body>
 </html>
