@@ -12,8 +12,8 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260530m" rel="stylesheet">
-    <link href="css/checkin.css?v=20260602-reset" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
+    <link href="css/checkin.css?v=20260603-xpbar" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-success">
     <div class="checkin-success-page">
@@ -69,17 +69,8 @@
                         <span id="successJourneyBadge">Base Camp</span>
                     </div>
                     <div class="success-trail-visual" aria-hidden="true">
-                        <div class="success-trail-track">
-                            <svg class="success-trail-line is-base" viewBox="0 0 340 74" preserveAspectRatio="none" aria-hidden="true">
-                                <path d="M4 48 C42 28 74 57 111 42 C146 28 169 48 199 38 C231 27 250 52 278 44 C300 38 316 42 336 36" pathLength="100" />
-                            </svg>
-                            <span class="success-trail-fill" id="successJourneyProgress">
-                                <svg class="success-trail-line is-fill" viewBox="0 0 340 74" preserveAspectRatio="none" aria-hidden="true">
-                                    <path d="M4 48 C42 28 74 57 111 42 C146 28 169 48 199 38 C231 27 250 52 278 44 C300 38 316 42 336 36" pathLength="100" />
-                                </svg>
-                            </span>
-                            <span class="success-hiker" id="successTrailHiker"><img src="assets/gamification/icon-hiker.svg" alt=""></span>
-                            <span class="success-summit"><i data-lucide="flag"></i></span>
+                        <div class="success-xp-bar-track">
+                            <span class="success-xp-bar-fill" id="successJourneyProgress"></span>
                         </div>
                     </div>
                     <div class="success-xp-progress-row">
@@ -155,8 +146,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
-    <script src="js/shell.js"></script>
+    <script src="js/shell.js?v=20260605-polish"></script>
     <script src="js/journey.js?v=20260602-climb"></script>
-    <script src="js/checkin_success.js?v=20260602-climb"></script>
+    <script src="js/checkin_success.js?v=20260603-xpbar"></script>
 </body>
 </html>

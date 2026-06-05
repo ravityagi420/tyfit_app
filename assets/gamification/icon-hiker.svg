@@ -1,10 +1,17 @@
-<svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="33" cy="12" r="6" fill="#5B21E8"/>
-  <path d="M31 22 43 31 37 43" stroke="#5B21E8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M37 43 49 61" stroke="#5B21E8" stroke-width="6.5" stroke-linecap="round"/>
-  <path d="M36 43 23 60" stroke="#5B21E8" stroke-width="6.5" stroke-linecap="round"/>
-  <path d="M41 31 24 35" stroke="#5B21E8" stroke-width="6" stroke-linecap="round"/>
-  <path d="M52 24v36" stroke="#6C63FF" stroke-width="4.2" stroke-linecap="round"/>
-  <circle cx="52" cy="61" r="5.2" fill="#fff" stroke="#6C63FF" stroke-width="4"/>
-  <path d="M25 64h29" stroke="#6C63FF" stroke-width="3" stroke-linecap="round" opacity=".22"/>
+<svg width="88" height="104" viewBox="0 0 88 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hiker" x1="25" x2="62" y1="12" y2="92" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#704BFF"/>
+      <stop offset="1" stop-color="#3F22D8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="45" cy="14" r="7.8" fill="#5832EA"/>
+  <path d="M38.2 29.3c4.7-6.1 13.9-5.5 17.8 1.1l5.8 9.7c1.7 2.8.8 6.4-2 8-2.7 1.7-6.3.8-8-1.9l-2.6-4.4-7.5 11 9 8.8c1.2 1.2 1.9 2.8 1.9 4.5v23.2c0 3.2-2.6 5.8-5.8 5.8S41 92.5 41 89.3V71.8L28.7 61.1c-2.5-2.2-2.8-5.9-.8-8.5l10.3-23.3Z" fill="url(#hiker)"/>
+  <path d="M34.5 34.8c-1.8-3.9-.1-8.6 3.9-10.4l5.2-2.4 4.8 10.1-6.2 2.8 4.3 9.2-10.1 4.7-1.9-14Z" fill="#28156F"/>
+  <path d="M41.2 52.4 26.3 66.2c-2.4 2.2-6.1 2.1-8.3-.3-2.2-2.4-2-6.1.4-8.3L32.6 44.5l8.6 7.9Z" fill="#6C63FF"/>
+  <path d="M58.5 41.2 73.5 52.7" stroke="#5832EA" stroke-width="7.2" stroke-linecap="round"/>
+  <path d="M73.2 52.4v42.5" stroke="#28156F" stroke-width="4.2" stroke-linecap="round"/>
+  <path d="M42.1 88.6 27.8 98" stroke="#4B28E8" stroke-width="7.4" stroke-linecap="round"/>
+  <path d="M52.1 88.8 68.9 94.8" stroke="#4B28E8" stroke-width="7.4" stroke-linecap="round"/>
+  <circle cx="73.2" cy="97" r="5.4" fill="#fff" stroke="#6C63FF" stroke-width="4"/>
 </svg>

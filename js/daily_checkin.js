@@ -15,10 +15,12 @@
         checkinsByDate: new Map(),
         autosaveTimer: null,
         hasPendingChanges: false,
-        isSaving: false
+        isSaving: false,
+        lastSavedAt: 0
     };
 
     const AUTOSAVE_DELAY_MS = 7000;
+    const DRAFT_PREFIX = "tyfit:daily-checkin-draft:";
 
     function el(id) {
         return document.getElementById(id);
@@ -145,22 +147,19 @@
         const title = el("goalActionTitle");
         if (!sheet || !backdrop || !goal) return;
 
-        title.textContent = `${goal.goal_name} options`;
-        sheet.classList.remove("checkin-hidden");
-        backdrop.classList.remove("checkin-hidden");
-        sheet.setAttribute("aria-hidden", "false");
+        if (!goal || !backdrop || !modal || !title || !noteInput) return;
         document.body.style.overflow = "hidden";
     }
 
     function closeGoalActionSheet() {
         const sheet = el("goalActionSheet");
-        const backdrop = el("goalActionBackdrop");
-        if (!sheet || !backdrop) return;
-        sheet.classList.add("checkin-hidden");
+            // actualWrap.classList.remove("checkin-hidden");
+            // actualInput.value = input.actual_value || "";
+            // unit.textContent = goal.target_unit || "";
         backdrop.classList.add("checkin-hidden");
-        sheet.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-        STATE.actionGoalId = "";
+            // actualWrap.classList.add("checkin-hidden");
+            // actualInput.value = "";
+            // unit.textContent = "";
     }
 
     function getInput(goalId) {
@@ -190,6 +189,53 @@
         }
     }
 
+    function draftKey() {
+        if (!STATE.targetUserId || !STATE.selectedDate) return "";
+        return `${DRAFT_PREFIX}${STATE.targetUserId}:${STATE.selectedDate}`;
+    }
+
+    function persistDraft() {
+        const key = draftKey();
+        if (!key) return;
+        try {
+            window.localStorage.setItem(key, JSON.stringify({
+                savedAt: Date.now(),
+                selectedDate: STATE.selectedDate,
+                targetUserId: STATE.targetUserId,
+                goalInputs: STATE.goalInputs
+            }));
+        } catch (error) {
+            console.warn("checkin draft warning:", error?.message || error);
+        }
+    }
+
+    function clearDraft() {
+        const key = draftKey();
+        if (!key) return;
+        try {
+            window.localStorage.removeItem(key);
+        } catch (error) {
+            console.warn("clear checkin draft warning:", error?.message || error);
+        }
+    }
+
+    function restoreDraftIfPresent() {
+        const key = draftKey();
+        if (!key) return false;
+        try {
+            const draft = JSON.parse(window.localStorage.getItem(key) || "null");
+            if (!draft?.goalInputs || draft.targetUserId !== STATE.targetUserId || draft.selectedDate !== STATE.selectedDate) {
+                return false;
+            }
+            STATE.goalInputs = { ...STATE.goalInputs, ...draft.goalInputs };
+            STATE.hasPendingChanges = true;
+            return true;
+        } catch (error) {
+            console.warn("restore checkin draft warning:", error?.message || error);
+            return false;
+        }
+    }
+
     function flushPendingChanges() {
         if (!STATE.hasPendingChanges || STATE.isSaving) return;
         return saveCheckin({
@@ -211,10 +257,8 @@
 
     function markPendingChanges() {
         STATE.hasPendingChanges = true;
+        persistDraft();
         clearAutosaveTimer();
-        if (!STATE.checkinId) {
-            return;
-        }
         STATE.autosaveTimer = setTimeout(() => {
             runAutosaveIfNeeded().catch((error) => {
                 console.error("autosave error:", error);
@@ -541,6 +585,7 @@
 
                 if (btn.hasAttribute("disabled")) return;
 
+                await flushPendingChanges();
                 STATE.selectedDate = btn.getAttribute("data-week-calendar-date") || STATE.selectedDate;
                 closeWeekCalendar();
                 renderDateStrip();
@@ -801,6 +846,15 @@
             });
         }
 
+        if (restoreDraftIfPresent()) {
+            clearAutosaveTimer();
+            STATE.autosaveTimer = setTimeout(() => {
+                runAutosaveIfNeeded().catch((error) => {
+                    console.error("restored draft autosave error:", error);
+                });
+            }, AUTOSAVE_DELAY_MS);
+        }
+
         const submit = el("submitCheckinBtn");
         if (submit) {
             submit.innerHTML = checkin?.id
@@ -920,7 +974,7 @@
                     goal_id: goal.id,
                     status: value.status || "missed",
                     comment: (value.comment || "").trim() || null,
-                    actual_value: value.actual_value === "" ? null : Number(value.actual_value)
+                    actual_value: null
                 };
             });
 
@@ -992,23 +1046,10 @@
                 return;
             }
 
-            let journeyResult = { awarded: false, reason: wasExistingCheckin ? "checkin-update" : "unavailable" };
-            if (!isAutosave && !wasExistingCheckin && window.tyfitJourney?.awardJourneyProgressIfEligible) {
-                try {
-                    journeyResult = await window.tyfitJourney.awardJourneyProgressIfEligible({
-                        userId: STATE.targetUserId,
-                        dailyCheckinId: checkinId,
-                        checkinDate: STATE.selectedDate,
-                        overallScore: adherence
-                    });
-                } catch (error) {
-                    console.warn("journey award warning:", error?.message || error);
-                    journeyResult = { awarded: false, reason: "award-error" };
-                }
-            }
-
             clearAutosaveTimer();
             STATE.hasPendingChanges = false;
+            STATE.lastSavedAt = Date.now();
+            clearDraft();
 
             const submit = el("submitCheckinBtn");
             if (submit && !wasExistingCheckin) {
@@ -1017,30 +1058,11 @@
             }
 
             if (redirectOnSuccess) {
-                const params = new URLSearchParams({
-                    date: STATE.selectedDate,
-                    adherence: String(adherence),
-                    score: String(adherence),
-                    done: String(doneCount),
-                    partial: String(partialCount),
-                    missed: String(missedCount),
-                    state: wasExistingCheckin ? "updated" : "submitted",
-                    journey_awarded: journeyResult.awarded ? "1" : "0"
-                });
-                if (journeyResult.awarded) {
-                    params.set("xp", String(journeyResult.xpAwarded || journeyResult.event?.xp_awarded || 0));
-                    params.set("streak", String(journeyResult.journey?.current_streak || journeyResult.event?.streak_after || 0));
-                    params.set("stage", String(journeyResult.journey?.current_stage || journeyResult.event?.stage_after || 1));
-                    params.set("title", journeyResult.journey?.current_title || journeyResult.event?.title_after || "");
-                    params.set("total_xp", String(journeyResult.journey?.total_xp || 0));
-                }
-                const nextUrl = `checkin_success.html?${params.toString()}`;
-                window.location.href = nextUrl;
-                return;
+                showToast(wasExistingCheckin ? "Checkin updated" : "Checkin saved");
             }
 
             if (showSuccessToast) {
-                showToast(isAutosave ? "Auto-saved" : "Check-in saved");
+                showToast(isAutosave ? "Auto-saved" : (wasExistingCheckin ? "Checkin updated" : "Checkin saved"));
             }
 
             await loadSubmittedDates();
@@ -1056,6 +1078,7 @@
         strip.addEventListener("click", async (event) => {
             const btn = event.target.closest("[data-checkin-date]");
             if (!btn) return;
+            await flushPendingChanges();
             STATE.selectedDate = btn.getAttribute("data-checkin-date");
             renderDateStrip();
             await loadGoals();
@@ -1096,24 +1119,11 @@
         const modal = el("goalNoteModal");
         const title = el("goalNoteModalTitle");
         const noteInput = el("goalNoteInput");
-        const actualWrap = el("goalActualFieldWrap");
-        const actualInput = el("goalActualInput");
-        const unit = el("goalActualUnit");
-        if (!goal || !backdrop || !modal || !title || !noteInput || !actualWrap || !actualInput || !unit) return;
+        if (!goal || !backdrop || !modal || !title || !noteInput) return;
 
         STATE.noteModalGoalId = id;
         title.textContent = `Add note for ${goal.goal_name}`;
         noteInput.value = input.comment || "";
-
-        if (isNumericGoal(goal)) {
-            actualWrap.classList.remove("checkin-hidden");
-            actualInput.value = input.actual_value || "";
-            unit.textContent = goal.target_unit || "";
-        } else {
-            actualWrap.classList.add("checkin-hidden");
-            actualInput.value = "";
-            unit.textContent = "";
-        }
 
         backdrop.classList.remove("checkin-hidden");
         modal.classList.remove("checkin-hidden");
@@ -1135,16 +1145,12 @@
 
     function saveGoalNoteModal() {
         if (!STATE.noteModalGoalId) return;
-        const goal = STATE.goals.find((item) => String(item.id) === STATE.noteModalGoalId);
         const input = getInput(STATE.noteModalGoalId);
         const noteInput = el("goalNoteInput");
-        const actualInput = el("goalActualInput");
-        if (!goal || !noteInput || !actualInput) return;
+        if (!noteInput) return;
 
         input.comment = (noteInput.value || "").trim();
-        if (isNumericGoal(goal)) {
-            input.actual_value = (actualInput.value || "").trim();
-        }
+        input.actual_value = "";
 
         closeGoalNoteModal();
         renderGoalGroups();
@@ -1212,11 +1218,12 @@
     function bindStaticActions() {
         const manage = el("manageGoalsBtn");
         if (manage) {
-            manage.addEventListener("click", () => {
+            manage.addEventListener("click", async () => {
                 if (STATE.access?.isAdmin && !STATE.targetUserId) {
                     showToast("Select a client first.");
                     return;
                 }
+                await flushPendingChanges();
                 window.location.href = getManageGoalsHref();
             });
         }
@@ -1225,7 +1232,7 @@
         if (submit) {
             submit.addEventListener("click", async () => {
                 await saveCheckin({
-                    redirectOnSuccess: true,
+                    redirectOnSuccess: false,
                     showSuccessToast: true,
                     isAutosave: false
                 });
@@ -1235,6 +1242,7 @@
         const userSelect = el("checkinUserSelect");
         if (userSelect) {
             userSelect.addEventListener("change", async () => {
+                await flushPendingChanges();
                 STATE.targetUserId = userSelect.value;
                 await loadSubmittedDates();
                 renderDateStrip();
@@ -1247,15 +1255,43 @@
     }
 
     function bindUnloadFlush() {
+        window.addEventListener("beforeunload", () => {
+            if (STATE.hasPendingChanges) {
+                persistDraft();
+                flushPendingChanges();
+            }
+        });
+
         window.addEventListener("pagehide", () => {
+            if (STATE.hasPendingChanges) persistDraft();
             flushPendingChanges();
         });
 
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
+                if (STATE.hasPendingChanges) persistDraft();
                 flushPendingChanges();
             }
         });
+    }
+
+    function bindNavigationFlush() {
+        document.addEventListener("click", async (event) => {
+            const link = event.target.closest("a[href]");
+            if (!link || !STATE.hasPendingChanges) return;
+            const href = link.getAttribute("href") || "";
+            if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+
+            const target = link.getAttribute("target");
+            if (target && target !== "_self") {
+                flushPendingChanges();
+                return;
+            }
+
+            event.preventDefault();
+            await flushPendingChanges();
+            window.location.href = link.href;
+        }, true);
     }
 
     function setGreeting() {
@@ -1274,6 +1310,7 @@
         bindActionSheet();
         bindStaticActions();
         bindUnloadFlush();
+        bindNavigationFlush();
 
         const params = new URLSearchParams(window.location.search);
         const todayIso = formatISODate(new Date());

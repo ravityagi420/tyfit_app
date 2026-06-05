@@ -17,9 +17,14 @@
         loader.className = 'tyfit-page-loader';
         loader.setAttribute('aria-hidden', 'true');
         loader.innerHTML = [
-            '<div class="tyfit-page-loader__panel">',
-            '  <div class="tyfit-page-loader__spinner" aria-hidden="true"></div>',
-            '  <p>Loading TYFIT...</p>',
+            '<div class="tyfit-page-loader__shell" aria-hidden="true">',
+            '  <span class="tyfit-page-loader__bar tyfit-page-loader__bar--sm"></span>',
+            '  <span class="tyfit-page-loader__hero"></span>',
+            '  <span class="tyfit-page-loader__row"></span>',
+            '  <span class="tyfit-page-loader__row tyfit-page-loader__row--short"></span>',
+            '  <div class="tyfit-page-loader__grid">',
+            '    <span></span><span></span><span></span>',
+            '  </div>',
             '</div>'
         ].join('');
 
@@ -204,6 +209,7 @@
         const page = document.body?.dataset?.page || '';
         if (page === 'home') return 'home';
         if (page === 'diet-chart') return 'diet';
+        if (page === 'daily-checkin') return 'checkin';
         if (page === 'training-plan') return 'training';
         if (page === 'journey') return 'profile';
         if (page === 'profile' || page === 'profile-edit' || page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') {
@@ -221,6 +227,7 @@
         const navItems = [
             { key: 'home', href: `${prefix}index.html`, icon: 'home', label: 'Home' },
             { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'clipboard-list', label: 'Diet Chart' },
+            { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'clipboard-check', label: 'CheckIn' },
             { key: 'training', href: `${prefix}training_plan.html`, icon: 'dumbbell', label: 'Training' },
             { key: 'profile', href: `${prefix}profile.html`, icon: 'user', label: 'Profile' },
         ];
@@ -230,12 +237,208 @@
             navItems.slice(0, 2).map((item) => (
                 `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
             )).join(''),
-            '<button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>',
-            navItems.slice(2).map((item) => (
+            `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" aria-label="Daily CheckIn"><i data-lucide="${navItems[2].icon}"></i><span>${navItems[2].label}</span></a>`,
+            navItems.slice(3).map((item) => (
                 `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
             )).join(''),
             '</nav>',
         ].join('');
+    }
+
+    function normalizeExistingBottomNav() {
+        const nav = document.querySelector('.tyfit-mobile-bottom-nav');
+        const quick = nav?.querySelector('#quickAddBtn.tyfit-plus-btn');
+        if (!nav || !quick) return;
+        const prefix = getRootPrefix();
+        const active = getActiveBottomNavKey();
+        const checkin = document.createElement('a');
+        checkin.href = `${prefix}daily_checkin.html`;
+        checkin.className = `tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}`;
+        checkin.setAttribute('aria-label', 'Daily CheckIn');
+        checkin.innerHTML = '<i data-lucide="clipboard-check"></i><span>CheckIn</span>';
+        quick.replaceWith(checkin);
+    }
+
+    function shouldMountFloatingAction() {
+        const page = document.body?.dataset?.page || '';
+        if (page === 'daily-checkin' || page === 'checkin-success') return false;
+        if (page === 'profile' || page === 'profile-edit') return false;
+        if (page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') return false;
+        return true;
+    }
+
+    function floatingActionIsMenuEnabled() {
+        const page = document.body?.dataset?.page || '';
+        return page !== 'diet-chart' && page !== 'training-plan';
+    }
+
+    function todayISO() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    async function getCurrentUserId() {
+        if (typeof window.getAccessState === 'function') {
+            const access = await window.getAccessState();
+            if (access?.user?.id) return access.user.id;
+        }
+        const sessionResult = await window.supabaseClient?.auth?.getSession?.();
+        return sessionResult?.data?.session?.user?.id || '';
+    }
+
+    function mountWeightModal() {
+        if (byId('tyfitWeightModal')) return;
+        const modal = document.createElement('div');
+        modal.id = 'tyfitWeightModal';
+        modal.className = 'tyfit-weight-modal';
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        modal.innerHTML = [
+            '<div class="tyfit-weight-modal__backdrop" data-weight-close></div>',
+            '<section class="tyfit-weight-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="tyfitWeightTitle">',
+            '  <button type="button" class="tyfit-weight-modal__close" data-weight-close aria-label="Close"><i data-lucide="x"></i></button>',
+            '  <div class="tyfit-weight-modal__head">',
+            '    <span class="tyfit-weight-modal__icon"><i data-lucide="scale"></i></span>',
+            '    <div>',
+            '      <h3 id="tyfitWeightTitle">Log Weight</h3>',
+            '      <p>Track your current body weight for progress history.</p>',
+            '    </div>',
+            '  </div>',
+            '  <div class="tyfit-weight-form-card">',
+            '    <label class="tyfit-weight-field" data-field="weight">',
+            '      <span class="tyfit-weight-field__icon"><i data-lucide="scale"></i></span>',
+            '      <span class="tyfit-weight-field__body"><strong>Weight</strong><input id="tyfitWeightValue" type="number" inputmode="decimal" min="25" max="300" step="0.1" placeholder="61.0 kg"></span>',
+            '    </label>',
+            '    <label class="tyfit-weight-field" data-field="date">',
+            '      <span class="tyfit-weight-field__icon"><i data-lucide="calendar-days"></i></span>',
+            '      <span class="tyfit-weight-field__body"><strong>Date</strong><input id="tyfitWeightDate" type="date"></span>',
+            '    </label>',
+            '    <label class="tyfit-weight-field" data-field="notes">',
+            '      <span class="tyfit-weight-field__icon"><i data-lucide="notebook-pen"></i></span>',
+            '      <span class="tyfit-weight-field__body"><strong>Note</strong><textarea id="tyfitWeightNotes" rows="2" placeholder="Optional"></textarea></span>',
+            '    </label>',
+            '  </div>',
+            '  <button type="button" class="tyfit-weight-modal__save" id="tyfitWeightSaveBtn">Save Weight</button>',
+            '</section>'
+        ].join('');
+        document.body.appendChild(modal);
+    }
+
+    function openWeightModal() {
+        mountWeightModal();
+        const modal = byId('tyfitWeightModal');
+        const date = byId('tyfitWeightDate');
+        const value = byId('tyfitWeightValue');
+        if (!modal || !date) return;
+        const today = todayISO();
+        date.value = today;
+        date.max = today;
+        modal.hidden = false;
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('tyfit-weight-modal-open');
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+        refreshIcons();
+        setTimeout(() => value?.focus(), 80);
+    }
+
+    window.tyfitOpenWeightModal = openWeightModal;
+
+    function closeWeightModal() {
+        const modal = byId('tyfitWeightModal');
+        if (!modal) return;
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('is-open');
+        document.body.classList.remove('tyfit-weight-modal-open');
+        setTimeout(() => {
+            if (!modal.classList.contains('is-open')) modal.hidden = true;
+        }, 220);
+    }
+
+    async function saveWeightLog() {
+        const valueNode = byId('tyfitWeightValue');
+        const dateNode = byId('tyfitWeightDate');
+        const notesNode = byId('tyfitWeightNotes');
+        const saveBtn = byId('tyfitWeightSaveBtn');
+        const weight = Number(valueNode?.value || 0);
+        const dateValue = dateNode?.value || todayISO();
+
+        if (!Number.isFinite(weight) || weight < 25 || weight > 300) {
+            showToast('Enter a valid weight.');
+            valueNode?.focus();
+            return;
+        }
+        if (!dateValue || dateValue > todayISO()) {
+            showToast('Choose today or a past date.');
+            dateNode?.focus();
+            return;
+        }
+
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            showToast('Please log in first.');
+            return;
+        }
+
+        const loggedAt = dateValue === todayISO()
+            ? new Date().toISOString()
+            : new Date(`${dateValue}T12:00:00`).toISOString();
+
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+        }
+        try {
+            const { error } = await window.supabaseClient
+                .from('user_metric_logs')
+                .insert({
+                    user_id: userId,
+                    created_by: userId,
+                    metric_key: 'weight',
+                    metric_label: 'Weight',
+                    value: weight,
+                    unit: 'kg',
+                    logged_at: loggedAt,
+                    notes: (notesNode?.value || '').trim() || null
+                });
+            if (error) throw error;
+            closeWeightModal();
+            showToast('Weight logged');
+        } catch (error) {
+            console.error('weight log error:', error);
+            showToast(error?.message || 'Could not log weight.');
+        } finally {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Weight';
+            }
+        }
+    }
+
+    function toggleFloatingMenu(forceOpen) {
+        const wrap = byId('tyfitFloatingAction');
+        if (!wrap) return;
+        const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !wrap.classList.contains('is-open');
+        wrap.classList.toggle('is-open', shouldOpen);
+        wrap.querySelector('.tyfit-floating-plus')?.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+
+    function mountFloatingAction() {
+        if (!shouldMountFloatingAction() || byId('tyfitFloatingAction')) return;
+        const enabled = floatingActionIsMenuEnabled();
+        const wrap = document.createElement('div');
+        wrap.id = 'tyfitFloatingAction';
+        wrap.className = `tyfit-floating-action${enabled ? '' : ' is-disabled'}`;
+        wrap.innerHTML = [
+            '<div class="tyfit-floating-action__menu" aria-hidden="true">',
+            '  <button type="button" data-floating-action="checkin"><i data-lucide="clipboard-check"></i><span>Daily Checkin</span></button>',
+            '  <button type="button" data-floating-action="weight"><i data-lucide="scale"></i><span>Log weight</span></button>',
+            '</div>',
+            `<button type="button" class="tyfit-floating-plus" aria-label="Quick actions" aria-expanded="false"${enabled ? '' : ' disabled'}><i data-lucide="plus"></i></button>`
+        ].join('');
+        document.body.appendChild(wrap);
     }
 
     if (document.body) {
@@ -248,6 +451,9 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         mountBottomNav();
+        normalizeExistingBottomNav();
+        mountFloatingAction();
+        mountWeightModal();
         optimizeImages();
 
         document.querySelectorAll('.tyfit-sidebar .sidebar-nav-item').forEach((item) => {
@@ -262,8 +468,12 @@
         const mobileDrawerClose = byId('mobileDrawerClose');
         const mobileDrawerBack  = byId('mobileDrawerBackdrop');
         const quickAddBtn       = byId('quickAddBtn');
+        const floatingAction    = byId('tyfitFloatingAction');
+        const floatingPlus      = floatingAction?.querySelector('.tyfit-floating-plus');
         const sheetClose        = byId('quickSheetClose');
         const sheetBackdrop     = byId('quickSheetBackdrop');
+        const weightModal       = byId('tyfitWeightModal');
+        const weightSaveBtn     = byId('tyfitWeightSaveBtn');
         const upgradeNowBtn     = byId('upgradeNowBtn');
         const desktopNotifBtn   = byId('desktopNotifBtn');
         const desktopNotifMenu  = byId('desktopNotifMenu');
@@ -276,8 +486,17 @@
         if (mobileDrawerClose)  mobileDrawerClose.addEventListener('click', closeMobileDrawer);
         if (mobileDrawerBack)   mobileDrawerBack.addEventListener('click', closeMobileDrawer);
         if (quickAddBtn)        quickAddBtn.addEventListener('click', openSheet);
+        if (floatingPlus && floatingActionIsMenuEnabled()) {
+            floatingPlus.addEventListener('click', () => toggleFloatingMenu());
+        }
         if (sheetClose)         sheetClose.addEventListener('click', closeSheet);
         if (sheetBackdrop)      sheetBackdrop.addEventListener('click', closeSheet);
+        if (weightSaveBtn)      weightSaveBtn.addEventListener('click', saveWeightLog);
+        if (weightModal) {
+            weightModal.addEventListener('click', (event) => {
+                if (event.target.closest('[data-weight-close]')) closeWeightModal();
+            });
+        }
         if (upgradeNowBtn)      upgradeNowBtn.addEventListener('click', () => showToast('Premium flow coming soon.'));
         if (desktopNotifBtn)    desktopNotifBtn.addEventListener('click', () => togglePopover(desktopNotifMenu));
         if (desktopAccountBtn)  desktopAccountBtn.addEventListener('click', () => togglePopover(desktopAccountMenu));
@@ -322,6 +541,10 @@
 
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeMobileDrawer();
+            if (e.key === 'Escape') {
+                toggleFloatingMenu(false);
+                closeWeightModal();
+            }
         });
 
         document.addEventListener('click', function (event) {
@@ -348,6 +571,7 @@
         });
 
         document.addEventListener('click', function (event) {
+            if (document.body?.dataset?.page === 'home') return;
             if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
             const link = event.target.closest('a[href]');
             if (!isInternalLink(link)) return;
@@ -373,10 +597,33 @@
                     return;
                 }
 
-                showToast('Log Weight clicked.');
+                if (action === 'weight') {
+                    closeSheet();
+                    openWeightModal();
+                    return;
+                }
+
                 closeSheet();
             });
         });
+
+        if (floatingAction) {
+            floatingAction.addEventListener('click', (event) => {
+                const actionBtn = event.target.closest('[data-floating-action]');
+                if (!actionBtn) return;
+                const action = String(actionBtn.dataset.floatingAction || '').toLowerCase();
+                const inPortal = window.location.pathname.includes('/portal/');
+                const checkinHref = inPortal ? '../daily_checkin.html' : 'daily_checkin.html';
+                toggleFloatingMenu(false);
+                if (action === 'checkin') {
+                    window.location.href = checkinHref;
+                    return;
+                }
+                if (action === 'weight') {
+                    openWeightModal();
+                }
+            });
+        }
 
         observeDynamicIcons();
         refreshIcons();

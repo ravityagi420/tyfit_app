@@ -12,8 +12,8 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260527a" rel="stylesheet">
-    <link href="css/training.css?v=20260530b" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
+    <link href="css/training.css?v=20260605-workoutlog" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="training-plan">
 
@@ -210,7 +210,7 @@
     <nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">
         <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
         <a href="portal/diet_chart.html"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
-        <button type="button" class="tyfit-plus-btn" id="quickAddBtn" aria-label="Quick add"><i data-lucide="plus"></i></button>
+        <a href="daily_checkin.html" class="tyfit-checkin-nav-btn" aria-label="Daily CheckIn"><i data-lucide="clipboard-check"></i><span>CheckIn</span></a>
         <a href="training_plan.html" class="is-active"><i data-lucide="dumbbell"></i><span>Training</span></a>
         <a href="profile.html"><i data-lucide="user"></i><span>Profile</span></a>
     </nav>
@@ -337,6 +337,37 @@
     </div>
 
     <!-- ═══════════════════════════════════
+         WORKOUT LOGGER MODAL
+    ════════════════════════════════════ -->
+    <div class="tp-modal-overlay" id="workoutLoggerOverlay" hidden aria-hidden="true">
+        <div class="tp-modal tp-workout-modal" role="dialog" aria-labelledby="workoutLoggerTitle">
+            <div class="tp-modal-header">
+                <div class="tp-modal-header-main">
+                    <div class="tp-modal-badge" style="background:#f3eeff;color:#6c63ff;">
+                        <i data-lucide="notebook-tabs"></i>
+                    </div>
+                    <div>
+                        <h3 id="workoutLoggerTitle">Log Workout</h3>
+                        <p id="workoutLoggerSubtitle">Track sets and volume</p>
+                    </div>
+                </div>
+                <button class="tp-modal-close" id="workoutLoggerClose" aria-label="Close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="tp-modal-body tp-workout-modal-body" id="workoutLoggerBody">
+                <!-- rendered by JS -->
+            </div>
+            <div class="tp-modal-footer">
+                <button class="tp-btn tp-btn-ghost" id="workoutLoggerCancelBtn">Cancel</button>
+                <button class="tp-btn tp-btn-primary" id="workoutLoggerSaveBtn">
+                    <i data-lucide="check"></i> Save Workout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
          TEXT-INPUT DIALOG (rename / create)
     ════════════════════════════════════ -->
     <div class="tp-modal-overlay" id="inputDialogOverlay" hidden aria-hidden="true">
@@ -423,6 +454,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/training_plan.js?v=20260530b"></script>
+    <script src="js/shell.js?v=20260605-polish"></script>
+    <script src="js/training_plan.js?v=20260605-workoutlog"></script>
 </body>
 </html>

@@ -17,6 +17,10 @@ const TP = {
   catalog: [],
   selectedCatalogIds: new Set(),
   catalogFilter: { bodyPart: "All", search: "" },
+  workoutLogs: [],
+  workoutDraft: null,
+  editingWorkoutLogId: null,
+  viewingWorkoutReadOnly: false,
   inputDialogResolve: null,
   confirmDialogResolve: null,
   editingExerciseId: null,
@@ -96,6 +100,44 @@ function titleOfPlan(plan) { return toTitleCaseWords(plan?.title ?? plan?.name) 
 function nameOfDay(day) { return toTitleCaseWords(day?.day_name ?? day?.name) || "Training Day"; }
 function capitalize(v) { return String(v || "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()); }
 function compact(v) { return v ? String(v).trim() : ""; }
+function todayDateString() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+function formatWorkoutDate(value) {
+  if (!value) return "";
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+}
+function parseRepsTarget(value) {
+  const match = String(value || "").match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
+function calcSetVolume(set) {
+  const weight = Number(set?.weight || 0);
+  const reps = Number(set?.reps || 0);
+  return weight > 0 && reps > 0 ? weight * reps : 0;
+}
+function calcWorkoutVolume(draft) {
+  return (draft?.exercises || []).reduce((sum, exercise) => (
+    sum + (exercise.sets || []).reduce((setSum, set) => setSum + (set.is_completed ? calcSetVolume(set) : 0), 0)
+  ), 0);
+}
+function calcCompletedSetCount(draft) {
+  return (draft?.exercises || []).reduce((sum, exercise) => sum + (exercise.sets || []).filter((set) => set.is_completed).length, 0);
+}
+function workoutLogExerciseCount(log) {
+  return (log?.workout_log_exercises || log?.exercises || []).length;
+}
+function workoutLogSetCount(log) {
+  return (log?.workout_log_exercises || log?.exercises || []).reduce((sum, ex) => sum + (ex.workout_log_sets || ex.sets || []).length, 0);
+}
+function workoutLogCompletedSetCount(log) {
+  return (log?.workout_log_exercises || log?.exercises || []).reduce((sum, ex) => (
+    sum + (ex.workout_log_sets || ex.sets || []).filter((set) => set.is_completed).length
+  ), 0);
+}
 function firstLine(v) {
   if (Array.isArray(v)) return v[0] || "";
   return v || "";
@@ -299,12 +341,13 @@ async function init() {
       setTrainingUserToolbarVisible(false);
     }
 
-    if (TP.isAdmin && !TP.selectedUserId) {
-      TP.plans = [];
-      TP.selectedPlanId = null;
-      TP.days = [];
-      renderPlanSelector();
-      renderMainContent();
+  if (TP.isAdmin && !TP.selectedUserId) {
+    TP.plans = [];
+    TP.selectedPlanId = null;
+    TP.days = [];
+    TP.workoutLogs = [];
+    renderPlanSelector();
+    renderMainContent();
     } else {
       await fetchAndRenderPlans();
     }
@@ -525,10 +568,144 @@ async function dbFetchCatalogItem(id) {
   if (error) throw error;
   return data;
 }
+async function dbFetchWorkoutLogs() {
+  const userId = targetUserId();
+  if (!userId) return [];
+
+  const { data, error } = await window.supabaseClient
+    .from("workout_logs")
+    .select("*, workout_log_exercises(*, workout_log_sets(*))")
+    .eq("user_id", userId)
+    .order("workout_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (error) throw error;
+
+  return (data || []).map((log) => ({
+    ...log,
+    workout_log_exercises: (log.workout_log_exercises || [])
+      .map((exercise) => ({
+        ...exercise,
+        workout_log_sets: (exercise.workout_log_sets || []).sort((a, b) => Number(a.set_number || 0) - Number(b.set_number || 0)),
+      }))
+      .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0)),
+  }));
+}
+async function dbCreateWorkoutLog(draft) {
+  const userId = TP.currentUserId;
+  const nowIso = new Date().toISOString();
+  const totalVolume = calcWorkoutVolume(draft);
+  const completedSets = calcCompletedSetCount(draft);
+  const totalSets = draft.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
+  const status = completedSets > 0 && completedSets < totalSets ? "in_progress" : "completed";
+
+  const { data: log, error } = await window.supabaseClient
+    .from("workout_logs")
+    .insert({
+      user_id: userId,
+      created_by: userId,
+      training_plan_id: draft.training_plan_id || null,
+      training_plan_day_id: draft.training_plan_day_id || null,
+      workout_date: draft.workout_date,
+      started_at: draft.started_at || nowIso,
+      completed_at: nowIso,
+      title: draft.title || "Workout",
+      notes: draft.notes || null,
+      status,
+      duration_seconds: draft.duration_seconds || null,
+      total_volume: totalVolume || null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+
+  await dbInsertWorkoutChildren(log.id, draft);
+  return log;
+}
+async function dbUpdateWorkoutLog(logId, draft) {
+  const totalVolume = calcWorkoutVolume(draft);
+  const completedSets = calcCompletedSetCount(draft);
+  const totalSets = draft.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
+  const status = completedSets > 0 && completedSets < totalSets ? "in_progress" : "completed";
+
+  const { error } = await window.supabaseClient
+    .from("workout_logs")
+    .update({
+      workout_date: draft.workout_date,
+      completed_at: new Date().toISOString(),
+      title: draft.title || "Workout",
+      notes: draft.notes || null,
+      status,
+      duration_seconds: draft.duration_seconds || null,
+      total_volume: totalVolume || null,
+    })
+    .eq("id", logId)
+    .eq("user_id", TP.currentUserId);
+  if (error) throw error;
+
+  const { error: deleteError } = await window.supabaseClient
+    .from("workout_log_exercises")
+    .delete()
+    .eq("workout_log_id", logId);
+  if (deleteError) throw deleteError;
+
+  await dbInsertWorkoutChildren(logId, draft);
+}
+async function dbInsertWorkoutChildren(workoutLogId, draft) {
+  const exerciseRows = draft.exercises.map((exercise, index) => ({
+    workout_log_id: workoutLogId,
+    training_day_exercise_id: exercise.training_day_exercise_id || null,
+    exercise_catalog_id: exercise.exercise_catalog_id || null,
+    exercise_name: exercise.exercise_name || "Exercise",
+    body_part: exercise.body_part || null,
+    equipment: exercise.equipment || null,
+    sort_order: index,
+    notes: exercise.notes || null,
+  }));
+
+  if (!exerciseRows.length) return;
+
+  const { data: insertedExercises, error: exerciseError } = await window.supabaseClient
+    .from("workout_log_exercises")
+    .insert(exerciseRows)
+    .select();
+  if (exerciseError) throw exerciseError;
+
+  const setRows = [];
+  insertedExercises.forEach((insertedExercise, exerciseIndex) => {
+    const draftExercise = draft.exercises[exerciseIndex];
+    (draftExercise.sets || []).forEach((set, setIndex) => {
+      setRows.push({
+        workout_log_exercise_id: insertedExercise.id,
+        set_number: setIndex + 1,
+        set_type: set.set_type || "normal",
+        weight: set.weight === "" || set.weight === null || set.weight === undefined ? null : Number(set.weight),
+        reps: set.reps === "" || set.reps === null || set.reps === undefined ? null : Number(set.reps),
+        rir: set.rir === "" || set.rir === null || set.rir === undefined ? null : Number(set.rir),
+        rpe: set.rpe === "" || set.rpe === null || set.rpe === undefined ? null : Number(set.rpe),
+        is_completed: Boolean(set.is_completed),
+        completed_at: set.is_completed ? (set.completed_at || new Date().toISOString()) : null,
+        notes: set.notes || null,
+      });
+    });
+  });
+
+  if (!setRows.length) return;
+
+  const { error: setError } = await window.supabaseClient.from("workout_log_sets").insert(setRows);
+  if (setError) throw setError;
+}
+async function dbDeleteWorkoutLog(logId) {
+  let query = window.supabaseClient.from("workout_logs").delete().eq("id", logId);
+  if (!TP.isAdmin) query = query.eq("user_id", TP.currentUserId);
+  const { error } = await query;
+  if (error) throw error;
+}
 
 /* ── Render plan selector/main ─────── */
 async function fetchAndRenderPlans() {
   TP.plans = await dbFetchPlans();
+  TP.workoutLogs = await dbFetchWorkoutLogs();
   if (TP.plans.length === 0) {
     TP.selectedPlanId = null;
     TP.days = [];
@@ -656,10 +833,12 @@ async function selectPlan(planId) {
   TP.selectedDayId = null;
   TP.days = [];
   TP.exercisesByDay = {};
+  TP.workoutLogs = [];
   renderPlanSelector();
   renderMainContent(true);
   TP.days = await dbFetchDays(planId);
   await Promise.all(TP.days.map(async d => { TP.exercisesByDay[d.id] = await dbFetchExercisesForDay(d.id); }));
+  TP.workoutLogs = await dbFetchWorkoutLogs();
   renderPlanSelector();
   renderMainContent(false);
   const state = window.history.state || {};
@@ -680,11 +859,83 @@ function renderMainContent(loading = false) {
   }
 
   if (!TP.selectedPlanId || TP.plans.length === 0) {
-    el.innerHTML = `<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="dumbbell"></i></div><h4>No training plan yet</h4><p>Create your first workout routine and add up to seven training days.</p><button class="tp-btn tp-btn-primary" id="emptyCreatePlanBtn"><i data-lucide="plus"></i>Create Plan</button></div>`;
+    const createButton = TP.isAdmin ? "" : `<button class="tp-btn tp-btn-primary" id="emptyCreatePlanBtn"><i data-lucide="plus"></i>Create Plan</button>`;
+    el.innerHTML = `${renderWorkoutLogPanel()}<div class="tp-empty-state"><div class="tp-empty-icon"><i data-lucide="dumbbell"></i></div><h4>No training plan yet</h4><p>${TP.isAdmin ? "This client does not have a training plan yet." : "Create your first workout routine and add up to seven training days."}</p>${createButton}</div>`;
+    bindWorkoutLogPanel();
     setIcons(); byId("emptyCreatePlanBtn")?.addEventListener("click", handleCreatePlan); return;
   }
-  el.innerHTML = `<div class="tp-section-row"><h3>Your Days</h3><span>${TP.days.length}/7 Days</span></div><div class="tp-days-grid" id="daysGrid"></div>`;
+  el.innerHTML = `${renderWorkoutLogPanel()}<div class="tp-section-row"><h3>Your Days</h3><span>${TP.days.length}/7 Days</span></div><div class="tp-days-grid" id="daysGrid"></div>`;
+  bindWorkoutLogPanel();
   renderDaysList();
+}
+function renderWorkoutLogPanel() {
+  const logs = TP.workoutLogs || [];
+  const latest = logs[0] || null;
+  const totalWorkouts = logs.length;
+  const totalVolume = logs.reduce((sum, log) => sum + Number(log.total_volume || 0), 0);
+  const canLog = !TP.isAdmin && TP.selectedPlanId && TP.days.length > 0;
+  const emptyText = TP.isAdmin
+    ? "No workout logs for this client yet."
+    : "Start a workout from one of your training days and track every set.";
+
+  return `<section class="tp-logbook-panel" id="workoutLogPanel">
+    <div class="tp-logbook-head">
+      <div>
+        <p class="tp-eyebrow tp-eyebrow--compact">WORKOUT LOG</p>
+        <h3>Track your sessions</h3>
+        <p>${TP.isAdmin ? "View client workout history and remove incorrect logs." : "Log sets, weights, reps, and progress like a proper training journal."}</p>
+      </div>
+      ${canLog ? `<button type="button" class="tp-logbook-start-btn" id="startLatestWorkoutBtn"><i data-lucide="play"></i> Start Workout</button>` : ""}
+    </div>
+    <div class="tp-logbook-stats">
+      <div><span>${totalWorkouts}</span><small>Workouts</small></div>
+      <div><span>${Math.round(totalVolume || 0).toLocaleString("en-GB")}</span><small>kg volume</small></div>
+      <div><span>${latest ? formatWorkoutDate(latest.workout_date) : "—"}</span><small>Last logged</small></div>
+    </div>
+    <div class="tp-logbook-list" id="workoutLogList">
+      ${logs.length ? logs.slice(0, 5).map(renderWorkoutLogRow).join("") : `<div class="tp-logbook-empty"><i data-lucide="notebook-tabs"></i><span>${emptyText}</span></div>`}
+    </div>
+  </section>`;
+}
+function renderWorkoutLogRow(log) {
+  const completedSets = workoutLogCompletedSetCount(log);
+  const setCount = workoutLogSetCount(log);
+  const exerciseCount = workoutLogExerciseCount(log);
+  const volume = Number(log.total_volume || 0);
+  const title = log.title || "Workout";
+  const deleteAction = TP.isAdmin
+    ? `<button type="button" class="tp-logbook-icon-btn danger" data-workout-action="delete" data-log-id="${log.id}" aria-label="Delete workout"><i data-lucide="trash-2"></i></button>`
+    : "";
+  const editLabel = TP.isAdmin ? "View" : "Edit";
+
+  return `<article class="tp-logbook-row" data-log-id="${log.id}">
+    <button type="button" class="tp-logbook-row-main" data-workout-action="open" data-log-id="${log.id}">
+      <span class="tp-logbook-row-icon"><i data-lucide="dumbbell"></i></span>
+      <span class="tp-logbook-row-copy">
+        <strong>${escHtml(title)}</strong>
+        <small>${escHtml(formatWorkoutDate(log.workout_date))} · ${exerciseCount} exercises · ${completedSets}/${setCount} sets</small>
+      </span>
+      <span class="tp-logbook-row-volume">${volume ? `${Math.round(volume).toLocaleString("en-GB")} kg` : "No volume"}</span>
+    </button>
+    <div class="tp-logbook-row-actions">
+      <button type="button" class="tp-logbook-text-btn" data-workout-action="open" data-log-id="${log.id}">${editLabel}</button>
+      ${deleteAction}
+    </div>
+  </article>`;
+}
+function bindWorkoutLogPanel() {
+  byId("startLatestWorkoutBtn")?.addEventListener("click", () => {
+    const dayId = TP.selectedDayId || TP.days[0]?.id;
+    if (dayId) openWorkoutLoggerForDay(dayId);
+  });
+
+  document.querySelectorAll("[data-workout-action='open']").forEach((btn) => {
+    btn.addEventListener("click", () => openWorkoutLog(btn.dataset.logId));
+  });
+
+  document.querySelectorAll("[data-workout-action='delete']").forEach((btn) => {
+    btn.addEventListener("click", () => handleDeleteWorkoutLog(btn.dataset.logId));
+  });
 }
 function renderDaysList() {
   const grid = byId("daysGrid");
@@ -702,12 +953,15 @@ function renderDaysList() {
     const accentSoft = hexToRgba(accent, 0.1);
     const accentLine = hexToRgba(accent, 0.25);
 
-    return `<article class="tp-day-row" data-day-id="${day.id}" style="--tp-day-accent:${accent};--tp-day-accent-soft:${accentSoft};--tp-day-accent-line:${accentLine};">
+    const logButton = TP.isAdmin ? "" : `<button type="button" class="tp-day-log-btn" data-action="log-day" data-day-id="${day.id}"><i data-lucide="play"></i><span>Log</span></button>`;
+
+    return `<article class="tp-day-row ${TP.isAdmin ? "" : "has-log-action"}" data-day-id="${day.id}" style="--tp-day-accent:${accent};--tp-day-accent-soft:${accentSoft};--tp-day-accent-line:${accentLine};">
       <div class="tp-day-icon"><i data-lucide="${dayIcon(nameOfDay(day))}"></i></div>
       <div class="tp-day-row-main" data-action="open-day" data-day-id="${day.id}">
         <p class="tp-day-title">${escHtml(nameOfDay(day))}</p>
         <p class="tp-day-sub">${count} exercise${count === 1 ? "" : "s"}</p>
       </div>
+      ${logButton}
       <div class="tp-day-menu-wrap" data-day-id="${day.id}">
         <button class="tp-day-menu-btn" data-action="toggle-day-menu" data-day-id="${day.id}" aria-label="Day actions" aria-expanded="false">
           <i data-lucide="ellipsis-vertical"></i>
@@ -723,6 +977,13 @@ function renderDaysList() {
   setIcons();
   byId("addDayBtn")?.addEventListener("click", handleCreateDay);
   grid.querySelectorAll("[data-action='open-day']").forEach(x => x.addEventListener("click", () => openDayDetail(x.dataset.dayId)));
+  grid.querySelectorAll("[data-action='log-day']").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openWorkoutLoggerForDay(btn.dataset.dayId);
+    });
+  });
 
   const closeAllDayMenus = () => {
     grid.querySelectorAll(".tp-day-menu-dropdown").forEach((menu) => menu.classList.remove("open"));
@@ -874,13 +1135,14 @@ function renderDayDetail() {
   const accentLine = hexToRgba(accent, 0.3);
   const exerciseLabel = `${exercises.length} Exercise${exercises.length === 1 ? "" : "s"}`;
 
-  byId("daySummaryCard").innerHTML = `<div class="tp-day-icon"><i data-lucide="${dayIcon(dayName)}"></i></div><div><h3>${escHtml(dayName)}</h3><p>${escHtml(exerciseLabel)}</p></div>`;
+  byId("daySummaryCard").innerHTML = `<div class="tp-day-icon"><i data-lucide="${dayIcon(dayName)}"></i></div><div><h3>${escHtml(dayName)}</h3><p>${escHtml(exerciseLabel)}</p></div>${TP.isAdmin ? "" : `<button type="button" class="tp-day-summary-log-btn" id="daySummaryLogBtn"><i data-lucide="play"></i> Start</button>`}`;
   byId("daySummaryCard").style.setProperty("--tp-day-accent", accent);
   byId("daySummaryCard").style.setProperty("--tp-day-accent-soft", accentSoft);
   byId("daySummaryCard").style.setProperty("--tp-day-accent-line", accentLine);
 
   renderDayExercises();
   setIcons();
+  byId("daySummaryLogBtn")?.addEventListener("click", () => openWorkoutLoggerForDay(day.id));
 
   const menuBtn = byId("dayDetailMenuBtn");
   const menu = byId("dayDetailMenuDropdown");
@@ -1378,6 +1640,287 @@ async function saveExerciseEdit() {
   try { await dbUpdateExercise(id, updates); const list = TP.exercisesByDay[TP.selectedDayId] || []; const item = list.find(e => e.id === id); if (item) Object.assign(item, updates); closeEditExercise(); renderDayDetail(); showToast("Exercise updated."); } catch(e) { console.error(e); showToast("Error saving exercise."); }
 }
 
+/* ── Workout logger ────────────────── */
+function createWorkoutDraftFromDay(dayId) {
+  const day = TP.days.find((item) => String(item.id) === String(dayId));
+  const plan = TP.plans.find((item) => String(item.id) === String(TP.selectedPlanId));
+  const exercises = TP.exercisesByDay[dayId] || [];
+  return {
+    id: null,
+    title: `${nameOfDay(day)} Workout`,
+    workout_date: todayDateString(),
+    notes: "",
+    training_plan_id: TP.selectedPlanId || null,
+    training_plan_day_id: dayId,
+    plan_name: plan ? titleOfPlan(plan) : "Training Plan",
+    day_name: day ? nameOfDay(day) : "Training Day",
+    exercises: exercises.map((exercise, exerciseIndex) => {
+      const targetSets = Math.max(1, Number(exercise.sets || 3));
+      const targetReps = parseRepsTarget(exercise.reps);
+      return {
+        temp_id: `ex-${exercise.id || exerciseIndex}`,
+        training_day_exercise_id: exercise.id,
+        exercise_catalog_id: exercise.exercise_catalog_id || null,
+        exercise_name: exercise.exercise_name || "Exercise",
+        body_part: exercise.body_part || null,
+        equipment: exercise.equipment || null,
+        notes: exercise.notes || "",
+        sets: Array.from({ length: targetSets }, (_, index) => ({
+          set_number: index + 1,
+          set_type: index === 0 && targetSets > 2 ? "warmup" : "normal",
+          weight: exercise.weight ?? "",
+          reps: targetReps ?? "",
+          rir: "",
+          rpe: "",
+          is_completed: true,
+          notes: "",
+        })),
+      };
+    }),
+  };
+}
+function createWorkoutDraftFromLog(log) {
+  return {
+    id: log.id,
+    title: log.title || "Workout",
+    workout_date: log.workout_date || todayDateString(),
+    notes: log.notes || "",
+    training_plan_id: log.training_plan_id || null,
+    training_plan_day_id: log.training_plan_day_id || null,
+    plan_name: titleOfPlan(TP.plans.find((plan) => String(plan.id) === String(log.training_plan_id))) || "Training Plan",
+    day_name: nameOfDay(TP.days.find((day) => String(day.id) === String(log.training_plan_day_id))) || "Logged Workout",
+    exercises: (log.workout_log_exercises || []).map((exercise, exerciseIndex) => ({
+      temp_id: `logged-${exercise.id || exerciseIndex}`,
+      id: exercise.id,
+      training_day_exercise_id: exercise.training_day_exercise_id || null,
+      exercise_catalog_id: exercise.exercise_catalog_id || null,
+      exercise_name: exercise.exercise_name || "Exercise",
+      body_part: exercise.body_part || null,
+      equipment: exercise.equipment || null,
+      notes: exercise.notes || "",
+      sets: (exercise.workout_log_sets || []).map((set, index) => ({
+        id: set.id,
+        set_number: index + 1,
+        set_type: set.set_type || "normal",
+        weight: set.weight ?? "",
+        reps: set.reps ?? "",
+        rir: set.rir ?? "",
+        rpe: set.rpe ?? "",
+        is_completed: Boolean(set.is_completed),
+        completed_at: set.completed_at || null,
+        notes: set.notes || "",
+      })),
+    })),
+  };
+}
+function openWorkoutLoggerForDay(dayId) {
+  if (TP.isAdmin) return showToast("Admins can view and delete workout logs only.");
+  const exercises = TP.exercisesByDay[dayId] || [];
+  if (!exercises.length) {
+    showToast("Add exercises to this day before logging.");
+    return;
+  }
+  TP.editingWorkoutLogId = null;
+  TP.viewingWorkoutReadOnly = false;
+  TP.workoutDraft = createWorkoutDraftFromDay(dayId);
+  renderWorkoutLoggerModal();
+  openModal("workoutLoggerOverlay");
+}
+function openWorkoutLog(logId) {
+  const log = TP.workoutLogs.find((item) => String(item.id) === String(logId));
+  if (!log) return;
+  TP.editingWorkoutLogId = log.id;
+  TP.viewingWorkoutReadOnly = TP.isAdmin;
+  TP.workoutDraft = createWorkoutDraftFromLog(log);
+  renderWorkoutLoggerModal();
+  openModal("workoutLoggerOverlay");
+}
+function closeWorkoutLogger() {
+  closeModal("workoutLoggerOverlay");
+  TP.workoutDraft = null;
+  TP.editingWorkoutLogId = null;
+  TP.viewingWorkoutReadOnly = false;
+}
+function renderWorkoutLoggerModal() {
+  const draft = TP.workoutDraft;
+  if (!draft) return;
+  const readOnly = TP.viewingWorkoutReadOnly;
+  const totalSets = draft.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
+  const completedSets = calcCompletedSetCount(draft);
+  const volume = calcWorkoutVolume(draft);
+  const titleEl = byId("workoutLoggerTitle");
+  const subtitleEl = byId("workoutLoggerSubtitle");
+  const bodyEl = byId("workoutLoggerBody");
+  const saveBtn = byId("workoutLoggerSaveBtn");
+  if (!bodyEl) return;
+
+  if (titleEl) titleEl.textContent = readOnly ? "Workout Log" : (TP.editingWorkoutLogId ? "Edit Workout" : "Log Workout");
+  if (subtitleEl) subtitleEl.textContent = `${draft.day_name || "Training Day"} · ${completedSets}/${totalSets} sets`;
+  if (saveBtn) saveBtn.hidden = readOnly;
+
+  bodyEl.innerHTML = `<div class="tp-workout-editor">
+    <div class="tp-workout-editor-head">
+      <label class="tp-workout-field"><span>Workout title</span><input id="workoutLogTitleInput" type="text" maxlength="80" value="${escHtml(draft.title)}" ${readOnly ? "disabled" : ""}></label>
+      <label class="tp-workout-field"><span>Date</span><input id="workoutLogDateInput" type="date" max="${todayDateString()}" value="${escHtml(draft.workout_date)}" ${readOnly ? "disabled" : ""}></label>
+    </div>
+    <div class="tp-workout-summary-strip">
+      <div><strong>${draft.exercises.length}</strong><span>Exercises</span></div>
+      <div><strong>${completedSets}/${totalSets}</strong><span>Sets</span></div>
+      <div><strong>${Math.round(volume || 0).toLocaleString("en-GB")}</strong><span>kg volume</span></div>
+    </div>
+    <div class="tp-workout-exercise-stack">
+      ${draft.exercises.map((exercise, exerciseIndex) => renderWorkoutExerciseEditor(exercise, exerciseIndex, readOnly)).join("")}
+    </div>
+    <label class="tp-workout-field tp-workout-notes"><span>Session notes</span><textarea id="workoutLogNotesInput" rows="3" placeholder="How did it feel?" ${readOnly ? "disabled" : ""}>${escHtml(draft.notes || "")}</textarea></label>
+  </div>`;
+  bindWorkoutLoggerBody();
+  setIcons();
+}
+function renderWorkoutExerciseEditor(exercise, exerciseIndex, readOnly) {
+  const accent = getExerciseAccent(exercise.exercise_name, exerciseIndex);
+  const iconPath = getExerciseIconPath(exercise.exercise_name);
+  return `<article class="tp-workout-exercise" data-exercise-index="${exerciseIndex}" style="--tp-ex-accent:${accent};--tp-ex-accent-soft:${hexToRgba(accent, 0.12)};--tp-ex-accent-line:${hexToRgba(accent, 0.26)};">
+    <div class="tp-workout-exercise-head">
+      <div class="tp-workout-exercise-icon"><img src="${escHtml(iconPath)}" alt="" loading="lazy" onerror="this.onerror=null; this.src='${EXERCISE_ICON_FALLBACK_PATH}';"></div>
+      <div><h4>${escHtml(exercise.exercise_name)}</h4><p>${[capitalize(exercise.body_part), exercise.equipment].filter(Boolean).join(" · ") || "Exercise"}</p></div>
+      ${readOnly ? "" : `<button type="button" class="tp-workout-mini-btn" data-workout-action="add-set" data-exercise-index="${exerciseIndex}"><i data-lucide="plus"></i> Set</button>`}
+    </div>
+    <div class="tp-workout-set-table">
+      <div class="tp-workout-set-head"><span>Set</span><span>kg</span><span>Reps</span><span>RPE</span><span>Done</span></div>
+      ${exercise.sets.map((set, setIndex) => renderWorkoutSetRow(set, exerciseIndex, setIndex, readOnly)).join("")}
+    </div>
+  </article>`;
+}
+function renderWorkoutSetRow(set, exerciseIndex, setIndex, readOnly) {
+  const disabled = readOnly ? "disabled" : "";
+  return `<div class="tp-workout-set-row" data-exercise-index="${exerciseIndex}" data-set-index="${setIndex}">
+    <span class="tp-workout-set-num">${setIndex + 1}</span>
+    <input type="number" inputmode="decimal" min="0" step="0.5" data-workout-field="weight" value="${escHtml(set.weight ?? "")}" ${disabled}>
+    <input type="number" inputmode="numeric" min="0" step="1" data-workout-field="reps" value="${escHtml(set.reps ?? "")}" ${disabled}>
+    <input type="number" inputmode="decimal" min="0" max="10" step="0.5" data-workout-field="rpe" value="${escHtml(set.rpe ?? "")}" ${disabled}>
+    <label class="tp-workout-check"><input type="checkbox" data-workout-field="is_completed" ${set.is_completed ? "checked" : ""} ${disabled}><span><i data-lucide="check"></i></span></label>
+    ${readOnly ? "" : `<button type="button" class="tp-workout-remove-set" data-workout-action="remove-set" data-exercise-index="${exerciseIndex}" data-set-index="${setIndex}" aria-label="Remove set"><i data-lucide="minus"></i></button>`}
+  </div>`;
+}
+function bindWorkoutLoggerBody() {
+  const body = byId("workoutLoggerBody");
+  if (!body || !TP.workoutDraft) return;
+
+  body.querySelectorAll("[data-workout-field]").forEach((input) => {
+    input.addEventListener("input", syncWorkoutDraftFromForm);
+    input.addEventListener("change", syncWorkoutDraftFromForm);
+  });
+  byId("workoutLogTitleInput")?.addEventListener("input", syncWorkoutDraftFromForm);
+  byId("workoutLogDateInput")?.addEventListener("change", syncWorkoutDraftFromForm);
+  byId("workoutLogNotesInput")?.addEventListener("input", syncWorkoutDraftFromForm);
+
+  body.querySelectorAll("[data-workout-action='add-set']").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      syncWorkoutDraftFromForm();
+      const exercise = TP.workoutDraft.exercises[Number(btn.dataset.exerciseIndex)];
+      if (!exercise) return;
+      const last = exercise.sets[exercise.sets.length - 1] || {};
+      exercise.sets.push({
+        set_number: exercise.sets.length + 1,
+        set_type: "normal",
+        weight: last.weight ?? "",
+        reps: last.reps ?? "",
+        rir: "",
+        rpe: last.rpe ?? "",
+        is_completed: false,
+        notes: "",
+      });
+      renderWorkoutLoggerModal();
+    });
+  });
+
+  body.querySelectorAll("[data-workout-action='remove-set']").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      syncWorkoutDraftFromForm();
+      const exercise = TP.workoutDraft.exercises[Number(btn.dataset.exerciseIndex)];
+      if (!exercise || exercise.sets.length <= 1) return;
+      exercise.sets.splice(Number(btn.dataset.setIndex), 1);
+      renderWorkoutLoggerModal();
+    });
+  });
+}
+function syncWorkoutDraftFromForm() {
+  const draft = TP.workoutDraft;
+  if (!draft) return;
+  draft.title = compact(byId("workoutLogTitleInput")?.value) || "Workout";
+  draft.workout_date = byId("workoutLogDateInput")?.value || todayDateString();
+  draft.notes = byId("workoutLogNotesInput")?.value || "";
+
+  document.querySelectorAll(".tp-workout-set-row").forEach((row) => {
+    const exercise = draft.exercises[Number(row.dataset.exerciseIndex)];
+    const set = exercise?.sets?.[Number(row.dataset.setIndex)];
+    if (!set) return;
+    set.weight = row.querySelector("[data-workout-field='weight']")?.value ?? "";
+    set.reps = row.querySelector("[data-workout-field='reps']")?.value ?? "";
+    set.rpe = row.querySelector("[data-workout-field='rpe']")?.value ?? "";
+    set.is_completed = Boolean(row.querySelector("[data-workout-field='is_completed']")?.checked);
+  });
+}
+async function saveWorkoutLog() {
+  if (TP.isAdmin) return showToast("Admins can view and delete workout logs only.");
+  syncWorkoutDraftFromForm();
+  const draft = TP.workoutDraft;
+  if (!draft) return;
+  if (!draft.workout_date || draft.workout_date > todayDateString()) {
+    showToast("Choose today or a past date.");
+    return;
+  }
+  if (!draft.exercises.length) {
+    showToast("Add at least one exercise.");
+    return;
+  }
+
+  const saveBtn = byId("workoutLoggerSaveBtn");
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i data-lucide="loader-circle"></i> Saving';
+    setIcons();
+  }
+
+  try {
+    if (TP.editingWorkoutLogId) {
+      await dbUpdateWorkoutLog(TP.editingWorkoutLogId, draft);
+      showToast("Workout updated.");
+    } else {
+      await dbCreateWorkoutLog(draft);
+      showToast("Workout logged.");
+    }
+    TP.workoutLogs = await dbFetchWorkoutLogs();
+    closeWorkoutLogger();
+    renderMainContent();
+    if (TP.selectedDayId) renderDayDetail();
+  } catch (error) {
+    console.error(error);
+    showToast(error?.message || "Could not save workout.");
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i data-lucide="check"></i> Save Workout';
+      setIcons();
+    }
+  }
+}
+async function handleDeleteWorkoutLog(logId) {
+  const log = TP.workoutLogs.find((item) => String(item.id) === String(logId));
+  if (!log) return;
+  const ok = await promptConfirm(`Delete "${log.title || "Workout"}" from ${formatWorkoutDate(log.workout_date)}?`, "Delete Workout");
+  if (!ok) return;
+  try {
+    await dbDeleteWorkoutLog(log.id);
+    TP.workoutLogs = await dbFetchWorkoutLogs();
+    renderMainContent();
+    showToast("Workout log deleted.");
+  } catch (error) {
+    console.error(error);
+    showToast("Could not delete workout log.");
+  }
+}
+
 /* ── Generic modals/input/confirm ───── */
 function openModal(id) { const o = byId(id); if (!o) return; o.hidden = false; o.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; setIcons(); }
 function closeModal(id) { const o = byId(id); if (!o) return; o.hidden = true; o.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; }
@@ -1627,13 +2170,16 @@ function bindStaticTrainingUI() {
   byId("editExerciseClose")?.addEventListener("click", closeEditExercise);
   byId("editExerciseCancelBtn")?.addEventListener("click", closeEditExercise);
   byId("editExerciseSaveBtn")?.addEventListener("click", saveExerciseEdit);
+  byId("workoutLoggerClose")?.addEventListener("click", closeWorkoutLogger);
+  byId("workoutLoggerCancelBtn")?.addEventListener("click", closeWorkoutLogger);
+  byId("workoutLoggerSaveBtn")?.addEventListener("click", saveWorkoutLog);
   byId("inputDialogClose")?.addEventListener("click", () => closeInputDialog(null));
   byId("inputDialogCancelBtn")?.addEventListener("click", () => closeInputDialog(null));
   byId("inputDialogConfirmBtn")?.addEventListener("click", () => closeInputDialog(compact(byId("inputDialogField")?.value)));
   byId("inputDialogField")?.addEventListener("keydown", e => { if (e.key === "Enter") closeInputDialog(compact(e.target.value)); });
   byId("confirmDialogCancelBtn")?.addEventListener("click", () => closeConfirmDialog(false));
   byId("confirmDialogOkBtn")?.addEventListener("click", () => closeConfirmDialog(true));
-  document.addEventListener("keydown", e => { if (e.key === "Escape") { ["catalogModalOverlay", "exerciseDetailOverlay", "editExerciseOverlay", "inputDialogOverlay", "confirmDialogOverlay"].forEach(closeModal); } });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { ["catalogModalOverlay", "exerciseDetailOverlay", "editExerciseOverlay", "workoutLoggerOverlay", "inputDialogOverlay", "confirmDialogOverlay"].forEach(closeModal); } });
 }
 
 function setTrainingUserToolbarVisible(visible) {

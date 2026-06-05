@@ -1,4 +1,6 @@
 (function () {
+    let latestProgressPercent = 0;
+
     function el(id) {
         return document.getElementById(id);
     }
@@ -9,27 +11,65 @@
         }
     }
 
-    function updateProgressRing(score) {
+    function animateNumber(node, to, formatter = (value) => String(value), duration = 900) {
+        if (!node) return;
+        const target = Math.max(0, Number(to) || 0);
+        const start = performance.now();
+        function frame(now) {
+            const progress = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            node.textContent = formatter(Math.round(target * eased));
+            if (progress < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                node.textContent = formatter(Math.round(target));
+            }
+        }
+        requestAnimationFrame(frame);
+    }
+
+    function updateProgressRing(score, animate = true) {
         const ring = document.querySelector(".summary-ring-progress");
         if (!ring) return;
 
         const clamped = Math.max(0, Math.min(100, Number(score) || 0));
         const color = clamped < 40 ? "#FF5E7D" : (clamped <= 75 ? "#FFB800" : "#22A861");
         const circumference = 2 * Math.PI * 54; // radius = 54
-        const offset = circumference * (1 - (clamped / 100));
-        ring.style.strokeDasharray = `${circumference - offset} ${circumference}`;
         ring.style.stroke = color;
+        ring.style.strokeDasharray = `0 ${circumference}`;
+
+        const scoreEl = el("successScoreValue");
+        if (animate) animateNumber(scoreEl, clamped, (value) => `${value}%`, 900);
+        else if (scoreEl) scoreEl.textContent = `${Math.round(clamped)}%`;
+
+        const start = performance.now();
+        const duration = animate ? 950 : 0;
+        function frame(now) {
+            const progress = duration ? Math.min(1, (now - start) / duration) : 1;
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = circumference * (clamped / 100) * eased;
+            ring.style.strokeDasharray = `${current} ${circumference}`;
+            if (progress < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                ring.style.strokeDasharray = `${circumference * (clamped / 100)} ${circumference}`;
+            }
+        }
+        requestAnimationFrame(frame);
     }
 
-    function setTrailProgress(percent) {
+    function setStageProgress(percent, animate = true) {
         const clamped = Math.max(0, Math.min(100, Number(percent) || 0));
+        latestProgressPercent = clamped;
         const fill = el("successJourneyProgress");
-        const hiker = el("successTrailHiker");
-        if (fill) fill.style.width = `${clamped}%`;
-        if (hiker) {
-            hiker.style.left = `${clamped}%`;
-            hiker.style.setProperty("--trail-progress", `${clamped}%`);
-        }
+        if (!fill) return;
+        fill.style.transition = animate ? "transform 950ms cubic-bezier(.22,1,.36,1)" : "none";
+        fill.style.transform = "scaleX(0)";
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                fill.style.transform = `scaleX(${clamped / 100})`;
+            });
+        });
     }
 
     function setSummary(data) {
@@ -42,8 +82,6 @@
             ? Math.max(0, Math.min(100, Math.round(queryScore)))
             : (total > 0 ? Math.round(((done + partial * 0.5) / total) * 100) : 0);
 
-        const scoreEl = el("successScoreValue");
-        if (scoreEl) scoreEl.textContent = `${Math.round(score)}%`;
         setText("successClimbTitle", score >= 80 ? "Great climb today! 🔥" : "Nice climb today!");
         setText("successWorkouts", `${done}/${total || 0}`);
         
@@ -171,8 +209,7 @@
             setText("successNextXpText", "9000 XP");
             setText("successJourneyText", "Summit reached. Legendary consistency.");
         }
-        setTrailProgress(percent);
-        window.requestAnimationFrame(() => setTrailProgress(percent));
+        setStageProgress(percent);
     }
 
     function renderAwardState({ xp, streak, stage, title, totalXp, awarded }) {
@@ -181,8 +218,9 @@
         setText("successTitle", "Check-in Successful!");
         setText("successSubtitle", "Great job showing up for yourself today. Consistency is your superpower.");
         setText("successJourneyBadge", title || stageInfo?.title || "Journey Progress");
-        setText("successXpAward", `+${Number(xp) || 0} XP`);
-        setText("successXpAwardDisplay", `+${Number(xp) || 0} XP`);
+        const awardedXp = Number(xp) || 0;
+        setText("successXpAward", `+${awardedXp} XP`);
+        animateNumber(el("successXpAwardDisplay"), awardedXp, (value) => `+${value} XP`, 850);
         setText("successStreak", `${Number(streak) || 1} Day Streak`);
         setText("successHeroStreak", `${Number(streak) || 1} Day Streak`);
         renderStageProgress(progress);
@@ -210,12 +248,16 @@
             const score = Number(event?.adherence_score ?? 0);
             const isToday = date === today;
             const state = event ? (score >= 50 ? "done" : "partial") : "missed";
-            const icon = state === "done" ? "check" : (state === "partial" ? "zap" : "mountain");
+            const iconMarkup = state === "done"
+                ? '<svg data-lucide="check"></svg>'
+                : (state === "partial"
+                    ? '<svg data-lucide="zap"></svg>'
+                    : '<img src="assets/gamification/icon-mountains.svg" alt="">');
             days.push(
                 `<span class="success-week-day is-${state}${isToday ? " is-today" : ""}">
                     <em>${isToday ? "TODAY" : formatDayShort(date)}</em>
                     <strong>${formatDayNumber(date)}</strong>
-                    <i><svg data-lucide="${icon}"></svg></i>
+                    <i>${iconMarkup}</i>
                 </span>`
             );
         }
@@ -341,5 +383,9 @@
         init().catch((error) => {
             console.error("checkin_success init error:", error);
         });
+    });
+
+    window.addEventListener("resize", () => {
+        window.requestAnimationFrame(() => setStageProgress(latestProgressPercent, false));
     });
 }());

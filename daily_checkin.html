@@ -12,7 +12,7 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260527a" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
     <link href="css/checkin.css?v=20260530c" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="daily-checkin">
@@ -192,7 +192,6 @@
     <section class="checkin-action-sheet checkin-hidden" id="goalActionSheet" aria-hidden="true">
         <h4 id="goalActionTitle">Goal options</h4>
         <button type="button" class="checkin-sheet-option" id="goalActionCommentBtn"><i data-lucide="message-square"></i> Add Comment</button>
-        <button type="button" class="checkin-sheet-option" id="goalActionActualBtn"><i data-lucide="activity"></i> Add Actual Value</button>
         <button type="button" class="checkin-pill-btn" id="goalActionCloseBtn">Close</button>
     </section>
 
@@ -200,15 +199,8 @@
     <section class="checkin-note-modal checkin-hidden" id="goalNoteModal" aria-hidden="true" aria-labelledby="goalNoteModalTitle">
         <h4 id="goalNoteModalTitle">Add note</h4>
         <div class="checkin-note-modal-body">
-            <div class="checkin-note-actual-field checkin-hidden" id="goalActualFieldWrap">
-                <label for="goalActualInput">Actual value</label>
-                <div class="checkin-note-actual-input-wrap">
-                    <input type="number" step="0.01" id="goalActualInput" placeholder="Enter value">
-                    <span id="goalActualUnit"></span>
-                </div>
-            </div>
             <div class="checkin-note-textarea-field">
-                <label for="goalNoteInput">Note (optional)</label>
+                <label for="goalNoteInput">Comment (optional)</label>
                 <textarea id="goalNoteInput" placeholder="Add a quick note"></textarea>
             </div>
         </div>
@@ -248,8 +240,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js"></script>
-    <script src="js/journey.js?v=20260602-climb"></script>
-    <script src="js/daily_checkin.js?v=20260530e"></script>
+    <script src="js/shell.js?v=20260605-polish"></script>
+    <script src="js/daily_checkin.js?v=20260605-autosave"></script>
 </body>
 </html>

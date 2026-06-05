@@ -1607,7 +1607,7 @@ body[data-page="checkin-success"] .summary-insight-text {
     }
 }
 
-@media (max-width: 390px) {
+@media (max-width: 480px) {
     .success-hero {
         min-height: 208px;
     }
@@ -5051,5 +5051,740 @@ body[data-page="checkin-success"] .success-check-pin {
     body[data-page="checkin-success"] .summary-ring {
         width: 86px;
         height: 86px;
+    }
+}
+
+/* Final polish: cleaner typography + stronger hero curvature */
+body[data-page="checkin-success"] .success-hero::before {
+    top: 150px;
+    height: calc(100% - 108px);
+    border-radius: 50% 50% 0 0 / 22% 22% 0 0;
+    background:
+        radial-gradient(520px 190px at 50% 2%, rgba(255,255,255,.96), rgba(255,255,255,0) 72%),
+        linear-gradient(180deg, rgba(255,255,255,.99), #FAF9FF 82%);
+}
+
+body[data-page="checkin-success"] .success-icon-circle {
+    background: linear-gradient(145deg, #F9F8FF, #F0EEFF);
+    border-color: rgba(255, 255, 255, 0.98);
+    box-shadow:
+        0 16px 34px rgba(108,99,255,.14),
+        inset 0 0 0 1px rgba(108,99,255,.10);
+}
+
+body[data-page="checkin-success"] .success-title {
+    font-size: clamp(22px, 2.7vw, 30px);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+body[data-page="checkin-success"] .success-subtitle {
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, .90);
+}
+
+body[data-page="checkin-success"] .success-xp-card strong {
+    font-size: 21px;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .summary-ring-value {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .summary-ring-label {
+    font-size: 8.5px;
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .count-number {
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .count-number strong {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .success-streak-card strong {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .success-streak-card p,
+body[data-page="checkin-success"] .success-mini-note p {
+    font-size: 12.5px;
+    line-height: 1.35;
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .success-activity-head h2,
+body[data-page="checkin-success"] .success-activity-head span,
+body[data-page="checkin-success"] .success-activity-legend,
+body[data-page="checkin-success"] .success-week-day {
+    font-weight: 500;
+}
+
+body[data-page="checkin-success"] .success-btn {
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+/* Success page targeted refinements: reference-aligned curve, trail, metrics and calendar */
+body[data-page="checkin-success"] .checkin-success-page,
+body[data-page="checkin-success"] .checkin-success-page *,
+body[data-page="checkin-success"] .checkin-success-page *::before,
+body[data-page="checkin-success"] .checkin-success-page *::after {
+    box-sizing: border-box;
+}
+
+body[data-page="checkin-success"] {
+    overflow-x: hidden;
+}
+
+body[data-page="checkin-success"] .success-content {
+    width: min(100%, 620px);
+    max-width: 620px;
+    gap: 12px;
+    padding: 0 10px 86px;
+}
+
+body[data-page="checkin-success"] .success-hero {
+    min-height: 374px;
+    padding-bottom: 22px;
+}
+
+body[data-page="checkin-success"] .success-mountain-wrap {
+    height: 214px;
+}
+
+body[data-page="checkin-success"] .success-hero-image {
+    object-position: center 38%;
+}
+
+body[data-page="checkin-success"] .success-hero::before {
+    left: -42%;
+    right: -42%;
+    top: 154px;
+    height: 252px;
+    border-radius: 50% 50% 0 0 / 34% 34% 0 0;
+    background:
+        radial-gradient(620px 210px at 50% -5%, rgba(255,255,255,.98), rgba(255,255,255,.76) 58%, rgba(255,255,255,0) 73%),
+        linear-gradient(180deg, rgba(255,255,255,.985), #FAF9FF 84%);
+}
+
+body[data-page="checkin-success"] .success-hero-copy {
+    margin-top: 126px;
+}
+
+body[data-page="checkin-success"] .success-icon-circle {
+    width: 92px;
+    height: 92px;
+    border: 6px solid rgba(255,255,255,.96);
+}
+
+body[data-page="checkin-success"] .success-icon-circle img {
+    width: 76%;
+    height: 76%;
+}
+
+body[data-page="checkin-success"] .success-streak-pill {
+    min-height: 30px;
+    margin-top: -13px;
+    padding: 0 17px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+body[data-page="checkin-success"] .success-title {
+    margin-top: 24px;
+    max-width: 340px;
+    color: #101331;
+    font-size: clamp(23px, 5.6vw, 31px);
+    line-height: 1.08;
+    font-weight: 650;
+}
+
+body[data-page="checkin-success"] .success-subtitle {
+    max-width: 330px;
+    margin-top: 9px;
+    color: #5C6383;
+    font-size: 13px;
+    line-height: 1.38;
+    font-weight: 500 !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+body[data-page="checkin-success"] .success-xp-card {
+    min-height: 62px;
+    padding: 11px 18px;
+    grid-template-columns: 52px 1fr;
+    gap: 12px;
+}
+
+body[data-page="checkin-success"] .success-xp-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+}
+
+body[data-page="checkin-success"] .success-xp-icon svg {
+    width: 31px;
+    height: 31px;
+}
+
+body[data-page="checkin-success"] .success-xp-card span {
+    font-size: 9.5px;
+    letter-spacing: .01em;
+}
+
+body[data-page="checkin-success"] .success-xp-card strong {
+    font-size: 21px;
+}
+
+body[data-page="checkin-success"] .today-summary-card.success-climb-card {
+    min-height: 196px;
+    padding: 15px 14px 13px;
+    grid-template-columns: 92px 1px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+}
+
+body[data-page="checkin-success"] .summary-ring {
+    width: 90px;
+    height: 90px;
+}
+
+body[data-page="checkin-success"] .summary-ring circle {
+    stroke-width: 10;
+}
+
+body[data-page="checkin-success"] .summary-ring-value {
+    font-size: 20px;
+}
+
+body[data-page="checkin-success"] .summary-ring-label {
+    font-size: 8.4px;
+}
+
+body[data-page="checkin-success"] .summary-divider {
+    height: 92px;
+}
+
+body[data-page="checkin-success"] .success-climb-head h2 {
+    font-size: 15px;
+    font-weight: 650;
+}
+
+body[data-page="checkin-success"] .success-trail-visual {
+    height: 62px;
+    margin-top: 5px;
+    overflow: visible;
+}
+
+body[data-page="checkin-success"] .success-trail-track {
+    inset: 0 12px 0 0;
+    overflow: visible;
+}
+
+body[data-page="checkin-success"] .success-trail-line .trail-area {
+    stroke: none;
+}
+
+body[data-page="checkin-success"] .success-trail-line .trail-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-base .trail-area {
+    fill: rgba(108,99,255,.055);
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-base .trail-line {
+    stroke: #E4DFFF;
+    stroke-width: 4;
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-fill .trail-area {
+    fill: rgba(108,99,255,.16);
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-fill .trail-line {
+    stroke: #651FFF;
+    stroke-width: 4;
+}
+
+body[data-page="checkin-success"] .success-trail-fill {
+    filter: drop-shadow(0 6px 10px rgba(108,99,255,.16));
+}
+
+body[data-page="checkin-success"] .success-hiker {
+    width: 38px;
+    height: 38px;
+    bottom: 18px;
+    transform: translate(-48%, 0);
+    filter: drop-shadow(0 5px 8px rgba(91,33,232,.28));
+}
+
+body[data-page="checkin-success"] .success-summit {
+    right: -2px;
+    bottom: 24px;
+    width: 27px;
+    height: 27px;
+    opacity: .92;
+}
+
+body[data-page="checkin-success"] .success-xp-progress-row {
+    margin-top: -2px;
+    font-size: 11.5px;
+}
+
+body[data-page="checkin-success"] .summary-counts-section {
+    margin-top: 11px;
+    padding-top: 12px;
+    gap: 0;
+}
+
+body[data-page="checkin-success"] .summary-count {
+    gap: 8px;
+    position: relative;
+}
+
+body[data-page="checkin-success"] .summary-count + .summary-count::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 1px;
+    background: #E0DDF3;
+}
+
+body[data-page="checkin-success"] .count-icon {
+    width: 28px;
+    height: 28px;
+}
+
+body[data-page="checkin-success"] .count-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+body[data-page="checkin-success"] .count-number {
+    font-size: 9.8px;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .count-number strong {
+    font-size: 16px;
+}
+
+body[data-page="checkin-success"] .success-streak-card {
+    min-height: 68px;
+    padding: 11px 18px;
+    gap: 12px;
+}
+
+body[data-page="checkin-success"] .success-streak-fire {
+    width: 46px;
+    height: 46px;
+}
+
+body[data-page="checkin-success"] .success-streak-card strong {
+    font-size: 16px;
+    font-weight: 650;
+}
+
+body[data-page="checkin-success"] .success-streak-card p {
+    font-size: 12px;
+}
+
+body[data-page="checkin-success"] .success-activity-card {
+    padding: 15px 10px 14px;
+}
+
+body[data-page="checkin-success"] .success-activity-head {
+    padding: 0 4px;
+    margin-bottom: 14px;
+}
+
+body[data-page="checkin-success"] .success-activity-head h2,
+body[data-page="checkin-success"] .success-activity-head span {
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+body[data-page="checkin-success"] .success-week-row {
+    gap: 6px;
+}
+
+body[data-page="checkin-success"] .success-week-day {
+    gap: 5px;
+}
+
+body[data-page="checkin-success"] .success-week-day em {
+    font-size: 8.2px;
+    font-weight: 650;
+}
+
+body[data-page="checkin-success"] .success-week-day strong {
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .success-week-day i {
+    width: 40px;
+    max-width: 100%;
+    height: 56px;
+    border-radius: 17px;
+    padding-bottom: 8px;
+    background: linear-gradient(180deg, #F9F7FF, #FFFFFF);
+    box-shadow: inset 0 -14px 20px rgba(108,99,255,.045), 0 9px 18px rgba(108,99,255,.055);
+}
+
+body[data-page="checkin-success"] .success-week-day.is-today i {
+    border-color: #C7BEFF;
+    background: linear-gradient(180deg, #F3EFFF, #FFFFFF);
+}
+
+body[data-page="checkin-success"] .success-week-day i svg {
+    width: 22px;
+    height: 22px;
+}
+
+body[data-page="checkin-success"] .success-week-day i img {
+    width: 25px;
+    height: 18px;
+    object-fit: contain;
+    opacity: .48;
+    filter: grayscale(.2);
+}
+
+body[data-page="checkin-success"] .success-week-day.is-done i svg {
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    color: #FFFFFF;
+    background: linear-gradient(135deg, #22C55E, #16A34A);
+    box-shadow: 0 8px 15px rgba(34,197,94,.18);
+}
+
+body[data-page="checkin-success"] .success-week-day.is-partial i svg {
+    color: #6C63FF;
+    fill: rgba(108,99,255,.18);
+}
+
+body[data-page="checkin-success"] .success-week-day.is-today:not(.is-done):not(.is-partial) i::after {
+    content: "";
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    border: 5px solid #B9AEFF;
+    box-sizing: border-box;
+}
+
+body[data-page="checkin-success"] .success-week-day.is-today:not(.is-done):not(.is-partial) i img {
+    display: none;
+}
+
+body[data-page="checkin-success"] .success-activity-legend {
+    margin-top: 13px;
+    gap: 10px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+body[data-page="checkin-success"] .success-mini-note {
+    min-height: 58px;
+    padding: 10px 18px;
+}
+
+body[data-page="checkin-success"] .success-mini-note p {
+    font-size: 12.5px;
+}
+
+body[data-page="checkin-success"] .success-btn.primary {
+    min-height: 48px;
+}
+
+/* Climb trail: screenshot-matched terrain, hiker and summit endpoint */
+body[data-page="checkin-success"] .success-trail-visual {
+    height: 72px;
+    margin-top: 0;
+    overflow: visible;
+}
+
+body[data-page="checkin-success"] .success-trail-track {
+    inset: 0 0 0 0;
+    overflow: visible;
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-base .trail-area {
+    fill: rgba(108,99,255,.06);
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-base .trail-line {
+    stroke: #E8E4FF;
+    stroke-width: 4;
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-fill .trail-area {
+    fill: rgba(108,99,255,.24);
+}
+
+body[data-page="checkin-success"] .success-trail-line.is-fill .trail-line {
+    stroke: #5B21E8;
+    stroke-width: 4;
+}
+
+body[data-page="checkin-success"] .success-trail-fill {
+    filter: drop-shadow(0 6px 10px rgba(108,99,255,.18));
+}
+
+body[data-page="checkin-success"] .success-hiker {
+    width: 44px;
+    height: 52px;
+    bottom: 10px;
+    transform: translate(-50%, 0);
+    filter: drop-shadow(0 5px 8px rgba(91,33,232,.28));
+}
+
+body[data-page="checkin-success"] .success-summit {
+    position: absolute;
+    right: -18px;
+    bottom: 1px;
+    width: 86px;
+    height: 68px;
+    display: grid;
+    place-items: end center;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    opacity: .82;
+    pointer-events: none;
+}
+
+body[data-page="checkin-success"] .success-summit img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Simplified animated XP progress bar */
+body[data-page="checkin-success"] .success-hero {
+    width: 100vw !important;
+    max-width: none !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+}
+
+body[data-page="checkin-success"] .success-mountain-wrap {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: none !important;
+}
+
+body[data-page="checkin-success"] .success-hero-image {
+    width: 100vw !important;
+    max-width: none !important;
+}
+
+body[data-page="checkin-success"] .success-trail-visual {
+    height: 48px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    overflow: visible;
+}
+
+body[data-page="checkin-success"] .success-xp-bar-track {
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(180deg, #F0EDFF 0%, #E8E4FF 100%);
+    box-shadow:
+        inset 0 1px 2px rgba(76,29,149,.08),
+        0 8px 18px rgba(108,99,255,.08);
+}
+
+body[data-page="checkin-success"] .success-xp-bar-track::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,0));
+    pointer-events: none;
+}
+
+body[data-page="checkin-success"] .success-xp-bar-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    border-radius: inherit;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: linear-gradient(135deg, #6C63FF 0%, #7C3AED 52%, #A78BFA 100%);
+    box-shadow:
+        0 0 18px rgba(108,99,255,.34),
+        inset 0 1px 0 rgba(255,255,255,.32);
+}
+
+body[data-page="checkin-success"] .success-trail-line,
+body[data-page="checkin-success"] .success-trail-fill svg,
+body[data-page="checkin-success"] .success-hiker,
+body[data-page="checkin-success"] .success-summit {
+    display: none !important;
+}
+
+@media (min-width: 700px) {
+    body[data-page="checkin-success"] .success-content {
+        width: min(100%, 760px);
+        max-width: 760px;
+    }
+
+    body[data-page="checkin-success"] .success-hero {
+        min-height: 404px;
+    }
+
+    body[data-page="checkin-success"] .success-mountain-wrap {
+        height: 248px;
+    }
+
+    body[data-page="checkin-success"] .success-hero::before {
+        top: 195px;
+        height: 250px;
+        border-radius: 50% 50% 0 0 / 28% 28% 0 0;
+    }
+
+    body[data-page="checkin-success"] .success-hero-copy {
+        margin-top: 158px;
+    }
+}
+
+@media (min-width: 901px) {
+    body[data-page="checkin-success"] .success-content {
+        width: min(100%, 980px);
+        max-width: 980px;
+        padding-inline: 20px;
+        gap: 14px;
+    }
+
+    body[data-page="checkin-success"] .success-hero {
+        min-height: 424px;
+        width: min(100%, 980px);
+    }
+
+    body[data-page="checkin-success"] .success-mountain-wrap {
+        height: 286px;
+    }
+
+    body[data-page="checkin-success"] .success-hero::before {
+        top: 224px;
+        height: 260px;
+    }
+
+    body[data-page="checkin-success"] .success-hero-copy {
+        margin-top: 185px;
+    }
+
+    body[data-page="checkin-success"] .today-summary-card.success-climb-card {
+        grid-template-columns: 124px 1px minmax(0, 1fr);
+        padding: 22px;
+        gap: 22px;
+    }
+
+    body[data-page="checkin-success"] .summary-ring {
+        width: 112px;
+        height: 112px;
+    }
+
+    body[data-page="checkin-success"] .success-week-day i {
+        width: 50px;
+        height: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    html:has(body[data-page="checkin-success"]),
+    body[data-page="checkin-success"] {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    body[data-page="checkin-success"] .success-content {
+        width: 100vw;
+        max-width: 100vw;
+        padding-inline: 9px;
+        gap: 11px;
+        overflow: hidden;
+    }
+
+    body[data-page="checkin-success"] .success-hero {
+        width: 100vw;
+        max-width: 100vw;
+        min-height: 366px;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+    }
+
+    body[data-page="checkin-success"] .success-xp-card,
+    body[data-page="checkin-success"] .today-summary-card,
+    body[data-page="checkin-success"] .success-streak-card,
+    body[data-page="checkin-success"] .success-activity-card,
+    body[data-page="checkin-success"] .success-mini-note,
+    body[data-page="checkin-success"] .success-buttons {
+        width: calc(100vw - 18px);
+        max-width: calc(100vw - 18px);
+        min-width: 0;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body[data-page="checkin-success"] .success-hero-copy {
+        margin-top: 126px;
+    }
+
+    body[data-page="checkin-success"] .today-summary-card.success-climb-card {
+        grid-template-columns: 86px 1px minmax(0, 1fr);
+        gap: 9px;
+        padding: 13px 11px;
+    }
+
+    body[data-page="checkin-success"] .summary-ring {
+        width: 84px;
+        height: 84px;
+    }
+
+    body[data-page="checkin-success"] .success-climb-head h2 {
+        font-size: 14px;
+    }
+
+    body[data-page="checkin-success"] .success-trail-track {
+        inset-right: 6px;
+    }
+
+    body[data-page="checkin-success"] .success-week-row {
+        gap: 4px;
+    }
+
+    body[data-page="checkin-success"] .success-week-day i {
+        height: 52px;
+        border-radius: 15px;
     }
 }

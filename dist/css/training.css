@@ -526,6 +526,9 @@ body[data-page="training-plan"] .tyfit-main-inner {
   overflow: visible;
   z-index: 1;
 }
+.tp-day-row.has-log-action {
+  grid-template-columns: 58px minmax(0, 1fr) auto auto;
+}
 .tp-day-row:hover { transform: translateY(-1px); border-color: var(--tp-day-accent, #cbd5e1); }
 .tp-day-row:active { transform: scale(.99); }
 .tp-day-row:has(.tp-day-menu-dropdown.open) {
@@ -542,6 +545,34 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-day-icon svg { width: 25px; height: 25px; stroke-width: 2.1; }
 .tp-day-title { margin:0 0 6px; font-size: 17px; font-weight: 650; color: var(--tp-text); letter-spacing: -.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .tp-day-sub { margin:0; font-size: 13.5px; color: var(--tp-muted); }
+.tp-day-log-btn,
+.tp-day-summary-log-btn {
+  border: 0;
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #fff;
+  background: linear-gradient(135deg, #6C63FF, #8B7CFF);
+  box-shadow: 0 12px 22px rgba(108, 99, 255, .2);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tp-day-log-btn svg,
+.tp-day-summary-log-btn svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+.tp-day-summary-log-btn {
+  margin-left: auto;
+}
 .tp-day-menu-wrap {
   position: relative;
   z-index: 12;
@@ -1114,6 +1145,494 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-spinner svg { width:18px; height:18px; animation: tpSpin 1s linear infinite; }
 @keyframes tpSpin { to { transform: rotate(360deg); } }
 
+/* Workout logging */
+.tp-logbook-panel {
+  margin: 0 0 22px;
+  padding: 18px;
+  border: 1px solid #E7E4FF;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(108, 99, 255, .12), transparent 34%),
+    #fff;
+  box-shadow: 0 18px 40px rgba(108, 99, 255, .08);
+}
+
+.tp-logbook-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tp-eyebrow--compact {
+  margin-bottom: 5px;
+  letter-spacing: .14em;
+}
+
+.tp-logbook-head h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 19px;
+  line-height: 1.15;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.tp-logbook-head p:not(.tp-eyebrow) {
+  margin: 6px 0 0;
+  max-width: 48ch;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.tp-logbook-start-btn {
+  min-height: 42px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  background: linear-gradient(135deg, #6C63FF, #8B7CFF);
+  box-shadow: 0 14px 28px rgba(108, 99, 255, .22);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tp-logbook-start-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.tp-logbook-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 14px;
+}
+
+.tp-logbook-stats div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #F0EEFF;
+  border-radius: 17px;
+  background: rgba(250, 249, 255, .82);
+}
+
+.tp-logbook-stats span {
+  display: block;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tp-logbook-stats small {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.tp-logbook-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tp-logbook-empty {
+  min-height: 58px;
+  border: 1px dashed #DDD8FF;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  color: #667085;
+  background: rgba(255, 255, 255, .7);
+  font-size: 13px;
+}
+
+.tp-logbook-empty svg {
+  width: 19px;
+  height: 19px;
+  color: #6C63FF;
+}
+
+.tp-logbook-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid #F0EEFF;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 26px rgba(42, 37, 112, .06);
+  padding: 8px;
+}
+
+.tp-logbook-row-main {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tp-logbook-row-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6C63FF;
+  background: #F0EDFF;
+}
+
+.tp-logbook-row-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tp-logbook-row-copy {
+  min-width: 0;
+}
+
+.tp-logbook-row-copy strong {
+  display: block;
+  color: #111827;
+  font-size: 13.5px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tp-logbook-row-copy small {
+  display: block;
+  margin-top: 3px;
+  color: #667085;
+  font-size: 11.5px;
+  font-weight: 450;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tp-logbook-row-volume {
+  color: #4B5563;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.tp-logbook-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tp-logbook-text-btn,
+.tp-logbook-icon-btn {
+  border: 0;
+  border-radius: 12px;
+  background: #F8F7FF;
+  color: #6C63FF;
+  min-height: 34px;
+  padding: 0 11px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.tp-logbook-icon-btn {
+  width: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tp-logbook-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tp-logbook-icon-btn.danger {
+  color: #EF4444;
+  background: #FFF1F2;
+}
+
+.tp-workout-modal {
+  width: min(100%, 860px);
+}
+
+.tp-workout-modal-body {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF9FF 100%);
+}
+
+.tp-workout-editor {
+  display: grid;
+  gap: 16px;
+}
+
+.tp-workout-editor-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  gap: 12px;
+}
+
+.tp-workout-field {
+  display: grid;
+  gap: 8px;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.tp-workout-field input,
+.tp-workout-field textarea {
+  width: 100%;
+  border: 1px solid #E7E4FF;
+  border-radius: 16px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 13px;
+  outline: none;
+}
+
+.tp-workout-field input:focus,
+.tp-workout-field textarea:focus,
+.tp-workout-set-row input:focus {
+  border-color: #8B7CFF;
+  box-shadow: 0 0 0 4px rgba(108, 99, 255, .1);
+}
+
+.tp-workout-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tp-workout-summary-strip div {
+  padding: 13px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #E7E4FF;
+}
+
+.tp-workout-summary-strip strong {
+  display: block;
+  color: #111827;
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 750;
+}
+
+.tp-workout-summary-strip span {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 11.5px;
+  font-weight: 550;
+}
+
+.tp-workout-exercise-stack {
+  display: grid;
+  gap: 13px;
+}
+
+.tp-workout-exercise {
+  border: 1px solid var(--tp-ex-accent-line, #E7E4FF);
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--tp-ex-accent-soft, #F8F7FF), #fff 58%);
+  box-shadow: 0 14px 30px rgba(42, 37, 112, .07);
+  padding: 14px;
+}
+
+.tp-workout-exercise-head {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 12px;
+}
+
+.tp-workout-exercise-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .78);
+  border: 1px solid rgba(255, 255, 255, .7);
+}
+
+.tp-workout-exercise-icon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.tp-workout-exercise h4 {
+  margin: 0;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.tp-workout-exercise p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 12px;
+}
+
+.tp-workout-mini-btn {
+  min-height: 34px;
+  border: 1px solid #DDD8FF;
+  border-radius: 12px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #6C63FF;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.tp-workout-mini-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tp-workout-set-table {
+  display: grid;
+  gap: 7px;
+}
+
+.tp-workout-set-head,
+.tp-workout-set-row {
+  display: grid;
+  grid-template-columns: 34px minmax(56px, .9fr) minmax(56px, .9fr) minmax(56px, .8fr) 44px 30px;
+  align-items: center;
+  gap: 7px;
+}
+
+.tp-workout-set-head {
+  color: #667085;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 0 2px;
+}
+
+.tp-workout-set-row {
+  min-height: 43px;
+}
+
+.tp-workout-set-num {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tp-workout-set-row input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid #ECE9FF;
+  border-radius: 13px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+
+.tp-workout-check {
+  display: flex;
+  justify-content: center;
+}
+
+.tp-workout-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tp-workout-check span {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #A4A9B8;
+  background: #F4F5F8;
+  border: 1px solid #E7EAF0;
+}
+
+.tp-workout-check input:checked + span {
+  color: #fff;
+  background: #22C55E;
+  border-color: #22C55E;
+  box-shadow: 0 8px 16px rgba(34, 197, 94, .18);
+}
+
+.tp-workout-check svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 3;
+}
+
+.tp-workout-remove-set {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #EF4444;
+  background: #FFF1F2;
+  cursor: pointer;
+}
+
+.tp-workout-remove-set svg {
+  width: 14px;
+  height: 14px;
+}
+
 /* Modal / full-screen on mobile */
 .tp-modal-overlay { position:fixed; inset:0; z-index:220; display:flex; align-items:center; justify-content:center; background: rgba(16,24,40,.45); padding: 12px; }
 .tp-modal-overlay[hidden] { display:none; }
@@ -1490,6 +2009,97 @@ body[data-page="training-plan"] .tyfit-main-inner {
   }
 }
 @media (max-width: 767px) {
+  .tp-logbook-panel {
+    padding: 15px;
+    border-radius: 22px;
+  }
+  .tp-logbook-head {
+    display: grid;
+  }
+  .tp-logbook-start-btn {
+    width: 100%;
+  }
+  .tp-logbook-stats {
+    gap: 7px;
+  }
+  .tp-logbook-stats div {
+    padding: 10px 8px;
+    border-radius: 15px;
+  }
+  .tp-logbook-stats span {
+    font-size: 14px;
+  }
+  .tp-logbook-stats small {
+    font-size: 10px;
+  }
+  .tp-logbook-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .tp-logbook-row-main {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+  .tp-logbook-row-volume {
+    grid-column: 2;
+    font-size: 11.5px;
+  }
+  .tp-logbook-row-actions {
+    justify-content: flex-end;
+  }
+  .tp-day-row.has-log-action {
+    grid-template-columns: 50px minmax(0, 1fr) auto;
+  }
+  .tp-day-row.has-log-action .tp-day-menu-wrap {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .tp-day-row.has-log-action .tp-day-log-btn {
+    grid-column: 2 / 4;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .tp-day-summary-log-btn {
+    min-height: 34px;
+    padding-inline: 11px;
+  }
+  .tp-workout-editor-head,
+  .tp-workout-summary-strip {
+    grid-template-columns: 1fr;
+  }
+  .tp-workout-exercise {
+    padding: 12px;
+    border-radius: 20px;
+  }
+  .tp-workout-exercise-head {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+  .tp-workout-mini-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .tp-workout-set-head,
+  .tp-workout-set-row {
+    grid-template-columns: 28px minmax(48px, 1fr) minmax(48px, 1fr) minmax(48px, 1fr) 38px 26px;
+    gap: 5px;
+  }
+  .tp-workout-set-head {
+    font-size: 9.5px;
+  }
+  .tp-workout-set-row input[type="number"] {
+    height: 38px;
+    border-radius: 11px;
+    font-size: 12px !important;
+    padding-inline: 3px;
+  }
+  .tp-workout-check span {
+    width: 32px;
+    height: 32px;
+  }
+  .tp-workout-remove-set {
+    width: 26px;
+    height: 26px;
+  }
+
   .tp-plan-selector-wrap {
     z-index: auto;
   }

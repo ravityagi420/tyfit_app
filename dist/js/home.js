@@ -8,7 +8,7 @@ const homeData = {
     tools: [
         { title: "Diet Chart", subtitle: "Track nutrition", href: "portal/diet_chart.html", icon: "salad", colorClass: "icon-diet" },
         { title: "Training Plan", subtitle: "Custom workouts", href: "training_plan.html", icon: "dumbbell", colorClass: "icon-training" },
-        { title: "Journey", subtitle: "Your progress", href: "journey.html", icon: "mountain", colorClass: "icon-food" },
+        { title: "Daily Check-in", subtitle: "Log your day", href: "daily_checkin.html", icon: "clipboard-check", colorClass: "icon-food" },
         { title: "BMR Calculator", subtitle: "Know your BMR", href: "#", icon: "calculator", colorClass: "icon-bmr", calculator: "bmr" },
         { title: "Macro Calculator", subtitle: "Plan macros", href: "#", icon: "pie-chart", colorClass: "icon-macro", comingSoon: true, hideComingSoonBadge: true },
         { title: "Goal Calculator", subtitle: "Set your goal", href: "#", icon: "target", colorClass: "icon-reminder", comingSoon: true, hideComingSoonBadge: true }
@@ -31,6 +31,16 @@ function escapeHtml(value) {
     }[char]));
 }
 
+function isInternalHomeLink(link) {
+    if (!link || !link.getAttribute) return false;
+    if (link.target && link.target !== "_self") return false;
+    if (link.hasAttribute("download")) return false;
+    const href = (link.getAttribute("href") || "").trim();
+    if (!href || href === "#" || href.startsWith("mailto:") || href.startsWith("tel:")) return false;
+    const url = new URL(href, window.location.href);
+    return url.origin === window.location.origin && url.href !== window.location.href;
+}
+
 function refreshIcons() {
     if (typeof window.tyfitRefreshIcons === "function") {
         window.tyfitRefreshIcons();
@@ -46,7 +56,17 @@ function mountHomeLoader() {
     const loader = document.createElement("div");
     loader.id = "tyfitPageLoader";
     loader.className = "tyfit-page-loader";
-    loader.innerHTML = '<div class="tyfit-page-loader__panel"><div class="tyfit-page-loader__spinner" aria-hidden="true"></div><p>Loading TYFIT...</p></div>';
+    loader.innerHTML = [
+        '<div class="tyfit-page-loader__shell" aria-hidden="true">',
+        '  <span class="tyfit-page-loader__bar tyfit-page-loader__bar--sm"></span>',
+        '  <span class="tyfit-page-loader__hero"></span>',
+        '  <span class="tyfit-page-loader__row"></span>',
+        '  <span class="tyfit-page-loader__row tyfit-page-loader__row--short"></span>',
+        '  <div class="tyfit-page-loader__grid">',
+        '    <span></span><span></span><span></span>',
+        '  </div>',
+        '</div>'
+    ].join("");
     document.body.appendChild(loader);
     requestAnimationFrame(() => loader.classList.add("is-visible"));
     mountHomeLoader._ts = Date.now();
@@ -918,6 +938,22 @@ function bindShellInteractions() {
         }
     });
 
+    document.addEventListener("click", (event) => {
+        if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        if (!isHomeUserLoggedIn) return;
+        if (event.target.closest("[data-calculator], [data-coming-soon], button")) return;
+        const link = event.target.closest("a[href]");
+        if (!isInternalHomeLink(link)) return;
+
+        event.preventDefault();
+        mountHomeLoader();
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                window.location.href = new URL(link.getAttribute("href"), window.location.href).href;
+            }, 70);
+        });
+    });
+
     if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener("click", toggleSidebar);
     if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openMobileDrawer);
     if (mobileDrawerClose) mobileDrawerClose.addEventListener("click", closeMobileDrawer);
@@ -1003,7 +1039,12 @@ function bindShellInteractions() {
                 return;
             }
 
-            showToast("Log Weight clicked.");
+            if (action === "weight" && typeof window.tyfitOpenWeightModal === "function") {
+                closeSheet();
+                window.tyfitOpenWeightModal();
+                return;
+            }
+
             closeSheet();
         });
     });
