@@ -3084,6 +3084,7 @@ body.tyfit-auth-locked .row {
 }
 
 .tyfit-ig-edit-photo-btn {
+    visibility: hidden;
     position: absolute;
     bottom: 0;
     right: 0;

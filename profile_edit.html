@@ -19,9 +19,10 @@
 
         <link href="css/style.css?v=20260527a" rel="stylesheet">
         <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
+        <link href="css/tyfit-design-system.css?v=20260606h" rel="stylesheet">
     </head>
 
-    <body class="tyfit-app" data-page="profile-edit">
+    <body class="tyfit-app tyfit-ui-page" data-page="profile-edit">
         <header class="tyfit-mobile-topbar">
             <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu">
                 <i data-lucide="menu"></i>
@@ -137,10 +138,10 @@
 
         <div class="tyfit-profile-main" id="profileMain" style="display:none;">
             <section class="tyfit-profile-shell">
-                <form id="profileEditForm" class="tyfit-profile-form" novalidate>
+                <form id="profileEditForm" class="tyfit-profile-form tyfit-ui-form" novalidate>
 
                     <!-- Profile Photo Row (Instagram-style) -->
-                    <section class="tyfit-profile-card tyfit-photo-card">
+                    <section class="tyfit-photo-card">
                         <div class="tyfit-ig-photo-row">
                             <div class="tyfit-ig-avatar-wrap">
                                 <img id="profilePreviewImage" class="tyfit-ig-avatar-img" src="" alt="Profile photo">
@@ -150,12 +151,13 @@
                             </div>
                             <div class="tyfit-ig-photo-meta">
                                 <span class="tyfit-ig-photo-name" id="profileDisplayName">Your Name</span>
-                                <button type="button" id="profileChangePhotoTrigger" class="tyfit-ig-change-photo-link">Edit Avatar</button>
+                                <button type="button" id="profileChangePhotoTrigger" class="tyfit-ig-change-photo-link">Change Avatar</button>
                             </div>
                         </div>
 
                         <!-- Photo picker modal panel (hidden by default) -->
-                        <div id="profilePhotoPicker" class="tyfit-photo-picker" aria-hidden="true">
+                        <div id="profilePhotoPicker" class="tyfit-photo-picker tyfit-ui-sheet-panel" aria-hidden="true">
+                            <div class="tyfit-ui-sheet-handle" aria-hidden="true"></div>
                             <!-- Tab switcher hidden while upload is disabled -->
                             <div id="profilePhotoSwitch" class="tyfit-photo-picker-tabs tyfit-segmented-switch is-avatar" role="tablist" style="display:none;">
                                 <button type="button" class="tyfit-tab-btn" id="profileTabUpload" role="tab" aria-selected="false" aria-controls="profileUploadPane" style="display:none;">
@@ -180,55 +182,65 @@
                     </section>
 
                     <!-- Personal Information -->
-                    <section class="tyfit-profile-card" id="personal-information">
-                        <div class="tyfit-profile-card-head">
-                            <h2>Personal Information</h2>
+                    <section class="tyfit-profile-card tyfit-ui-section" id="personal-information">
+                        <div class="tyfit-profile-card-head tyfit-ui-section-head">
+                            <h2 class="tyfit-ui-h3">Personal Information</h2>
                         </div>
-                        <div class="tyfit-field-grid">
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileFirstName">First Name</label>
-                                <input type="text" id="profileFirstName" class="tyfit-field-input" placeholder="First name" autocomplete="given-name" required>
-                            </div>
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileLastName">Last Name</label>
-                                <input type="text" id="profileLastName" class="tyfit-field-input" placeholder="Last name" autocomplete="family-name" required>
-                            </div>
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileDob">Date of Birth</label>
-                                <div class="tyfit-input-icon-wrap">
-                                    <input type="text" id="profileDob" class="tyfit-field-input tyfit-field-input--with-right-icon" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="bday" required>
-                                    <i data-lucide="calendar" class="tyfit-input-icon tyfit-input-icon--right"></i>
+                        <div class="tyfit-field-grid tyfit-ui-form-grid">
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileFirstName">First Name</label>
+                                <div class="tyfit-ui-icon-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="user"></i></span>
+                                    <input type="text" id="profileFirstName" class="tyfit-field-input tyfit-ui-control" placeholder="First name" autocomplete="given-name" required>
                                 </div>
                             </div>
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileGender">Gender</label>
-                                <div class="tyfit-select-wrap">
-                                    <select id="profileGender" class="tyfit-field-input tyfit-field-select" required>
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileLastName">Last Name</label>
+                                <div class="tyfit-ui-icon-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="badge"></i></span>
+                                    <input type="text" id="profileLastName" class="tyfit-field-input tyfit-ui-control" placeholder="Last name" autocomplete="family-name" required>
+                                </div>
+                            </div>
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileDob">Date of Birth</label>
+                                <div class="tyfit-input-icon-wrap tyfit-ui-icon-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="calendar-days"></i></span>
+                                    <input type="text" id="profileDob" class="tyfit-field-input tyfit-ui-control tyfit-field-input--with-right-icon" placeholder="DD/MM/YYYY" inputmode="numeric" maxlength="10" autocomplete="bday" required>
+                                    <span class="tyfit-ui-trailing-icon"><i data-lucide="calendar"></i></span>
+                                </div>
+                            </div>
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileGender">Gender</label>
+                                <div class="tyfit-select-wrap tyfit-ui-select-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="users"></i></span>
+                                    <select id="profileGender" class="tyfit-field-input tyfit-ui-select tyfit-field-select" required>
                                         <option value="">Select gender</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                     </select>
-                                    <i data-lucide="chevron-down" class="tyfit-select-arrow"></i>
+                                    <span class="tyfit-ui-select-chevron"><i data-lucide="chevron-down"></i></span>
                                 </div>
                             </div>
                         </div>
                     </section>
 
                     <!-- Contact Information -->
-                    <section class="tyfit-profile-card" id="contact-information">
-                        <div class="tyfit-profile-card-head">
-                            <h2>Contact Information</h2>
+                    <section class="tyfit-profile-card tyfit-ui-section" id="contact-information">
+                        <div class="tyfit-profile-card-head tyfit-ui-section-head">
+                            <h2 class="tyfit-ui-h3">Contact Information</h2>
                         </div>
-                        <div class="tyfit-field-grid">
-                            <div class="tyfit-field-group tyfit-field-group--full">
-                                <label class="tyfit-field-label" for="profileEmail">Email</label>
-                                <div class="tyfit-input-icon-wrap">
-                                    <input type="email" id="profileEmail" class="tyfit-field-input tyfit-field-input--with-right-icon" readonly>
-                                    <i data-lucide="circle-check" class="tyfit-input-icon tyfit-input-icon--right tyfit-input-icon--verified"></i>
+                        <div class="tyfit-field-grid tyfit-ui-form-grid">
+                            <div class="tyfit-field-group tyfit-field-group--full tyfit-ui-field tyfit-ui-field--full">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileEmail">Email</label>
+                                <div class="tyfit-input-icon-wrap tyfit-ui-icon-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="mail"></i></span>
+                                    <input type="email" id="profileEmail" class="tyfit-field-input tyfit-ui-control tyfit-field-input--with-right-icon" readonly>
+                                    <span class="tyfit-ui-trailing-icon"><i data-lucide="circle-check"></i></span>
                                 </div>
                             </div>
-                            <div class="tyfit-field-group tyfit-field-group--full">
-                                <label class="tyfit-field-label" for="profilePhoneNumber">Phone Number</label>
+                            <div class="tyfit-field-group tyfit-field-group--full tyfit-ui-field tyfit-ui-field--full">
+                                <span class="tyfit-ui-icon-tile"><i data-lucide="phone"></i></span>
+                                <label class="tyfit-field-label tyfit-ui-label" for="profilePhoneNumber">Phone Number</label>
                                 <div class="tyfit-phone-wrap">
                                     <div class="tyfit-country-code-btn" id="profileCountryCodeBtn" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
                                         <span class="tyfit-cc-flag" id="profileCCFlag">🌐</span>
@@ -236,74 +248,79 @@
                                         <i data-lucide="chevron-down" class="tyfit-cc-arrow"></i>
                                         <input type="hidden" id="profilePhoneCode" value="+91">
                                     </div>
-                                    <input type="tel" id="profilePhoneNumber" class="tyfit-field-input tyfit-phone-input" placeholder="Phone number" autocomplete="tel-national">
+                                    <input type="tel" id="profilePhoneNumber" class="tyfit-field-input tyfit-ui-control tyfit-phone-input" placeholder="Phone number" autocomplete="tel-national">
                                     <div id="profileCountryCodeDropdown" class="tyfit-cc-dropdown" role="listbox" aria-label="Country code selector">
                                         <div class="tyfit-cc-search-wrap">
                                             <i data-lucide="search" class="tyfit-cc-search-icon"></i>
-                                            <input type="text" id="profileCCSearch" class="tyfit-cc-search" placeholder="Search country..." autocomplete="off">
+                                            <input type="text" id="profileCCSearch" class="tyfit-cc-search tyfit-ui-control" placeholder="Search country..." autocomplete="off">
                                         </div>
                                         <ul id="profileCCList" class="tyfit-cc-list"></ul>
                                     </div>
                                 </div>
                             </div>
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileCountry">Country</label>
-                                <div class="tyfit-select-wrap">
-                                    <select id="profileCountry" class="tyfit-field-input tyfit-field-select" required>
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileCountry">Country</label>
+                                <div class="tyfit-select-wrap tyfit-ui-select-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="map-pin"></i></span>
+                                    <select id="profileCountry" class="tyfit-field-input tyfit-ui-select tyfit-field-select" required>
                                         <option value="">Select country</option>
                                     </select>
-                                    <i data-lucide="chevron-down" class="tyfit-select-arrow"></i>
+                                    <span class="tyfit-ui-select-chevron"><i data-lucide="chevron-down"></i></span>
                                 </div>
                             </div>
                         </div>
                     </section>
 
                     <!-- Fitness Details -->
-                    <section class="tyfit-profile-card" id="fitness-detail">
-                        <div class="tyfit-profile-card-head tyfit-card-head-row">
-                            <h2>Fitness Details</h2>
+                    <section class="tyfit-profile-card tyfit-ui-section" id="fitness-detail">
+                        <div class="tyfit-profile-card-head tyfit-card-head-row tyfit-ui-section-head">
+                            <h2 class="tyfit-ui-h3">Fitness Details</h2>
                             <div id="unitSystemSwitch" class="tyfit-unit-toggle tyfit-segmented-switch is-metric" role="group" aria-label="Unit system">
                                 <button type="button" id="unitMetricBtn" class="tyfit-unit-btn active">Metric</button>
                                 <button type="button" id="unitImperialBtn" class="tyfit-unit-btn">Imperial</button>
                             </div>
                         </div>
-                        <div class="tyfit-field-grid">
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileHeight">Height</label>
-                                <div class="tyfit-measurement-wrap">
+                        <div class="tyfit-field-grid tyfit-ui-form-grid">
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileHeight">Height</label>
+                                <div class="tyfit-measurement-wrap tyfit-ui-unit-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="ruler"></i></span>
                                     <!-- Metric: cm -->
-                                    <input type="number" id="profileHeight" class="tyfit-field-input tyfit-meas-input" min="0" step="0.1" placeholder="170" required>
+                                    <input type="number" id="profileHeight" class="tyfit-field-input tyfit-ui-control tyfit-meas-input" min="0" step="0.1" placeholder="170" required>
                                     <!-- Imperial: ft + in -->
-                                    <input type="number" id="profileHeightFt" class="tyfit-field-input tyfit-meas-input" min="0" max="9" step="1" placeholder="5" style="display:none;">
-                                    <input type="number" id="profileHeightIn" class="tyfit-field-input tyfit-meas-input tyfit-meas-input--in" min="0" max="11" step="1" placeholder="7" style="display:none;">
-                                    <span class="tyfit-meas-unit" id="heightUnitLabel">cm</span>
-                                    <span class="tyfit-meas-unit" id="heightUnitLabelImperial" style="display:none;">ft / in</span>
+                                    <input type="number" id="profileHeightFt" class="tyfit-field-input tyfit-ui-control tyfit-meas-input" min="0" max="9" step="1" placeholder="5" style="display:none;">
+                                    <input type="number" id="profileHeightIn" class="tyfit-field-input tyfit-ui-control tyfit-meas-input tyfit-meas-input--in" min="0" max="11" step="1" placeholder="7" style="display:none;">
+                                    <span class="tyfit-meas-unit tyfit-ui-unit" id="heightUnitLabel">cm</span>
+                                    <span class="tyfit-meas-unit tyfit-ui-unit" id="heightUnitLabelImperial" style="display:none;">ft / in</span>
                                 </div>
                             </div>
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileWeight">Weight</label>
-                                <div class="tyfit-measurement-wrap">
-                                    <input type="number" id="profileWeight" class="tyfit-field-input tyfit-meas-input" min="0" step="0.1" placeholder="70" required>
-                                    <span class="tyfit-meas-unit" id="weightUnitLabel">kg</span>
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileWeight">Weight</label>
+                                <div class="tyfit-measurement-wrap tyfit-ui-unit-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="scale"></i></span>
+                                    <input type="number" id="profileWeight" class="tyfit-field-input tyfit-ui-control tyfit-meas-input" min="0" step="0.1" placeholder="70" required>
+                                    <span class="tyfit-meas-unit tyfit-ui-unit" id="weightUnitLabel">kg</span>
                                 </div>
                             </div>
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileGoal">Goal</label>
-                                <div class="tyfit-select-wrap">
-                                    <select id="profileGoal" class="tyfit-field-input tyfit-field-select" required>
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileGoal">Goal</label>
+                                <div class="tyfit-select-wrap tyfit-ui-select-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="target"></i></span>
+                                    <select id="profileGoal" class="tyfit-field-input tyfit-ui-select tyfit-field-select" required>
                                         <option value="">Select goal</option>
                                         <option value="Fat Loss">Fat Loss</option>
                                         <option value="Muscle Gain">Muscle Gain</option>
                                         <option value="Recomposition">Recomposition</option>
                                         <option value="Maintenance">Maintenance</option>
                                     </select>
-                                    <i data-lucide="chevron-down" class="tyfit-select-arrow"></i>
+                                    <span class="tyfit-ui-select-chevron"><i data-lucide="chevron-down"></i></span>
                                 </div>
                             </div>
-                            <div class="tyfit-field-group">
-                                <label class="tyfit-field-label" for="profileActivityLevel">Activity Level</label>
-                                <div class="tyfit-select-wrap">
-                                    <select id="profileActivityLevel" class="tyfit-field-input tyfit-field-select" required>
+                            <div class="tyfit-field-group tyfit-ui-field">
+                                <label class="tyfit-field-label tyfit-ui-label" for="profileActivityLevel">Activity Level</label>
+                                <div class="tyfit-select-wrap tyfit-ui-select-control">
+                                    <span class="tyfit-ui-icon-tile"><i data-lucide="activity"></i></span>
+                                    <select id="profileActivityLevel" class="tyfit-field-input tyfit-ui-select tyfit-field-select" required>
                                         <option value="">Select activity</option>
                                         <option value="Sedentary">Sedentary (Little or No exercise)</option>
                                         <option value="Light Exercise">Light Exercise (1-2 days/week)</option>
@@ -311,7 +328,7 @@
                                         <option value="Heavy Exercise">Heavy Exercise (6-7 days/week)</option>
                                         <option value="Athlete">Athlete (2x per day)</option>
                                     </select>
-                                    <i data-lucide="chevron-down" class="tyfit-select-arrow"></i>
+                                    <span class="tyfit-ui-select-chevron"><i data-lucide="chevron-down"></i></span>
                                 </div>
                             </div>
                         </div>
@@ -325,7 +342,7 @@
         <!-- Sticky save bar: appears only when form has unsaved changes -->
         <div class="tyfit-save-bar" id="profileSaveBar" aria-hidden="true">
             <span class="tyfit-save-bar__hint">Unsaved changes</span>
-            <button type="submit" form="profileEditForm" id="profileSaveBtn" class="tyfit-save-bar__btn">
+            <button type="submit" form="profileEditForm" id="profileSaveBtn" class="tyfit-save-bar__btn tyfit-ui-primary-btn">
                 <i data-lucide="check" class="mr-1"></i> Save
             </button>
         </div>
@@ -336,7 +353,7 @@
             <div class="tyfit-profile-skel-card"></div>
         </div>
 
-        <a href="#" class="back-to-top"><i data-lucide="chevron-up"></i></a>
+        <button type="button" class="back-to-top" aria-label="Back to top"><i data-lucide="chevron-up"></i></button>
 
                 </div><!-- /.tyfit-main-inner -->
             </main><!-- /.tyfit-main -->
