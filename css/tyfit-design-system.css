@@ -542,7 +542,7 @@ body[data-page="profile-edit"] .tyfit-profile-card-head h2.tyfit-ui-h3 {
     color: #111827;
     font-size: 15px;
     line-height: 1.2;
-    font-weight: 550;
+    font-weight: 400;
     letter-spacing: 0;
 }
 
@@ -625,10 +625,10 @@ body[data-page="profile-edit"] .tyfit-ui-label {
     grid-column: 2;
     grid-row: 1;
     align-self: center;
-    color: #667085;
+    color: #414755;
     font-size: 14px;
     line-height: 1.2;
-    font-weight: 520;
+    font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
     transition: color 150ms ease;
@@ -758,7 +758,7 @@ body[data-page="profile-edit"] .tyfit-ui-unit-control .tyfit-field-input {
     padding: 0 12px;
     color: #111827;
     font-size: 14px;
-    font-weight: 450;
+    font-weight: 300;
     caret-color: var(--tyfit-ui-primary);
     transition: color 150ms ease, background-color 150ms ease;
 }
@@ -787,7 +787,7 @@ body[data-page="profile-edit"] .tyfit-custom-select-trigger {
     color: #111827;
     font: inherit;
     font-size: 14px;
-    font-weight: 450;
+    font-weight: 300;
     text-align: left;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;

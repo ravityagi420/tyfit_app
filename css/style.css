@@ -2960,7 +2960,7 @@ body.tyfit-auth-locked .row {
 
 .tyfit-profile-main {
     min-height: 100vh;
-    padding: calc((var(--tyfit-header-h-mobile, 64px) + 14px) / 4) 14px 100px;
+    padding: calc((var(--tyfit-header-h-mobile, 64px) + 14px) / 10) 14px 100px;
     background: radial-gradient(circle at 8% 10%, #dbeafe 0%, transparent 32%), radial-gradient(circle at 95% 0%, #ffe4e6 0%, transparent 26%), #f8fafc;
 }
 
@@ -3059,7 +3059,7 @@ body.tyfit-auth-locked .row {
     background: transparent;
     border: none;
     box-shadow: none;
-    padding: 4px 4px 4px;
+    padding: 5px 4px 0px;
 }
 
 .tyfit-ig-photo-row {
