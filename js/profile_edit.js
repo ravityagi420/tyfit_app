@@ -186,28 +186,8 @@ function bindDobInputFormatting() {
     const dobEl = pe("profileDob");
     if (!dobEl) return;
 
-    dobEl.addEventListener("input", () => {
-        const digits = dobEl.value.replace(/\D/g, "").slice(0, 8);
-        let out = "";
-        if (digits.length > 0) out += digits.slice(0, 2);
-        if (digits.length >= 3) out += `/${digits.slice(2, 4)}`;
-        if (digits.length >= 5) out += `/${digits.slice(4, 8)}`;
-        dobEl.value = out;
-    });
-
-    dobEl.addEventListener("blur", () => {
-        if (!dobEl.value.trim()) return;
-        const iso = parseDisplayDateToIso(dobEl.value);
-        if (!iso) {
-            showProfileStatus("Please enter Date of Birth as DD/MM/YYYY.", "error");
-            return;
-        }
-        if (!isAtLeastTenYearsOld(iso)) {
-            showProfileStatus("Birth date must be at least 10 years before today.", "error");
-            return;
-        }
-        dobEl.value = formatIsoDateToDisplay(iso);
-    });
+    // Calendar-only input: keep the text field non-editable.
+    dobEl.setAttribute("readonly", "readonly");
 }
 
 function initDobCalendar() {
@@ -259,7 +239,7 @@ function initDobCalendar() {
 
     window.flatpickr(dobEl, {
         dateFormat: "d/m/Y",
-        allowInput: true,
+        allowInput: false,
         disableMobile: true,
         maxDate: new Date(new Date().getFullYear() - 10, new Date().getMonth(), new Date().getDate()),
         monthSelectorType: "dropdown",
@@ -291,6 +271,10 @@ function initDobCalendar() {
             dobEl.value = formatIsoDateToDisplay(iso);
         }
     });
+
+    // Ensure tap/click always opens picker while keyboard stays hidden.
+    dobEl.addEventListener("focus", () => dobEl._flatpickr?.open());
+    dobEl.addEventListener("click", () => dobEl._flatpickr?.open());
 }
 
 /* ── Photo picker (Instagram-style) ───────────────────────── */
