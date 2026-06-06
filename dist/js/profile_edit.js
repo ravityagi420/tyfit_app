@@ -355,77 +355,36 @@ function bindAvatarPicker() {
     });
 }
 
-/* ── Country code dropdown ─────────────────────────────────── */
-let _ccDropdownOpen = false;
-
-function renderCCList() {
-    const list = pe("profileCCList");
-    if (!list) return;
-    const currentDial = pe("profilePhoneCode")?.value || "";
-    list.innerHTML = COUNTRY_DATA.map(c => `
-        <li class="tyfit-cc-item${c.dial === currentDial ? " selected" : ""}" data-dial="${c.dial}" data-name="${c.name}" data-flag="${c.flag}" role="option">
-            <span class="tyfit-cc-item-flag">${c.flag}</span>
-            <span class="tyfit-cc-item-name">${c.name}</span>
-            <span class="tyfit-cc-item-dial">${c.dial}</span>
-        </li>
-    `).join("");
-}
-
-function selectCountryCode(dial, flag) {
+/* ── Country code select ───────────────────────────────────── */
+function populatePhoneCodeSelect(currentDial) {
+    const codeSelect = pe("profilePhoneCodeSelect");
     const codeInput = pe("profilePhoneCode");
-    const flagEl = pe("profileCCFlag");
-    const dialEl = pe("profileCCDial");
-    if (codeInput) codeInput.value = dial;
-    if (flagEl) flagEl.textContent = flag;
-    if (dialEl) dialEl.textContent = dial;
+    if (!codeSelect || !codeInput) return;
+
+    const uniqueByDial = new Map();
+    COUNTRY_DATA.forEach((country) => {
+        if (!uniqueByDial.has(country.dial)) uniqueByDial.set(country.dial, country.flag);
+    });
+
+    const options = Array.from(uniqueByDial.entries())
+        .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
+        .map(([dial, flag]) => ({ dial, flag }));
+
+    codeSelect.innerHTML = options.map((item) => `<option value="${item.dial}">${item.dial}</option>`).join("");
+
+    const resolvedDial = currentDial && uniqueByDial.has(currentDial) ? currentDial : "+91";
+    codeSelect.value = resolvedDial;
+    codeInput.value = resolvedDial;
+    rebuildTyfitCustomSelect(codeSelect);
 }
 
-function openCCDropdown() {
-    const dropdown = pe("profileCountryCodeDropdown");
-    const btn = pe("profileCountryCodeBtn");
-    if (!dropdown) return;
-    dropdown.classList.add("is-open");
-    document.body.classList.add("tyfit-cc-modal-open");
-    btn?.setAttribute("aria-expanded", "true");
-    _ccDropdownOpen = true;
-    renderCCList();
-}
+function bindPhoneCodeSelect() {
+    const codeSelect = pe("profilePhoneCodeSelect");
+    const codeInput = pe("profilePhoneCode");
+    if (!codeSelect || !codeInput) return;
 
-function closeCCDropdown() {
-    const dropdown = pe("profileCountryCodeDropdown");
-    const btn = pe("profileCountryCodeBtn");
-    if (!dropdown) return;
-    dropdown.classList.remove("is-open");
-    document.body.classList.remove("tyfit-cc-modal-open");
-    btn?.setAttribute("aria-expanded", "false");
-    _ccDropdownOpen = false;
-}
-
-function bindCCDropdown() {
-    const btn = pe("profileCountryCodeBtn");
-    const list = pe("profileCCList");
-    const dropdown = pe("profileCountryCodeDropdown");
-
-    if (btn) {
-        btn.addEventListener("click", () => _ccDropdownOpen ? closeCCDropdown() : openCCDropdown());
-        btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); _ccDropdownOpen ? closeCCDropdown() : openCCDropdown(); } });
-    }
-
-    if (list) {
-        list.addEventListener("click", (e) => {
-            const item = e.target.closest(".tyfit-cc-item");
-            if (!item) return;
-            selectCountryCode(item.dataset.dial, item.dataset.flag);
-            closeCCDropdown();
-        });
-    }
-
-    if (dropdown) bindSheetDragClose(dropdown, closeCCDropdown);
-
-    document.addEventListener("click", (e) => {
-        if (!_ccDropdownOpen) return;
-        const wrap = pe("profileCountryCodeBtn")?.closest(".tyfit-phone-wrap");
-        if (wrap && !wrap.contains(e.target)) closeCCDropdown();
+    codeSelect.addEventListener("change", () => {
+        codeInput.value = codeSelect.value || "+91";
     });
 }
 
@@ -451,6 +410,7 @@ function populateCountrySelect(currentValue) {
 const PROFILE_CUSTOM_SELECT_IDS = [
     "profileGender",
     "profileCountry",
+    "profilePhoneCodeSelect",
     "profileGoal",
     "profileActivityLevel"
 ];
@@ -464,6 +424,13 @@ function getSelectDisplayText(selectEl) {
 
 function getCustomSelectOptionMarkup(selectEl, optionEl) {
     const label = optionEl.textContent.trim();
+    if (selectEl?.id === "profilePhoneCodeSelect" && optionEl.value) {
+        const dial = String(optionEl.value || "").trim();
+        const country = COUNTRY_DATA.find((item) => item.dial === dial);
+        if (country) {
+            return `<span class="tyfit-custom-option-main"><span class="tyfit-custom-option-flag">${country.flag}</span><span>${country.dial}</span></span>`;
+        }
+    }
     if (selectEl?.id === "profileCountry" && optionEl.value) {
         const country = COUNTRY_DATA.find((item) => item.name === optionEl.value);
         if (country) {
@@ -477,6 +444,14 @@ function setCustomSelectTriggerValue(selectEl, trigger) {
     const valueEl = trigger?.querySelector(".tyfit-custom-select-value");
     if (!valueEl || !selectEl) return;
     const selected = selectEl.selectedOptions?.[0];
+    if (selectEl.id === "profilePhoneCodeSelect" && selected?.value) {
+        const dial = String(selected.value || "").trim();
+        const country = COUNTRY_DATA.find((item) => item.dial === dial);
+        if (country) {
+            valueEl.innerHTML = `<span class="tyfit-custom-option-main"><span class="tyfit-custom-option-flag">${country.flag}</span><span>${country.dial}</span></span>`;
+            return;
+        }
+    }
     if (selectEl.id === "profileCountry" && selected?.value) {
         const country = COUNTRY_DATA.find((item) => item.name === selected.value);
         if (country) {
@@ -543,7 +518,7 @@ function openTyfitCustomSelect(field) {
 function buildTyfitCustomSelect(selectEl) {
     const shell = selectEl?.closest(".tyfit-ui-select-control");
     const field = shell?.closest(".tyfit-ui-field");
-    if (!selectEl || !shell || !field || field.querySelector(".tyfit-custom-select-trigger")) return;
+    if (!selectEl || !shell || !field || shell.querySelector(".tyfit-custom-select-trigger")) return;
 
     const trigger = document.createElement("button");
     trigger.type = "button";
@@ -580,7 +555,7 @@ function buildTyfitCustomSelect(selectEl) {
         field.classList.contains("is-open") ? closeTyfitCustomSelect() : openTyfitCustomSelect(field);
     });
 
-    field.append(trigger);
+    shell.append(trigger);
     document.body.appendChild(menu);
     bindSheetDragClose(menu, closeTyfitCustomSelect);
     if (window.lucide?.createIcons) window.lucide.createIcons();
@@ -631,8 +606,8 @@ function bindSheetDragClose(sheet, closeFn) {
 function rebuildTyfitCustomSelect(selectEl) {
     const shell = selectEl?.closest(".tyfit-ui-select-control");
     const field = shell?.closest(".tyfit-ui-field");
-    if (!field) return;
-    field.querySelector(".tyfit-custom-select-trigger")?.remove();
+    if (!field || !shell) return;
+    shell.querySelector(".tyfit-custom-select-trigger")?.remove();
     document.getElementById(`tyfitCustomMenu-${selectEl.id}`)?.remove();
     buildTyfitCustomSelect(selectEl);
 }
@@ -778,8 +753,7 @@ function fillProfileForm(profile, userAbout, user) {
     pe("profileEmail").value = profile?.email || user?.email || "";
 
     const savedDial = profile?.phone_country_code || "+91";
-    const savedCountry = COUNTRY_DATA.find(c => c.dial === savedDial);
-    selectCountryCode(savedDial, savedCountry?.flag || "🌐");
+    populatePhoneCodeSelect(savedDial);
     pe("profilePhoneNumber").value = profile?.phone_number || "";
 
     populateCountrySelect(profile?.country || "");
@@ -1016,8 +990,7 @@ function bindFormEvents() {
     bindAvatarPicker();
 
     // Country code dropdown
-    bindCCDropdown();
-    renderCCList("");
+    bindPhoneCodeSelect();
     initTyfitCustomSelects();
 
     // Unit toggle
@@ -1037,7 +1010,7 @@ function bindFormEvents() {
     const TRACKED_FIELDS = [
         "profileFirstName", "profileLastName", "profileDob", "profileGender",
         "profileHeight", "profileWeight", "profileGoal", "profileActivityLevel",
-        "profileCountry", "profilePhoneNumber", "profilePhoneCode"
+        "profileCountry", "profilePhoneNumber", "profilePhoneCode", "profilePhoneCodeSelect"
     ];
     TRACKED_FIELDS.forEach(id => {
         const el = pe(id);

@@ -2961,7 +2961,6 @@ body.tyfit-auth-locked .row {
 .tyfit-profile-main {
     min-height: 100vh;
     padding: calc((var(--tyfit-header-h-mobile, 64px) + 14px) / 10) 14px 100px;
-    background: radial-gradient(circle at 8% 10%, #dbeafe 0%, transparent 32%), radial-gradient(circle at 95% 0%, #ffe4e6 0%, transparent 26%), #f8fafc;
 }
 
 .tyfit-profile-shell {
@@ -3041,7 +3040,7 @@ body.tyfit-auth-locked .row {
 
 [data-page="profile-edit"] .tyfit-field-input {
     font-size: 15px;
-    font-weight: 400;
+    font-weight: 300;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: #1A1F36;
 }
@@ -3523,6 +3522,28 @@ span.flatpickr-weekday {
     position: relative;
     gap: 0;
 }
+.tyfit-cc-select-wrap {
+    width: 112px;
+    flex-shrink: 0;
+}
+.tyfit-cc-select-wrap .tyfit-field-select {
+    height: 44px;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    padding-left: 10px;
+    padding-right: 28px;
+    background: #f1f5f9;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 600;
+}
+.tyfit-cc-select-wrap .tyfit-select-arrow {
+    right: 8px;
+}
+
+.tyfit-cc-select-wrap .tyfit-ui-select-chevron {
+    right: 8px;
+}
 
 .tyfit-country-code-btn {
     display: flex;
@@ -3556,7 +3577,7 @@ span.flatpickr-weekday {
 
 .tyfit-cc-dial {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 300;
     color: #0f172a;
 }
 
@@ -3577,6 +3598,38 @@ span.flatpickr-weekday {
     border-radius: 0 10px 10px 0;
     flex: 1;
     min-width: 0;
+}
+
+body[data-page="profile-edit"] .tyfit-cc-select-wrap {
+    width: 120px;
+    flex: 0 0 120px;
+}
+
+body[data-page="profile-edit"] .tyfit-cc-select-wrap.tyfit-ui-select-control {
+    display: block;
+    position: relative;
+}
+
+body[data-page="profile-edit"] .tyfit-cc-select-wrap .tyfit-field-select {
+    height: 46px;
+    border: 1px solid #E6EAF3;
+    border-right: none;
+    border-radius: 14px 0 0 14px;
+    background: #FFFFFF;
+    padding-left: 10px;
+    padding-right: 28px;
+    font-weight: 600;
+}
+
+body[data-page="profile-edit"] .tyfit-cc-select-wrap .tyfit-custom-select-trigger {
+    height: 46px;
+    border: 0;
+    border-radius: 14px 0 0 14px;
+    background: #FFFFFF;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-weight: 300;
+    box-shadow: none;
 }
 
 .tyfit-phone-input:focus {

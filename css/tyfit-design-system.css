@@ -164,7 +164,6 @@
     min-height: 48px;
     border-radius: 16px;
     background: #FFFFFF;
-    box-shadow: inset 0 0 0 1px var(--tyfit-ui-border-2);
     transition: box-shadow 160ms ease;
 }
 
@@ -583,7 +582,7 @@ body[data-page="profile-edit"] .tyfit-photo-card .tyfit-ig-photo-name {
 body[data-page="profile-edit"] .tyfit-photo-card .tyfit-ig-change-photo-link {
     color: var(--tyfit-ui-primary);
     font-size: 14px;
-    font-weight: 620;
+    font-weight: 400;
     text-align: center;
 }
 
@@ -1054,7 +1053,7 @@ body[data-page="profile-edit"] .tyfit-meas-unit.tyfit-ui-unit {
         box-shadow: none;
         color: #111827;
         font-size: 14px;
-        font-weight: 450;
+        font-weight: 300;
     }
 
     body[data-page="profile-edit"] .tyfit-custom-select-trigger,

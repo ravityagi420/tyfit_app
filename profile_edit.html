@@ -242,16 +242,14 @@
                                 <span class="tyfit-ui-icon-tile"><i data-lucide="phone"></i></span>
                                 <label class="tyfit-field-label tyfit-ui-label" for="profilePhoneNumber">Phone Number</label>
                                 <div class="tyfit-phone-wrap">
-                                    <div class="tyfit-country-code-btn" id="profileCountryCodeBtn" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
-                                        <span class="tyfit-cc-flag" id="profileCCFlag">🌐</span>
-                                        <span class="tyfit-cc-dial" id="profileCCDial">+91</span>
-                                        <i data-lucide="chevron-down" class="tyfit-cc-arrow"></i>
-                                        <input type="hidden" id="profilePhoneCode" value="+91">
+                                    <div class="tyfit-select-wrap tyfit-ui-select-control tyfit-cc-select-wrap">
+                                        <select id="profilePhoneCodeSelect" class="tyfit-field-input tyfit-ui-select tyfit-field-select" aria-label="Country code">
+                                            <option value="+91">+91</option>
+                                        </select>
+                                        <span class="tyfit-ui-select-chevron"><i data-lucide="chevron-down"></i></span>
                                     </div>
+                                    <input type="hidden" id="profilePhoneCode" value="+91">
                                     <input type="tel" id="profilePhoneNumber" class="tyfit-field-input tyfit-ui-control tyfit-phone-input" placeholder="Phone number" autocomplete="tel-national">
-                                    <div id="profileCountryCodeDropdown" class="tyfit-cc-dropdown" role="listbox" aria-label="Country code selector">
-                                        <ul id="profileCCList" class="tyfit-cc-list"></ul>
-                                    </div>
                                 </div>
                             </div>
                             <div class="tyfit-field-group tyfit-ui-field">
