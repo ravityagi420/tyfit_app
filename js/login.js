@@ -826,39 +826,9 @@ function updateMobileBottomNav(accessState) {
     return;
   }
 
-  const links = Array.from(nav.querySelectorAll("a"));
-  links.forEach((link) => {
-    const label = link.querySelector("span")?.textContent?.trim().toLowerCase();
-    const iconEl = link.querySelector("i[data-lucide], svg[data-lucide], [data-lucide]");
-
-    if (label === "diet chart" && iconEl) {
-      iconEl.setAttribute("data-lucide", "salad");
-    }
-
-    if (label === "training" && iconEl) {
-      iconEl.setAttribute("data-lucide", "dumbbell");
-    }
-
-    if (label === "profile") {
-      link.classList.add("tyfit-mobile-profile-link");
-
-      const existingIcon = link.querySelector("i[data-lucide], svg, [data-lucide]");
-      if (existingIcon) {
-        existingIcon.remove();
-      }
-
-      let avatarImg = link.querySelector("img.tyfit-mobile-profile-avatar");
-      if (!avatarImg) {
-        avatarImg = document.createElement("img");
-        avatarImg.className = "tyfit-mobile-profile-avatar";
-        avatarImg.alt = "Profile";
-        avatarImg.loading = "lazy";
-        link.prepend(avatarImg);
-      }
-
-      avatarImg.src = resolveMobileProfileAvatar(accessState);
-    }
-  });
+  if (typeof window.tyfitApplyPhosphorBottomNavIcons === "function") {
+    window.tyfitApplyPhosphorBottomNavIcons(nav);
+  }
 
   if (typeof window.tyfitRefreshIcons === "function") {
     window.tyfitRefreshIcons();

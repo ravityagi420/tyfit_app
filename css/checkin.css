@@ -216,7 +216,7 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     margin: 0;
     color: #5E5693;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .checkin-user-select-wrap {
@@ -412,13 +412,14 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     gap: 1px;
     text-align: center;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 400;
     position: relative;
 }
 
 .checkin-date-pill strong {
     font-size: 15px;
     color: #262445;
+    font-weight: 450;
 }
 
 .checkin-date-pill.is-active,
@@ -426,7 +427,6 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     background: linear-gradient(135deg, #6C63FF 0%, #8B7CFF 100%);
     color: #F4F3FF;
     border-color: transparent;
-    box-shadow: 0 14px 28px rgba(108, 99, 255, 0.28);
 }
 
 .checkin-date-pill.is-active strong {
@@ -1054,14 +1054,14 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
     background: #FFFFFF;
     box-shadow: 0 14px 35px rgba(108, 99, 255, 0.08);
     padding: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
 }
 
 .summary-card-title {
     grid-column: 1 / -1;
     margin: 0px;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 15px;
+    font-weight: 400;
     color: #242648;
     text-align: left;
 }
@@ -1084,9 +1084,9 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 
 .summary-ring-value {
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 400;
     fill: #2F2B56;
-    transform: translateY(3px);
+    transform: translateY(5px);
 }
 
 .summary-ring-label {
@@ -1151,12 +1151,13 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 }
 
 .count-number {
-    font-size: 14px;
+    font-size: 13px;
     color: #17172F;
+    font-weight: 350;
 }
 
 .count-number strong {
-    font-weight: 700;
+    font-weight: 450;
     color: #262445;
 }
 
@@ -3107,7 +3108,7 @@ body[data-page="daily-checkin"] {
     margin: 0;
     color: #5E5693;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .checkin-group-panel,
@@ -3440,7 +3441,7 @@ body[data-page="daily-checkin"] .checkin-group {
 body[data-page="daily-checkin"] .checkin-group-title {
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 17px;
-    font-weight: 800;
+    font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
     color: #17172F;
@@ -3497,7 +3498,7 @@ body[data-page="daily-checkin"] .checkin-goal-title-line {
 body[data-page="daily-checkin"] .checkin-goal-title-line h4 {
     margin: 0;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 400;
     color: #17172F;
     line-height: 1.15;
     white-space: nowrap;
@@ -3866,11 +3867,11 @@ body[data-page="daily-checkin"] .summary-ring {
 
 /* ── 3. Calendar Section ─────────────────────────────────────── */
 body[data-page="daily-checkin"] .checkin-calendar-section {
-    background: #FFFFFF;
+    /* background: #FFFFFF;
     border: 1px solid rgba(108, 99, 255, 0.13);
     border-radius: 20px;
     padding: 12px 14px;
-    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.05);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.05); */
 }
 
 body[data-page="daily-checkin"] .checkin-week-nav-row {
@@ -3891,7 +3892,7 @@ body[data-page="daily-checkin"] .checkin-week-nav-row {
     gap: 6px;
     padding: 0 12px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 400;
     transition: all 0.2s ease;
     cursor: pointer;
 }
@@ -3912,7 +3913,7 @@ body[data-page="daily-checkin"] .checkin-week-nav-row {
 body[data-page="daily-checkin"] .checkin-selected-date {
     margin: 0 5px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 400;
     color: #8A86B8;
     text-align: right;
     flex-shrink: 0;
@@ -3940,7 +3941,7 @@ body[data-page="daily-checkin"] .checkin-date-dot {
     width: 6px;
     height: 6px;
     border-radius: 999px;
-    background: #6C63FF;
+    background: #22A861;
     margin: 3px auto 0;
     display: block;
 }
@@ -3974,7 +3975,7 @@ body[data-page="daily-checkin"] .checkin-date-pill strong {
 }
 
 body[data-page="daily-checkin"] .checkin-date-pill.is-active {
-    box-shadow: 0 8px 18px rgba(108, 99, 255, 0.22);
+    /* box-shadow: 0 8px 18px rgba(108, 99, 255, 0.22); */
 }
 
 body[data-page="daily-checkin"] .checkin-date-pill:not(.is-active):hover {
@@ -3992,7 +3993,7 @@ body[data-page="daily-checkin"] .checkin-date-pill:disabled {
 /* ── 4. Goal Groups — hover + transition polish ──────────────── */
 body[data-page="daily-checkin"] .checkin-group-title {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 400;
     letter-spacing: 0;
     text-transform: none;
     color: #17172F;
@@ -4149,7 +4150,7 @@ body[data-page="daily-checkin"] .checkin-week-calendar-head h4 {
     margin: 0;
     text-align: center;
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 500;
     color: #1D2144;
 }
 
@@ -4185,7 +4186,7 @@ body[data-page="daily-checkin"] .checkin-week-calendar-weekdays {
 body[data-page="daily-checkin"] .checkin-week-calendar-weekdays span {
     text-align: center;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 500;
     color: #8A8FA3;
     text-transform: uppercase;
 }
@@ -4203,7 +4204,7 @@ body[data-page="daily-checkin"] .checkin-week-calendar-day {
     background: #FFFFFF;
     color: #262445;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 400;
     display: grid;
     justify-items: center;
     align-content: center;
@@ -4240,7 +4241,7 @@ body[data-page="daily-checkin"] .checkin-week-calendar-day-dot {
     width: 6px;
     height: 6px;
     border-radius: 999px;
-    background: #6C63FF;
+    background: #22A861;
     display: block;
 }
 

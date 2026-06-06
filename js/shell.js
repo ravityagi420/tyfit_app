@@ -8,6 +8,8 @@
     let iconRefreshRaf = null;
     let iconRefreshIdle = null;
     let loaderVisibleAt = 0;
+    const PHOSPHOR_CSS_ID = 'tyfitPhosphorIcons';
+    const PHOSPHOR_CSS_HREF = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css';
 
     function mountPageLoader() {
         if (byId('tyfitPageLoader')) return;
@@ -97,6 +99,56 @@
 
     // Expose a shared, throttled icon refresh for other page scripts.
     window.tyfitRefreshIcons = refreshIcons;
+
+    function ensurePhosphorIcons() {
+        if (document.getElementById(PHOSPHOR_CSS_ID)) return;
+        const link = document.createElement('link');
+        link.id = PHOSPHOR_CSS_ID;
+        link.rel = 'stylesheet';
+        link.href = PHOSPHOR_CSS_HREF;
+        document.head.appendChild(link);
+    }
+
+    function phosphorIcon(name) {
+        return `<i class="ph ${name}" aria-hidden="true"></i>`;
+    }
+
+    function getBottomNavIconClass(key) {
+        const icons = {
+            home: 'ph-house',
+            diet: 'ph-fork-knife',
+            checkin: 'ph-check-square',
+            training: 'ph-barbell',
+            profile: 'ph-user-circle'
+        };
+        return icons[key] || 'ph-circle';
+    }
+
+    function getBottomNavKeyFromLink(link) {
+        const label = link?.querySelector('span')?.textContent?.trim().toLowerCase() || '';
+        const href = link?.getAttribute('href') || '';
+        if (label === 'home' || href.includes('index.html')) return 'home';
+        if (label === 'diet chart' || href.includes('diet_chart.html')) return 'diet';
+        if (label === 'checkin' || label === 'daily checkin' || href.includes('daily_checkin.html')) return 'checkin';
+        if (label === 'training' || href.includes('training_plan.html')) return 'training';
+        if (label === 'profile' || href.includes('profile.html')) return 'profile';
+        return '';
+    }
+
+    function applyPhosphorBottomNavIcons(root) {
+        ensurePhosphorIcons();
+        const nav = root?.matches?.('.tyfit-mobile-bottom-nav') ? root : (root || document).querySelector?.('.tyfit-mobile-bottom-nav');
+        if (!nav) return;
+        nav.querySelectorAll('a, button').forEach((item) => {
+            const key = item.dataset.navKey || getBottomNavKeyFromLink(item);
+            if (!key) return;
+            item.dataset.navKey = key;
+            item.querySelectorAll('i[data-lucide], svg[data-lucide], svg.lucide, img.tyfit-mobile-profile-avatar, i.ph').forEach((icon) => icon.remove());
+            item.insertAdjacentHTML('afterbegin', phosphorIcon(getBottomNavIconClass(key)));
+        });
+    }
+
+    window.tyfitApplyPhosphorBottomNavIcons = applyPhosphorBottomNavIcons;
 
     function optimizeImages() {
         const images = document.querySelectorAll('img');
@@ -225,21 +277,22 @@
         const prefix = getRootPrefix();
         const active = getActiveBottomNavKey();
         const navItems = [
-            { key: 'home', href: `${prefix}index.html`, icon: 'home', label: 'Home' },
-            { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'salad', label: 'Diet Chart' },
-            { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'clipboard-check', label: 'CheckIn' },
-            { key: 'training', href: `${prefix}training_plan.html`, icon: 'dumbbell', label: 'Training' },
-            { key: 'profile', href: `${prefix}profile.html`, icon: 'user', label: 'Profile' },
+            { key: 'home', href: `${prefix}index.html`, icon: 'ph-house', label: 'Home' },
+            { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'ph-fork-knife', label: 'Diet Chart' },
+            { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'ph-check-square', label: 'CheckIn' },
+            { key: 'training', href: `${prefix}training_plan.html`, icon: 'ph-barbell', label: 'Training' },
+            { key: 'profile', href: `${prefix}profile.html`, icon: 'ph-user-circle', label: 'Profile' },
         ];
 
+        ensurePhosphorIcons();
         placeholder.outerHTML = [
             '<nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">',
             navItems.slice(0, 2).map((item) => (
-                `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
+                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon)}<span>${item.label}</span></a>`
             )).join(''),
-            `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" aria-label="Daily CheckIn"><i data-lucide="${navItems[2].icon}"></i><span>${navItems[2].label}</span></a>`,
+            `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" data-nav-key="${navItems[2].key}" aria-label="Daily CheckIn">${phosphorIcon(navItems[2].icon)}<span>${navItems[2].label}</span></a>`,
             navItems.slice(3).map((item) => (
-                `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
+                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon)}<span>${item.label}</span></a>`
             )).join(''),
             '</nav>',
         ].join('');
@@ -254,9 +307,11 @@
         const checkin = document.createElement('a');
         checkin.href = `${prefix}daily_checkin.html`;
         checkin.className = `tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}`;
+        checkin.dataset.navKey = 'checkin';
         checkin.setAttribute('aria-label', 'Daily CheckIn');
-        checkin.innerHTML = '<i data-lucide="clipboard-check"></i><span>CheckIn</span>';
+        checkin.innerHTML = `${phosphorIcon('ph-check-square')}<span>CheckIn</span>`;
         quick.replaceWith(checkin);
+        applyPhosphorBottomNavIcons(nav);
     }
 
     function shouldMountFloatingAction() {
@@ -452,6 +507,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         mountBottomNav();
         normalizeExistingBottomNav();
+        applyPhosphorBottomNavIcons(document);
         mountFloatingAction();
         mountWeightModal();
         optimizeImages();

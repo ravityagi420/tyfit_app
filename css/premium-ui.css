@@ -2148,6 +2148,18 @@ body[data-page="home"] .tyfit-motivation-right {
     stroke-width: 2.8;
 }
 
+.tyfit-mobile-bottom-nav a i.ph,
+.tyfit-mobile-bottom-nav button i.ph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 25px;
+    width: 25px;
+    height: 25px;
+    stroke-width: 0;
+}
+
 .tyfit-mobile-bottom-nav a svg {
     fill: none;
     stroke: currentColor;
@@ -2229,6 +2241,13 @@ body[data-page="home"] .tyfit-motivation-right {
     z-index: 1;
     color: var(--tyfit-primary) !important;
     stroke-width: 2.25 !important;
+}
+
+.tyfit-mobile-bottom-nav .tyfit-checkin-nav-btn i.ph {
+    position: relative;
+    z-index: 1;
+    color: var(--tyfit-primary) !important;
+    font-size: 24px;
 }
 
 .tyfit-mobile-bottom-nav .tyfit-checkin-nav-btn span {
