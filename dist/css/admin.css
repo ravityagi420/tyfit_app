@@ -5557,3 +5557,487 @@ body.food-page-ready .tyfit-sidebar-toggle-floating {
         top: 0;
     }
 }
+
+.tybot-entry-card,
+.tybot-sheet,
+.tybot-plan-card,
+.tybot-replacement-card {
+    font-family: "Manrope", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.tybot-entry-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    margin: -4px 0 18px;
+    padding: 14px 16px;
+    border: 1px solid rgba(231, 228, 255, 0.95);
+    border-radius: 22px;
+    background: linear-gradient(135deg, #ffffff 0%, #faf9ff 100%);
+    box-shadow: 0 16px 38px rgba(108, 99, 255, 0.08);
+}
+
+.tybot-entry-avatar,
+.tybot-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #ffffff, #f0edff);
+    border: 1px solid #e7e4ff;
+    box-shadow: 0 12px 24px rgba(108, 99, 255, 0.12);
+}
+
+.tybot-entry-avatar::before,
+.tybot-avatar::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    width: 18px;
+    height: 3px;
+    border-radius: 999px;
+    background: #6c63ff;
+    opacity: 0.85;
+}
+
+.tybot-entry-face,
+.tybot-face {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 24px;
+    margin-top: 8px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(108, 99, 255, 0.18);
+}
+
+.tybot-entry-face span,
+.tybot-face span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #6c63ff;
+}
+
+.tybot-entry-copy h3 {
+    margin: 0 0 3px;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 750;
+    letter-spacing: 0;
+}
+
+.tybot-entry-copy p {
+    margin: 0;
+    color: #667085;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.tybot-entry-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #6c63ff, #554bf5);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 750;
+    box-shadow: 0 12px 22px rgba(108, 99, 255, 0.22);
+    cursor: pointer;
+}
+
+.tybot-entry-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.tybot-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1055;
+    background: rgba(17, 24, 39, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+}
+
+.tybot-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tybot-sheet {
+    position: fixed;
+    z-index: 1056;
+    right: 24px;
+    bottom: 24px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    width: min(440px, calc(100vw - 48px));
+    max-height: min(720px, calc(100vh - 48px));
+    min-height: 620px;
+    border: 1px solid #e7e4ff;
+    border-radius: 28px;
+    background: #ffffff;
+    box-shadow: 0 28px 80px rgba(17, 24, 39, 0.24);
+    overflow: hidden;
+    transform: translateY(18px) scale(0.98);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 190ms ease, transform 190ms ease;
+}
+
+.tybot-sheet.is-open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tybot-header,
+.tybot-composer {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(14px);
+}
+
+.tybot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(231, 228, 255, 0.9);
+}
+
+.tybot-header-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.tybot-avatar {
+    width: 44px;
+    height: 44px;
+}
+
+.tybot-header h3 {
+    margin: 0;
+    color: #111827;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.tybot-header p {
+    margin: 1px 0 0;
+    color: #667085;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.tybot-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 14px;
+    background: #f7f5ff;
+    color: #4b5563;
+    cursor: pointer;
+}
+
+.tybot-close svg {
+    width: 18px;
+    height: 18px;
+}
+
+.tybot-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    background:
+        radial-gradient(circle at 12% 8%, rgba(108, 99, 255, 0.08), transparent 28%),
+        linear-gradient(180deg, #ffffff 0%, #faf9ff 100%);
+}
+
+.tybot-message {
+    max-width: 88%;
+    border-radius: 18px;
+    padding: 11px 13px;
+    font-size: 13.5px;
+    line-height: 1.48;
+    color: #1f2937;
+    white-space: pre-wrap;
+}
+
+.tybot-message--user {
+    align-self: flex-end;
+    background: linear-gradient(145deg, #6c63ff, #554bf5);
+    color: #ffffff;
+    box-shadow: 0 12px 28px rgba(108, 99, 255, 0.16);
+}
+
+.tybot-message--bot {
+    align-self: flex-start;
+    background: #ffffff;
+    border: 1px solid #e7e4ff;
+    box-shadow: 0 12px 28px rgba(108, 99, 255, 0.07);
+}
+
+.tybot-quick-actions {
+    display: grid;
+    gap: 8px;
+    width: 100%;
+    margin-top: 3px;
+}
+
+.tybot-quick-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 13px;
+    border: 1px solid #e7e4ff;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #111827;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(108, 99, 255, 0.05);
+}
+
+.tybot-quick-action svg {
+    width: 17px;
+    height: 17px;
+    color: #6c63ff;
+}
+
+.tybot-typing {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.tybot-typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #8b7cff;
+    animation: tybotPulse 900ms ease-in-out infinite;
+}
+
+.tybot-typing span:nth-child(2) {
+    animation-delay: 120ms;
+}
+
+.tybot-typing span:nth-child(3) {
+    animation-delay: 240ms;
+}
+
+.tybot-composer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px;
+    border-top: 1px solid rgba(231, 228, 255, 0.9);
+}
+
+.tybot-composer input {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid #e7e4ff;
+    border-radius: 16px;
+    padding: 0 14px;
+    background: #fbfaff;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+}
+
+.tybot-composer input:focus {
+    border-color: rgba(108, 99, 255, 0.58);
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1);
+}
+
+.tybot-composer button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #6c63ff, #554bf5);
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(108, 99, 255, 0.18);
+}
+
+.tybot-composer button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.tybot-composer button:disabled,
+.tybot-entry-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.tybot-card-list {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.tybot-plan-card,
+.tybot-replacement-card {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #e7e4ff;
+    border-radius: 20px;
+    padding: 14px;
+    box-shadow: 0 14px 30px rgba(108, 99, 255, 0.08);
+}
+
+.tybot-plan-card h4,
+.tybot-replacement-card h4 {
+    margin: 0 0 8px;
+    color: #111827;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.tybot-plan-macros,
+.tybot-replacement-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.tybot-plan-macros span,
+.tybot-replacement-macros span {
+    border-radius: 999px;
+    background: #f3eeff;
+    color: #5046e5;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.tybot-meal-preview {
+    display: grid;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.tybot-meal-preview strong {
+    color: #111827;
+    font-size: 12px;
+}
+
+.tybot-meal-preview p {
+    margin: 0;
+    color: #667085;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.tybot-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.tybot-action-btn {
+    min-height: 38px;
+    border: 0;
+    border-radius: 13px;
+    padding: 0 12px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.tybot-action-btn--primary {
+    background: linear-gradient(145deg, #6c63ff, #554bf5);
+    color: #ffffff;
+}
+
+.tybot-action-btn--ghost {
+    border: 1px solid #e7e4ff;
+    background: #ffffff;
+    color: #5046e5;
+}
+
+@keyframes tybotPulse {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 0.45;
+    }
+    50% {
+        transform: translateY(-3px);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .tybot-entry-card {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px;
+        padding: 13px;
+        border-radius: 20px;
+    }
+
+    .tybot-entry-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-height: 42px;
+    }
+
+    .tybot-backdrop {
+        z-index: 1090;
+    }
+
+    .tybot-sheet {
+        z-index: 1091;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-height: 85vh;
+        min-height: 85vh;
+        border-radius: 28px 28px 0 0;
+        border-bottom: 0;
+        transform: translateY(100%);
+    }
+
+    .tybot-sheet.is-open {
+        transform: translateY(0);
+    }
+
+    .tybot-messages {
+        padding: 14px;
+    }
+}

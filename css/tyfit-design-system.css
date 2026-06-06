@@ -491,6 +491,10 @@ body[data-page="profile-edit"] .tyfit-profile-form {
     gap: 14px;
 }
 
+body[data-page="profile-edit"] {
+    overflow-x: hidden;
+}
+
 body[data-page="profile-edit"] .tyfit-profile-main {
     padding-left: 12px;
     padding-right: 12px;
@@ -542,7 +546,7 @@ body[data-page="profile-edit"] .tyfit-profile-card-head h2.tyfit-ui-h3 {
     color: #111827;
     font-size: 15px;
     line-height: 1.2;
-    font-weight: 400;
+    font-weight: 440;
     letter-spacing: 0;
 }
 
@@ -841,45 +845,14 @@ body[data-page="profile-edit"] .tyfit-custom-select-menu {
     background: #FFFFFF;
     box-shadow: 0 18px 40px rgba(17, 24, 39, 0.16);
     overflow: auto;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    touch-action: pan-y;
 }
 
 body[data-page="profile-edit"] .tyfit-custom-select-menu.is-open {
     display: grid;
     gap: 4px;
-}
-
-body[data-page="profile-edit"] .tyfit-custom-select-search-wrap {
-    position: sticky;
-    top: -8px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 44px;
-    margin: -2px -2px 6px;
-    padding: 0 12px;
-    border-radius: 14px;
-    background: #F8F7FF;
-    color: #8B7CFF;
-}
-
-body[data-page="profile-edit"] .tyfit-custom-select-search-wrap svg {
-    width: 17px;
-    height: 17px;
-    flex: 0 0 auto;
-}
-
-body[data-page="profile-edit"] .tyfit-custom-select-search {
-    width: 100%;
-    min-width: 0;
-    height: 42px;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: #111827;
-    font: inherit;
-    font-size: 16px;
-    font-weight: 450;
 }
 
 body[data-page="profile-edit"] .tyfit-custom-option {
@@ -900,6 +873,7 @@ body[data-page="profile-edit"] .tyfit-custom-option {
     text-align: left;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
 }
 
 body[data-page="profile-edit"] .tyfit-custom-option:hover,
@@ -963,6 +937,9 @@ body[data-page="profile-edit"] .tyfit-cc-dropdown {
     opacity: 0;
     z-index: 1700;
     backdrop-filter: none;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    touch-action: pan-y;
 }
 
 body[data-page="profile-edit"] .tyfit-cc-dropdown.is-open {
@@ -970,15 +947,19 @@ body[data-page="profile-edit"] .tyfit-cc-dropdown.is-open {
     opacity: 1 !important;
 }
 
-body[data-page="profile-edit"] .tyfit-cc-search-wrap,
 body[data-page="profile-edit"] .tyfit-cc-list,
 body[data-page="profile-edit"] .tyfit-cc-item {
     background: #FFFFFF;
 }
 
-body[data-page="profile-edit"] .tyfit-cc-search.tyfit-ui-control,
-body[data-page="profile-edit"] .tyfit-cc-search {
-    background: #FFFFFF !important;
+body[data-page="profile-edit"] .tyfit-cc-list {
+    padding-top: 14px;
+    overflow-x: hidden;
+}
+
+body[data-page="profile-edit"] .tyfit-cc-item {
+    min-height: 44px;
+    overflow: hidden;
 }
 
 body[data-page="profile-edit"] .tyfit-phone-wrap:focus-within {
@@ -1055,26 +1036,6 @@ body[data-page="profile-edit"] .tyfit-meas-unit.tyfit-ui-unit {
     box-shadow: none;
 }
 
-body[data-page="profile-edit"] .tyfit-cc-search.tyfit-ui-control {
-    height: 42px;
-    border-radius: 14px;
-    padding-left: 34px;
-}
-
-body[data-page="profile-edit"] .tyfit-cc-search-wrap.has-value .tyfit-cc-search.tyfit-ui-control {
-    padding-left: 12px;
-}
-
-body[data-page="profile-edit"] .tyfit-cc-search-wrap.has-value .tyfit-cc-search-icon {
-    opacity: 0;
-    transform: translateY(-40%) scale(0.9);
-}
-
-body[data-page="profile-edit"] .tyfit-cc-search-icon {
-    pointer-events: none;
-    transition: opacity 140ms ease, transform 140ms ease;
-}
-
 @media (min-width: 992px) {
     body[data-page="profile-edit"] .tyfit-ui-select-control .tyfit-ui-select {
         position: static;
@@ -1126,15 +1087,59 @@ body[data-page="profile-edit"] .back-to-top.is-visible {
     transform: translateY(0) scale(1);
 }
 
+body[data-page="profile-edit"].tyfit-calendar-modal-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1390;
+    background: rgba(17, 24, 39, 0.45);
+    backdrop-filter: blur(6px);
+}
+
+body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.open {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(342px, calc(100vw - 40px));
+    max-width: calc(100vw - 40px);
+    z-index: 1400 !important;
+    transform: translate(-50%, -50%) !important;
+    border: 1px solid var(--tyfit-ui-border);
+    border-radius: 22px;
+    box-shadow: 0 28px 80px rgba(17, 24, 39, 0.24);
+    overflow: hidden;
+}
+
+body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowTop::before,
+body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowTop::after,
+body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowBottom::before,
+body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowBottom::after {
+    display: none;
+}
+
+body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-months,
+body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-current-month {
+    margin-bottom: 5px;
+}
+
 @media (max-width: 991.98px) {
     body[data-page="profile-edit"].tyfit-custom-select-open::before,
-    body[data-page="profile-edit"].tyfit-cc-modal-open::before {
+    body[data-page="profile-edit"].tyfit-cc-modal-open::before,
+    body[data-page="profile-edit"].tyfit-calendar-modal-open::before {
         content: "";
         position: fixed;
         inset: 0;
         z-index: 1390;
         background: rgba(17, 24, 39, 0.45);
         backdrop-filter: blur(6px);
+    }
+
+    body[data-page="profile-edit"].tyfit-custom-select-open,
+    body[data-page="profile-edit"].tyfit-cc-modal-open,
+    body[data-page="profile-edit"].tyfit-calendar-modal-open {
+        overflow-x: hidden;
     }
 
     body[data-page="profile-edit"] .tyfit-main {
@@ -1174,6 +1179,7 @@ body[data-page="profile-edit"] .back-to-top.is-visible {
         margin: -8px auto 10px;
         border-radius: 999px;
         background: #C8CDD7;
+        cursor: grab;
     }
 
     body[data-page="profile-edit"] .tyfit-cc-dropdown {
@@ -1191,8 +1197,47 @@ body[data-page="profile-edit"] .back-to-top.is-visible {
         transform: translateY(18px);
     }
 
+    body[data-page="profile-edit"] .tyfit-cc-dropdown::before {
+        content: "";
+        width: 48px;
+        height: 5px;
+        margin: 12px auto 4px;
+        border-radius: 999px;
+        background: #C8CDD7;
+        cursor: grab;
+        flex: 0 0 auto;
+    }
+
     body[data-page="profile-edit"] .tyfit-cc-dropdown.is-open {
         transform: translateY(0);
+    }
+
+    body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.open {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: min(342px, calc(100vw - 40px));
+        max-width: calc(100vw - 40px);
+        z-index: 1400 !important;
+        transform: translate(-50%, -50%) !important;
+        border: 1px solid var(--tyfit-ui-border);
+        border-radius: 22px;
+        box-shadow: 0 28px 80px rgba(17, 24, 39, 0.24);
+        overflow: hidden;
+    }
+
+    body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowTop::before,
+    body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowTop::after,
+    body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowBottom::before,
+    body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-calendar.arrowBottom::after {
+        display: none;
+    }
+
+    body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-months,
+    body[data-page="profile-edit"].tyfit-calendar-modal-open .flatpickr-current-month {
+        margin-bottom: 5px;
     }
 }
 

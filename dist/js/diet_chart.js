@@ -5305,3 +5305,201 @@ window.collectDietChartFormData = collectDietChartFormData;
 window.saveDietChart = saveDietChart;
 window.deleteDietChart = deleteDietChart;
 window.resetDietChartPage = resetDietChartPage;
+
+function normalizeTybotPlanItem(item = {}, itemIndex = 0) {
+    const quantity = Math.max(0.01, toNumber(item.quantity ?? item.servingQuantity, 100));
+    const quantityUnit = String(item.quantity_unit || item.quantityUnit || item.unit || "g").trim() || "g";
+    const referenceQuantity = Math.max(0.01, toNumber(item.reference_quantity ?? item.referenceQuantity ?? item.catalogQuantity, quantity));
+    const referenceUnit = String(item.reference_unit || item.referenceUnit || quantityUnit || "g").trim() || "g";
+
+    return {
+        food_name: String(item.food_name || item.foodName || item.name || `Food ${itemIndex + 1}`).trim() || `Food ${itemIndex + 1}`,
+        quantity,
+        quantity_unit: quantityUnit,
+        reference_quantity: referenceQuantity,
+        reference_unit: referenceUnit,
+        reference_carbs: Math.max(0, toNumber(item.reference_carbs ?? item.referenceCarbs ?? item.carbs, 0)),
+        reference_protein: Math.max(0, toNumber(item.reference_protein ?? item.referenceProtein ?? item.protein, 0)),
+        reference_fat: Math.max(0, toNumber(item.reference_fat ?? item.referenceFat ?? item.fats ?? item.fat, 0)),
+        reference_fibre: Math.max(0, toNumber(item.reference_fibre ?? item.referenceFibre ?? item.fibre, 0)),
+        sort_order: itemIndex + 1
+    };
+}
+
+function normalizeTybotPlan(plan = {}) {
+    const sourceMeals = Array.isArray(plan.meals) ? plan.meals : [];
+    return {
+        title: String(plan.title || plan.chartTitle || "TyBot Plan").trim().slice(0, 60) || "TyBot Plan",
+        notes: String(plan.notes || plan.explanation || "Created with TyBot.").trim(),
+        meals: sourceMeals.map((meal, mealIndex) => ({
+            meal_name: String(meal.meal_name || meal.mealName || meal.name || `Meal ${mealIndex + 1}`).trim() || `Meal ${mealIndex + 1}`,
+            sort_order: mealIndex + 1,
+            items: (Array.isArray(meal.items) ? meal.items : Array.isArray(meal.foods) ? meal.foods : [])
+                .map((item, itemIndex) => normalizeTybotPlanItem(item, itemIndex))
+        })).filter((meal) => meal.items.length > 0)
+    };
+}
+
+async function saveTybotPreviewPlan(previewPlan) {
+    const selectedUserId = DIET_STATE.selectedUserId || DIET_STATE.currentUserId;
+    if (!selectedUserId) {
+        throw new Error("Select a user before saving a TyBot plan.");
+    }
+
+    if (Array.isArray(DIET_STATE.dietCharts) && DIET_STATE.dietCharts.length >= 3) {
+        throw new Error("You can create up to 3 diet charts only.");
+    }
+
+    const normalizedPlan = normalizeTybotPlan(previewPlan);
+    if (!normalizedPlan.meals.length) {
+        throw new Error("TyBot did not return any meals to save.");
+    }
+
+    const createdBy = await resolveActorUserId();
+    if (!createdBy) {
+        throw new Error("Please login again and retry.");
+    }
+
+    showLoadingSpinner();
+    try {
+        const { data: chart, error: chartError } = await window.supabaseClient
+            .from("diet_charts")
+            .insert({
+                user_id: selectedUserId,
+                title: normalizeDietChartName(normalizedPlan.title).slice(0, 12) || "TyBot Plan",
+                notes: normalizedPlan.notes || null,
+                created_by: createdBy,
+                updated_at: new Date().toISOString()
+            })
+            .select("id")
+            .single();
+
+        if (chartError || !chart?.id) {
+            throw new Error(chartError?.message || "Failed to save TyBot plan.");
+        }
+
+        for (let mealIndex = 0; mealIndex < normalizedPlan.meals.length; mealIndex += 1) {
+            const meal = normalizedPlan.meals[mealIndex];
+            const { data: insertedMeal, error: mealError } = await window.supabaseClient
+                .from("diet_chart_meals")
+                .insert({
+                    diet_chart_id: chart.id,
+                    meal_name: meal.meal_name,
+                    sort_order: mealIndex + 1
+                })
+                .select("id")
+                .single();
+
+            if (mealError || !insertedMeal?.id) {
+                throw new Error(mealError?.message || "Failed to save TyBot meal.");
+            }
+
+            const itemPayload = meal.items.map((item, itemIndex) => ({
+                ...item,
+                meal_id: insertedMeal.id,
+                sort_order: itemIndex + 1
+            }));
+
+            if (itemPayload.length) {
+                const { error: itemError } = await window.supabaseClient
+                    .from("diet_chart_items")
+                    .insert(itemPayload);
+
+                if (itemError) {
+                    throw new Error(itemError.message || "Failed to save TyBot meal items.");
+                }
+            }
+        }
+
+        await loadDietChartsForUser(selectedUserId);
+        await loadAndRenderDietChart(chart.id);
+        showPageStatus("TyBot plan saved successfully.", "success");
+        return chart.id;
+    } finally {
+        hideLoadingSpinner();
+    }
+}
+
+async function applyTybotReplacement(replacementOption = {}) {
+    const dietItemId = String(replacementOption.dietItemId || replacementOption.diet_item_id || replacementOption.itemId || "").trim();
+    if (!dietItemId) {
+        throw new Error("TyBot needs a specific food item before applying this replacement.");
+    }
+
+    const normalized = normalizeTybotPlanItem(replacementOption, 0);
+    const { data, error } = await window.supabaseClient
+        .from("diet_chart_items")
+        .update({
+            food_name: normalized.food_name,
+            quantity: normalized.quantity,
+            quantity_unit: normalized.quantity_unit,
+            reference_quantity: normalized.reference_quantity,
+            reference_unit: normalized.reference_unit,
+            reference_carbs: normalized.reference_carbs,
+            reference_protein: normalized.reference_protein,
+            reference_fat: normalized.reference_fat,
+            reference_fibre: normalized.reference_fibre,
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", dietItemId)
+        .select("id")
+        .maybeSingle();
+
+    if (error) {
+        throw new Error(error.message || "Failed to apply replacement.");
+    }
+
+    if (!data?.id) {
+        throw new Error("Replacement was blocked by permissions or the item no longer exists.");
+    }
+
+    if (DIET_STATE.selectedChartId) {
+        await loadAndRenderDietChart(DIET_STATE.selectedChartId);
+    }
+    showPageStatus("Replacement applied successfully.", "success");
+}
+
+function getTybotDietContext() {
+    const chartData = DIET_STATE.currentChartData || null;
+    const meals = (chartData?.meals || []).map((meal) => ({
+        id: meal.id || null,
+        name: meal.meal_name || "",
+        items: (meal.items || []).map((item) => {
+            const computed = getComputedFromItem(item);
+            return {
+                id: item.id || null,
+                meal_id: item.meal_id || meal.id || null,
+                food_name: item.food_name || "",
+                quantity: toNumber(item.quantity, 0),
+                quantity_unit: item.quantity_unit || item.reference_unit || "",
+                reference_quantity: toNumber(item.reference_quantity, 0),
+                reference_unit: item.reference_unit || "",
+                carbs: computed.carbs,
+                protein: computed.protein,
+                fats: computed.fats,
+                calories: computed.calories
+            };
+        })
+    }));
+
+    return {
+        currentUserId: DIET_STATE.currentUserId || "",
+        selectedUserId: DIET_STATE.selectedUserId || DIET_STATE.currentUserId || "",
+        selectedChartId: DIET_STATE.selectedChartId || "",
+        isAdmin: Boolean(DIET_STATE.isAdmin),
+        selectedUserMeta: DIET_STATE.selectedUserMeta || {},
+        chart: chartData?.chart || null,
+        meals,
+        foodCatalog: (DIET_STATE.foodCatalog || []).slice(0, 150)
+    };
+}
+
+window.tyfitDietChartAI = {
+    getContext: getTybotDietContext,
+    savePreviewPlan: saveTybotPreviewPlan,
+    applyReplacement: applyTybotReplacement,
+    showToast(message, type = "success") {
+        const mappedType = type === "error" ? "danger" : type;
+        showPageStatus(message, mappedType);
+    }
+};

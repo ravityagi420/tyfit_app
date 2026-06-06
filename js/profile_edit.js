@@ -266,6 +266,10 @@ function initDobCalendar() {
         onReady: (_selectedDates, _dateStr, instance) => {
             syncCalendarHeader(instance);
         },
+        onOpen: (_selectedDates, _dateStr, instance) => {
+            document.body.classList.add("tyfit-calendar-modal-open");
+            syncCalendarHeader(instance);
+        },
         onYearChange: (_selectedDates, _dateStr, instance) => {
             syncCalendarHeader(instance);
         },
@@ -273,6 +277,7 @@ function initDobCalendar() {
             syncCalendarHeader(instance);
         },
         onClose: () => {
+            document.body.classList.remove("tyfit-calendar-modal-open");
             if (!dobEl.value.trim()) return;
             const iso = parseDisplayDateToIso(dobEl.value);
             if (!iso) {
@@ -353,13 +358,11 @@ function bindAvatarPicker() {
 /* ── Country code dropdown ─────────────────────────────────── */
 let _ccDropdownOpen = false;
 
-function renderCCList(filter) {
+function renderCCList() {
     const list = pe("profileCCList");
     if (!list) return;
-    const q = (filter || "").toLowerCase();
     const currentDial = pe("profilePhoneCode")?.value || "";
-    const filtered = q ? COUNTRY_DATA.filter(c => c.name.toLowerCase().includes(q) || c.dial.includes(q)) : COUNTRY_DATA;
-    list.innerHTML = filtered.map(c => `
+    list.innerHTML = COUNTRY_DATA.map(c => `
         <li class="tyfit-cc-item${c.dial === currentDial ? " selected" : ""}" data-dial="${c.dial}" data-name="${c.name}" data-flag="${c.flag}" role="option">
             <span class="tyfit-cc-item-flag">${c.flag}</span>
             <span class="tyfit-cc-item-name">${c.name}</span>
@@ -385,12 +388,7 @@ function openCCDropdown() {
     document.body.classList.add("tyfit-cc-modal-open");
     btn?.setAttribute("aria-expanded", "true");
     _ccDropdownOpen = true;
-    const searchEl = pe("profileCCSearch");
-    if (searchEl) {
-        searchEl.value = "";
-        searchEl.closest(".tyfit-cc-search-wrap")?.classList.remove("has-value");
-        renderCCList("");
-    }
+    renderCCList();
 }
 
 function closeCCDropdown() {
@@ -405,22 +403,12 @@ function closeCCDropdown() {
 
 function bindCCDropdown() {
     const btn = pe("profileCountryCodeBtn");
-    const search = pe("profileCCSearch");
     const list = pe("profileCCList");
+    const dropdown = pe("profileCountryCodeDropdown");
 
     if (btn) {
         btn.addEventListener("click", () => _ccDropdownOpen ? closeCCDropdown() : openCCDropdown());
         btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); _ccDropdownOpen ? closeCCDropdown() : openCCDropdown(); } });
-    }
-
-    if (search) {
-        search.addEventListener("input", () => {
-            search.closest(".tyfit-cc-search-wrap")?.classList.toggle("has-value", Boolean(search.value.trim()));
-            renderCCList(search.value);
-        });
-        search.addEventListener("focus", () => {
-            search.closest(".tyfit-cc-search-wrap")?.classList.toggle("has-value", Boolean(search.value.trim()));
-        });
     }
 
     if (list) {
@@ -431,6 +419,8 @@ function bindCCDropdown() {
             closeCCDropdown();
         });
     }
+
+    if (dropdown) bindSheetDragClose(dropdown, closeCCDropdown);
 
     document.addEventListener("click", (e) => {
         if (!_ccDropdownOpen) return;
@@ -516,15 +506,10 @@ function closeTyfitCustomSelect() {
     if (!_activeCustomSelect) return;
     const selectEl = _activeCustomSelect.querySelector("select");
     const menu = selectEl ? document.getElementById(`tyfitCustomMenu-${selectEl.id}`) : null;
-    const search = menu?.querySelector(".tyfit-custom-select-search");
     _activeCustomSelect.classList.remove("is-open");
     _activeCustomSelect.classList.remove("is-select-open");
     _activeCustomSelect.querySelector(".tyfit-custom-select-trigger")?.setAttribute("aria-expanded", "false");
     menu?.classList.remove("is-open");
-    if (search) {
-        search.value = "";
-        menu.querySelectorAll(".tyfit-custom-option").forEach((option) => { option.hidden = false; });
-    }
     if (menu) {
         menu.style.left = "";
         menu.style.top = "";
@@ -544,12 +529,6 @@ function openTyfitCustomSelect(field) {
     field.classList.add("is-open", "is-select-open");
     trigger?.setAttribute("aria-expanded", "true");
     menu?.classList.add("is-open");
-    const search = menu?.querySelector(".tyfit-custom-select-search");
-    if (search) {
-        search.value = "";
-        menu.querySelectorAll(".tyfit-custom-option").forEach((option) => { option.hidden = false; });
-        setTimeout(() => search.focus({ preventScroll: true }), 80);
-    }
 
     if (menu && trigger && window.matchMedia("(min-width: 768px)").matches) {
         const rect = trigger.getBoundingClientRect();
@@ -581,20 +560,6 @@ function buildTyfitCustomSelect(selectEl) {
     menu.setAttribute("aria-label", selectEl.getAttribute("aria-label") || selectEl.id || "Select option");
     trigger.setAttribute("aria-controls", menu.id);
 
-    if (selectEl.id === "profileCountry") {
-        const searchWrap = document.createElement("div");
-        searchWrap.className = "tyfit-custom-select-search-wrap";
-        searchWrap.innerHTML = '<i data-lucide="search"></i><input class="tyfit-custom-select-search" type="search" placeholder="Search country" autocomplete="off">';
-        const searchInput = searchWrap.querySelector("input");
-        searchInput.addEventListener("input", () => {
-            const query = searchInput.value.trim().toLowerCase();
-            menu.querySelectorAll(".tyfit-custom-option").forEach((option) => {
-                option.hidden = Boolean(query) && !option.textContent.toLowerCase().includes(query);
-            });
-        });
-        menu.appendChild(searchWrap);
-    }
-
     Array.from(selectEl.options).forEach((nativeOption) => {
         const option = document.createElement("button");
         option.type = "button";
@@ -617,9 +582,50 @@ function buildTyfitCustomSelect(selectEl) {
 
     field.append(trigger);
     document.body.appendChild(menu);
+    bindSheetDragClose(menu, closeTyfitCustomSelect);
     if (window.lucide?.createIcons) window.lucide.createIcons();
     selectEl.addEventListener("change", () => refreshTyfitCustomSelect(selectEl));
     refreshTyfitCustomSelect(selectEl);
+}
+
+function bindSheetDragClose(sheet, closeFn) {
+    if (!sheet || sheet.dataset.dragCloseBound === "true") return;
+    sheet.dataset.dragCloseBound = "true";
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    sheet.addEventListener("touchstart", (event) => {
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        const rect = sheet.getBoundingClientRect();
+        const startedOnHandleArea = touch.clientY <= rect.top + 42;
+        tracking = startedOnHandleArea;
+        startX = touch.clientX;
+        startY = touch.clientY;
+    }, { passive: true });
+
+    sheet.addEventListener("touchmove", (event) => {
+        if (!tracking) return;
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        const dx = Math.abs(touch.clientX - startX);
+        const dy = touch.clientY - startY;
+        if (dx > Math.max(24, Math.abs(dy) * 1.2)) {
+            tracking = false;
+        }
+    }, { passive: true });
+
+    sheet.addEventListener("touchend", (event) => {
+        if (!tracking) return;
+        const touch = event.changedTouches?.[0];
+        tracking = false;
+        if (!touch) return;
+        const dy = touch.clientY - startY;
+        const dx = Math.abs(touch.clientX - startX);
+        if (dy > 46 && dx < 72) closeFn();
+    }, { passive: true });
 }
 
 function rebuildTyfitCustomSelect(selectEl) {

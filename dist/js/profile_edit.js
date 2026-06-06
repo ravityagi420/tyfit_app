@@ -266,6 +266,10 @@ function initDobCalendar() {
         onReady: (_selectedDates, _dateStr, instance) => {
             syncCalendarHeader(instance);
         },
+        onOpen: (_selectedDates, _dateStr, instance) => {
+            document.body.classList.add("tyfit-calendar-modal-open");
+            syncCalendarHeader(instance);
+        },
         onYearChange: (_selectedDates, _dateStr, instance) => {
             syncCalendarHeader(instance);
         },
@@ -273,6 +277,7 @@ function initDobCalendar() {
             syncCalendarHeader(instance);
         },
         onClose: () => {
+            document.body.classList.remove("tyfit-calendar-modal-open");
             if (!dobEl.value.trim()) return;
             const iso = parseDisplayDateToIso(dobEl.value);
             if (!iso) {
@@ -353,13 +358,11 @@ function bindAvatarPicker() {
 /* ── Country code dropdown ─────────────────────────────────── */
 let _ccDropdownOpen = false;
 
-function renderCCList(filter) {
+function renderCCList() {
     const list = pe("profileCCList");
     if (!list) return;
-    const q = (filter || "").toLowerCase();
     const currentDial = pe("profilePhoneCode")?.value || "";
-    const filtered = q ? COUNTRY_DATA.filter(c => c.name.toLowerCase().includes(q) || c.dial.includes(q)) : COUNTRY_DATA;
-    list.innerHTML = filtered.map(c => `
+    list.innerHTML = COUNTRY_DATA.map(c => `
         <li class="tyfit-cc-item${c.dial === currentDial ? " selected" : ""}" data-dial="${c.dial}" data-name="${c.name}" data-flag="${c.flag}" role="option">
             <span class="tyfit-cc-item-flag">${c.flag}</span>
             <span class="tyfit-cc-item-name">${c.name}</span>
@@ -382,10 +385,10 @@ function openCCDropdown() {
     const btn = pe("profileCountryCodeBtn");
     if (!dropdown) return;
     dropdown.classList.add("is-open");
+    document.body.classList.add("tyfit-cc-modal-open");
     btn?.setAttribute("aria-expanded", "true");
     _ccDropdownOpen = true;
-    const searchEl = pe("profileCCSearch");
-    if (searchEl) { searchEl.value = ""; renderCCList(""); }
+    renderCCList();
 }
 
 function closeCCDropdown() {
@@ -393,22 +396,19 @@ function closeCCDropdown() {
     const btn = pe("profileCountryCodeBtn");
     if (!dropdown) return;
     dropdown.classList.remove("is-open");
+    document.body.classList.remove("tyfit-cc-modal-open");
     btn?.setAttribute("aria-expanded", "false");
     _ccDropdownOpen = false;
 }
 
 function bindCCDropdown() {
     const btn = pe("profileCountryCodeBtn");
-    const search = pe("profileCCSearch");
     const list = pe("profileCCList");
+    const dropdown = pe("profileCountryCodeDropdown");
 
     if (btn) {
         btn.addEventListener("click", () => _ccDropdownOpen ? closeCCDropdown() : openCCDropdown());
         btn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); _ccDropdownOpen ? closeCCDropdown() : openCCDropdown(); } });
-    }
-
-    if (search) {
-        search.addEventListener("input", () => renderCCList(search.value));
     }
 
     if (list) {
@@ -419,6 +419,8 @@ function bindCCDropdown() {
             closeCCDropdown();
         });
     }
+
+    if (dropdown) bindSheetDragClose(dropdown, closeCCDropdown);
 
     document.addEventListener("click", (e) => {
         if (!_ccDropdownOpen) return;
@@ -442,6 +444,231 @@ function populateCountrySelect(currentValue) {
         sel.appendChild(opt);
     });
     if (currentValue) sel.value = currentValue;
+    rebuildTyfitCustomSelect(sel);
+}
+
+/* ── Lightweight custom selects ────────────────────────────── */
+const PROFILE_CUSTOM_SELECT_IDS = [
+    "profileGender",
+    "profileCountry",
+    "profileGoal",
+    "profileActivityLevel"
+];
+
+let _activeCustomSelect = null;
+
+function getSelectDisplayText(selectEl) {
+    const selected = selectEl?.selectedOptions?.[0];
+    return selected?.textContent?.trim() || selectEl?.querySelector("option")?.textContent?.trim() || "Select";
+}
+
+function getCustomSelectOptionMarkup(selectEl, optionEl) {
+    const label = optionEl.textContent.trim();
+    if (selectEl?.id === "profileCountry" && optionEl.value) {
+        const country = COUNTRY_DATA.find((item) => item.name === optionEl.value);
+        if (country) {
+            return `<span class="tyfit-custom-option-main"><span class="tyfit-custom-option-flag">${country.flag}</span><span>${country.name}</span></span>`;
+        }
+    }
+    return `<span>${label}</span>`;
+}
+
+function setCustomSelectTriggerValue(selectEl, trigger) {
+    const valueEl = trigger?.querySelector(".tyfit-custom-select-value");
+    if (!valueEl || !selectEl) return;
+    const selected = selectEl.selectedOptions?.[0];
+    if (selectEl.id === "profileCountry" && selected?.value) {
+        const country = COUNTRY_DATA.find((item) => item.name === selected.value);
+        if (country) {
+            valueEl.innerHTML = `<span class="tyfit-custom-option-main"><span class="tyfit-custom-option-flag">${country.flag}</span><span>${country.name}</span></span>`;
+            return;
+        }
+    }
+    valueEl.textContent = getSelectDisplayText(selectEl);
+}
+
+function refreshTyfitCustomSelect(selectEl) {
+    if (!selectEl) return;
+    const shell = selectEl.closest(".tyfit-ui-select-control");
+    const field = shell?.closest(".tyfit-ui-field");
+    const trigger = field?.querySelector(".tyfit-custom-select-trigger");
+    const menu = document.getElementById(`tyfitCustomMenu-${selectEl.id}`);
+    if (!trigger) return;
+    setCustomSelectTriggerValue(selectEl, trigger);
+    menu?.querySelectorAll(".tyfit-custom-option").forEach((option) => {
+        const isSelected = option.dataset.value === selectEl.value;
+        option.classList.toggle("is-selected", isSelected);
+        option.setAttribute("aria-selected", String(isSelected));
+    });
+}
+
+function closeTyfitCustomSelect() {
+    if (!_activeCustomSelect) return;
+    const selectEl = _activeCustomSelect.querySelector("select");
+    const menu = selectEl ? document.getElementById(`tyfitCustomMenu-${selectEl.id}`) : null;
+    _activeCustomSelect.classList.remove("is-open");
+    _activeCustomSelect.classList.remove("is-select-open");
+    _activeCustomSelect.querySelector(".tyfit-custom-select-trigger")?.setAttribute("aria-expanded", "false");
+    menu?.classList.remove("is-open");
+    if (menu) {
+        menu.style.left = "";
+        menu.style.top = "";
+        menu.style.width = "";
+    }
+    _activeCustomSelect = null;
+    document.body.classList.remove("tyfit-custom-select-open");
+}
+
+function openTyfitCustomSelect(field) {
+    if (!field) return;
+    if (_activeCustomSelect && _activeCustomSelect !== field) closeTyfitCustomSelect();
+    const selectEl = field.querySelector("select");
+    const menu = selectEl ? document.getElementById(`tyfitCustomMenu-${selectEl.id}`) : null;
+    const trigger = field.querySelector(".tyfit-custom-select-trigger");
+    _activeCustomSelect = field;
+    field.classList.add("is-open", "is-select-open");
+    trigger?.setAttribute("aria-expanded", "true");
+    menu?.classList.add("is-open");
+
+    if (menu && trigger && window.matchMedia("(min-width: 768px)").matches) {
+        const rect = trigger.getBoundingClientRect();
+        menu.style.left = `${Math.round(rect.left)}px`;
+        menu.style.top = `${Math.round(rect.bottom + 6)}px`;
+        menu.style.width = `${Math.round(rect.width)}px`;
+    }
+
+    document.body.classList.add("tyfit-custom-select-open");
+}
+
+function buildTyfitCustomSelect(selectEl) {
+    const shell = selectEl?.closest(".tyfit-ui-select-control");
+    const field = shell?.closest(".tyfit-ui-field");
+    if (!selectEl || !shell || !field || field.querySelector(".tyfit-custom-select-trigger")) return;
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "tyfit-custom-select-trigger";
+    trigger.setAttribute("aria-haspopup", "listbox");
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.innerHTML = '<span class="tyfit-custom-select-value"></span><i data-lucide="chevron-down"></i>';
+
+    const menu = document.createElement("div");
+    menu.id = `tyfitCustomMenu-${selectEl.id}`;
+    menu.className = "tyfit-custom-select-menu";
+    menu.dataset.ownerSelect = selectEl.id;
+    menu.setAttribute("role", "listbox");
+    menu.setAttribute("aria-label", selectEl.getAttribute("aria-label") || selectEl.id || "Select option");
+    trigger.setAttribute("aria-controls", menu.id);
+
+    Array.from(selectEl.options).forEach((nativeOption) => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "tyfit-custom-option";
+        option.dataset.value = nativeOption.value;
+        option.setAttribute("role", "option");
+        option.innerHTML = `${getCustomSelectOptionMarkup(selectEl, nativeOption)}<i data-lucide="check"></i>`;
+        option.addEventListener("click", () => {
+            selectEl.value = nativeOption.value;
+            selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+            refreshTyfitCustomSelect(selectEl);
+            closeTyfitCustomSelect();
+        });
+        menu.appendChild(option);
+    });
+
+    trigger.addEventListener("click", () => {
+        field.classList.contains("is-open") ? closeTyfitCustomSelect() : openTyfitCustomSelect(field);
+    });
+
+    field.append(trigger);
+    document.body.appendChild(menu);
+    bindSheetDragClose(menu, closeTyfitCustomSelect);
+    if (window.lucide?.createIcons) window.lucide.createIcons();
+    selectEl.addEventListener("change", () => refreshTyfitCustomSelect(selectEl));
+    refreshTyfitCustomSelect(selectEl);
+}
+
+function bindSheetDragClose(sheet, closeFn) {
+    if (!sheet || sheet.dataset.dragCloseBound === "true") return;
+    sheet.dataset.dragCloseBound = "true";
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    sheet.addEventListener("touchstart", (event) => {
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        const rect = sheet.getBoundingClientRect();
+        const startedOnHandleArea = touch.clientY <= rect.top + 42;
+        tracking = startedOnHandleArea;
+        startX = touch.clientX;
+        startY = touch.clientY;
+    }, { passive: true });
+
+    sheet.addEventListener("touchmove", (event) => {
+        if (!tracking) return;
+        const touch = event.touches?.[0];
+        if (!touch) return;
+        const dx = Math.abs(touch.clientX - startX);
+        const dy = touch.clientY - startY;
+        if (dx > Math.max(24, Math.abs(dy) * 1.2)) {
+            tracking = false;
+        }
+    }, { passive: true });
+
+    sheet.addEventListener("touchend", (event) => {
+        if (!tracking) return;
+        const touch = event.changedTouches?.[0];
+        tracking = false;
+        if (!touch) return;
+        const dy = touch.clientY - startY;
+        const dx = Math.abs(touch.clientX - startX);
+        if (dy > 46 && dx < 72) closeFn();
+    }, { passive: true });
+}
+
+function rebuildTyfitCustomSelect(selectEl) {
+    const shell = selectEl?.closest(".tyfit-ui-select-control");
+    const field = shell?.closest(".tyfit-ui-field");
+    if (!field) return;
+    field.querySelector(".tyfit-custom-select-trigger")?.remove();
+    document.getElementById(`tyfitCustomMenu-${selectEl.id}`)?.remove();
+    buildTyfitCustomSelect(selectEl);
+}
+
+function initTyfitCustomSelects() {
+    PROFILE_CUSTOM_SELECT_IDS.forEach((id) => buildTyfitCustomSelect(pe(id)));
+
+    document.addEventListener("click", (event) => {
+        if (!_activeCustomSelect) return;
+        const selectEl = _activeCustomSelect.querySelector("select");
+        const menu = selectEl ? document.getElementById(`tyfitCustomMenu-${selectEl.id}`) : null;
+        if (!_activeCustomSelect.contains(event.target) && !menu?.contains(event.target)) closeTyfitCustomSelect();
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeTyfitCustomSelect();
+    });
+}
+
+function bindProfileBackToTop() {
+    const button = document.querySelector(".back-to-top");
+    if (!button) return;
+
+    const syncVisibility = () => {
+        button.classList.toggle("is-visible", window.scrollY > 240);
+    };
+
+    window.addEventListener("scroll", syncVisibility, { passive: true });
+    syncVisibility();
+
+    button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, true);
 }
 
 /* ── Unit toggle (metric / imperial) ──────────────────────── */
@@ -568,6 +795,7 @@ function fillProfileForm(profile, userAbout, user) {
     pe("profileGoal").value = userAbout?.goal || "";
     pe("profileActivityLevel").value = normalizeActivityLevelForSelect(userAbout?.activity_level);
 
+    PROFILE_CUSTOM_SELECT_IDS.forEach((id) => refreshTyfitCustomSelect(pe(id)));
     updateDisplayName();
 }
 
@@ -790,6 +1018,7 @@ function bindFormEvents() {
     // Country code dropdown
     bindCCDropdown();
     renderCCList("");
+    initTyfitCustomSelects();
 
     // Unit toggle
     bindUnitToggle();
@@ -818,7 +1047,7 @@ function bindFormEvents() {
     // Close picker when user clicks away from the photo card.
     document.addEventListener("click", (event) => {
         const picker = pe("profilePhotoPicker");
-        if (!picker || picker.style.display === "none") return;
+        if (!picker || !picker.classList.contains("is-open")) return;
         const withinPhotoCard = event.target.closest(".tyfit-photo-card");
         if (!withinPhotoCard) {
             togglePhotoPicker(false);
@@ -915,6 +1144,7 @@ async function loadProfileEditPage() {
 
 document.addEventListener("DOMContentLoaded", () => {
     bindFormEvents();
+    bindProfileBackToTop();
 
     document.addEventListener("component-loaded", (event) => {
         if (event.detail?.componentName === "navbar") {
