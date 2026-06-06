@@ -190,7 +190,7 @@
                 <td>
                     <div class="goal-actions">
                         <button type="button" class="goal-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
-                        <button type="button" class="goal-icon-btn goal-icon-btn--danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash2"></i></button>
+                        <button type="button" class="goal-icon-btn goal-icon-btn--danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash-2"></i></button>
                     </div>
                 </td>
             </tr>`;

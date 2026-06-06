@@ -13,16 +13,14 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
+    <link href="css/tyfit-design-system.css?v=20260606i" rel="stylesheet">
     <link href="css/checkin.css?v=20260527a" rel="stylesheet">
-    <link href="css/goal-tracking.css?v=20260527a" rel="stylesheet">
+    <link href="css/goal-tracking.css?v=20260606a" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-goals">
     <header class="tyfit-mobile-topbar">
-        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
-        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home">
-            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
-            <span class="tyfit-wordmark">TYFIT</span>
-        </a>
+        <a class="tyfit-icon-btn goal-mobile-back-btn" href="daily_checkin.html" aria-label="Back to Daily Check-in"><i data-lucide="arrow-left"></i></a>
+        <h1 class="goal-mobile-title">Goal Setting</h1>
         <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown">
             <button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i></button>
         </div>
@@ -172,46 +170,64 @@
         <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
     </section>
 
-    <div class="checkin-modal-overlay checkin-hidden" id="goalModalOverlay" aria-hidden="true">
-        <section class="checkin-modal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
-            <div class="checkin-modal-head">
-                <div class="checkin-modal-title-wrap">
+    <div class="checkin-modal-overlay goal-standard-modal-overlay checkin-hidden" id="goalModalOverlay" aria-hidden="true">
+        <section class="checkin-modal goal-standard-modal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+            <div class="goal-modal-handle" aria-hidden="true"></div>
+            <div class="checkin-modal-head goal-standard-modal-head">
+                <div class="checkin-modal-title-wrap goal-standard-modal-title">
                     <h3 id="goalModalTitle">Add Goal</h3>
                     <p class="checkin-modal-subtitle">Create a daily check-in goal for this user.</p>
                 </div>
                 <button type="button" class="checkin-icon-btn" id="goalModalClose" aria-label="Close"><i data-lucide="x"></i></button>
             </div>
-            <div class="checkin-modal-grid">
-                <div class="checkin-form-field">
-                    <label for="goalNameInput">Goal Name</label>
-                    <input type="text" id="goalNameInput" placeholder="e.g. Water Intake">
+            <div class="checkin-modal-grid goal-standard-form">
+                <div class="checkin-form-field goal-standard-field">
+                    <label class="tyfit-ui-label" for="goalNameInput">Goal Name</label>
+                    <div class="tyfit-ui-icon-control">
+                        <span class="tyfit-ui-icon-tile"><i data-lucide="target"></i></span>
+                        <input type="text" id="goalNameInput" class="tyfit-ui-control goal-standard-input" placeholder="e.g. Water Intake">
+                    </div>
                 </div>
-                <div class="checkin-form-field">
-                    <label for="goalCategoryInput">Goal Category</label>
-                    <select id="goalCategoryInput">
-                        <option value="Diet">Diet</option>
-                        <option value="Lifestyle">Lifestyle</option>
-                    </select>
+                <div class="checkin-form-field goal-standard-field">
+                    <label class="tyfit-ui-label" for="goalCategoryInput">Goal Category</label>
+                    <div class="tyfit-ui-select-control">
+                        <span class="tyfit-ui-icon-tile"><i data-lucide="layers-3"></i></span>
+                        <select id="goalCategoryInput" class="tyfit-ui-select goal-standard-select">
+                            <option value="Diet">Diet</option>
+                            <option value="Lifestyle">Lifestyle</option>
+                        </select>
+                        <span class="tyfit-ui-select-chevron"><i data-lucide="chevron-down"></i></span>
+                    </div>
                 </div>
-                <div class="checkin-form-field checkin-hidden" id="goalTypeField">
-                    <label for="goalTypeInput">Goal Type</label>
-                    <select id="goalTypeInput">
-                        <option value="binary">Yes/No</option>
-                        <option value="numeric">Numeric</option>
-                    </select>
+                <div class="checkin-form-field goal-standard-field checkin-hidden" id="goalTypeField">
+                    <label class="tyfit-ui-label" for="goalTypeInput">Goal Type</label>
+                    <div class="tyfit-ui-select-control">
+                        <span class="tyfit-ui-icon-tile"><i data-lucide="toggle-left"></i></span>
+                        <select id="goalTypeInput" class="tyfit-ui-select goal-standard-select">
+                            <option value="binary">Yes/No</option>
+                            <option value="numeric">Numeric</option>
+                        </select>
+                        <span class="tyfit-ui-select-chevron"><i data-lucide="chevron-down"></i></span>
+                    </div>
                 </div>
-                <div class="checkin-form-field checkin-hidden" id="goalTargetValueField">
-                    <label for="goalTargetValueInput">Target Value</label>
-                    <input type="number" step="0.01" id="goalTargetValueInput" placeholder="e.g. 2.5">
+                <div class="checkin-form-field goal-standard-field checkin-hidden" id="goalTargetValueField">
+                    <label class="tyfit-ui-label" for="goalTargetValueInput">Target Value</label>
+                    <div class="tyfit-ui-icon-control">
+                        <span class="tyfit-ui-icon-tile"><i data-lucide="gauge"></i></span>
+                        <input type="number" step="0.01" id="goalTargetValueInput" class="tyfit-ui-control goal-standard-input" placeholder="e.g. 2.5">
+                    </div>
                 </div>
-                <div class="checkin-form-field checkin-hidden" id="goalTargetUnitField">
-                    <label for="goalTargetUnitInput">Target Unit</label>
-                    <input type="text" id="goalTargetUnitInput" placeholder="e.g. litres, steps">
+                <div class="checkin-form-field goal-standard-field checkin-hidden" id="goalTargetUnitField">
+                    <label class="tyfit-ui-label" for="goalTargetUnitInput">Target Unit</label>
+                    <div class="tyfit-ui-icon-control">
+                        <span class="tyfit-ui-icon-tile"><i data-lucide="ruler"></i></span>
+                        <input type="text" id="goalTargetUnitInput" class="tyfit-ui-control goal-standard-input" placeholder="e.g. litres, steps">
+                    </div>
                 </div>
             </div>
-            <div class="checkin-modal-actions">
-                <button type="button" class="checkin-pill-btn checkin-modal-cancel-btn" id="goalModalCancelBtn">Cancel</button>
-                <button type="button" class="checkin-secondary-btn checkin-modal-save-btn" id="goalModalSaveBtn"><i data-lucide="save"></i> Save Goal</button>
+            <div class="checkin-modal-actions goal-standard-modal-actions">
+                <button type="button" class="tyfit-ui-secondary-btn checkin-modal-cancel-btn" id="goalModalCancelBtn">Cancel</button>
+                <button type="button" class="tyfit-ui-primary-btn checkin-modal-save-btn" id="goalModalSaveBtn"><i data-lucide="save"></i> Save Goal</button>
             </div>
         </section>
     </div>
@@ -238,7 +254,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260605-polish"></script>
-    <script src="js/checkin_goals.js?v=20260527a"></script>
+    <script src="js/shell.js?v=20260606-goals"></script>
+    <script src="js/checkin_goals.js?v=20260606a"></script>
 </body>
 </html>
