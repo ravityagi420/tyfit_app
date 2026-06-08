@@ -76,7 +76,10 @@
         if (String(goal.goal_category || "").toLowerCase().includes("diet")) {
             return "Target: Diet plan";
         }
-        return "Target not set";
+        if (String(goal.goal_type || "").toLowerCase() === "binary") {
+            return "Yes/No";
+        }
+        return "Yes/No";
     }
 
     function goalIcon(goal) {
@@ -363,7 +366,7 @@
             submitWrap.classList.add("checkin-hidden");
             if (manageBtn) {
                 manageBtn.disabled = true;
-                manageBtn.innerHTML = '<i data-lucide="settings-2"></i> Manage Goals';
+                manageBtn.innerHTML = '<i data-lucide="sliders-horizontal"></i><span>Goal Settings</span>';
             }
             refreshIcons();
             return;
@@ -379,7 +382,7 @@
             submitWrap.classList.add("checkin-hidden");
             if (manageBtn) {
                 manageBtn.disabled = false;
-                manageBtn.innerHTML = '<i data-lucide="plus"></i> Add Goal';
+                manageBtn.innerHTML = '<i data-lucide="sliders-horizontal"></i><span>Goal Settings</span>';
             }
             refreshIcons();
             return;
@@ -388,7 +391,7 @@
         submitWrap.classList.remove("checkin-hidden");
         if (manageBtn) {
             manageBtn.disabled = false;
-            manageBtn.innerHTML = '<i data-lucide="settings-2"></i> Manage Goals';
+            manageBtn.innerHTML = '<i data-lucide="sliders-horizontal"></i><span>Goal Settings</span>';
         }
 
         const grouped = {
@@ -445,7 +448,6 @@
 
     function renderDateStrip() {
         const strip = el("checkinDateStrip");
-        const selectedDateText = el("checkinSelectedDateText");
         const weekLabel = el("checkinWeekLabel");
         if (!strip) return;
 
@@ -467,13 +469,6 @@
 
         if (weekLabel) {
             weekLabel.textContent = formatWeekLabel(selectedDate);
-        }
-
-        if (selectedDateText) {
-            const parsed = parseDate(selectedDate);
-            selectedDateText.textContent = parsed
-                ? parsed.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long", year: "numeric" })
-                : "";
         }
 
         updateProgressCardTitle(selectedDate);
@@ -1217,7 +1212,6 @@
 
     function bindStaticActions() {
         const manage = el("manageGoalsBtn");
-        const manageFloating = el("manageGoalsFloatingBtn");
 
         const openManageGoals = async () => {
             if (STATE.access?.isAdmin && !STATE.targetUserId) {
@@ -1230,10 +1224,6 @@
 
         if (manage) {
             manage.addEventListener("click", openManageGoals);
-        }
-
-        if (manageFloating) {
-            manageFloating.addEventListener("click", openManageGoals);
         }
 
         const submit = el("submitCheckinBtn");

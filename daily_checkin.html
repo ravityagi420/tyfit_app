@@ -12,16 +12,14 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
-    <link href="css/checkin.css?v=20260530c" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260608-checkin-refine" rel="stylesheet">
+    <link href="css/checkin.css?v=20260608-checkin-refine" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="daily-checkin">
-    <header class="tyfit-mobile-topbar">
-        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
-        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home">
-            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span>
-        </a>
-        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown"><button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i></button></div>
+    <header class="tyfit-mobile-topbar tyfit-subpage-topbar">
+        <a class="tyfit-subpage-back-btn" href="index.html" aria-label="Back to Home"><i data-lucide="arrow-left"></i></a>
+        <h1 class="tyfit-subpage-title">Check-In</h1>
+        <span class="tyfit-subpage-topbar-spacer" aria-hidden="true"></span>
     </header>
 
     <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
@@ -108,7 +106,10 @@
                             <span id="checkinWeekLabel">This Week</span>
                             <i data-lucide="chevron-down"></i>
                         </button>
-                        <p class="checkin-selected-date" id="checkinSelectedDateText"></p>
+                        <button type="button" class="checkin-goal-settings-btn" id="manageGoalsBtn">
+                            <i data-lucide="sliders-horizontal"></i>
+                            <span>Goal Settings</span>
+                        </button>
                     </div>
 
                     <!-- Calendar Strip -->
@@ -169,12 +170,6 @@
     </div>
     <div data-tyfit-bottom-nav></div>
 
-    <div class="tyfit-floating-action checkin-floating-action" id="manageGoalsFloatingWrap">
-        <button type="button" class="tyfit-floating-plus checkin-floating-settings-btn" id="manageGoalsFloatingBtn" aria-label="Manage goals">
-            <i data-lucide="settings-2"></i>
-        </button>
-    </div>
-
     <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
     <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
         <header><h4>Quick Actions</h4><button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close"><i data-lucide="x"></i></button></header>
@@ -234,7 +229,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260605-polish"></script>
-    <script src="js/daily_checkin.js?v=20260605-autosave"></script>
+    <script src="js/shell.js?v=20260608-checkin-refine"></script>
+    <script src="js/daily_checkin.js?v=20260608-checkin-refine"></script>
 </body>
 </html>

@@ -6,7 +6,6 @@
         editingGoalId: null,
         pendingDeleteGoalId: null,
         users: [],
-        currentFilter: "all",
         swipeHandlersBound: false,
         suppressCardClickUntil: 0
     };
@@ -166,13 +165,7 @@
 
         if (!tableBody || !cardList || !panel) return;
 
-        // Filter goals
-        const filteredGoals = STATE.goals.filter(goal => {
-            if (STATE.currentFilter === "all") return true;
-            return String(goal.goal_category).toLowerCase() === String(STATE.currentFilter).toLowerCase();
-        });
-
-        if (!filteredGoals.length) {
+        if (!STATE.goals.length) {
             tableBody.innerHTML = "";
             cardList.innerHTML = "";
             panel.classList.add("checkin-hidden");
@@ -181,23 +174,18 @@
 
         panel.classList.remove("checkin-hidden");
 
-        // Desktop table
-        tableBody.innerHTML = filteredGoals.map((goal) => {
-            return `<tr>
-                <td><strong>${escapeHtml(goal.goal_name)}</strong></td>
-                <td><span class="goal-label ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span></td>
-                <td>${escapeHtml(targetText(goal))}</td>
-                <td>
-                    <div class="goal-actions">
-                        <button type="button" class="goal-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
-                        <button type="button" class="goal-icon-btn goal-icon-btn--danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash-2"></i></button>
-                    </div>
-                </td>
-            </tr>`;
-        }).join("");
+        const groups = [
+            {
+                title: "Diet Goals",
+                goals: STATE.goals.filter((goal) => normalizeGoalCategory(goal.goal_category) === "Diet")
+            },
+            {
+                title: "Lifestyle Goals",
+                goals: STATE.goals.filter((goal) => normalizeGoalCategory(goal.goal_category) !== "Diet")
+            }
+        ].filter((group) => group.goals.length);
 
-        // Mobile cards
-        cardList.innerHTML = filteredGoals.map((goal) => {
+        const renderGoalCard = (goal) => {
             const iconName = getGoalIcon(goal);
             const iconColorClass = getGoalIconColor(goal);
             return `<div class="goal-card-row" data-goal-id="${goal.id}">
@@ -219,6 +207,35 @@
                     </div>
                 </article>
             </div>`;
+        };
+
+        // Desktop table
+        tableBody.innerHTML = groups.map((group) => {
+            const rows = group.goals.map((goal) => `<tr>
+                <td><strong>${escapeHtml(goal.goal_name)}</strong></td>
+                <td><span class="goal-label ${categoryClass(goal.goal_category)}">${escapeHtml(goal.goal_category)}</span></td>
+                <td>${escapeHtml(targetText(goal))}</td>
+                <td>
+                    <div class="goal-actions">
+                        <button type="button" class="goal-icon-btn" data-action="edit" data-goal-id="${goal.id}" aria-label="Edit goal"><i data-lucide="pencil"></i></button>
+                        <button type="button" class="goal-icon-btn goal-icon-btn--danger" data-action="delete" data-goal-id="${goal.id}" aria-label="Delete goal"><i data-lucide="trash-2"></i></button>
+                    </div>
+                </td>
+            </tr>`).join("");
+            return `<tr class="goal-table-group-row"><td colspan="4">${escapeHtml(group.title)}</td></tr>${rows}`;
+        }).join("");
+
+        // Mobile cards
+        cardList.innerHTML = groups.map((group) => {
+            return `<section class="goal-card-group">
+                <div class="goal-card-group-head">
+                    <h3>${escapeHtml(group.title)}</h3>
+                    <span>${group.goals.length} ${group.goals.length === 1 ? "goal" : "goals"}</span>
+                </div>
+                <div class="goal-card-group-list">
+                    ${group.goals.map(renderGoalCard).join("")}
+                </div>
+            </section>`;
         }).join("");
 
         refreshIcons();
@@ -622,60 +639,6 @@
         });
     }
 
-    function setupFilterDropdown() {
-        const filterBtn = el("goalFilterBtn");
-        const filterMenu = el("goalFilterMenu");
-        const filterOptions = document.querySelectorAll(".goal-filter-option");
-        const filterLabel = el("goalFilterLabel");
-
-        if (!filterBtn || !filterMenu) return;
-
-        filterBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const isHidden = filterMenu.hasAttribute("hidden");
-            if (isHidden) {
-                filterMenu.removeAttribute("hidden");
-                filterBtn.setAttribute("aria-expanded", "true");
-            } else {
-                filterMenu.setAttribute("hidden", "");
-                filterBtn.setAttribute("aria-expanded", "false");
-            }
-        });
-
-        filterOptions.forEach((option) => {
-            option.addEventListener("click", () => {
-                const filter = option.getAttribute("data-filter");
-                STATE.currentFilter = filter;
-
-                // Update UI
-                filterOptions.forEach((opt) => opt.classList.remove("active"));
-                option.classList.add("active");
-
-                const filterText = {
-                    "all": "All Goals",
-                    "diet": "Diet",
-                    "lifestyle": "Lifestyle"
-                };
-                filterLabel.textContent = filterText[filter] || "All Goals";
-
-                // Close menu
-                filterMenu.setAttribute("hidden", "");
-                filterBtn.setAttribute("aria-expanded", "false");
-
-                // Re-render goals
-                renderGoals();
-            });
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!filterBtn.contains(e.target) && !filterMenu.contains(e.target)) {
-                filterMenu.setAttribute("hidden", "");
-                filterBtn.setAttribute("aria-expanded", "false");
-            }
-        });
-    }
-
     function bindEvents() {
         // Handle all add goal buttons
         ["heroAddGoalBtn", "addGoalBtn", "mobileAddGoalBtn"].forEach((id) => {
@@ -776,8 +739,6 @@
             }
         });
 
-        // Setup filter dropdown
-        setupFilterDropdown();
         setupGoalCardSwipeDelete();
     }
 

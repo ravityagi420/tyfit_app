@@ -12,18 +12,16 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260608-checkin-refine" rel="stylesheet">
     <link href="css/tyfit-design-system.css?v=20260606i" rel="stylesheet">
     <link href="css/checkin.css?v=20260527a" rel="stylesheet">
-    <link href="css/goal-tracking.css?v=20260606a" rel="stylesheet">
+    <link href="css/goal-tracking.css?v=20260608-checkin-refine" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="checkin-goals">
-    <header class="tyfit-mobile-topbar">
-        <a class="tyfit-icon-btn goal-mobile-back-btn" href="daily_checkin.html" aria-label="Back to Daily Check-in"><i data-lucide="arrow-left"></i></a>
-        <h1 class="goal-mobile-title">Goal Setting</h1>
-        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown">
-            <button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i></button>
-        </div>
+    <header class="tyfit-mobile-topbar tyfit-subpage-topbar">
+        <a class="tyfit-subpage-back-btn" href="daily_checkin.html" aria-label="Back to Daily Check-in"><i data-lucide="arrow-left"></i></a>
+        <h1 class="tyfit-subpage-title">Goal Settings</h1>
+        <span class="tyfit-subpage-topbar-spacer" aria-hidden="true"></span>
     </header>
 
     <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
@@ -117,23 +115,7 @@
                         </div>
                     </section>
 
-                    <!-- Your Goals Section -->
                     <section class="goal-panel checkin-hidden" id="goalPanel">
-                        <div class="goal-section-header">
-                            <h2 class="goal-section-title">Your Goals</h2>
-                            <div class="goal-filter-dropdown">
-                                <button type="button" class="goal-filter-btn" id="goalFilterBtn" aria-expanded="false">
-                                    <span id="goalFilterLabel">All Goals</span>
-                                    <i data-lucide="chevron-down"></i>
-                                </button>
-                                <div class="goal-filter-menu" id="goalFilterMenu" hidden>
-                                    <button type="button" class="goal-filter-option active" data-filter="all">All Goals</button>
-                                    <button type="button" class="goal-filter-option" data-filter="Diet">Diet</button>
-                                    <button type="button" class="goal-filter-option" data-filter="Lifestyle">Lifestyle</button>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Desktop Table (hidden on mobile) -->
                         <div class="goal-table-wrap" id="goalTableWrap">
                             <table class="goal-table">
@@ -254,7 +236,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260606-goals"></script>
-    <script src="js/checkin_goals.js?v=20260606a"></script>
+    <script src="js/shell.js?v=20260608-checkin-refine"></script>
+    <script src="js/checkin_goals.js?v=20260608-checkin-refine"></script>
 </body>
 </html>

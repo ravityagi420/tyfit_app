@@ -10,6 +10,8 @@
     let loaderVisibleAt = 0;
     const PHOSPHOR_CSS_ID = 'tyfitPhosphorIcons';
     const PHOSPHOR_CSS_HREF = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css';
+    const PHOSPHOR_FILL_CSS_ID = 'tyfitPhosphorFillIcons';
+    const PHOSPHOR_FILL_CSS_HREF = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css';
 
     function mountPageLoader() {
         if (byId('tyfitPageLoader')) return;
@@ -101,23 +103,33 @@
     window.tyfitRefreshIcons = refreshIcons;
 
     function ensurePhosphorIcons() {
-        if (document.getElementById(PHOSPHOR_CSS_ID)) return;
-        const link = document.createElement('link');
-        link.id = PHOSPHOR_CSS_ID;
-        link.rel = 'stylesheet';
-        link.href = PHOSPHOR_CSS_HREF;
-        document.head.appendChild(link);
+        if (!document.getElementById(PHOSPHOR_CSS_ID)) {
+            const link = document.createElement('link');
+            link.id = PHOSPHOR_CSS_ID;
+            link.rel = 'stylesheet';
+            link.href = PHOSPHOR_CSS_HREF;
+            document.head.appendChild(link);
+        }
+
+        if (!document.getElementById(PHOSPHOR_FILL_CSS_ID)) {
+            const fillLink = document.createElement('link');
+            fillLink.id = PHOSPHOR_FILL_CSS_ID;
+            fillLink.rel = 'stylesheet';
+            fillLink.href = PHOSPHOR_FILL_CSS_HREF;
+            document.head.appendChild(fillLink);
+        }
     }
 
-    function phosphorIcon(name) {
-        return `<i class="ph ${name}" aria-hidden="true"></i>`;
+    function phosphorIcon(name, weight = 'regular') {
+        const family = weight === 'fill' ? 'ph-fill' : 'ph';
+        return `<i class="${family} ${name}" aria-hidden="true"></i>`;
     }
 
     function getBottomNavIconClass(key) {
         const icons = {
             home: 'ph-house',
             diet: 'ph-fork-knife',
-            checkin: 'ph-check-square',
+            checkin: 'ph-clipboard-text',
             training: 'ph-barbell',
             profile: 'ph-user-circle'
         };
@@ -143,8 +155,8 @@
             const key = item.dataset.navKey || getBottomNavKeyFromLink(item);
             if (!key) return;
             item.dataset.navKey = key;
-            item.querySelectorAll('i[data-lucide], svg[data-lucide], svg.lucide, img.tyfit-mobile-profile-avatar, i.ph').forEach((icon) => icon.remove());
-            item.insertAdjacentHTML('afterbegin', phosphorIcon(getBottomNavIconClass(key)));
+            item.querySelectorAll('i[data-lucide], svg[data-lucide], svg.lucide, img.tyfit-mobile-profile-avatar, i.ph, i.ph-fill').forEach((icon) => icon.remove());
+            item.insertAdjacentHTML('afterbegin', phosphorIcon(getBottomNavIconClass(key), item.classList.contains('is-active') ? 'fill' : 'regular'));
         });
     }
 
@@ -261,7 +273,7 @@
         const page = document.body?.dataset?.page || '';
         if (page === 'home') return 'home';
         if (page === 'diet-chart') return 'diet';
-        if (page === 'daily-checkin') return 'checkin';
+        if (page === 'daily-checkin' || page === 'checkin-goals' || page === 'checkin-summary') return 'checkin';
         if (page === 'training-plan') return 'training';
         if (page === 'journey') return 'profile';
         if (page === 'profile' || page === 'profile-edit' || page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') {
@@ -279,7 +291,7 @@
         const navItems = [
             { key: 'home', href: `${prefix}index.html`, icon: 'ph-house', label: 'Home' },
             { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'ph-fork-knife', label: 'Diet Chart' },
-            { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'ph-check-square', label: 'CheckIn' },
+            { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'ph-clipboard-text', label: 'CheckIn' },
             { key: 'training', href: `${prefix}training_plan.html`, icon: 'ph-barbell', label: 'Training' },
             { key: 'profile', href: `${prefix}profile.html`, icon: 'ph-user-circle', label: 'Profile' },
         ];
@@ -288,11 +300,11 @@
         placeholder.outerHTML = [
             '<nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">',
             navItems.slice(0, 2).map((item) => (
-                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon)}<span>${item.label}</span></a>`
+                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon, item.key === active ? 'fill' : 'regular')}<span>${item.label}</span></a>`
             )).join(''),
-            `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" data-nav-key="${navItems[2].key}" aria-label="Daily CheckIn">${phosphorIcon(navItems[2].icon)}<span>${navItems[2].label}</span></a>`,
+            `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" data-nav-key="${navItems[2].key}" aria-label="Daily CheckIn">${phosphorIcon(navItems[2].icon, active === 'checkin' ? 'fill' : 'regular')}<span>${navItems[2].label}</span></a>`,
             navItems.slice(3).map((item) => (
-                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon)}<span>${item.label}</span></a>`
+                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon, item.key === active ? 'fill' : 'regular')}<span>${item.label}</span></a>`
             )).join(''),
             '</nav>',
         ].join('');
@@ -309,7 +321,7 @@
         checkin.className = `tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}`;
         checkin.dataset.navKey = 'checkin';
         checkin.setAttribute('aria-label', 'Daily CheckIn');
-        checkin.innerHTML = `${phosphorIcon('ph-check-square')}<span>CheckIn</span>`;
+        checkin.innerHTML = `${phosphorIcon('ph-clipboard-text', active === 'checkin' ? 'fill' : 'regular')}<span>CheckIn</span>`;
         quick.replaceWith(checkin);
         applyPhosphorBottomNavIcons(nav);
     }

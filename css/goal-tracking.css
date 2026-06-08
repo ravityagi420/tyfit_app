@@ -9,28 +9,6 @@ body[data-page="checkin-goals"] {
     overflow-x: hidden;
 }
 
-body[data-page="checkin-goals"] .goal-mobile-title {
-    justify-self: center;
-    margin: 0;
-    color: #111827;
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 17px;
-    line-height: 1.1;
-    font-weight: 650;
-    letter-spacing: 0;
-}
-
-body[data-page="checkin-goals"] .goal-mobile-back-btn {
-    color: #111827;
-    text-decoration: none;
-}
-
-body[data-page="checkin-goals"] .goal-mobile-back-btn svg {
-    width: 22px;
-    height: 22px;
-    stroke-width: 2.15;
-}
-
 /* ====== COLOR & ICON SYSTEM ====== */
 
 .goal-icon--green {
@@ -303,80 +281,6 @@ body[data-page="checkin-goals"] .goal-mobile-back-btn svg {
     letter-spacing: -0.02em;
 }
 
-/* ====== FILTER DROPDOWN ====== */
-
-.goal-filter-dropdown {
-    position: relative;
-}
-
-.goal-filter-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    background: #FFFFFF;
-    border: 1px solid rgba(108, 99, 255, 0.2);
-    border-radius: 999px;
-    color: #4C46B8;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-height: 36px;
-}
-
-.goal-filter-btn:hover {
-    background: rgba(108, 99, 255, 0.05);
-    border-color: rgba(108, 99, 255, 0.3);
-}
-
-.goal-filter-btn i {
-    width: 14px;
-    height: 14px;
-}
-
-.goal-filter-menu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background: #FFFFFF;
-    border: 1px solid rgba(108, 99, 255, 0.14);
-    border-radius: 16px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
-    min-width: 140px;
-    display: grid;
-    gap: 0;
-    z-index: 100;
-    overflow: hidden;
-}
-
-.goal-filter-menu[hidden] {
-    display: none !important;
-}
-
-.goal-filter-option {
-    padding: 12px 14px;
-    background: transparent;
-    border: none;
-    color: #667085;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.15s ease;
-}
-
-.goal-filter-option:hover {
-    background: rgba(108, 99, 255, 0.06);
-    color: #4C46B8;
-}
-
-.goal-filter-option.active {
-    background: rgba(108, 99, 255, 0.1);
-    color: #4C46B8;
-    font-weight: 700;
-}
-
 /* ====== GOAL CARD - DESKTOP TABLE ====== */
 
 .goal-table-wrap {
@@ -389,6 +293,17 @@ body[data-page="checkin-goals"] .goal-mobile-back-btn svg {
     min-width: 760px;
     border-collapse: separate;
     border-spacing: 0 10px;
+}
+
+.goal-table-group-row td {
+    padding: 18px 14px 2px !important;
+    color: #4B3FC7;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: transparent !important;
+    border: 0 !important;
 }
 
 .goal-table th {
@@ -466,7 +381,42 @@ body[data-page="checkin-goals"] .goal-mobile-back-btn svg {
 
 .goal-cards-list {
     display: grid;
-    gap: 0;
+    gap: 14px;
+}
+
+.goal-card-group {
+    display: grid;
+    gap: 8px;
+}
+
+.goal-card-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+}
+
+.goal-card-group-head h3 {
+    margin: 0;
+    color: #1F2937;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.goal-card-group-head span {
+    color: #8B93A6;
+    font-size: 13px;
+    font-weight: 450;
+}
+
+.goal-card-group-list {
+    background: #FFFFFF;
+    border: 1px solid rgba(108, 99, 255, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 10px 28px rgba(17, 24, 39, 0.05);
+    overflow: hidden;
 }
 
 .goal-card-row {
@@ -717,9 +667,9 @@ body[data-page="checkin-goals"] .goal-standard-modal-head {
 
 body[data-page="checkin-goals"] .goal-standard-modal-title h3 {
     color: #111827;
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1.2;
-    font-weight: 680;
+    font-weight: 500;
     letter-spacing: 0;
 }
 
@@ -727,7 +677,7 @@ body[data-page="checkin-goals"] .goal-standard-modal-title .checkin-modal-subtit
     color: #667085;
     font-size: 13px;
     line-height: 1.4;
-    font-weight: 430;
+    font-weight: 400;
 }
 
 body[data-page="checkin-goals"] .goal-standard-form {
@@ -875,8 +825,8 @@ body[data-page="checkin-goals"] .goal-standard-modal-actions button {
     min-width: 0;
     min-height: 48px;
     border-radius: 16px;
-    font-size: 14px;
-    font-weight: 650;
+    font-size: 15px;
+    font-weight: 500;
 }
 
 /* ====== TOOLBAR ====== */
@@ -1015,25 +965,11 @@ body[data-page="checkin-goals"] .goal-standard-modal-actions button {
 
     .goal-floating-add {
         display: flex;
-        bottom: 90px;
+        bottom: 120px;
     }
 }
 
 @media (max-width: 991px) {
-    body[data-page="checkin-goals"] .tyfit-mobile-topbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 100;
-        background: rgba(255, 255, 255, 0.9);
-        border-bottom: 1px solid rgba(231, 228, 255, 0.72);
-    }
-
-    body[data-page="checkin-goals"] .tyfit-mobile-topbar-dropdown {
-        justify-self: end;
-    }
-
     body[data-page="checkin-goals"] .goal-back-btn {
         display: none;
     }
@@ -1046,11 +982,11 @@ body[data-page="checkin-goals"] .goal-standard-modal-actions button {
     }
 
     .goal-cards-list {
-        background: #FFFFFF;
-        border: 1px solid rgba(108, 99, 255, 0.08);
-        border-radius: 32px;
-        box-shadow: 0 10px 28px rgba(17, 24, 39, 0.06);
-        overflow: hidden;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        overflow: visible;
     }
 
     .goal-table-wrap {
@@ -1063,7 +999,7 @@ body[data-page="checkin-goals"] .goal-standard-modal-actions button {
 
     .goal-floating-add {
         display: flex;
-        bottom: 90px;
+        bottom: 120px;
     }
 
     body[data-page="checkin-goals"] .goal-standard-modal-overlay {
