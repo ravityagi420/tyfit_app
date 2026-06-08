@@ -85,16 +85,22 @@ function unmountHomeLoader() {
 }
 
 function unmountHomeLoaderWhenReady() {
-    if (document.readyState === "complete") {
+    let isDone = false;
+    const finish = () => {
+        if (isDone) return;
+        isDone = true;
         refreshIcons();
         unmountHomeLoader();
+    };
+
+    if (document.readyState !== "loading") {
+        finish();
         return;
     }
 
-    window.addEventListener("load", () => {
-        refreshIcons();
-        unmountHomeLoader();
-    }, { once: true });
+    document.addEventListener("DOMContentLoaded", finish, { once: true });
+    window.addEventListener("load", finish, { once: true });
+    setTimeout(finish, 1200);
 }
 
 if (document.body) {
