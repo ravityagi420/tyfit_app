@@ -318,6 +318,7 @@
         const page = document.body?.dataset?.page || '';
         if (page === 'daily-checkin' || page === 'checkin-success') return false;
         if (page === 'checkin-goals') return false;
+        if (page === 'diet-chart' || page === 'training-plan') return false;
         if (page === 'profile' || page === 'profile-edit') return false;
         if (page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') return false;
         return true;
