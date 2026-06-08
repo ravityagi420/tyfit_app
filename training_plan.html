@@ -12,25 +12,18 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260605-polish" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260608-action-avatar" rel="stylesheet">
     <link href="css/training.css?v=20260605-workoutlog" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="training-plan">
 
     <!-- ── Mobile top bar ── -->
-    <header class="tyfit-mobile-topbar">
-        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu">
-            <i data-lucide="menu"></i>
-        </button>
-        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home">
-            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
-            <span class="tyfit-wordmark">TYFIT</span>
+    <header class="tyfit-mobile-topbar tyfit-subpage-topbar">
+        <a class="tyfit-subpage-back-btn" href="index.html" aria-label="Back to Home">
+            <i data-lucide="arrow-left"></i>
         </a>
-        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown">
-            <button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications">
-                <i data-lucide="bell"></i>
-            </button>
-        </div>
+        <h1 class="tyfit-subpage-title">Training</h1>
+        <span class="tyfit-subpage-topbar-spacer" aria-hidden="true"></span>
     </header>
 
     <!-- ── Mobile drawer ── -->
@@ -454,7 +447,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260608-floating"></script>
+    <script src="js/shell.js?v=20260608-action-avatar"></script>
     <script src="js/training_plan.js?v=20260605-workoutlog"></script>
 </body>
 </html>

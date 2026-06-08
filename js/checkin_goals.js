@@ -354,17 +354,25 @@
             clearGoalForm();
         }
 
-        modal.classList.remove("checkin-hidden");
-        modal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
+        if (window.tyfitStandardModal?.open) {
+            window.tyfitStandardModal.open(modal);
+        } else {
+            modal.classList.remove("checkin-hidden");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        }
     }
 
     function closeGoalModal() {
         const modal = el("goalModalOverlay");
         if (!modal) return;
-        modal.classList.add("checkin-hidden");
-        modal.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
+        if (window.tyfitStandardModal?.close) {
+            window.tyfitStandardModal.close(modal);
+        } else {
+            modal.classList.add("checkin-hidden");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+        }
     }
 
     function openDeleteGoalModal(goalId) {

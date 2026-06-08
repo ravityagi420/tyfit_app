@@ -125,6 +125,22 @@
         return `<i class="${family} ${name}" aria-hidden="true"></i>`;
     }
 
+    function escapeAttr(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function defaultProfileAvatarSrc() {
+        return `${getRootPrefix()}assets/avatars/avatar-5.svg`;
+    }
+
+    function profileAvatarMarkup(src) {
+        return `<img class="tyfit-mobile-profile-avatar" src="${escapeAttr(src || defaultProfileAvatarSrc())}" alt="Profile">`;
+    }
+
     function getBottomNavIconClass(key) {
         const icons = {
             home: 'ph-house',
@@ -156,11 +172,72 @@
             if (!key) return;
             item.dataset.navKey = key;
             item.querySelectorAll('i[data-lucide], svg[data-lucide], svg.lucide, img.tyfit-mobile-profile-avatar, i.ph, i.ph-fill').forEach((icon) => icon.remove());
-            item.insertAdjacentHTML('afterbegin', phosphorIcon(getBottomNavIconClass(key), item.classList.contains('is-active') ? 'fill' : 'regular'));
+            item.insertAdjacentHTML(
+                'afterbegin',
+                key === 'profile'
+                    ? profileAvatarMarkup()
+                    : phosphorIcon(getBottomNavIconClass(key), item.classList.contains('is-active') ? 'fill' : 'regular')
+            );
         });
+        hydrateBottomNavProfileAvatar();
     }
 
     window.tyfitApplyPhosphorBottomNavIcons = applyPhosphorBottomNavIcons;
+
+    async function resolveCurrentProfileAvatar() {
+        if (!window.supabaseClient?.auth) return defaultProfileAvatarSrc();
+        const { data: { session } = {} } = await window.supabaseClient.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return defaultProfileAvatarSrc();
+
+        if (window.tyfitProfile?.fetchProfile && window.tyfitProfile?.fetchUserAbout && window.tyfitProfile?.resolveProfileImage) {
+            const [profile, about] = await Promise.all([
+                window.tyfitProfile.fetchProfile(userId).catch(() => null),
+                window.tyfitProfile.fetchUserAbout(userId).catch(() => null)
+            ]);
+            return window.tyfitProfile.resolveProfileImage(profile, about) || defaultProfileAvatarSrc();
+        }
+
+        const [profileResult, aboutResult] = await Promise.all([
+            window.supabaseClient
+                .from('profiles')
+                .select('profile_picture_url')
+                .eq('id', userId)
+                .maybeSingle(),
+            window.supabaseClient
+                .from('user_about')
+                .select('avatar_key')
+                .eq('user_id', userId)
+                .maybeSingle()
+                .catch(() => ({ data: null }))
+        ]);
+
+        const picture = profileResult?.data?.profile_picture_url;
+        if (picture) {
+            if (/^https?:\/\//i.test(String(picture))) return picture;
+            const { data } = window.supabaseClient.storage.from('profile-images').getPublicUrl(picture);
+            return data?.publicUrl || defaultProfileAvatarSrc();
+        }
+
+        const avatarKey = aboutResult?.data?.avatar_key || 'avatar-5.svg';
+        return `${getRootPrefix()}assets/avatars/${avatarKey}`;
+    }
+
+    let profileAvatarHydratePromise = null;
+    function hydrateBottomNavProfileAvatar() {
+        const avatars = document.querySelectorAll('.tyfit-mobile-bottom-nav img.tyfit-mobile-profile-avatar');
+        if (!avatars.length) return;
+        if (!profileAvatarHydratePromise) {
+            profileAvatarHydratePromise = resolveCurrentProfileAvatar().catch(() => defaultProfileAvatarSrc());
+        }
+        profileAvatarHydratePromise.then((src) => {
+            document.querySelectorAll('.tyfit-mobile-bottom-nav img.tyfit-mobile-profile-avatar').forEach((avatar) => {
+                avatar.src = src || defaultProfileAvatarSrc();
+            });
+        });
+    }
+
+    window.tyfitHydrateBottomNavProfileAvatar = hydrateBottomNavProfileAvatar;
 
     function optimizeImages() {
         const images = document.querySelectorAll('img');
@@ -265,6 +342,35 @@
         showToast._t = setTimeout(() => toast.classList.remove('is-show'), 2200);
     }
 
+    function resolveModalTarget(target) {
+        if (!target) return null;
+        if (typeof target === 'string') return byId(target) || document.querySelector(target);
+        return target;
+    }
+
+    function openStandardModal(target) {
+        const modal = resolveModalTarget(target);
+        if (!modal) return;
+        modal.hidden = false;
+        modal.classList.remove('checkin-hidden', 'is-hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeStandardModal(target) {
+        const modal = resolveModalTarget(target);
+        if (!modal) return;
+        modal.hidden = true;
+        modal.classList.add('checkin-hidden', 'is-hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    window.tyfitStandardModal = {
+        open: openStandardModal,
+        close: closeStandardModal
+    };
+
     function getRootPrefix() {
         return window.location.pathname.includes('/portal/') ? '../' : '';
     }
@@ -304,10 +410,11 @@
             )).join(''),
             `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" data-nav-key="${navItems[2].key}" aria-label="Daily CheckIn">${phosphorIcon(navItems[2].icon, active === 'checkin' ? 'fill' : 'regular')}<span>${navItems[2].label}</span></a>`,
             navItems.slice(3).map((item) => (
-                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon, item.key === active ? 'fill' : 'regular')}<span>${item.label}</span></a>`
+                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${item.key === 'profile' ? profileAvatarMarkup() : phosphorIcon(item.icon, item.key === active ? 'fill' : 'regular')}<span>${item.label}</span></a>`
             )).join(''),
             '</nav>',
         ].join('');
+        hydrateBottomNavProfileAvatar();
     }
 
     function normalizeExistingBottomNav() {
@@ -522,6 +629,7 @@
         mountBottomNav();
         normalizeExistingBottomNav();
         applyPhosphorBottomNavIcons(document);
+        hydrateBottomNavProfileAvatar();
         mountFloatingAction();
         mountWeightModal();
         optimizeImages();

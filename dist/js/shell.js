@@ -8,6 +8,10 @@
     let iconRefreshRaf = null;
     let iconRefreshIdle = null;
     let loaderVisibleAt = 0;
+    const PHOSPHOR_CSS_ID = 'tyfitPhosphorIcons';
+    const PHOSPHOR_CSS_HREF = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css';
+    const PHOSPHOR_FILL_CSS_ID = 'tyfitPhosphorFillIcons';
+    const PHOSPHOR_FILL_CSS_HREF = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css';
 
     function mountPageLoader() {
         if (byId('tyfitPageLoader')) return;
@@ -97,6 +101,143 @@
 
     // Expose a shared, throttled icon refresh for other page scripts.
     window.tyfitRefreshIcons = refreshIcons;
+
+    function ensurePhosphorIcons() {
+        if (!document.getElementById(PHOSPHOR_CSS_ID)) {
+            const link = document.createElement('link');
+            link.id = PHOSPHOR_CSS_ID;
+            link.rel = 'stylesheet';
+            link.href = PHOSPHOR_CSS_HREF;
+            document.head.appendChild(link);
+        }
+
+        if (!document.getElementById(PHOSPHOR_FILL_CSS_ID)) {
+            const fillLink = document.createElement('link');
+            fillLink.id = PHOSPHOR_FILL_CSS_ID;
+            fillLink.rel = 'stylesheet';
+            fillLink.href = PHOSPHOR_FILL_CSS_HREF;
+            document.head.appendChild(fillLink);
+        }
+    }
+
+    function phosphorIcon(name, weight = 'regular') {
+        const family = weight === 'fill' ? 'ph-fill' : 'ph';
+        return `<i class="${family} ${name}" aria-hidden="true"></i>`;
+    }
+
+    function escapeAttr(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function defaultProfileAvatarSrc() {
+        return `${getRootPrefix()}assets/avatars/avatar-5.svg`;
+    }
+
+    function profileAvatarMarkup(src) {
+        return `<img class="tyfit-mobile-profile-avatar" src="${escapeAttr(src || defaultProfileAvatarSrc())}" alt="Profile">`;
+    }
+
+    function getBottomNavIconClass(key) {
+        const icons = {
+            home: 'ph-house',
+            diet: 'ph-fork-knife',
+            checkin: 'ph-clipboard-text',
+            training: 'ph-barbell',
+            profile: 'ph-user-circle'
+        };
+        return icons[key] || 'ph-circle';
+    }
+
+    function getBottomNavKeyFromLink(link) {
+        const label = link?.querySelector('span')?.textContent?.trim().toLowerCase() || '';
+        const href = link?.getAttribute('href') || '';
+        if (label === 'home' || href.includes('index.html')) return 'home';
+        if (label === 'diet chart' || href.includes('diet_chart.html')) return 'diet';
+        if (label === 'checkin' || label === 'daily checkin' || href.includes('daily_checkin.html')) return 'checkin';
+        if (label === 'training' || href.includes('training_plan.html')) return 'training';
+        if (label === 'profile' || href.includes('profile.html')) return 'profile';
+        return '';
+    }
+
+    function applyPhosphorBottomNavIcons(root) {
+        ensurePhosphorIcons();
+        const nav = root?.matches?.('.tyfit-mobile-bottom-nav') ? root : (root || document).querySelector?.('.tyfit-mobile-bottom-nav');
+        if (!nav) return;
+        nav.querySelectorAll('a, button').forEach((item) => {
+            const key = item.dataset.navKey || getBottomNavKeyFromLink(item);
+            if (!key) return;
+            item.dataset.navKey = key;
+            item.querySelectorAll('i[data-lucide], svg[data-lucide], svg.lucide, img.tyfit-mobile-profile-avatar, i.ph, i.ph-fill').forEach((icon) => icon.remove());
+            item.insertAdjacentHTML(
+                'afterbegin',
+                key === 'profile'
+                    ? profileAvatarMarkup()
+                    : phosphorIcon(getBottomNavIconClass(key), item.classList.contains('is-active') ? 'fill' : 'regular')
+            );
+        });
+        hydrateBottomNavProfileAvatar();
+    }
+
+    window.tyfitApplyPhosphorBottomNavIcons = applyPhosphorBottomNavIcons;
+
+    async function resolveCurrentProfileAvatar() {
+        if (!window.supabaseClient?.auth) return defaultProfileAvatarSrc();
+        const { data: { session } = {} } = await window.supabaseClient.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return defaultProfileAvatarSrc();
+
+        if (window.tyfitProfile?.fetchProfile && window.tyfitProfile?.fetchUserAbout && window.tyfitProfile?.resolveProfileImage) {
+            const [profile, about] = await Promise.all([
+                window.tyfitProfile.fetchProfile(userId).catch(() => null),
+                window.tyfitProfile.fetchUserAbout(userId).catch(() => null)
+            ]);
+            return window.tyfitProfile.resolveProfileImage(profile, about) || defaultProfileAvatarSrc();
+        }
+
+        const [profileResult, aboutResult] = await Promise.all([
+            window.supabaseClient
+                .from('profiles')
+                .select('profile_picture_url')
+                .eq('id', userId)
+                .maybeSingle(),
+            window.supabaseClient
+                .from('user_about')
+                .select('avatar_key')
+                .eq('user_id', userId)
+                .maybeSingle()
+                .catch(() => ({ data: null }))
+        ]);
+
+        const picture = profileResult?.data?.profile_picture_url;
+        if (picture) {
+            if (/^https?:\/\//i.test(String(picture))) return picture;
+            const { data } = window.supabaseClient.storage.from('profile-images').getPublicUrl(picture);
+            return data?.publicUrl || defaultProfileAvatarSrc();
+        }
+
+        const avatarKey = aboutResult?.data?.avatar_key || 'avatar-5.svg';
+        return `${getRootPrefix()}assets/avatars/${avatarKey}`;
+    }
+
+    let profileAvatarHydratePromise = null;
+    function hydrateBottomNavProfileAvatar() {
+        const avatars = document.querySelectorAll('.tyfit-mobile-bottom-nav img.tyfit-mobile-profile-avatar');
+        if (!avatars.length) return;
+        if (!profileAvatarHydratePromise) {
+            profileAvatarHydratePromise = resolveCurrentProfileAvatar().catch(() => defaultProfileAvatarSrc());
+        }
+        profileAvatarHydratePromise.then((src) => {
+            document.querySelectorAll('.tyfit-mobile-bottom-nav img.tyfit-mobile-profile-avatar').forEach((avatar) => {
+                avatar.src = src || defaultProfileAvatarSrc();
+            });
+        });
+    }
+
+    window.tyfitHydrateBottomNavProfileAvatar = hydrateBottomNavProfileAvatar;
 
     function optimizeImages() {
         const images = document.querySelectorAll('img');
@@ -201,6 +342,35 @@
         showToast._t = setTimeout(() => toast.classList.remove('is-show'), 2200);
     }
 
+    function resolveModalTarget(target) {
+        if (!target) return null;
+        if (typeof target === 'string') return byId(target) || document.querySelector(target);
+        return target;
+    }
+
+    function openStandardModal(target) {
+        const modal = resolveModalTarget(target);
+        if (!modal) return;
+        modal.hidden = false;
+        modal.classList.remove('checkin-hidden', 'is-hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeStandardModal(target) {
+        const modal = resolveModalTarget(target);
+        if (!modal) return;
+        modal.hidden = true;
+        modal.classList.add('checkin-hidden', 'is-hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    window.tyfitStandardModal = {
+        open: openStandardModal,
+        close: closeStandardModal
+    };
+
     function getRootPrefix() {
         return window.location.pathname.includes('/portal/') ? '../' : '';
     }
@@ -209,7 +379,7 @@
         const page = document.body?.dataset?.page || '';
         if (page === 'home') return 'home';
         if (page === 'diet-chart') return 'diet';
-        if (page === 'daily-checkin') return 'checkin';
+        if (page === 'daily-checkin' || page === 'checkin-goals' || page === 'checkin-summary') return 'checkin';
         if (page === 'training-plan') return 'training';
         if (page === 'journey') return 'profile';
         if (page === 'profile' || page === 'profile-edit' || page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') {
@@ -225,24 +395,26 @@
         const prefix = getRootPrefix();
         const active = getActiveBottomNavKey();
         const navItems = [
-            { key: 'home', href: `${prefix}index.html`, icon: 'home', label: 'Home' },
-            { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'salad', label: 'Diet Chart' },
-            { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'clipboard-check', label: 'CheckIn' },
-            { key: 'training', href: `${prefix}training_plan.html`, icon: 'dumbbell', label: 'Training' },
-            { key: 'profile', href: `${prefix}profile.html`, icon: 'user', label: 'Profile' },
+            { key: 'home', href: `${prefix}index.html`, icon: 'ph-house', label: 'Home' },
+            { key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'ph-fork-knife', label: 'Diet Chart' },
+            { key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'ph-clipboard-text', label: 'CheckIn' },
+            { key: 'training', href: `${prefix}training_plan.html`, icon: 'ph-barbell', label: 'Training' },
+            { key: 'profile', href: `${prefix}profile.html`, icon: 'ph-user-circle', label: 'Profile' },
         ];
 
+        ensurePhosphorIcons();
         placeholder.outerHTML = [
             '<nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">',
             navItems.slice(0, 2).map((item) => (
-                `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
+                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${phosphorIcon(item.icon, item.key === active ? 'fill' : 'regular')}<span>${item.label}</span></a>`
             )).join(''),
-            `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" aria-label="Daily CheckIn"><i data-lucide="${navItems[2].icon}"></i><span>${navItems[2].label}</span></a>`,
+            `<a href="${navItems[2].href}" class="tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}" data-nav-key="${navItems[2].key}" aria-label="Daily CheckIn">${phosphorIcon(navItems[2].icon, active === 'checkin' ? 'fill' : 'regular')}<span>${navItems[2].label}</span></a>`,
             navItems.slice(3).map((item) => (
-                `<a href="${item.href}"${item.key === active ? ' class="is-active"' : ''}><i data-lucide="${item.icon}"></i><span>${item.label}</span></a>`
+                `<a href="${item.href}" data-nav-key="${item.key}"${item.key === active ? ' class="is-active"' : ''}>${item.key === 'profile' ? profileAvatarMarkup() : phosphorIcon(item.icon, item.key === active ? 'fill' : 'regular')}<span>${item.label}</span></a>`
             )).join(''),
             '</nav>',
         ].join('');
+        hydrateBottomNavProfileAvatar();
     }
 
     function normalizeExistingBottomNav() {
@@ -254,14 +426,18 @@
         const checkin = document.createElement('a');
         checkin.href = `${prefix}daily_checkin.html`;
         checkin.className = `tyfit-checkin-nav-btn${active === 'checkin' ? ' is-active' : ''}`;
+        checkin.dataset.navKey = 'checkin';
         checkin.setAttribute('aria-label', 'Daily CheckIn');
-        checkin.innerHTML = '<i data-lucide="clipboard-check"></i><span>CheckIn</span>';
+        checkin.innerHTML = `${phosphorIcon('ph-clipboard-text', active === 'checkin' ? 'fill' : 'regular')}<span>CheckIn</span>`;
         quick.replaceWith(checkin);
+        applyPhosphorBottomNavIcons(nav);
     }
 
     function shouldMountFloatingAction() {
         const page = document.body?.dataset?.page || '';
         if (page === 'daily-checkin' || page === 'checkin-success') return false;
+        if (page === 'checkin-goals') return false;
+        if (page === 'diet-chart' || page === 'training-plan') return false;
         if (page === 'profile' || page === 'profile-edit') return false;
         if (page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') return false;
         return true;
@@ -452,6 +628,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         mountBottomNav();
         normalizeExistingBottomNav();
+        applyPhosphorBottomNavIcons(document);
+        hydrateBottomNavProfileAvatar();
         mountFloatingAction();
         mountWeightModal();
         optimizeImages();

@@ -1066,8 +1066,8 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
     grid-template-columns: 44px minmax(0, 1fr) 44px;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.92);
-    border-bottom: 1px solid rgba(231, 228, 255, 0.72);
+    /* background: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid rgba(231, 228, 255, 0.72); */
     box-shadow: 0 8px 24px rgba(17, 24, 39, 0.035);
 }
 
@@ -2189,12 +2189,19 @@ body[data-page="home"] .tyfit-motivation-right {
 }
 
 .tyfit-mobile-profile-avatar {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 999px;
     object-fit: cover;
-    border: 2px solid rgba(15, 23, 42, 0.18);
+    border: 1.5px solid rgba(108, 99, 255, 0.24);
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(17, 24, 39, 0.1);
     display: block;
+}
+
+.tyfit-mobile-bottom-nav a.is-active .tyfit-mobile-profile-avatar {
+    border-color: rgba(108, 99, 255, 0.5);
+    box-shadow: 0 5px 14px rgba(108, 99, 255, 0.18);
 }
 
 .tyfit-mobile-bottom-nav a i,
@@ -2329,6 +2336,7 @@ body[data-page="home"] .tyfit-motivation-right {
 }
 
 .tyfit-floating-plus {
+    position: relative;
     width: 58px;
     height: 58px;
     border: 0;
@@ -2344,9 +2352,39 @@ body[data-page="home"] .tyfit-motivation-right {
         0 8px 16px rgba(17, 24, 39, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.28);
     transition: transform .28s cubic-bezier(.2, .8, .2, 1), box-shadow .28s ease, filter .28s ease;
+    overflow: visible;
+}
+
+.tyfit-floating-plus::before,
+.tyfit-floating-plus::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    border-radius: 2px;
+    transform: rotate(45deg);
+}
+
+.tyfit-floating-plus::before {
+    top: 7px;
+    right: 4px;
+    width: 7px;
+    height: 7px;
+    background: rgba(255, 255, 255, 0.78);
+    box-shadow: -50px 39px 0 -2px rgba(139, 124, 255, 0.34);
+}
+
+.tyfit-floating-plus::after {
+    left: 2px;
+    bottom: 9px;
+    width: 5px;
+    height: 5px;
+    background: rgba(244, 231, 255, 0.72);
+    box-shadow: 53px -39px 0 -1px rgba(255, 255, 255, 0.52);
 }
 
 .tyfit-floating-plus svg {
+    position: relative;
+    z-index: 1;
     width: 28px;
     height: 28px;
     stroke-width: 2.5;
@@ -2704,6 +2742,11 @@ body[data-page="home"] .tyfit-motivation-right {
 }
 
 @media (max-width: 767px) {
+    body[data-page="diet-chart"] .tp-hero-header,
+    body[data-page="training-plan"] .tp-hero-header {
+        display: none !important;
+    }
+
     .tyfit-main {
         padding-inline: 18px;
         width: 100%;
@@ -2985,6 +3028,11 @@ body[data-page="home"] .tyfit-motivation-right {
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
+    body[data-page="diet-chart"] .tp-hero-header,
+    body[data-page="training-plan"] .tp-hero-header {
+        display: none !important;
+    }
+
     .tyfit-mobile-topbar .tyfit-logo-img {
         width: 46px;
     }
@@ -4319,8 +4367,9 @@ body[data-page="home"] .tyfit-journey-home-card.is-loading {
 }
 
 body[data-page="home"] .tyfit-journey-home-title {
-    font-size: clamp(28px, 4vw, 36px);
-    line-height: 1.04;
+    font-size: 34px;
+    line-height: 1.02;
+    font-weight: 650;
     letter-spacing: 0;
 }
 
@@ -4437,7 +4486,9 @@ body[data-page="home"] .tyfit-journey-meta-grid strong {
     }
 
     body[data-page="home"] .tyfit-journey-home-title {
-        font-size: 27px;
+        font-size: 26px;
+        line-height: 1.04;
+        font-weight: 620;
     }
 
     body[data-page="home"] .tyfit-journey-home-actions {
@@ -4557,7 +4608,8 @@ body[data-page="home"] .tyfit-journey-meta-grid strong {
     }
 
     body[data-page="home"] .tyfit-journey-home-title {
-        font-size: 25px;
+        font-size: 24px;
+        line-height: 1.05;
     }
 
     body[data-page="home"] .tyfit-journey-home-text {
@@ -4807,8 +4859,9 @@ body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-cta sv
 
     body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-journey-home-title {
         max-width: 100%;
-        font-size: clamp(18px, 6.6vw, 18px);
-        line-height: 0.95;
+        font-size: 18px;
+        line-height: 1.02;
+        font-weight: 620;
     }
 
     body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-chips {
@@ -4862,7 +4915,7 @@ body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-cta sv
 
     body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-journey-home-title {
         max-width: 100%;
-        font-size: clamp(17px, 6.8vw, 18px);
+        font-size: 17px;
     }
 
     body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-chips {
@@ -4922,7 +4975,7 @@ body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-cta sv
     }
 
     body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-journey-home-title {
-        font-size: clamp(16px, 6.8vw, 21px);
+        font-size: 16px;
     }
 
     body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-cta {
