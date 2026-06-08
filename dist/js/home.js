@@ -1292,6 +1292,10 @@ async function renderHeroCheckinRing(userId) {
 
 document.addEventListener("DOMContentLoaded", async () => {
     bindShellInteractions();
+    const requestedCalculator = new URLSearchParams(window.location.search).get("calculator");
+    if (requestedCalculator && ["bmr", "macro", "goal"].includes(requestedCalculator)) {
+        setTimeout(() => openCalculatorModal(requestedCalculator), 120);
+    }
     await hydrateNameFromProfile();
     await refreshHomeAuthState();
     applySidebarTooltipData();

@@ -36,6 +36,15 @@
         }
     }
 
+    function syncTopbarSaveButton() {
+        const button = el("checkinTopbarSaveBtn");
+        if (!button) return;
+        const isActive = Boolean(STATE.hasPendingChanges && !STATE.isSaving);
+        button.disabled = !isActive;
+        button.classList.toggle("is-active", isActive);
+        button.textContent = STATE.isSaving ? "Saving" : "Save";
+    }
+
     function showToast(message) {
         const toast = el("appToast");
         if (!toast) return;
@@ -232,6 +241,7 @@
             }
             STATE.goalInputs = { ...STATE.goalInputs, ...draft.goalInputs };
             STATE.hasPendingChanges = true;
+            syncTopbarSaveButton();
             return true;
         } catch (error) {
             console.warn("restore checkin draft warning:", error?.message || error);
@@ -260,6 +270,7 @@
 
     function markPendingChanges() {
         STATE.hasPendingChanges = true;
+        syncTopbarSaveButton();
         persistDraft();
         clearAutosaveTimer();
         STATE.autosaveTimer = setTimeout(() => {
@@ -813,9 +824,11 @@
     async function loadCheckinForDate() {
         clearAutosaveTimer();
         STATE.hasPendingChanges = false;
+        syncTopbarSaveButton();
 
         if (!STATE.targetUserId) {
             STATE.checkinId = "";
+            syncTopbarSaveButton();
             const submitWithoutTarget = el("submitCheckinBtn");
             if (submitWithoutTarget) {
                 submitWithoutTarget.innerHTML = '<i data-lucide="save"></i> Save Check-in';
@@ -849,6 +862,7 @@
                 });
             }, AUTOSAVE_DELAY_MS);
         }
+        syncTopbarSaveButton();
 
         const submit = el("submitCheckinBtn");
         if (submit) {
@@ -961,6 +975,7 @@
         }
 
         STATE.isSaving = true;
+        syncTopbarSaveButton();
 
         try {
             const payload = STATE.goals.map((goal) => {
@@ -1043,6 +1058,7 @@
 
             clearAutosaveTimer();
             STATE.hasPendingChanges = false;
+            syncTopbarSaveButton();
             STATE.lastSavedAt = Date.now();
             clearDraft();
 
@@ -1064,6 +1080,7 @@
             renderDateStrip();
         } finally {
             STATE.isSaving = false;
+            syncTopbarSaveButton();
         }
     }
 
@@ -1229,6 +1246,18 @@
         const submit = el("submitCheckinBtn");
         if (submit) {
             submit.addEventListener("click", async () => {
+                await saveCheckin({
+                    redirectOnSuccess: false,
+                    showSuccessToast: true,
+                    isAutosave: false
+                });
+            });
+        }
+
+        const topbarSave = el("checkinTopbarSaveBtn");
+        if (topbarSave) {
+            topbarSave.addEventListener("click", async () => {
+                if (topbarSave.disabled) return;
                 await saveCheckin({
                     redirectOnSuccess: false,
                     showSuccessToast: true,

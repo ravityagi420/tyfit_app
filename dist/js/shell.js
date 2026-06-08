@@ -250,6 +250,34 @@
         });
     }
 
+    function initBackToTopButtons() {
+        const buttons = Array.from(document.querySelectorAll('.back-to-top'));
+        if (!buttons.length) return;
+
+        const syncVisibility = () => {
+            const visible = window.scrollY > 220;
+            buttons.forEach((button) => {
+                button.classList.toggle('is-visible', visible);
+                button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+            });
+        };
+
+        buttons.forEach((button) => {
+            button.setAttribute('role', 'button');
+            button.setAttribute('aria-label', button.getAttribute('aria-label') || 'Back to top');
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, true);
+        });
+
+        window.addEventListener('scroll', syncVisibility, { passive: true });
+        window.addEventListener('resize', syncVisibility, { passive: true });
+        syncVisibility();
+    }
+
     function observeDynamicIcons() {
         const root = byId('tyfitLayout') || document.body;
         if (!root || typeof MutationObserver === 'undefined') return;
@@ -278,6 +306,12 @@
         const layout = byId('tyfitLayout');
         if (layout) layout.classList.toggle('sidebar-collapsed');
         document.body.classList.toggle('sidebar-collapsed');
+        const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+        const button = byId('sidebarCollapseBtn');
+        if (button) {
+            button.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+            button.setAttribute('aria-label', isCollapsed ? 'Show sidebar' : 'Hide sidebar');
+        }
     }
 
     function openMobileDrawer() {
@@ -374,6 +408,50 @@
     function getRootPrefix() {
         return window.location.pathname.includes('/portal/') ? '../' : '';
     }
+
+    function getSidebarActiveKey() {
+        const page = document.body?.dataset?.page || '';
+        if (page === 'home') return 'home';
+        if (page === 'diet-chart') return 'diet';
+        if (page === 'daily-checkin' || page === 'checkin-goals' || page === 'checkin-summary' || page === 'checkin-success') return 'checkin';
+        if (page === 'training-plan') return 'training';
+        if (page === 'profile' || page === 'profile-edit') return 'profile';
+        if (page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') return 'settings';
+        return '';
+    }
+
+    function sidebarItem({ key, href, icon, label, attrs = '' }) {
+        const activeClass = key === getSidebarActiveKey() ? ' active' : '';
+        return `<a href="${href}" class="sidebar-nav-item${activeClass}" data-sidebar-key="${key}"${attrs}><i data-lucide="${icon}"></i><span>${label}</span></a>`;
+    }
+
+    function renderSharedSidebarMenus() {
+        const prefix = getRootPrefix();
+        const calculatorHref = (type) => document.body?.dataset?.page === 'home' ? '#' : `${prefix}index.html?calculator=${type}`;
+        const calculatorAttrs = (type, title) => ` data-calculator="${type}" data-calculator-title="${title}"`;
+        const menuHtml = [
+            '<p class="sidebar-section-label">MAIN</p>',
+            sidebarItem({ key: 'home', href: `${prefix}index.html`, icon: 'home', label: 'Home' }),
+            sidebarItem({ key: 'diet', href: `${prefix}portal/diet_chart.html`, icon: 'clipboard-list', label: 'Diet Chart' }),
+            sidebarItem({ key: 'checkin', href: `${prefix}daily_checkin.html`, icon: 'clipboard-check', label: 'Daily Check-In' }),
+            sidebarItem({ key: 'training', href: `${prefix}training_plan.html`, icon: 'dumbbell', label: 'Training Plan' }),
+            '<hr class="sidebar-divider">',
+            '<p class="sidebar-section-label">TOOLS</p>',
+            sidebarItem({ key: 'bmr', href: calculatorHref('bmr'), icon: 'calculator', label: 'BMR Calculator', attrs: calculatorAttrs('bmr', 'BMR Calculator') }),
+            sidebarItem({ key: 'macro', href: calculatorHref('macro'), icon: 'pie-chart', label: 'Macro Calculator', attrs: calculatorAttrs('macro', 'Macro Calculator') }),
+            sidebarItem({ key: 'goal', href: calculatorHref('goal'), icon: 'target', label: 'Goal Calculator', attrs: calculatorAttrs('goal', 'Goal Calculator') }),
+            '<hr class="sidebar-divider">',
+            '<p class="sidebar-section-label">ACCOUNT</p>',
+            sidebarItem({ key: 'profile', href: `${prefix}profile.html`, icon: 'user', label: 'Profile' }),
+            sidebarItem({ key: 'settings', href: `${prefix}privacy-data.html`, icon: 'settings', label: 'Settings' })
+        ].join('');
+
+        document.querySelectorAll('.tyfit-sidebar .sidebar-menu, .tyfit-mobile-drawer .sidebar-menu').forEach((menu) => {
+            menu.innerHTML = menuHtml;
+        });
+    }
+
+    window.tyfitRenderSharedSidebarMenus = renderSharedSidebarMenus;
 
     function getActiveBottomNavKey() {
         const page = document.body?.dataset?.page || '';
@@ -627,12 +705,14 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         mountBottomNav();
+        renderSharedSidebarMenus();
         normalizeExistingBottomNav();
         applyPhosphorBottomNavIcons(document);
         hydrateBottomNavProfileAvatar();
         mountFloatingAction();
         mountWeightModal();
         optimizeImages();
+        initBackToTopButtons();
 
         document.querySelectorAll('.tyfit-sidebar .sidebar-nav-item').forEach((item) => {
             const label = item.querySelector('span')?.textContent?.trim();
@@ -659,7 +739,10 @@
         const desktopAccountMenu = byId('desktopAccountMenu');
         const desktopAccountWrap = byId('desktopAccountWrap') || desktopAccountBtn?.closest('.tyfit-dropdown-wrap');
 
-        if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener('click', toggleSidebar);
+        if (sidebarCollapseBtn) {
+            sidebarCollapseBtn.setAttribute('aria-expanded', document.body.classList.contains('sidebar-collapsed') ? 'false' : 'true');
+            sidebarCollapseBtn.addEventListener('click', toggleSidebar);
+        }
         if (mobileMenuBtn)      mobileMenuBtn.addEventListener('click', openMobileDrawer);
         if (mobileDrawerClose)  mobileDrawerClose.addEventListener('click', closeMobileDrawer);
         if (mobileDrawerBack)   mobileDrawerBack.addEventListener('click', closeMobileDrawer);

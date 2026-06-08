@@ -3979,6 +3979,54 @@ body[data-page="daily-checkin"] .checkin-selected-date {
 body[data-page="daily-checkin"] .checkin-goal-settings-btn {
     flex-shrink: 0;
     margin-left: auto;
+    background: rgba(108, 99, 255, 0.08);
+    border-color: rgba(108, 99, 255, 0.12);
+}
+
+body[data-page="daily-checkin"] .checkin-goal-settings-btn:hover {
+    background: rgba(108, 99, 255, 0.12);
+    border-color: rgba(108, 99, 255, 0.18);
+}
+
+@media (min-width: 768px) {
+    body[data-page="daily-checkin"] .checkin-week-nav-row {
+        gap: 12px;
+        padding-top: 14px;
+    }
+
+    body[data-page="daily-checkin"] .checkin-week-pill,
+    body[data-page="daily-checkin"] .checkin-goal-settings-btn {
+        height: 42px;
+        min-height: 42px;
+        border-radius: 16px;
+        padding-inline: 15px;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 560;
+    }
+
+    body[data-page="daily-checkin"] .checkin-week-pill i,
+    body[data-page="daily-checkin"] .checkin-week-pill svg,
+    body[data-page="daily-checkin"] .checkin-goal-settings-btn i,
+    body[data-page="daily-checkin"] .checkin-goal-settings-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+@media (min-width: 1024px) {
+    body[data-page="daily-checkin"] .checkin-week-nav-row {
+        padding-top: 18px;
+    }
+
+    body[data-page="daily-checkin"] .checkin-week-pill,
+    body[data-page="daily-checkin"] .checkin-goal-settings-btn {
+        height: 46px;
+        min-height: 46px;
+        border-radius: 18px;
+        padding-inline: 18px;
+        font-size: 14px;
+    }
 }
 
 body[data-page="daily-checkin"] .checkin-floating-action {

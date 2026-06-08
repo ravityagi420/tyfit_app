@@ -12,14 +12,15 @@
     <link rel="manifest" href="/site.webmanifest">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="css/premium-ui.css?v=20260608-action-avatar" rel="stylesheet">
-    <link href="css/checkin.css?v=20260608-checkin-refine" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
+    <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
+    <link href="css/checkin.css?v=20260608-checkin-save" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="daily-checkin">
     <header class="tyfit-mobile-topbar tyfit-subpage-topbar">
         <a class="tyfit-subpage-back-btn" href="index.html" aria-label="Back to Home"><i data-lucide="arrow-left"></i></a>
         <h1 class="tyfit-subpage-title">Check-In</h1>
-        <span class="tyfit-subpage-topbar-spacer" aria-hidden="true"></span>
+        <button type="button" class="tyfit-subpage-save-btn" id="checkinTopbarSaveBtn" disabled>Save</button>
     </header>
 
     <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
@@ -229,7 +230,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260608-action-avatar"></script>
-    <script src="js/daily_checkin.js?v=20260608-checkin-refine"></script>
+    <script src="js/shell.js?v=20260608-sidebar-module"></script>
+    <script src="js/daily_checkin.js?v=20260608-checkin-save"></script>
 </body>
 </html>

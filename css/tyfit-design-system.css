@@ -834,6 +834,38 @@ body[data-page="profile-edit"] .tyfit-photo-card.tyfit-ui-section {
     overflow: visible;
 }
 
+body[data-page="profile-edit"] .tyfit-ig-avatar-wrap {
+    isolation: isolate;
+    padding: 12px;
+}
+
+body[data-page="profile-edit"] .tyfit-ig-avatar-wrap::before,
+body[data-page="profile-edit"] .tyfit-ig-avatar-wrap::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    border-radius: 999px;
+}
+
+body[data-page="profile-edit"] .tyfit-ig-avatar-wrap::before {
+    inset: 0;
+    background:
+        radial-gradient(circle at 28% 24%, rgba(108, 99, 255, 0.18), rgba(108, 99, 255, 0) 42%),
+        radial-gradient(circle at 78% 74%, rgba(34, 197, 94, 0.14), rgba(34, 197, 94, 0) 38%),
+        linear-gradient(145deg, rgba(243, 238, 255, 0.72), rgba(255, 255, 255, 0));
+    transform: rotate(-8deg);
+}
+
+body[data-page="profile-edit"] .tyfit-ig-avatar-wrap::after {
+    width: 34px;
+    height: 34px;
+    right: 1px;
+    top: 4px;
+    background: linear-gradient(145deg, rgba(139, 124, 255, 0.2), rgba(96, 165, 250, 0.08));
+    filter: blur(1px);
+}
+
 body[data-page="profile-edit"] .tyfit-photo-card .tyfit-ig-photo-row {
     flex-direction: column;
     justify-content: center;

@@ -1120,6 +1120,43 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
     display: block;
 }
 
+.tyfit-subpage-save-btn {
+    justify-self: end;
+    min-width: 54px;
+    height: 34px;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(108, 99, 255, 0.14);
+    color: #6C63FF;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 650;
+    letter-spacing: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tyfit-subpage-save-btn:disabled {
+    cursor: default;
+    color: #A7ADBC;
+    background: rgba(148, 163, 184, 0.12);
+    opacity: 1;
+}
+
+.tyfit-subpage-save-btn.is-active {
+    background: rgba(108, 99, 255, 0.22);
+    color: #5146E8;
+}
+
+.tyfit-subpage-save-btn.is-active:active {
+    transform: scale(0.96);
+}
+
 .tyfit-mobile-logo-center {
     display: inline-flex;
     align-items: center;
@@ -1273,6 +1310,34 @@ body[data-page="home"] #motivationCard {
     width: 13px;
     height: 13px;
     stroke-width: 2.1;
+}
+
+@media (min-width: 768px) {
+    .tyfit-hero-badge {
+        height: 34px;
+        gap: 8px;
+        padding: 0 15px;
+        font-size: 13px;
+        font-weight: 550;
+    }
+
+    .tyfit-hero-badge svg {
+        width: 15px;
+        height: 15px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .tyfit-hero-badge {
+        height: 38px;
+        padding: 0 18px;
+        font-size: 14px;
+    }
+
+    .tyfit-hero-badge svg {
+        width: 16px;
+        height: 16px;
+    }
 }
 
 .tyfit-hero-title {
@@ -2355,33 +2420,6 @@ body[data-page="home"] .tyfit-motivation-right {
     overflow: visible;
 }
 
-.tyfit-floating-plus::before,
-.tyfit-floating-plus::after {
-    content: "";
-    position: absolute;
-    pointer-events: none;
-    border-radius: 2px;
-    transform: rotate(45deg);
-}
-
-.tyfit-floating-plus::before {
-    top: 7px;
-    right: 4px;
-    width: 7px;
-    height: 7px;
-    background: rgba(255, 255, 255, 0.78);
-    box-shadow: -50px 39px 0 -2px rgba(139, 124, 255, 0.34);
-}
-
-.tyfit-floating-plus::after {
-    left: 2px;
-    bottom: 9px;
-    width: 5px;
-    height: 5px;
-    background: rgba(244, 231, 255, 0.72);
-    box-shadow: 53px -39px 0 -1px rgba(255, 255, 255, 0.52);
-}
-
 .tyfit-floating-plus svg {
     position: relative;
     z-index: 1;
@@ -3097,6 +3135,11 @@ body[data-page="home"] .tyfit-motivation-right {
 
     .tyfit-sidebar > .sidebar-inner {
         padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
     }
 
     .tyfit-sidebar-head {
@@ -3107,6 +3150,24 @@ body[data-page="home"] .tyfit-motivation-right {
         min-height: 52px;
         margin-bottom: 8px;
         flex-shrink: 0;
+    }
+
+    .tyfit-sidebar .sidebar-menu {
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 2px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(108, 99, 255, 0.24) transparent;
+    }
+
+    .tyfit-sidebar .sidebar-menu::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .tyfit-sidebar .sidebar-menu::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: rgba(108, 99, 255, 0.24);
     }
 
     .tyfit-sidebar .tyfit-logo-img {
@@ -3361,6 +3422,12 @@ body[data-page="home"] .tyfit-motivation-right {
 
     body.sidebar-collapsed .tyfit-sidebar > .sidebar-inner {
         padding: 18px 10px;
+        overflow: visible;
+    }
+
+    body.sidebar-collapsed .tyfit-sidebar .sidebar-menu {
+        overflow: visible;
+        padding-right: 0;
     }
 
     body.sidebar-collapsed .tyfit-sidebar .sidebar-section-label,
@@ -4732,6 +4799,34 @@ body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-badge 
 body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-badge svg {
     width: 16px;
     height: 16px;
+}
+
+@media (min-width: 768px) {
+    body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-badge {
+        height: 36px;
+        padding: 0 17px;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 720;
+    }
+
+    body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-badge svg {
+        width: 17px;
+        height: 17px;
+    }
+}
+
+@media (min-width: 1024px) {
+    body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-badge {
+        height: 40px;
+        padding: 0 20px;
+        font-size: 13px;
+    }
+
+    body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-hero-badge svg {
+        width: 18px;
+        height: 18px;
+    }
 }
 
 body[data-page="home"] .tyfit-journey-home-card.is-onboarding .tyfit-journey-home-title {
