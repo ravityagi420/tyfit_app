@@ -308,7 +308,7 @@ function openDietChartInputModal(options = {}) {
     confirmLabelEl.textContent = options.confirmLabel || "Save";
     inputEl.placeholder = options.placeholder || "Enter diet chart name";
     inputEl.value = normalizeDietChartName(options.defaultValue || "");
-    inputEl.maxLength = 60;
+    inputEl.maxLength = maxLength;
     helperEl.textContent = "Maximum 12 characters";
     errorEl.hidden = true;
     errorEl.textContent = "";
@@ -329,7 +329,9 @@ function openDietChartInputModal(options = {}) {
             confirmBtn.removeEventListener("click", onConfirm);
             overlay.removeEventListener("click", onBackdropClick);
             inputEl.removeEventListener("keydown", onKeydown);
+            inputEl.removeEventListener("beforeinput", onBeforeInput);
             inputEl.removeEventListener("input", onInput);
+            inputEl.removeEventListener("paste", onPaste);
         };
 
         const finish = (value) => {
@@ -368,12 +370,40 @@ function openDietChartInputModal(options = {}) {
         const onInput = () => {
             const normalized = normalizeDietChartName(inputEl.value);
             if (normalized.length > maxLength) {
+                inputEl.value = normalized.slice(0, maxLength);
                 showError("Max 12 characters allowed.");
                 return;
             }
 
             errorEl.hidden = true;
             errorEl.textContent = "";
+        };
+
+        const onBeforeInput = (event) => {
+            if (event.inputType && event.inputType.startsWith("delete")) {
+                return;
+            }
+
+            const start = inputEl.selectionStart ?? inputEl.value.length;
+            const end = inputEl.selectionEnd ?? inputEl.value.length;
+            const nextValue = `${inputEl.value.slice(0, start)}${event.data || ""}${inputEl.value.slice(end)}`;
+
+            if (normalizeDietChartName(nextValue).length > maxLength) {
+                event.preventDefault();
+                showError("Max 12 characters allowed.");
+            }
+        };
+
+        const onPaste = (event) => {
+            const pastedText = event.clipboardData?.getData("text") || "";
+            const start = inputEl.selectionStart ?? inputEl.value.length;
+            const end = inputEl.selectionEnd ?? inputEl.value.length;
+            const nextValue = normalizeDietChartName(`${inputEl.value.slice(0, start)}${pastedText}${inputEl.value.slice(end)}`);
+            if (nextValue.length > maxLength) {
+                event.preventDefault();
+                inputEl.value = nextValue.slice(0, maxLength);
+                showError("Max 12 characters allowed.");
+            }
         };
 
         const onBackdropClick = (event) => {
@@ -399,7 +429,9 @@ function openDietChartInputModal(options = {}) {
         confirmBtn.addEventListener("click", onConfirm);
         overlay.addEventListener("click", onBackdropClick);
         inputEl.addEventListener("keydown", onKeydown);
+        inputEl.addEventListener("beforeinput", onBeforeInput);
         inputEl.addEventListener("input", onInput);
+        inputEl.addEventListener("paste", onPaste);
     });
 }
 
@@ -587,6 +619,30 @@ function hideLoadingSpinner() {
     }
 }
 
+function showDietChartSectionLoading() {
+    const editorEl = getEl("dietChartEditor");
+    const viewEl = getEl("dietChartView");
+    const emptyStateEl = getEl("dietChartEmptyState");
+
+    if (editorEl) {
+        editorEl.style.display = "none";
+    }
+    if (emptyStateEl) {
+        emptyStateEl.style.display = "none";
+    }
+    if (viewEl) {
+        viewEl.style.display = "block";
+        viewEl.innerHTML = `
+            <div class="diet-chart-section-loader" role="status" aria-live="polite">
+                <div class="diet-chart-section-loader__head shimmer"></div>
+                <div class="diet-chart-section-loader__macro shimmer"></div>
+                <div class="diet-chart-section-loader__meal shimmer"></div>
+                <div class="diet-chart-section-loader__meal shimmer"></div>
+            </div>
+        `;
+    }
+}
+
 function setDietPagePending(isPending) {
     document.body.classList.remove("diet-auth-pending");
     window.requestAnimationFrame(() => {
@@ -643,7 +699,6 @@ function renderDietChartSelector() {
     strip.innerHTML = charts.length > 0
         ? charts.map((chart, index) => {
             const active = String(chart.id) === String(DIET_STATE.selectedChartId) ? "is-active" : "";
-            const createdLabel = formatChartCreatedLabel(chart.created_at);
             const iconName = planIcons[index % planIcons.length];
             const fullName = getDietChartName(chart, index);
             const accent = getDietPlanAccent(index);
@@ -653,9 +708,8 @@ function renderDietChartSelector() {
             return `<div class="tp-plan-card-wrap">
                 <button type="button" class="tp-plan-card ${active}" data-chart-id="${chart.id}" title="${escapeHtml(fullName)}" style="--diet-accent:${accent};--diet-accent-soft:${accentSoft};--diet-accent-line:${accentLine};">
                     <span class="diet-plan-icon" aria-hidden="true"><i data-lucide="${iconName}"></i></span>
-                    <strong>${escapeHtml(formatDietChartDisplayName(fullName))}</strong>
-                    <span class="diet-plan-meta">
-                        ${createdLabel ? `<small class="diet-plan-date"><i data-lucide="calendar-days" class="diet-plan-date-icon"></i>${escapeHtml(createdLabel)}</small>` : ""}
+                    <span class="diet-plan-copy">
+                        <strong>${escapeHtml(formatDietChartDisplayName(fullName))}</strong>
                     </span>
                 </button>
                 ${isPinnedReadOnly
@@ -1778,7 +1832,7 @@ function renderDietChartView(chartData) {
                                 </div>
                             </div>
                             <div class="diet-view-item-macros">
-                                <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C:${formatMacro(computed.carbs)} g</span>
+                                <span class="diet-view-macro carbs"><i data-lucide="wheat"></i> C:${formatMacro(computed.carbs)} g</span>
                                 <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P:${formatMacro(computed.protein)} g</span>
                                 <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F:${formatMacro(computed.fats)} g</span>
                                 ${canEditChart
@@ -1926,7 +1980,7 @@ function renderDietChartView(chartData) {
     }
 
     function isDietMealMobileMenuMode() {
-        return window.matchMedia("(max-width: 767px)").matches;
+        return window.matchMedia("(max-width: 991px)").matches;
     }
 
     function startViewMealInlineRename(mealIndex) {
@@ -1963,9 +2017,9 @@ function renderDietChartView(chartData) {
                         <button type="button" class="tp-plan-card-sheet-close" data-meal-sheet-close aria-label="Close"><i data-lucide="x"></i></button>
                     </div>
                     <div class="tp-plan-card-sheet-actions">
-                        <button type="button" class="tp-plan-card-sheet-btn" data-meal-sheet-action="replacement"><i class="fa fa-random"></i> Replacement</button>
-                        <button type="button" class="tp-plan-card-sheet-btn" data-meal-sheet-action="rename"><i class="fa fa-pencil-alt"></i> Rename</button>
-                        <button type="button" class="tp-plan-card-sheet-btn tp-plan-card-sheet-btn--danger" data-meal-sheet-action="delete"><i class="fa fa-trash-alt"></i> Delete</button>
+                        <button type="button" class="tp-plan-card-sheet-btn" data-meal-sheet-action="replacement"><i data-lucide="repeat-2"></i> Replacement</button>
+                        <button type="button" class="tp-plan-card-sheet-btn" data-meal-sheet-action="rename"><i data-lucide="pencil-line"></i> Rename</button>
+                        <button type="button" class="tp-plan-card-sheet-btn tp-plan-card-sheet-btn--danger" data-meal-sheet-action="delete"><i data-lucide="trash-2"></i> Delete</button>
                     </div>
                 </section>
             </div>
@@ -2595,17 +2649,14 @@ async function renderFoodCatalogModalList(searchTerm = "") {
                         <div class="diet-catalog-pick-body">
                             <div class="diet-catalog-pick-title">
                                 <span class="diet-catalog-pick-name">${escapeHtml(food.food_name || "Unnamed Food")}</span>
-                                <span class="diet-catalog-ref-qty">${formatMacro(initialQty)}&thinsp;${unit}</span>
                             </div>
                             <div class="diet-catalog-pick-macros">
-                                <span class="diet-view-macro carbs"><i class="fa fa-bolt"></i> C: ${formatMacro(carbs)} g</span>
+                                <span class="diet-view-macro carbs"><i data-lucide="wheat"></i> C: ${formatMacro(carbs)} g</span>
                                 <span class="diet-view-macro protein"><i class="fa fa-dumbbell"></i> P: ${formatMacro(protein)} g</span>
                                 <span class="diet-view-macro fats"><i class="fa fa-tint"></i> F: ${formatMacro(fats)} g</span>
                             </div>
                         </div>
-                        <div class="diet-catalog-pick-aside">
-                            <div class="diet-catalog-pick-calories">${formatMacro(calories)} kcal</div>
-                        </div>
+                        <div class="diet-catalog-pick-calories">${formatMacro(calories)} kcal</div>
                     </div>
                     <div class="diet-catalog-pick-footer">
                         <div class="diet-catalog-qty-row">
@@ -3607,7 +3658,7 @@ function addMeal(mealData = {}) {
             <div class="diet-food-rows"></div>
             <div class="diet-meal-footer mt-3">
                 <div class="diet-total-chips diet-meal-totals">
-                    <span class="diet-total-chip carbs" data-total="carbs"><i class="fa fa-bolt"></i> Carbs 0 gms</span>
+                    <span class="diet-total-chip carbs" data-total="carbs"><i data-lucide="wheat"></i> Carbs 0 gms</span>
                     <span class="diet-total-chip protein" data-total="protein"><i class="fa fa-dumbbell"></i> Protein 0 gms</span>
                     <span class="diet-total-chip fats" data-total="fat"><i class="fa fa-tint"></i> Fats 0 gms</span>
                     <span class="diet-total-chip calories" data-total="calories"><i class="fa fa-fire"></i> Calories 0 kcal</span>
@@ -3666,7 +3717,7 @@ function addFoodRow(mealElement, rowData = null) {
         </div>
         <div class="diet-food-ref-text text-muted small">Reference data not set</div>
         <div class="diet-row-total-chips">
-            <span class="diet-mini-chip carbs" data-value="carbs"><i class="fa fa-bolt"></i> 0 gms</span>
+            <span class="diet-mini-chip carbs" data-value="carbs"><i data-lucide="wheat"></i> 0 gms</span>
             <span class="diet-mini-chip protein" data-value="protein"><i class="fa fa-dumbbell"></i> 0 gms</span>
             <span class="diet-mini-chip fats" data-value="fat"><i class="fa fa-tint"></i> 0 gms</span>
             <span class="diet-mini-chip calories" data-value="calories"><i class="fa fa-fire"></i> 0 kcal</span>
@@ -4716,14 +4767,12 @@ function bindDietChartEvents() {
             renderDietChartSelector();
             closeDietChartActionsMenu();
             hidePageStatus();
-            showLoadingSpinner();
+            showDietChartSectionLoading();
             try {
                 await loadAndRenderDietChart(nextChartId);
             } catch (error) {
                 console.error("chart switch error:", error);
                 showPageStatus(error.message || "Failed to load selected diet chart.", "danger");
-            } finally {
-                hideLoadingSpinner();
             }
         });
 

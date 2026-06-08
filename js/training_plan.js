@@ -34,6 +34,22 @@ const TP = {
   historyBound: false,
 };
 
+window.tyfitTrainingAI = {
+  getContext() {
+    const selectedPlan = TP.plans.find((plan) => String(plan.id) === String(TP.selectedPlanId)) || null;
+    return {
+      currentUserId: TP.currentUserId,
+      selectedUserId: targetUserId(),
+      selectedUserMeta: TP.users.find((user) => String(user.id) === String(targetUserId())) || {},
+      plan: selectedPlan,
+      days: TP.days,
+      exercisesByDay: TP.exercisesByDay,
+      exerciseCatalog: TP.catalog.slice(0, 250),
+      workoutLogs: TP.workoutLogs.slice(0, 10),
+    };
+  },
+};
+
 const BODY_PARTS = ["All", "Chest", "Back", "Shoulders", "Arms", "Legs", "Core", "Full Body"];
 const MAX_TRAINING_PLANS = 3;
 const TP_HISTORY_MARKER = "training-plan";

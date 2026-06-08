@@ -936,6 +936,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     color: #9a3412;
     white-space: nowrap;
     flex-shrink: 0;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
 }
 
 .diet-catalog-pick-macros {
@@ -1260,6 +1264,14 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     padding: 0 22px;
 }
 
+#customFoodModal .food-form-actions .btn svg,
+#addFoodModal .food-form-actions .btn svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    stroke-width: 2.2;
+}
+
 #customFoodModal .food-form-actions .btn-primary,
 #addFoodModal .food-form-actions .btn-primary,
 #selectFoodModal .food-modal-footer .btn-outline-primary {
@@ -1274,6 +1286,131 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     border: 1px solid #e6ecf5;
     background: #ffffff;
     color: #344054;
+}
+
+#customFoodModal .diet-custom-food-form {
+    gap: 0;
+    padding: 0;
+    overflow: visible;
+}
+
+#customFoodModal .diet-custom-food-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 18px;
+    margin-bottom: 14px;
+}
+
+#customFoodModal .tyfit-standard-field--full {
+    grid-column: 1 / -1;
+}
+
+#customFoodModal .tyfit-standard-field {
+    min-height: 72px;
+    padding-top: 10px;
+}
+
+#customFoodModal .tyfit-standard-field .tyfit-ui-unit-control {
+    display: contents;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+#customFoodModal .tyfit-standard-field::after {
+    left: 42px;
+}
+
+#customFoodModal .tyfit-standard-input,
+#customFoodModal .tyfit-standard-select {
+    height: 40px;
+    min-height: 40px;
+    padding-right: 34px;
+    font-size: 14px;
+    font-weight: 440;
+    color: #111827;
+}
+
+#customFoodModal .tyfit-ui-unit {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    align-self: center;
+    min-width: auto;
+    height: 24px;
+    padding: 0 0 0 10px;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #8b95a7;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+#customFoodModal .tyfit-ui-unit-control .tyfit-standard-input {
+    padding-right: 48px;
+}
+
+#customFoodModal .diet-custom-food-fields .tyfit-standard-field:nth-child(1) .tyfit-ui-icon-tile {
+    background: #f0edff;
+    color: #6c63ff;
+}
+
+#customFoodModal .diet-custom-food-fields .tyfit-standard-field:nth-child(2) .tyfit-ui-icon-tile {
+    background: #ecfdf3;
+    color: #0f9d58;
+}
+
+#customFoodModal .diet-custom-food-fields .tyfit-standard-field:nth-child(3) .tyfit-ui-icon-tile {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+#customFoodModal .diet-custom-food-fields .tyfit-standard-field:nth-child(4) .tyfit-ui-icon-tile {
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+#customFoodModal .diet-custom-food-fields .tyfit-standard-field:nth-child(5) .tyfit-ui-icon-tile {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+#customFoodModal .diet-custom-food-fields .tyfit-standard-field:nth-child(6) .tyfit-ui-icon-tile {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+#customFoodModal .diet-custom-food-fields .tyfit-standard-field:nth-child(7) .tyfit-ui-icon-tile {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+#customFoodModal .food-modal-note {
+    border-color: rgba(108, 99, 255, 0.16);
+    background: rgba(108, 99, 255, 0.07);
+    color: #5046e5;
+}
+
+#customFoodModal .food-form-actions .btn-primary,
+#addFoodModal .food-form-actions .btn-primary,
+#selectFoodModal .food-modal-footer .btn-outline-primary {
+    background: linear-gradient(145deg, #6c63ff, #554bf5);
+    border-color: transparent;
+    color: #ffffff;
+}
+
+#customFoodModal .custom-food-switch input:checked + .custom-food-slider {
+    background-color: #6c63ff;
+}
+
+@media (max-width: 767.98px) {
+    #customFoodModal .diet-custom-food-fields {
+        grid-template-columns: 1fr;
+        column-gap: 0;
+    }
 }
 
 .catalog-search-row {
@@ -1374,6 +1511,7 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     font-size: 15px;
     font-weight: 600;
     color: #101828;
+    padding-right: 86px;
 }
 
 .diet-catalog-ref-qty {
@@ -1404,6 +1542,10 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     background: #f2f4f7;
     border-radius: 999px;
     padding: 5px 10px;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
 }
 
 .diet-catalog-pick-footer {
@@ -1602,6 +1744,7 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 
     .diet-catalog-pick-main {
         grid-template-columns: auto 1fr;
+        position: relative;
     }
 
     .diet-catalog-pick-aside {
@@ -2186,10 +2329,11 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     position: relative;
     z-index: 1;
     width: min(92vw, 440px);
-    border-radius: 18px;
+    border-radius: 22px;
     background: #ffffff;
-    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.26);
-    padding: 14px;
+    box-shadow: 0 22px 58px rgba(15, 23, 42, 0.22);
+    padding: 18px;
+    border: 1px solid rgba(231, 228, 255, 0.95);
 }
 
 .tp-plan-card-sheet-head {
@@ -2202,8 +2346,8 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 
 .tp-plan-card-sheet-title {
     margin: 0;
-    font-size: 15px;
-    font-weight: 400;
+    font-size: 16px;
+    font-weight: 600;
     color: #1A1F36;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -2227,18 +2371,18 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 
 .tp-plan-card-sheet-btn {
     width: 100%;
-    border: 1px solid #dbe4ef;
-    border-radius: 12px;
+    border: 1px solid rgba(231, 228, 255, 0.9);
+    border-radius: 16px;
     background: #ffffff;
-    color: #334155;
-    font-size: 15px;
-    font-weight: 400;
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 600;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    justify-content: center;
-    padding: 12px;
+    justify-content: flex-start;
+    padding: 13px 14px;
     cursor: pointer;
 }
 
@@ -2255,15 +2399,53 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 }
 
 @media (min-width: 768px) {
-    .tp-plan-card-sheet {
+    #dietChartCardActionSheet {
         display: none !important;
     }
 }
 
+@media (max-width: 991px) {
+    .tp-plan-card-sheet {
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .tp-plan-card-sheet-backdrop {
+        background: rgba(17, 24, 39, 0.44);
+        backdrop-filter: blur(8px);
+    }
+
+    .tp-plan-card-sheet-panel {
+        width: 100%;
+        max-height: min(82vh, 520px);
+        overflow-y: auto;
+        border-radius: 28px 28px 0 0;
+        padding: 24px 18px calc(18px + env(safe-area-inset-bottom));
+        box-shadow: 0 -22px 58px rgba(15, 23, 42, 0.18);
+    }
+
+    .tp-plan-card-sheet-panel::before {
+        content: "";
+        position: absolute;
+        top: 9px;
+        left: 50%;
+        width: 46px;
+        height: 5px;
+        transform: translateX(-50%);
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.42);
+    }
+
+    .tp-plan-card-sheet-title {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 .diet-plan-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
+    width: 28px;
+    height: 28px;
+    border-radius: 11px;
     background: var(--diet-accent-soft);
     color: var(--diet-accent);
     display: inline-flex;
@@ -2272,26 +2454,29 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 }
 
 .diet-plan-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
     stroke-width: 2.1;
     fill: none;
     stroke: currentColor;
 }
 
-.diet-chart-strip .tp-plan-card strong {
-    font-size: 13px;
-    font-weight: 500;
-    color: #0f172a;
-    line-height: 1.2;
+.diet-plan-copy {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
 }
 
-.diet-plan-meta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 18px;
+.diet-chart-strip .tp-plan-card strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 124px;
+    font-size: 14px;
+    font-weight: 650;
+    color: #0f172a;
+    line-height: 1.2;
 }
 
 .diet-plan-current-badge {
@@ -2306,56 +2491,39 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     padding: 4px 7px;
 }
 
-.diet-plan-date {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    color: #64748b;
-    font-weight: 600;
-}
-
-.diet-plan-date-icon {
-    width: 11px;
-    height: 11px;
-    stroke-width: 2;
-}
-
 .diet-chart-strip .tp-plan-card:hover {
     border-color: var(--diet-accent);
-    box-shadow: none;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
     transform: translateY(-1px);
 }
 
 .diet-chart-strip .tp-plan-card.is-active {
     border-color: var(--diet-accent-line);
     background: var(--diet-accent-soft);
-    box-shadow: none;
-    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 24px rgba(108, 99, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.diet-chart-strip .tp-plan-card.is-active .diet-plan-icon {
+    background: rgba(255, 255, 255, 0.74);
+    color: var(--diet-accent);
 }
 
 .diet-chart-strip .tp-plan-card.tp-plan-create {
-    border: none;
-    color: #334155;
-    background: transparent;
-    padding-left: 8px;
-    padding-right: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+    min-width: 126px;
+    border: 1px dashed rgba(108, 99, 255, 0.28);
+    color: #5046e5;
+    background: rgba(247, 244, 255, 0.72);
+    padding: 11px 12px;
 }
 
 .diet-chart-strip .tp-plan-card.tp-plan-create .diet-plan-icon {
-    margin: 0;
+    margin-bottom: 4px;
 }
 
 .diet-chart-strip .tp-plan-card.tp-plan-create strong {
-    line-height: 1;
-}
-
-.diet-chart-strip .tp-plan-card.tp-plan-create strong {
-    color: #0f172a;
+    color: #5046e5;
+    line-height: 1.15;
 }
 
 .diet-chart-strip-empty {
@@ -2805,6 +2973,47 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     margin: 0;
     font-size: 12px;
     font-weight: 600;
+}
+
+.diet-chart-section-loader {
+    display: grid;
+    gap: 14px;
+    padding: 6px 0 18px;
+}
+
+.diet-chart-section-loader .shimmer {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    background: linear-gradient(110deg, #f4f2ff 8%, #ffffff 18%, #f4f2ff 33%);
+    background-size: 220% 100%;
+    border: 1px solid rgba(231, 228, 255, 0.72);
+    box-shadow: 0 14px 34px rgba(108, 99, 255, 0.07);
+    animation: dietSectionShimmer 1.15s linear infinite;
+}
+
+.diet-chart-section-loader__head {
+    height: 42px;
+    width: min(360px, 100%);
+    justify-self: center;
+}
+
+.diet-chart-section-loader__macro {
+    height: 146px;
+}
+
+.diet-chart-section-loader__meal {
+    height: 138px;
+}
+
+@keyframes dietSectionShimmer {
+    0% {
+        background-position: 160% 0;
+    }
+
+    100% {
+        background-position: -80% 0;
+    }
 }
 
 .diet-view-container {
@@ -3365,21 +3574,24 @@ body[data-page="diet-chart"] .tp-page-subtitle {
 .diet-view-add-meal-btn {
     display: inline-flex;
     align-items: center;
-    padding: 12px 28px;
-    border-radius: 999px;
-    border: 2px dashed #cbd5e1;
-    background: transparent;
-    color: #64748b;
-    font-size: 15px;
-    font-weight: 700;
+    gap: 8px;
+    padding: 13px 24px;
+    border-radius: 18px;
+    border: 1px dashed rgba(108, 99, 255, 0.36);
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.08), rgba(255, 255, 255, 0.9));
+    color: #5046e5;
+    font-size: 14px;
+    font-weight: 720;
     letter-spacing: 0.01em;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    box-shadow: 0 12px 24px rgba(108, 99, 255, 0.07);
+    transition: border-color 0.2s, color 0.2s, transform 0.2s ease;
 }
 
 .diet-view-add-meal-btn:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
+    transform: translateY(-1px);
+    border-color: rgba(108, 99, 255, 0.58);
+    color: #5046e5;
 }
 
 .diet-meal-replacement-overlay[hidden] {
@@ -4407,20 +4619,30 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     background: rgba(248, 250, 252, 0.9);
 }
 
+.diet-view-macro svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.2;
+}
+
 .diet-view-macro.carbs {
     color: #c05621;
+    background: rgba(249, 115, 22, 0.07);
 }
 
 .diet-view-macro.protein {
     color: #15803d;
+    background: rgba(34, 197, 94, 0.07);
 }
 
 .diet-view-macro.fats {
     color: #1d4ed8;
+    background: rgba(59, 130, 246, 0.07);
 }
 
 .diet-view-macro.fibre {
     color: #7c3aed;
+    background: rgba(124, 58, 237, 0.07);
 }
 
 .diet-view-meal-totals {
@@ -4860,7 +5082,15 @@ body[data-page="diet-chart"] .tp-page-subtitle {
     }
 
     .diet-view-meal-totals {
-        display: none;
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+
+    .diet-view-meal-total-chip {
+        font-size: 12px;
+        padding: 5px 8px;
     }
 
     .diet-view-item-actions .diet-item-delete-btn {
@@ -4936,55 +5166,6 @@ body[data-page="diet-chart"] .tp-page-subtitle {
    ============================================ */
 
 @media (max-width: 768px) {
-    .diet-chart-strip {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-        overflow-x: visible;
-        padding-bottom: 0;
-    }
-
-    .tp-plan-card-wrap {
-        width: 100%;
-        min-width: 0;
-    }
-
-    .diet-chart-strip .tp-plan-card {
-        width: 100%;
-        min-width: 0;
-        padding: 10px 8px;
-        border-radius: 12px;
-    }
-
-    .diet-chart-strip .tp-plan-card strong {
-        font-size: 11px;
-    }
-
-    .diet-chart-strip .tp-plan-card.tp-plan-create {
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-
-    .diet-plan-icon {
-        width: 32px;
-        height: 32px;
-    }
-
-    .diet-plan-icon svg {
-        width: 15px;
-        height: 15px;
-    }
-
-    .diet-plan-date {
-        font-size: 10px;
-        gap: 3px;
-    }
-
-    .diet-chart-strip .tp-plan-card.tp-plan-create {
-        width: 100%;
-        padding: 10px 8px;
-    }
-
     .admin-tab-bar .nav-link {
         padding: 12px 15px;
         font-size: 14px;
@@ -5566,16 +5747,50 @@ body.food-page-ready .tyfit-sidebar-toggle-floating {
 }
 
 .tybot-entry-card {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    position: relative;
+    display: flex;
     align-items: center;
-    gap: 14px;
-    margin: -4px 0 18px;
-    padding: 14px 16px;
-    border: 1px solid rgba(231, 228, 255, 0.95);
-    border-radius: 22px;
-    background: linear-gradient(135deg, #ffffff 0%, #faf9ff 100%);
-    box-shadow: 0 16px 38px rgba(108, 99, 255, 0.08);
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 60px;
+    margin: -2px 0 14px;
+    padding: 11px 14px;
+    border: 1px solid rgba(108, 99, 255, 0.18);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at 88% 12%, rgba(139, 124, 255, 0.16), transparent 30%),
+        linear-gradient(135deg, #ffffff 0%, #f7f4ff 100%);
+    box-shadow: 0 10px 24px rgba(108, 99, 255, 0.08);
+    cursor: pointer;
+    overflow: hidden;
+    user-select: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.tybot-entry-card::after {
+    content: "";
+    position: absolute;
+    right: 44px;
+    top: 9px;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(108, 99, 255, 0.24);
+    box-shadow:
+        -17px 27px 0 rgba(108, 99, 255, 0.1),
+        16px 26px 0 rgba(34, 197, 94, 0.11);
+    pointer-events: none;
+}
+
+.tybot-entry-card:hover {
+    border-color: rgba(108, 99, 255, 0.28);
+    box-shadow: 0 16px 32px rgba(108, 99, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.tybot-entry-card:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.12), 0 14px 30px rgba(108, 99, 255, 0.1);
 }
 
 .tybot-entry-avatar,
@@ -5590,6 +5805,33 @@ body.food-page-ready .tyfit-sidebar-toggle-floating {
     background: linear-gradient(145deg, #ffffff, #f0edff);
     border: 1px solid #e7e4ff;
     box-shadow: 0 12px 24px rgba(108, 99, 255, 0.12);
+}
+
+.tybot-entry-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    flex: 0 0 44px;
+    background: linear-gradient(145deg, #ffffff, #efeaff);
+    box-shadow: 0 10px 20px rgba(108, 99, 255, 0.12);
+}
+
+.tybot-entry-avatar::before {
+    top: 7px;
+    width: 17px;
+}
+
+.tybot-entry-avatar .tybot-entry-face {
+    width: 29px;
+    height: 23px;
+    gap: 5px;
+    margin-top: 7px;
+    border-radius: 9px;
+}
+
+.tybot-entry-avatar .tybot-entry-face span {
+    width: 4px;
+    height: 4px;
 }
 
 .tybot-entry-avatar::before,
@@ -5626,39 +5868,72 @@ body.food-page-ready .tyfit-sidebar-toggle-floating {
     background: #6c63ff;
 }
 
+.tybot-entry-copy {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.tybot-entry-title,
 .tybot-entry-copy h3 {
     margin: 0 0 3px;
     color: #111827;
-    font-size: 16px;
-    font-weight: 750;
+    font-size: 15px;
+    font-weight: 760;
     letter-spacing: 0;
+    line-height: 1.1;
+    white-space: nowrap;
 }
 
+.tybot-entry-subtitle,
 .tybot-entry-copy p {
     margin: 0;
     color: #667085;
     font-size: 12.5px;
     font-weight: 500;
     line-height: 1.35;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+.tybot-entry-sparkle {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: #8b7cff;
+}
+
+.tybot-entry-sparkle svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.2;
+}
+
+.tybot-entry-arrow,
 .tybot-entry-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    min-height: 40px;
-    padding: 0 14px;
-    border: 0;
-    border-radius: 14px;
-    background: linear-gradient(145deg, #6c63ff, #554bf5);
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 750;
-    box-shadow: 0 12px 22px rgba(108, 99, 255, 0.22);
-    cursor: pointer;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 999px;
+    background: rgba(108, 99, 255, 0.11);
+    color: #6c63ff;
 }
 
+.tybot-entry-arrow svg,
 .tybot-entry-btn svg {
     width: 16px;
     height: 16px;
@@ -6005,16 +6280,40 @@ body.food-page-ready .tyfit-sidebar-toggle-floating {
 
 @media (max-width: 767.98px) {
     .tybot-entry-card {
-        grid-template-columns: auto minmax(0, 1fr);
-        gap: 12px;
-        padding: 13px;
-        border-radius: 20px;
+        min-height: 60px;
+        padding: 9px 11px;
+        border-radius: 18px;
+        gap: 10px;
     }
 
-    .tybot-entry-btn {
-        grid-column: 1 / -1;
-        width: 100%;
-        min-height: 42px;
+    .tybot-entry-avatar {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+    }
+
+    .tybot-entry-copy {
+        display: grid;
+        gap: 2px;
+    }
+
+    .tybot-entry-title {
+        font-size: 14.5px;
+    }
+
+    .tybot-entry-subtitle {
+        display: block;
+        font-size: 11.2px;
+    }
+
+    .tybot-entry-sparkle {
+        display: none;
+    }
+
+    .tybot-entry-arrow {
+        width: 32px;
+        height: 32px;
+        flex-basis: 32px;
     }
 
     .tybot-backdrop {
@@ -6039,5 +6338,328 @@ body.food-page-ready .tyfit-sidebar-toggle-floating {
 
     .tybot-messages {
         padding: 14px;
+    }
+}
+
+@media (max-width: 374px) {
+    .tybot-entry-subtitle {
+        display: none;
+    }
+}
+
+/* Diet page standard modal surfaces */
+.diet-standard-modal .diet-standard-dialog {
+    max-width: 440px;
+}
+
+.diet-standard-modal .diet-standard-panel {
+    position: relative;
+    border: 1px solid rgba(231, 228, 255, 0.95);
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(17, 24, 39, 0.18);
+    overflow: hidden;
+}
+
+.diet-standard-modal .diet-standard-body {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: 26px 24px 14px;
+    text-align: center;
+}
+
+.diet-standard-danger-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    background: linear-gradient(135deg, rgba(254, 226, 226, 0.95), rgba(255, 247, 247, 0.95));
+}
+
+.diet-standard-danger-icon svg {
+    width: 23px;
+    height: 23px;
+    stroke-width: 2.3;
+}
+
+.diet-standard-modal h5 {
+    margin: 0;
+    color: #111827;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.diet-standard-modal p {
+    margin: 0;
+    max-width: 320px;
+    color: #667085;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.diet-standard-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 16px 20px 20px;
+    border-top: 0;
+}
+
+.diet-standard-btn {
+    min-height: 46px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+.diet-standard-btn--ghost {
+    border: 1px solid rgba(231, 228, 255, 0.95);
+    background: #ffffff;
+    color: #475569;
+}
+
+.diet-standard-btn--danger {
+    border: 1px solid rgba(239, 68, 68, 0.18);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    box-shadow: 0 14px 24px rgba(239, 68, 68, 0.18);
+}
+
+.diet-chart-input-overlay .tp-modal {
+    position: relative;
+    border: 1px solid rgba(231, 228, 255, 0.95);
+    border-radius: 24px;
+    box-shadow: 0 24px 70px rgba(17, 24, 39, 0.18);
+}
+
+.diet-chart-input-overlay .tp-modal-badge {
+    background: #f0edff;
+    color: #6C63FF;
+}
+
+.diet-chart-input-overlay .tp-modal-header {
+    border-bottom-color: rgba(231, 228, 255, 0.85);
+}
+
+.diet-chart-input-overlay .tp-modal-footer {
+    border-top-color: rgba(231, 228, 255, 0.85);
+}
+
+.diet-chart-input-overlay .tp-form-group {
+    position: relative;
+    gap: 6px;
+}
+
+.diet-chart-input-overlay .tp-form-group label {
+    color: #667085;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.diet-chart-input-overlay .tp-form-group input {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    border-bottom: 1px solid rgba(231, 228, 255, 0.95);
+    color: #111827;
+    padding: 0;
+    height: 46px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+.diet-chart-input-overlay .tp-form-group input:focus {
+    border-color: rgba(108, 99, 255, 0.45);
+    box-shadow: none;
+}
+
+.diet-chart-input-overlay .tp-btn {
+    border-radius: 16px;
+    height: 48px;
+}
+
+.diet-chart-input-overlay .tp-btn.tp-btn-primary {
+    background: linear-gradient(135deg, #6C63FF, #8B7CFF);
+    border-color: transparent;
+    box-shadow: 0 14px 28px rgba(108, 99, 255, 0.18);
+}
+
+.diet-chart-input-overlay .tp-modal-close:hover {
+    color: #6C63FF;
+    background: #f5f3ff;
+    border-color: rgba(108, 99, 255, 0.18);
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .modal-dialog {
+    max-width: 440px;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-content {
+    border: 1px solid rgba(231, 228, 255, 0.95);
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(17, 24, 39, 0.18);
+    overflow: hidden;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-header {
+    justify-content: center;
+    padding: 24px 24px 8px;
+    border-bottom: 0;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-title {
+    color: #111827;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-body {
+    padding: 6px 24px 14px;
+    text-align: center;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-message {
+    margin: 0 auto;
+    max-width: 320px;
+    color: #667085;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 16px 20px 20px;
+    border-top: 0;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-btn {
+    min-height: 46px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-btn.btn-primary {
+    background: linear-gradient(135deg, #6C63FF, #8B7CFF);
+    border-color: transparent;
+    box-shadow: 0 14px 28px rgba(108, 99, 255, 0.18);
+}
+
+body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-btn.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 14px 24px rgba(239, 68, 68, 0.18);
+}
+
+@media (max-width: 991px) {
+    .diet-standard-modal {
+        padding-right: 0 !important;
+    }
+
+    .diet-standard-modal .diet-standard-dialog {
+        display: flex;
+        align-items: flex-end;
+        min-height: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    .diet-standard-modal .diet-standard-panel {
+        width: 100%;
+        border-radius: 28px 28px 0 0;
+        border-bottom: 0;
+        box-shadow: 0 -22px 58px rgba(15, 23, 42, 0.18);
+    }
+
+    .diet-standard-modal .diet-standard-panel::before,
+    .diet-chart-input-overlay .tp-modal::before {
+        content: "";
+        position: absolute;
+        top: 9px;
+        left: 50%;
+        width: 46px;
+        height: 5px;
+        transform: translateX(-50%);
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.42);
+    }
+
+    .diet-standard-modal .diet-standard-body {
+        padding-top: 30px;
+    }
+
+    .diet-chart-input-overlay.tp-modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .diet-chart-input-overlay .tp-modal {
+        position: relative;
+        width: 100%;
+        max-width: none;
+        max-height: 86vh;
+        border-radius: 28px 28px 0 0;
+        border-bottom: 0;
+        box-shadow: 0 -22px 58px rgba(15, 23, 42, 0.18);
+    }
+
+    .diet-chart-input-overlay .tp-modal-header {
+        padding-top: 28px;
+    }
+
+    .diet-chart-input-overlay .tp-modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    body[data-page="diet-chart"] #tyfitDialogModal {
+        padding-right: 0 !important;
+    }
+
+    body[data-page="diet-chart"] #tyfitDialogModal .modal-dialog {
+        display: flex;
+        align-items: flex-end;
+        min-height: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-content {
+        position: relative;
+        width: 100%;
+        border-radius: 28px 28px 0 0;
+        border-bottom: 0;
+        box-shadow: 0 -22px 58px rgba(15, 23, 42, 0.18);
+    }
+
+    body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-content::before {
+        content: "";
+        position: absolute;
+        top: 9px;
+        left: 50%;
+        width: 46px;
+        height: 5px;
+        transform: translateX(-50%);
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.42);
+    }
+
+    body[data-page="diet-chart"] #tyfitDialogModal .tyfit-dialog-header {
+        padding-top: 30px;
     }
 }

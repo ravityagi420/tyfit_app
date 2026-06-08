@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
     <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
-    <link href="css/checkin.css?v=20260608-checkin-save" rel="stylesheet">
+    <link href="css/checkin.css?v=20260608-checkin-tablet-layout" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="daily-checkin">
     <header class="tyfit-mobile-topbar tyfit-subpage-topbar">
@@ -113,47 +113,49 @@
                         </button>
                     </div>
 
-                    <!-- Calendar Strip -->
-                    <section class="checkin-calendar-section">
-                        <div class="checkin-date-scroll" id="checkinDateStrip"></div>
-                    </section>
+                    <div class="checkin-top-progress-layout">
+                        <!-- Calendar Strip -->
+                        <section class="checkin-calendar-section">
+                            <div class="checkin-date-scroll" id="checkinDateStrip"></div>
+                        </section>
 
-                    <!-- 2. Today's Progress Card -->
-                    <section class="today-summary-card" id="progressCard">
-                        <h3 class="summary-card-title" id="progressCardTitle">Today's Progress</h3>
-                        <div class="summary-ring-section">
-                            <svg class="summary-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
-                                        <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
-                                    </linearGradient>
-                                </defs>
-                                <circle cx="60" cy="60" r="54" fill="none" stroke="#EEEAFE" stroke-width="12"/>
-                                <circle class="summary-ring-progress" id="checkinProgressRing" cx="60" cy="60" r="54" fill="none" stroke="url(#ringGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 339.29" transform="rotate(-90 60 60)"/>
-                                <text x="60" y="56" text-anchor="middle" class="summary-ring-value" id="checkinProgressPercent">0%</text>
-                                <text x="60" y="76" text-anchor="middle" class="summary-ring-label">Overall Score</text>
-                            </svg>
-                        </div>
+                        <!-- 2. Today's Progress Card -->
+                        <section class="today-summary-card" id="progressCard">
+                            <h3 class="summary-card-title" id="progressCardTitle">Today's Progress</h3>
+                            <div class="summary-ring-section">
+                                <svg class="summary-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#8B7CFF;stop-opacity:1" />
+                                            <stop offset="55%" style="stop-color:#6C63FF;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#5146E8;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="60" cy="60" r="54" fill="none" stroke="#EEEAFE" stroke-width="12"/>
+                                    <circle class="summary-ring-progress" id="checkinProgressRing" cx="60" cy="60" r="54" fill="none" stroke="url(#ringGradient)" stroke-width="12" stroke-linecap="round" stroke-dasharray="0 339.29" transform="rotate(-90 60 60)"/>
+                                    <text x="60" y="56" text-anchor="middle" class="summary-ring-value" id="checkinProgressPercent">0%</text>
+                                    <text x="60" y="76" text-anchor="middle" class="summary-ring-label">Overall Score</text>
+                                </svg>
+                            </div>
 
-                        <div class="summary-divider"></div>
+                            <div class="summary-divider"></div>
 
-                        <div class="summary-counts-section">
-                            <div class="summary-count">
-                                <div class="count-icon done"><i data-lucide="check"></i></div>
-                                <span class="count-number"><strong id="metricDone">0</strong> Done</span>
+                            <div class="summary-counts-section">
+                                <div class="summary-count">
+                                    <div class="count-icon done"><i data-lucide="check"></i></div>
+                                    <span class="count-number"><strong id="metricDone">0</strong> Done</span>
+                                </div>
+                                <div class="summary-count">
+                                    <div class="count-icon partial"><i data-lucide="plus"></i></div>
+                                    <span class="count-number"><strong id="metricPartial">0</strong> Partial</span>
+                                </div>
+                                <div class="summary-count">
+                                    <div class="count-icon missed"><i data-lucide="x"></i></div>
+                                    <span class="count-number"><strong id="metricMissed">0</strong> Missed</span>
+                                </div>
                             </div>
-                            <div class="summary-count">
-                                <div class="count-icon partial"><i data-lucide="plus"></i></div>
-                                <span class="count-number"><strong id="metricPartial">0</strong> Partial</span>
-                            </div>
-                            <div class="summary-count">
-                                <div class="count-icon missed"><i data-lucide="x"></i></div>
-                                <span class="count-number"><strong id="metricMissed">0</strong> Missed</span>
-                            </div>
-                        </div>
-                    </section>
+                        </section>
+                    </div>
 
                     <!-- 3. Check-in Goal Groups (rendered by JS) -->
                     <div id="checkinGroupsWrap" class="checkin-shell"></div>
@@ -230,7 +232,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260608-sidebar-module"></script>
+    <script src="js/shell.js?v=20260608-avatar-key-fix"></script>
     <script src="js/daily_checkin.js?v=20260608-checkin-save"></script>
 </body>
 </html>

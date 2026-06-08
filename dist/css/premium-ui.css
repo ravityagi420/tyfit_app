@@ -1122,12 +1122,12 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
 
 .tyfit-subpage-save-btn {
     justify-self: end;
-    min-width: 54px;
-    height: 34px;
+    min-width: 75px;
+    height: 40px;
     border: 0;
     border-radius: 12px;
-    background: rgba(108, 99, 255, 0.14);
-    color: #6C63FF;
+    background: linear-gradient(135deg, #6C63FF 0%, #8B7CFF 100%);
+    color: #F4F3FF;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 13px;
     line-height: 1;
@@ -1149,8 +1149,8 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
 }
 
 .tyfit-subpage-save-btn.is-active {
-    background: rgba(108, 99, 255, 0.22);
-    color: #5146E8;
+    background: linear-gradient(135deg, #6C63FF 0%, #8B7CFF 100%);
+    color: #F4F3FF;
 }
 
 .tyfit-subpage-save-btn.is-active:active {

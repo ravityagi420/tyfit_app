@@ -465,6 +465,362 @@ body[data-page="training-plan"] .tyfit-main-inner {
 
 /* Main days */
 .tp-days-panel { display: block; }
+
+.tybot-entry-card,
+.tybot-sheet,
+.tybot-plan-card,
+.tybot-replacement-card {
+  font-family: var(--tp-font);
+}
+
+.tybot-entry-card {
+  width: 100%;
+  min-height: 62px;
+  margin: -6px 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgba(108, 99, 255, 0.18);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f7f4ff 100%);
+  box-shadow: 0 10px 24px rgba(108, 99, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.tybot-entry-avatar,
+.tybot-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #ffffff, #f0edff);
+  border: 1px solid rgba(108, 99, 255, 0.16);
+  color: #6c63ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 -8px 16px rgba(108, 99, 255, 0.06);
+}
+
+.tybot-entry-face,
+.tybot-face {
+  width: 24px;
+  height: 16px;
+  border-radius: 9px;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.tybot-entry-face span,
+.tybot-face span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tybot-entry-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: grid;
+  gap: 2px;
+}
+
+.tybot-entry-copy h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 720;
+  line-height: 1.15;
+}
+
+.tybot-entry-copy p {
+  margin: 0;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 520;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tybot-entry-sparkle {
+  color: #8b7cff;
+  opacity: 0.8;
+}
+
+.tybot-entry-sparkle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tybot-entry-arrow {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(108, 99, 255, 0.1);
+  color: #6c63ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tybot-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1090;
+  background: rgba(17, 24, 39, 0.45);
+  backdrop-filter: blur(7px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.tybot-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tybot-sheet {
+  position: fixed;
+  z-index: 1091;
+  right: 24px;
+  bottom: 24px;
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(720px, calc(100vh - 64px));
+  min-height: 560px;
+  border-radius: 28px;
+  border: 1px solid #e7e4ff;
+  background: #ffffff;
+  box-shadow: 0 28px 72px rgba(17, 24, 39, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(18px) scale(0.98);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.tybot-sheet.is-open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tybot-header,
+.tybot-composer {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+}
+
+.tybot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(231, 228, 255, 0.9);
+}
+
+.tybot-header-main {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.tybot-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 780;
+}
+
+.tybot-header p {
+  margin: 2px 0 0;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tybot-close {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #e7e4ff;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #667085;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tybot-messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfaff 100%);
+}
+
+.tybot-message {
+  max-width: 84%;
+  border-radius: 18px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 520;
+}
+
+.tybot-message--user {
+  align-self: flex-end;
+  background: linear-gradient(145deg, #6c63ff, #554bf5);
+  color: #ffffff;
+}
+
+.tybot-message--bot {
+  align-self: flex-start;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e7e4ff;
+  box-shadow: 0 10px 24px rgba(108, 99, 255, 0.06);
+}
+
+.tybot-quick-actions,
+.tybot-card-list {
+  display: grid;
+  gap: 8px;
+}
+
+.tybot-quick-action {
+  min-height: 42px;
+  border: 1px solid #e7e4ff;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #5046e5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 720;
+  cursor: pointer;
+}
+
+.tybot-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid rgba(231, 228, 255, 0.9);
+}
+
+.tybot-composer input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #e7e4ff;
+  border-radius: 16px;
+  padding: 0 14px;
+  background: #fbfaff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+}
+
+.tybot-composer button {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #6c63ff, #554bf5);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tybot-typing {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.tybot-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #8b7cff;
+  animation: tpTybotPulse 900ms ease-in-out infinite;
+}
+
+.tybot-typing span:nth-child(2) { animation-delay: 120ms; }
+.tybot-typing span:nth-child(3) { animation-delay: 240ms; }
+
+@keyframes tpTybotPulse {
+  0%, 100% { opacity: 0.45; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
+}
+
+@media (max-width: 767.98px) {
+  .tybot-entry-card {
+    min-height: 60px;
+    padding: 9px 11px;
+    border-radius: 18px;
+  }
+
+  .tybot-entry-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .tybot-entry-copy h3 {
+    font-size: 14.5px;
+  }
+
+  .tybot-entry-copy p {
+    font-size: 11.2px;
+  }
+
+  .tybot-entry-sparkle {
+    display: none;
+  }
+
+  .tybot-entry-arrow {
+    width: 32px;
+    height: 32px;
+  }
+
+  .tybot-sheet {
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 85vh;
+    min-height: 85vh;
+    border-radius: 28px 28px 0 0;
+    border-bottom: 0;
+    transform: translateY(100%);
+  }
+
+  .tybot-sheet.is-open {
+    transform: translateY(0);
+  }
+}
+
 .tp-section-row,
 .tp-days-header {
   display: flex;
@@ -551,17 +907,17 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-day-sub { margin:0; font-size: 13.5px; color: var(--tp-muted); }
 .tp-day-log-btn,
 .tp-day-summary-log-btn {
-  border: 0;
-  border-radius: 999px;
-  min-height: 36px;
-  padding: 0 13px;
+  border: 1px solid rgba(108, 99, 255, 0.18);
+  border-radius: 14px;
+  min-height: 38px;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: #fff;
-  background: linear-gradient(135deg, #6C63FF, #8B7CFF);
-  box-shadow: 0 12px 22px rgba(108, 99, 255, .2);
+  color: #5046e5;
+  background: rgba(108, 99, 255, 0.1);
+  box-shadow: none;
   font: inherit;
   font-size: 12.5px;
   font-weight: 650;
@@ -693,25 +1049,25 @@ body[data-page="training-plan"] .tyfit-main-inner {
 }
 .tp-add-day-card {
   min-height: 0;
-  border: 2px dashed #cbd5e1;
-  background: transparent;
-  border-radius: 999px;
-  color: #64748b;
+  border: 1px dashed rgba(108, 99, 255, 0.36);
+  background: linear-gradient(135deg, rgba(108, 99, 255, 0.08), rgba(255, 255, 255, 0.9));
+  border-radius: 18px;
+  color: #5046e5;
   display: inline-flex;
   align-items:center; justify-content:center;
   gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 720;
   letter-spacing: 0.01em;
   cursor:pointer; transition: all .18s ease;
   width: auto;
-  padding: 12px 28px;
-  box-shadow: none;
+  padding: 13px 24px;
+  box-shadow: 0 12px 24px rgba(108, 99, 255, 0.07);
 }
 .tp-add-day-card:hover {
   transform: translateY(-1px);
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: rgba(108, 99, 255, 0.58);
+  color: #5046e5;
 }
 .tp-add-day-card svg { width: 18px; height:18px; stroke-width: 2.3; }
 .tp-add-day-card.is-empty-state,
@@ -1151,14 +1507,14 @@ body[data-page="training-plan"] .tyfit-main-inner {
 
 /* Workout logging */
 .tp-logbook-panel {
-  margin: 0 0 22px;
-  padding: 18px;
+  margin: 0 0 16px;
+  padding: 14px;
   border: 1px solid #E7E4FF;
-  border-radius: 24px;
+  border-radius: 20px;
   background:
     radial-gradient(circle at top right, rgba(108, 99, 255, .12), transparent 34%),
     #fff;
-  box-shadow: 0 18px 40px rgba(108, 99, 255, .08);
+  box-shadow: 0 12px 28px rgba(108, 99, 255, .06);
 }
 
 .tp-logbook-head {
@@ -1176,7 +1532,7 @@ body[data-page="training-plan"] .tyfit-main-inner {
 .tp-logbook-head h3 {
   margin: 0;
   color: #111827;
-  font-size: 19px;
+  font-size: 16px;
   line-height: 1.15;
   font-weight: 650;
   letter-spacing: -0.02em;
@@ -1184,15 +1540,15 @@ body[data-page="training-plan"] .tyfit-main-inner {
 
 .tp-logbook-head p:not(.tp-eyebrow) {
   margin: 6px 0 0;
-  max-width: 48ch;
+  max-width: 44ch;
   color: #667085;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
 .tp-logbook-start-btn {
-  min-height: 42px;
-  padding: 0 15px;
+  min-height: 38px;
+  padding: 0 13px;
   border: 0;
   border-radius: 15px;
   display: inline-flex;
@@ -1202,7 +1558,7 @@ body[data-page="training-plan"] .tyfit-main-inner {
   background: linear-gradient(135deg, #6C63FF, #8B7CFF);
   box-shadow: 0 14px 28px rgba(108, 99, 255, .22);
   font: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -1218,14 +1574,14 @@ body[data-page="training-plan"] .tyfit-main-inner {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  margin: 16px 0 14px;
+  margin: 12px 0 10px;
 }
 
 .tp-logbook-stats div {
   min-width: 0;
-  padding: 12px;
+  padding: 9px 10px;
   border: 1px solid #F0EEFF;
-  border-radius: 17px;
+  border-radius: 14px;
   background: rgba(250, 249, 255, .82);
 }
 

@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
     <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
-    <link href="css/training.css?v=20260605-workoutlog" rel="stylesheet">
+    <link href="css/training.css?v=20260608-tybot-training" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="training-plan">
 
@@ -129,6 +129,18 @@
                             <h2 class="tp-page-title">Training Plan</h2>
                             <p class="tp-page-subtitle">Plan your workouts. Stay consistent.</p>
                         </div>
+                    </section>
+
+                    <section class="tybot-entry-card tybot-training-card" id="tybotTrainingCard" role="button" tabindex="0" aria-label="Ask TyBot about training">
+                        <div class="tybot-entry-avatar" aria-hidden="true">
+                            <span class="tybot-entry-face"><span></span><span></span></span>
+                        </div>
+                        <div class="tybot-entry-copy">
+                            <h3>Ask TyBot</h3>
+                            <p>Create workouts, choose splits & improve your plan</p>
+                        </div>
+                        <span class="tybot-entry-sparkle" aria-hidden="true"><i data-lucide="sparkles"></i></span>
+                        <span class="tybot-entry-arrow" aria-hidden="true"><i data-lucide="chevron-right"></i></span>
                     </section>
 
                     <section class="tp-user-toolbar" id="trainingUserToolbar" hidden>
@@ -443,12 +455,41 @@
     <!-- Toast -->
     <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
 
+    <div class="tybot-backdrop" id="tybotBackdrop" hidden></div>
+    <section class="tybot-sheet" id="tybotSheet" aria-hidden="true" aria-labelledby="tybotTitle">
+        <header class="tybot-header">
+            <div class="tybot-header-main">
+                <div class="tybot-avatar" aria-hidden="true">
+                    <span class="tybot-face">
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
+                <div>
+                    <h3 id="tybotTitle">TyBot</h3>
+                    <p>AI Training Coach</p>
+                </div>
+            </div>
+            <button type="button" class="tybot-close" id="tybotCloseBtn" aria-label="Close TyBot">
+                <i data-lucide="x"></i>
+            </button>
+        </header>
+        <div class="tybot-messages" id="tybotMessages" aria-live="polite"></div>
+        <form class="tybot-composer" id="tybotComposer">
+            <input id="tybotInput" type="text" placeholder="Ask TyBot about your workout..." autocomplete="off">
+            <button type="submit" aria-label="Send message">
+                <i data-lucide="send"></i>
+            </button>
+        </form>
+    </section>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260608-sidebar-module"></script>
-    <script src="js/training_plan.js?v=20260605-workoutlog"></script>
+    <script src="js/shell.js?v=20260608-avatar-key-fix"></script>
+    <script src="js/training_plan.js?v=20260608-tybot-training"></script>
+    <script src="assets/js/tybot-diet-coach.js?v=20260608-training-mode"></script>
 </body>
 </html>

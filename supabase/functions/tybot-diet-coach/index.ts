@@ -254,6 +254,104 @@ For blood sugar or diabetes concerns, advise professional consultation.
 Always return structured JSON only. Do not include markdown.`;
 }
 
+function buildTrainingSystemPrompt() {
+  return `You are TyBot, Tyfit's AI training coach.
+You help users create practical strength-training plans, improve workout routines, and answer workout questions.
+You are not a medical doctor or physiotherapist.
+Ask clarifying questions before generating a full plan when time per session, days per week, training age, home/gym setup, or goal is missing.
+Prefer exercise names from the provided exercise catalog. Do not invent exercises when catalog candidates are available.
+If the user's profile goal is present, ask them to confirm it before assuming it.
+For general training guidance, give practical ranges and say when advice depends on recovery, injury history, and technique.
+If a question is advanced, risky, or medical/injury related, answer cautiously and advise consulting a qualified professional.
+Always return structured JSON only. Do not include markdown.`;
+}
+
+function inferTrainingIntent(action: string, message: string) {
+  if (action === "create_training_plan") return "create_training_plan";
+  if (action === "improve_training_plan") return "improve_training_plan";
+  const text = normalizeText(`${action} ${message}`);
+  if (/(create|make|build|generate).*(training|workout|plan|split)/.test(text)) return "create_training_plan";
+  if (/(improve|edit|better|change).*(training|workout|plan|split)/.test(text)) return "improve_training_plan";
+  return "training_question";
+}
+
+function buildTrainingUserPrompt(params: {
+  action: string;
+  message: string;
+  intent: string;
+  userProfile: JsonRecord | null;
+  userAbout: JsonRecord | null;
+  currentPlan: unknown;
+  trainingDays: unknown;
+  exercisesByDay: unknown;
+  exerciseCatalog: JsonRecord[];
+  workoutLogs: unknown;
+  conversation: unknown[];
+}) {
+  return JSON.stringify({
+    task: "Respond as TyBot Training Coach using the requested JSON schema.",
+    action: params.action,
+    detectedIntent: params.intent,
+    userMessage: params.message,
+    conversation: params.conversation,
+    targetUserProfile: params.userProfile,
+    targetUserAbout: params.userAbout,
+    currentTrainingPlan: params.currentPlan,
+    currentTrainingDays: params.trainingDays,
+    currentExercisesByDay: params.exercisesByDay,
+    recentWorkoutLogs: params.workoutLogs,
+    exerciseCatalogCandidates: params.exerciseCatalog.map((exercise) => ({
+      id: exercise.id,
+      name: exercise.name,
+      body_part: exercise.body_part,
+      equipment: exercise.equipment,
+      level: exercise.level,
+    })),
+    requiredJsonShape: {
+      success: true,
+      intent: "create_training_plan | improve_training_plan | training_question",
+      reply: "short helpful conversational response",
+      needsMoreInfo: false,
+      questions: ["ask for missing time per session, days per week, training age, home/gym, and goal when needed"],
+      previewPlan: null,
+      replacementOptions: [],
+      actions: [],
+      trainingPlanPreview: {
+        title: "short plan name",
+        split: "Push Pull Legs | Upper Lower | Full Body | custom",
+        weeks: 8,
+        daysPerWeek: 4,
+        sessionLengthMinutes: 60,
+        goal: "fat loss | muscle gain | maintain | general fitness",
+        days: [
+          {
+            day_name: "Push",
+            focus: "Chest, shoulders, triceps",
+            exercises: [
+              {
+                exercise_catalog_id: "must match catalog id when possible",
+                exercise_name: "must match catalog name when possible",
+                sets: 3,
+                reps: "8-12",
+                rest_seconds: 90,
+                notes: "brief coaching cue"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    rules: [
+      "For create_training_plan, ask clarifying questions if time per session, days per week, training age, home/gym setup, or goal is missing.",
+      "If targetUserAbout.goal exists, ask the user to confirm that goal before building the plan unless the user already confirmed a different goal.",
+      "Use only exerciseCatalogCandidates for generated exercises whenever possible.",
+      "Do not write to the database. The app will save only after user confirmation in a later flow.",
+      "For basic workout questions, answer concisely with normal coaching ranges.",
+      "For advanced or medical questions, include a cautious note and recommend a qualified professional."
+    ],
+  });
+}
+
 function buildUserPrompt(params: {
   action: string;
   message: string;
@@ -470,7 +568,7 @@ Deno.serve(async (req) => {
 
   const isAdmin = String(actorProfile.role || "").toLowerCase() === "admin";
   if (targetUserId !== userData.user.id && !isAdmin) {
-    return jsonResponse({ success: false, error: "You can only access your own diet data." }, 403);
+    return jsonResponse({ success: false, error: "You can only access your own Tyfit data." }, 403);
   }
 
   const readClient = isAdmin && serviceClient ? serviceClient : supabase;
@@ -486,6 +584,65 @@ Deno.serve(async (req) => {
     .select("weight, height, goal, activity_level, gender")
     .eq("user_id", targetUserId)
     .maybeSingle();
+
+  if (clientContext.source === "training_plan") {
+    const { data: exerciseRows } = await readClient
+      .from("exercise_catalog")
+      .select("id, name, body_part, equipment, level")
+      .eq("is_active", true)
+      .order("name", { ascending: true })
+      .limit(300);
+
+    const trainingIntent = inferTrainingIntent(action, message);
+    const trainingTaskType: GeminiTaskType = trainingIntent === "training_question" ? "simple" : "reasoning";
+    const trainingPrompt = buildTrainingUserPrompt({
+      action,
+      message,
+      intent: trainingIntent,
+      userProfile: targetProfile || null,
+      userAbout: targetAbout || null,
+      currentPlan: clientContext.currentPlan || null,
+      trainingDays: clientContext.trainingDays || [],
+      exercisesByDay: clientContext.exercisesByDay || {},
+      exerciseCatalog: (exerciseRows || []) as JsonRecord[],
+      workoutLogs: clientContext.workoutLogs || [],
+      conversation,
+    });
+
+    try {
+      const firstGeminiResult = await callGeminiWithFallback(buildTrainingSystemPrompt(), trainingPrompt, trainingTaskType);
+      let text = firstGeminiResult.text;
+      let parsed: JsonRecord;
+
+      try {
+        parsed = extractJson(text);
+      } catch (_parseError) {
+        const retryResult = await callGeminiWithFallback(
+          buildTrainingSystemPrompt(),
+          trainingPrompt,
+          trainingTaskType,
+          "Return valid JSON only using the required JSON shape. No markdown."
+        );
+        text = retryResult.text;
+        parsed = extractJson(text);
+      }
+
+      return jsonResponse({
+        success: true,
+        intent: trainingIntent,
+        reply: safeString(parsed.reply, "I can help with that. Tell me your training goal, days per week, and gym/home setup."),
+        needsMoreInfo: Boolean(parsed.needsMoreInfo),
+        questions: Array.isArray(parsed.questions) ? parsed.questions : [],
+        previewPlan: parsed.previewPlan || null,
+        replacementOptions: Array.isArray(parsed.replacementOptions) ? parsed.replacementOptions : [],
+        actions: Array.isArray(parsed.actions) ? parsed.actions : [],
+        trainingPlanPreview: parsed.trainingPlanPreview || null,
+      });
+    } catch (error) {
+      console.error("TyBot training error:", error);
+      return jsonResponse(fallbackResponse(getSafeErrorReply(error)), 200);
+    }
+  }
 
   let chart: JsonRecord | null = null;
   let mealsWithItems: JsonRecord[] = [];

@@ -1,9 +1,16 @@
 (function () {
-    const QUICK_ACTIONS = [
+    const DIET_QUICK_ACTIONS = [
         { label: "Create a diet plan", icon: "sparkles", action: "create_plan", prompt: "Create a diet plan for me." },
         { label: "Suggest replacements", icon: "repeat-2", action: "suggest_replacement", prompt: "Suggest replacements for my current diet chart." },
         { label: "Improve my current diet", icon: "wand-sparkles", action: "improve_plan", prompt: "Improve my current diet chart." },
         { label: "Analyze my nutrition", icon: "scan-heart", action: "analyze_plan", prompt: "Analyze my current diet chart." }
+    ];
+
+    const TRAINING_QUICK_ACTIONS = [
+        { label: "Create training plan", icon: "sparkles", action: "create_training_plan", prompt: "Create a training plan for me." },
+        { label: "Choose a split", icon: "git-branch", action: "training_question", prompt: "Which workout split should I follow?" },
+        { label: "Improve my plan", icon: "wand-sparkles", action: "improve_training_plan", prompt: "Improve my current training plan." },
+        { label: "Training advice", icon: "message-circle", action: "training_question", prompt: "How many sets are recommended for muscle gain?" }
     ];
 
     const state = {
@@ -110,6 +117,22 @@
         window.setTimeout(() => toast.classList.remove("show"), 3500);
     }
 
+    function getTybotMode() {
+        return document.body?.dataset?.page === "training-plan" ? "training" : "diet";
+    }
+
+    function getQuickActions() {
+        return getTybotMode() === "training" ? TRAINING_QUICK_ACTIONS : DIET_QUICK_ACTIONS;
+    }
+
+    function getIntroText() {
+        if (getTybotMode() === "training") {
+            return "Hi, I’m TyBot. I can help build training plans, choose exercises from your catalog, and answer workout questions.";
+        }
+
+        return "Hi, I’m TyBot. I can help create diet plans, suggest smarter swaps, and review your current chart.";
+    }
+
     function scrollMessages() {
         const messages = $("tybotMessages");
         if (messages) {
@@ -158,13 +181,13 @@
         const messages = $("tybotMessages");
         if (!messages) return;
 
-        const intro = createMessage("bot", "Hi, I’m TyBot. I can help create diet plans, suggest smarter swaps, and review your current chart.");
+        const intro = createMessage("bot", getIntroText());
         messages.appendChild(intro);
 
         const wrap = document.createElement("div");
         wrap.className = "tybot-card-list tybot-quick-actions";
 
-        QUICK_ACTIONS.forEach((item) => {
+        getQuickActions().forEach((item) => {
             const button = document.createElement("button");
             button.type = "button";
             button.className = "tybot-quick-action";
@@ -185,7 +208,10 @@
     }
 
     function getInvokePayload(action, message) {
-        const pageContext = getDietContext();
+        const isTrainingMode = getTybotMode() === "training";
+        const pageContext = isTrainingMode && window.tyfitTrainingAI?.getContext
+            ? window.tyfitTrainingAI.getContext()
+            : getDietContext();
         return {
             action: action || "chat",
             message,
@@ -193,11 +219,16 @@
             dietChartId: pageContext.selectedChartId || undefined,
             conversation: state.conversation.slice(-10),
             context: {
-                source: "diet_chart",
+                source: isTrainingMode ? "training_plan" : "diet_chart",
                 selectedUserMeta: pageContext.selectedUserMeta || {},
                 currentChart: pageContext.chart || null,
                 meals: pageContext.meals || [],
-                foodCatalog: pageContext.foodCatalog || []
+                foodCatalog: pageContext.foodCatalog || [],
+                currentPlan: pageContext.plan || null,
+                trainingDays: pageContext.days || [],
+                exercisesByDay: pageContext.exercisesByDay || {},
+                exerciseCatalog: pageContext.exerciseCatalog || [],
+                workoutLogs: pageContext.workoutLogs || []
             }
         };
     }
@@ -465,7 +496,22 @@
     }
 
     function bindEvents() {
-        $("tybotOpenBtn")?.addEventListener("click", openTybot);
+        $("tybotOpenBtn")?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            openTybot();
+        });
+        $("tybotDietCard")?.addEventListener("click", openTybot);
+        $("tybotDietCard")?.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            openTybot();
+        });
+        $("tybotTrainingCard")?.addEventListener("click", openTybot);
+        $("tybotTrainingCard")?.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            openTybot();
+        });
         $("tybotCloseBtn")?.addEventListener("click", closeTybot);
         $("tybotBackdrop")?.addEventListener("click", closeTybot);
 

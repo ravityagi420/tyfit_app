@@ -1149,8 +1149,8 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
 }
 
 .tyfit-subpage-save-btn.is-active {
-    background: rgba(108, 99, 255, 0.22);
-    color: #5146E8;
+    background: linear-gradient(135deg, #6C63FF 0%, #8B7CFF 100%);
+    color: #F4F3FF;
 }
 
 .tyfit-subpage-save-btn.is-active:active {

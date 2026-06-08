@@ -137,6 +137,15 @@
         return `${getRootPrefix()}assets/avatars/avatar-5.svg`;
     }
 
+    function isLocalAvatarKey(value) {
+        return /^avatar-[1-6]\.svg$/i.test(String(value || '').trim());
+    }
+
+    function localAvatarSrc(value) {
+        const key = String(value || '').trim() || 'avatar-5.svg';
+        return `${getRootPrefix()}assets/avatars/${key}`;
+    }
+
     function profileAvatarMarkup(src) {
         return `<img class="tyfit-mobile-profile-avatar" src="${escapeAttr(src || defaultProfileAvatarSrc())}" alt="Profile">`;
     }
@@ -214,19 +223,23 @@
 
         const picture = profileResult?.data?.profile_picture_url;
         if (picture) {
+            if (isLocalAvatarKey(picture)) return localAvatarSrc(picture);
             if (/^https?:\/\//i.test(String(picture))) return picture;
             const { data } = window.supabaseClient.storage.from('profile-images').getPublicUrl(picture);
             return data?.publicUrl || defaultProfileAvatarSrc();
         }
 
         const avatarKey = aboutResult?.data?.avatar_key || 'avatar-5.svg';
-        return `${getRootPrefix()}assets/avatars/${avatarKey}`;
+        return localAvatarSrc(avatarKey);
     }
 
     let profileAvatarHydratePromise = null;
-    function hydrateBottomNavProfileAvatar() {
+    function hydrateBottomNavProfileAvatar(options = {}) {
         const avatars = document.querySelectorAll('.tyfit-mobile-bottom-nav img.tyfit-mobile-profile-avatar');
         if (!avatars.length) return;
+        if (options.force) {
+            profileAvatarHydratePromise = null;
+        }
         if (!profileAvatarHydratePromise) {
             profileAvatarHydratePromise = resolveCurrentProfileAvatar().catch(() => defaultProfileAvatarSrc());
         }
@@ -709,6 +722,9 @@
         normalizeExistingBottomNav();
         applyPhosphorBottomNavIcons(document);
         hydrateBottomNavProfileAvatar();
+        window.supabaseClient?.auth?.onAuthStateChange?.(() => {
+            hydrateBottomNavProfileAvatar({ force: true });
+        });
         mountFloatingAction();
         mountWeightModal();
         optimizeImages();

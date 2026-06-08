@@ -222,11 +222,11 @@ body[data-page="daily-checkin"] .tyfit-main-inner {
 .checkin-goal-settings-btn {
     height: 36px;
     min-height: 36px;
-    border: 1px solid rgba(108, 99, 255, 0.1);
+    border: 1px solid rgba(108, 99, 255, 0.2);
     border-radius: 14px;
     padding: 0 11px;
     background: rgba(255, 255, 255, 0.86);
-    color: #565B74;
+    color: rgba(108, 99, 255, 0.82);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3979,54 +3979,6 @@ body[data-page="daily-checkin"] .checkin-selected-date {
 body[data-page="daily-checkin"] .checkin-goal-settings-btn {
     flex-shrink: 0;
     margin-left: auto;
-    background: rgba(108, 99, 255, 0.08);
-    border-color: rgba(108, 99, 255, 0.12);
-}
-
-body[data-page="daily-checkin"] .checkin-goal-settings-btn:hover {
-    background: rgba(108, 99, 255, 0.12);
-    border-color: rgba(108, 99, 255, 0.18);
-}
-
-@media (min-width: 768px) {
-    body[data-page="daily-checkin"] .checkin-week-nav-row {
-        gap: 12px;
-        padding-top: 14px;
-    }
-
-    body[data-page="daily-checkin"] .checkin-week-pill,
-    body[data-page="daily-checkin"] .checkin-goal-settings-btn {
-        height: 42px;
-        min-height: 42px;
-        border-radius: 16px;
-        padding-inline: 15px;
-        gap: 8px;
-        font-size: 13px;
-        font-weight: 560;
-    }
-
-    body[data-page="daily-checkin"] .checkin-week-pill i,
-    body[data-page="daily-checkin"] .checkin-week-pill svg,
-    body[data-page="daily-checkin"] .checkin-goal-settings-btn i,
-    body[data-page="daily-checkin"] .checkin-goal-settings-btn svg {
-        width: 16px;
-        height: 16px;
-    }
-}
-
-@media (min-width: 1024px) {
-    body[data-page="daily-checkin"] .checkin-week-nav-row {
-        padding-top: 18px;
-    }
-
-    body[data-page="daily-checkin"] .checkin-week-pill,
-    body[data-page="daily-checkin"] .checkin-goal-settings-btn {
-        height: 46px;
-        min-height: 46px;
-        border-radius: 18px;
-        padding-inline: 18px;
-        font-size: 14px;
-    }
 }
 
 body[data-page="daily-checkin"] .checkin-floating-action {
@@ -4173,6 +4125,10 @@ body[data-page="daily-checkin"] .checkin-shell {
     overflow-x: hidden;
 }
 
+body[data-page="daily-checkin"] .checkin-top-progress-layout {
+    display: contents;
+}
+
 /* Force grid children to honour available width */
 body[data-page="daily-checkin"] .summary-ring-section,
 body[data-page="daily-checkin"] .summary-counts-section {
@@ -4221,14 +4177,129 @@ body[data-page="daily-checkin"] .summary-count {
     }
 }
 
+@media (max-width: 1023.98px) {
+    body[data-page="daily-checkin"] .checkin-sticky-submit {
+        display: none !important;
+    }
+}
+
+@media (min-width: 768px) {
+    body[data-page="daily-checkin"] .checkin-top-progress-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        gap: 14px;
+        align-items: stretch;
+        margin-top: 4px;
+    }
+
+    body[data-page="daily-checkin"] .checkin-calendar-section,
+    body[data-page="daily-checkin"] .today-summary-card {
+        height: 100%;
+        min-height: 118px;
+        margin-bottom: 0;
+    }
+
+    body[data-page="daily-checkin"] .checkin-calendar-section {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+    }
+
+    body[data-page="daily-checkin"] .checkin-date-scroll {
+        width: 100%;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        align-items: center;
+        gap: 7px;
+        padding: 0;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card {
+        grid-template-columns: 76px minmax(0, 1fr);
+        gap: 10px;
+        padding: 13px 14px;
+        align-content: center;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .summary-card-title,
+    body[data-page="daily-checkin"] .today-summary-card .summary-divider {
+        display: none;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .summary-ring-section {
+        align-items: center;
+        justify-content: center;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .summary-ring {
+        width: 76px;
+        height: 76px;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .summary-ring-value {
+        font-size: 19px;
+        transform: translateY(6px);
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .summary-ring-label {
+        font-size: 8.5px;
+        transform: translateY(3px);
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .summary-counts-section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding-left: 0;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .summary-count {
+        flex: 1 1 0;
+        min-width: 0;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        text-align: center;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .count-icon {
+        width: 25px;
+        height: 25px;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .count-icon svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .count-number {
+        display: grid;
+        gap: 1px;
+        color: #667085;
+        font-size: 10px;
+        line-height: 1.1;
+        font-weight: 550;
+    }
+
+    body[data-page="daily-checkin"] .today-summary-card .count-number strong {
+        color: #17172F;
+        font-size: 15px;
+        font-weight: 620;
+        line-height: 1;
+    }
+}
+
 @media (min-width: 1024px) {
     body[data-page="daily-checkin"] .checkin-sticky-submit {
-        justify-items: end;
+        justify-items: stretch;
+        width: 100%;
+        max-width: none;
     }
 
     body[data-page="daily-checkin"] .checkin-sticky-submit .checkin-secondary-btn {
-        width: auto;
-        min-width: 240px;
+        width: 100%;
+        min-width: 0;
     }
 }
 

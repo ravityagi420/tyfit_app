@@ -19,7 +19,7 @@
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../css/style.css?v=20260527a" rel="stylesheet">
-    <link href="../css/admin.css?v=20260530i" rel="stylesheet">
+    <link href="../css/admin.css?v=20260608-diet-modals-loader" rel="stylesheet">
     <link href="../css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
     <link href="../css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
 </head>
@@ -148,7 +148,7 @@
                 </div>
             </section>
 
-            <section class="tybot-entry-card" id="tybotDietCard" aria-label="TyBot AI coach">
+            <section class="tybot-entry-card" id="tybotDietCard" role="button" tabindex="0" aria-label="Ask TyBot">
                 <div class="tybot-entry-avatar" aria-hidden="true">
                     <span class="tybot-entry-face">
                         <span></span>
@@ -156,13 +156,13 @@
                     </span>
                 </div>
                 <div class="tybot-entry-copy">
-                    <h3>Ask TyBot anything</h3>
-                    <p>Create plans, get smart replacements and improve your diet.</p>
+                    <span class="tybot-entry-title">Ask TyBot</span>
+                    <span class="tybot-entry-subtitle">Get plans, replacements &amp; diet help</span>
                 </div>
-                <button type="button" class="tybot-entry-btn" id="tybotOpenBtn">
-                    <i data-lucide="sparkles"></i>
-                    <span>Ask TyBot</span>
-                </button>
+                <span class="tybot-entry-sparkle" aria-hidden="true"><i data-lucide="sparkles"></i></span>
+                <span class="tybot-entry-arrow" id="tybotOpenBtn" aria-hidden="true">
+                    <i data-lucide="chevron-right"></i>
+                </span>
             </section>
 
             <div id="dietViewSaveBar" class="diet-view-save-bar" style="display: none;">
@@ -193,7 +193,7 @@
 
                     <div class="diet-chart-switcher mb-3" id="dietChartSwitcher" hidden>
                         <div class="diet-chart-switcher-head">
-                            <p class="diet-chart-switcher-label mb-0">Diet Charts</p>
+                            <p class="diet-chart-switcher-label mb-0">My Plans</p>
                         </div>
                         <div class="diet-chart-strip" id="dietChartStrip"></div>
                     </div>
@@ -366,7 +366,7 @@
                     </button>
                 </div>
                 <div class="modal-body modal-content-scroll">
-                    <form id="customFoodForm" novalidate>
+                    <form id="customFoodForm" class="diet-custom-food-form tyfit-standard-form" novalidate>
                         <div class="form-group custom-food-scope-top" id="customFoodScopeWrap" style="display: none;">
                             <div class="custom-food-scope-control">
                                 <span class="scope-option scope-custom">Custom for selected user</span>
@@ -377,54 +377,64 @@
                                 <span class="scope-option scope-global">Global</span>
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group col-12">
-                                <label for="cfFoodName">Food Name <span class="text-danger">*</span></label>
-                                <input type="text" id="cfFoodName" class="form-control" placeholder="e.g., Homemade Dahl" required autocomplete="off">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="cfQuantity">Reference Quantity <span class="text-danger">*</span></label>
-                                <input type="number" id="cfQuantity" class="form-control" min="0.01" step="0.01" placeholder="e.g., 100" required>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="cfUnit">Unit</label>
-                                <select id="cfUnit" class="form-control">
-                                    <option value="g">gms</option>
-                                    <option value="ml">ml</option>
-                                    <option value="piece">piece</option>
-                                    <option value="slice">slice</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row custom-food-macro-grid">
-                            <div class="form-group col-md-6">
-                                <label for="cfCarbs">Carbs <span class="text-danger">*</span></label>
-                                <div class="unit-inside-wrap">
-                                    <input type="number" id="cfCarbs" class="form-control" min="0" step="0.01" placeholder="0" required>
-                                    <span class="unit-inside-suffix">gms</span>
+                        <div class="diet-custom-food-fields">
+                            <div class="tyfit-standard-field tyfit-standard-field--full">
+                                <span class="tyfit-ui-icon-tile" aria-hidden="true"><i data-lucide="utensils"></i></span>
+                                <label class="tyfit-ui-label" for="cfFoodName">Food Name <span class="text-danger">*</span></label>
+                                <div class="tyfit-ui-icon-control">
+                                    <input type="text" id="cfFoodName" class="form-control tyfit-standard-input" placeholder="e.g., Homemade Dahl" required autocomplete="off">
                                 </div>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="cfProtein">Protein <span class="text-danger">*</span></label>
-                                <div class="unit-inside-wrap">
-                                    <input type="number" id="cfProtein" class="form-control" min="0" step="0.01" placeholder="0" required>
-                                    <span class="unit-inside-suffix">gms</span>
+                            <div class="tyfit-standard-field">
+                                <span class="tyfit-ui-icon-tile" aria-hidden="true"><i data-lucide="scale"></i></span>
+                                <label class="tyfit-ui-label" for="cfQuantity">Reference Quantity <span class="text-danger">*</span></label>
+                                <div class="tyfit-ui-icon-control">
+                                    <input type="number" id="cfQuantity" class="form-control tyfit-standard-input" min="0.01" step="0.01" placeholder="e.g., 100" required>
                                 </div>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="cfFats">Fats <span class="text-danger">*</span></label>
-                                <div class="unit-inside-wrap">
-                                    <input type="number" id="cfFats" class="form-control" min="0" step="0.01" placeholder="0" required>
-                                    <span class="unit-inside-suffix">gms</span>
+                            <div class="tyfit-standard-field">
+                                <span class="tyfit-ui-icon-tile" aria-hidden="true"><i data-lucide="ruler"></i></span>
+                                <label class="tyfit-ui-label" for="cfUnit">Unit</label>
+                                <div class="tyfit-ui-icon-control tyfit-ui-select-control">
+                                    <select id="cfUnit" class="form-control tyfit-standard-select">
+                                        <option value="g">gms</option>
+                                        <option value="ml">ml</option>
+                                        <option value="piece">piece</option>
+                                        <option value="slice">slice</option>
+                                    </select>
+                                    <span class="tyfit-ui-select-chevron" aria-hidden="true"><i data-lucide="chevron-down"></i></span>
                                 </div>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="cfFibre">Fibre <span class="text-muted small">(optional)</span></label>
-                                <div class="unit-inside-wrap">
-                                    <input type="number" id="cfFibre" class="form-control" min="0" step="0.01" placeholder="Optional">
-                                    <span class="unit-inside-suffix">gms</span>
+                            <div class="tyfit-standard-field">
+                                <span class="tyfit-ui-icon-tile" aria-hidden="true"><i data-lucide="wheat"></i></span>
+                                <label class="tyfit-ui-label" for="cfCarbs">Carbs <span class="text-danger">*</span></label>
+                                <div class="tyfit-ui-icon-control tyfit-ui-unit-control">
+                                    <input type="number" id="cfCarbs" class="form-control tyfit-standard-input" min="0" step="0.01" placeholder="0" required>
+                                    <span class="tyfit-ui-unit">gms</span>
+                                </div>
+                            </div>
+                            <div class="tyfit-standard-field">
+                                <span class="tyfit-ui-icon-tile" aria-hidden="true"><i data-lucide="dumbbell"></i></span>
+                                <label class="tyfit-ui-label" for="cfProtein">Protein <span class="text-danger">*</span></label>
+                                <div class="tyfit-ui-icon-control tyfit-ui-unit-control">
+                                    <input type="number" id="cfProtein" class="form-control tyfit-standard-input" min="0" step="0.01" placeholder="0" required>
+                                    <span class="tyfit-ui-unit">gms</span>
+                                </div>
+                            </div>
+                            <div class="tyfit-standard-field">
+                                <span class="tyfit-ui-icon-tile" aria-hidden="true"><i data-lucide="droplet"></i></span>
+                                <label class="tyfit-ui-label" for="cfFats">Fats <span class="text-danger">*</span></label>
+                                <div class="tyfit-ui-icon-control tyfit-ui-unit-control">
+                                    <input type="number" id="cfFats" class="form-control tyfit-standard-input" min="0" step="0.01" placeholder="0" required>
+                                    <span class="tyfit-ui-unit">gms</span>
+                                </div>
+                            </div>
+                            <div class="tyfit-standard-field">
+                                <span class="tyfit-ui-icon-tile" aria-hidden="true"><i data-lucide="leaf"></i></span>
+                                <label class="tyfit-ui-label" for="cfFibre">Fibre <span class="text-muted small">(optional)</span></label>
+                                <div class="tyfit-ui-icon-control tyfit-ui-unit-control">
+                                    <input type="number" id="cfFibre" class="form-control tyfit-standard-input" min="0" step="0.01" placeholder="Optional">
+                                    <span class="tyfit-ui-unit">gms</span>
                                 </div>
                             </div>
                         </div>
@@ -435,10 +445,10 @@
                         <div id="customFoodStatus" class="alert" style="display: none;"></div>
                         <div class="food-form-actions mt-3 food-modal-footer-actions modal-footer">
                             <button type="submit" id="customFoodSaveBtn" class="btn btn-primary">
-                                <i class="fa fa-save mr-1"></i> Save Food Item
+                                <i data-lucide="save"></i> Save Food Item
                             </button>
                             <button type="button" id="customFoodCancelBtn" class="btn btn-secondary">
-                                <i class="fa fa-arrow-left mr-1"></i> Back
+                                <i data-lucide="arrow-left"></i> Back
                             </button>
                         </div>
                     </form>
@@ -448,38 +458,38 @@
     </div>
 
     <!-- Delete Food Item Confirmation Modal -->
-    <div class="modal fade" id="deleteFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content food-form-modal-content">
-                <div class="modal-body text-center" style="padding: 32px 28px 24px;">
-                    <div style="width:52px;height:52px;border-radius:50%;background:#fff1f0;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
-                        <i class="fa fa-trash-alt" style="color:#e53e3e;font-size:22px;"></i>
+    <div class="modal fade diet-standard-modal diet-confirm-modal" id="deleteFoodModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered diet-standard-dialog" role="document">
+            <div class="modal-content diet-standard-panel">
+                <div class="modal-body diet-standard-body">
+                    <div class="diet-standard-danger-icon">
+                        <i data-lucide="trash-2"></i>
                     </div>
-                    <h5 style="font-weight:700;color:#101828;margin-bottom:8px;">Delete Food Item?</h5>
-                    <p style="color:#667085;font-size:14px;margin-bottom:0;">Are you sure you want to delete this food item? This action cannot be undone.</p>
+                    <h5>Delete Food Item?</h5>
+                    <p>Are you sure you want to delete this food item? This action cannot be undone.</p>
                 </div>
-                <div class="modal-footer" style="justify-content:center;gap:10px;padding-bottom:24px;border-top:0;">
-                    <button type="button" class="btn" data-dismiss="modal" style="border-radius:999px;padding:8px 24px;font-weight:600;background:#eef2f7;color:#334155;border:1px solid #d4dde8;min-width:100px;">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" style="border-radius:999px;padding:8px 24px;font-weight:600;min-width:100px;"><i class="fa fa-trash-alt mr-1"></i> Delete</button>
+                <div class="modal-footer diet-standard-actions">
+                    <button type="button" class="btn diet-standard-btn diet-standard-btn--ghost" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn diet-standard-btn diet-standard-btn--danger" id="confirmDeleteBtn"><i data-lucide="trash-2"></i> Delete</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Delete Meal Confirmation Modal -->
-    <div class="modal fade" id="deleteMealModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content food-form-modal-content">
-                <div class="modal-body text-center" style="padding: 32px 28px 24px;">
-                    <div style="width:52px;height:52px;border-radius:50%;background:#fff1f0;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
-                        <i class="fa fa-trash-alt" style="color:#e53e3e;font-size:22px;"></i>
+    <div class="modal fade diet-standard-modal diet-confirm-modal" id="deleteMealModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered diet-standard-dialog" role="document">
+            <div class="modal-content diet-standard-panel">
+                <div class="modal-body diet-standard-body">
+                    <div class="diet-standard-danger-icon">
+                        <i data-lucide="trash-2"></i>
                     </div>
-                    <h5 style="font-weight:700;color:#101828;margin-bottom:8px;">Delete Meal?</h5>
-                    <p style="color:#667085;font-size:14px;margin-bottom:0;">Are you sure you want to delete this meal and all its food items? This action cannot be undone.</p>
+                    <h5>Delete Meal?</h5>
+                    <p>Are you sure you want to delete this meal and all its food items? This action cannot be undone.</p>
                 </div>
-                <div class="modal-footer" style="justify-content:center;gap:10px;padding-bottom:24px;border-top:0;">
-                    <button type="button" class="btn" data-dismiss="modal" style="border-radius:999px;padding:8px 24px;font-weight:600;background:#eef2f7;color:#334155;border:1px solid #d4dde8;min-width:100px;">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteMealBtn" style="border-radius:999px;padding:8px 24px;font-weight:600;min-width:100px;"><i class="fa fa-trash-alt mr-1"></i> Delete</button>
+                <div class="modal-footer diet-standard-actions">
+                    <button type="button" class="btn diet-standard-btn diet-standard-btn--ghost" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn diet-standard-btn diet-standard-btn--danger" id="confirmDeleteMealBtn"><i data-lucide="trash-2"></i> Delete</button>
                 </div>
             </div>
         </div>
@@ -535,7 +545,7 @@
         <div class="tp-modal tp-input-dialog" role="dialog" aria-labelledby="dietChartInputTitle">
             <div class="tp-modal-header">
                 <div class="tp-modal-header-main">
-                    <div class="tp-modal-badge" style="background:#eaf3ff;color:#0f6fea;">
+                    <div class="tp-modal-badge">
                         <i data-lucide="clipboard-list"></i>
                     </div>
                     <div>
@@ -581,8 +591,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
     <script src="../js/login.js?v=20260523l"></script>
-    <script src="../js/shell.js?v=20260608-sidebar-module"></script>
-    <script src="../js/diet_chart.js?v=20260530f"></script>
-    <script src="../assets/js/tybot-diet-coach.js?v=20260605a"></script>
+    <script src="../js/profile-utils.js?v=20260608-footer-avatar"></script>
+    <script src="../js/shell.js?v=20260608-avatar-key-fix"></script>
+    <script src="../js/diet_chart.js?v=20260608-diet-switch-loader"></script>
+    <script src="../assets/js/tybot-diet-coach.js?v=20260608-tybot-row"></script>
 </body>
 </html>
