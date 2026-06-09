@@ -675,6 +675,29 @@ function setSelectedDietChartName(name) {
     }
 }
 
+function getDietChartSelectorMeta(chart) {
+    if (!chart) {
+        return "No plan selected";
+    }
+
+    const chartData = DIET_STATE.currentChartData;
+    const isActiveLoaded = chartData?.chart?.id && String(chartData.chart.id) === String(chart.id);
+    if (!isActiveLoaded) {
+        return "Select to view";
+    }
+
+    const meals = Array.isArray(chartData.meals) ? chartData.meals : [];
+    const totals = meals.reduce((sum, meal) => {
+        (meal.items || []).forEach((item) => {
+            sum.calories += getComputedFromItem(item).calories;
+        });
+        return sum;
+    }, { calories: 0 });
+
+    const mealLabel = meals.length === 1 ? "meal" : "meals";
+    return `${formatMacro(totals.calories)} kcal • ${meals.length} ${mealLabel}`;
+}
+
 function ensureDietChartFloatingFab() {
     if (getEl("dietChartFab")) {
         return;
@@ -810,42 +833,47 @@ function renderDietChartSelector() {
         return;
     }
 
-    const planIcons = ["cookie", "utensils-crossed", "cooking-pot"];
-    const visibleCharts = charts.slice(0, 3);
-    const slotHtml = [];
+    const selectedChart = charts.find((chart) => String(chart.id) === String(DIET_STATE.selectedChartId));
+    const selectedIndex = Math.max(0, charts.findIndex((chart) => String(chart.id) === String(DIET_STATE.selectedChartId)));
+    const selectedName = selectedChart ? getDietChartName(selectedChart, selectedIndex) : "Select Plan";
+    const selectedMeta = selectedChart ? getDietChartSelectorMeta(selectedChart) : "Create your first plan";
+    const selectedIcon = selectedIndex % 2 === 0 ? "apple" : "salad";
 
-    visibleCharts.forEach((chart, index) => {
-        const active = String(chart.id) === String(DIET_STATE.selectedChartId) ? "is-active" : "";
-        const iconName = planIcons[index % planIcons.length];
-        const fullName = getDietChartName(chart, index);
-        const accent = getDietPlanAccent(index);
-        const accentSoft = hexToRgba(accent, 0.1);
-        const accentLine = hexToRgba(accent, 0.24);
-        slotHtml.push(`<div class="tp-plan-card-wrap diet-segment-wrap">
-            <button type="button" class="tp-plan-card ${active}" data-chart-id="${chart.id}" title="${escapeHtml(fullName)}" style="--diet-accent:${accent};--diet-accent-soft:${accentSoft};--diet-accent-line:${accentLine};">
-                <span class="diet-plan-icon" aria-hidden="true"><i data-lucide="${iconName}"></i></span>
-                <span class="diet-plan-copy">
-                    <strong>${escapeHtml(formatDietChartDisplayName(fullName))}</strong>
+    strip.innerHTML = `
+        <button type="button" class="selected-plan-button js-plan-sheet-open" aria-haspopup="dialog" aria-expanded="false">
+            <span class="selected-plan-icon" aria-hidden="true"><i data-lucide="${selectedIcon}"></i></span>
+            <span class="selected-plan-copy">
+                <span class="selected-plan-name-row">
+                    <strong>${escapeHtml(formatDietChartDisplayName(selectedName))}</strong>
+                    <i data-lucide="chevron-down" aria-hidden="true"></i>
                 </span>
-            </button>
-        </div>`);
-    });
+                <span class="selected-plan-meta">${escapeHtml(selectedMeta)}</span>
+            </span>
+        </button>
+        <button type="button" class="new-plan-button js-diet-chart-create">
+            <span class="new-plan-icon" aria-hidden="true"><i data-lucide="plus"></i></span>
+            <span>New Plan</span>
+        </button>
+    `;
 
-    if (visibleCharts.length < 3) {
-        const createAccent = getDietPlanAccent(visibleCharts.length);
-        const createAccentSoft = hexToRgba(createAccent, 0.16);
-        const createAccentLine = hexToRgba(createAccent, 0.24);
-        slotHtml.push(`<div class="tp-plan-card-wrap diet-segment-wrap">
-            <button type="button" class="tp-plan-card tp-plan-create js-diet-chart-create" style="--diet-accent:${createAccent};--diet-accent-soft:${createAccentSoft};--diet-accent-line:${createAccentLine};">
-                <span class="diet-plan-icon" aria-hidden="true"><i data-lucide="plus"></i></span>
-                <span class="diet-plan-copy"><strong>New Plan</strong></span>
-            </button>
-        </div>`);
+    const planSheetButton = strip.querySelector(".js-plan-sheet-open");
+    if (planSheetButton) {
+        planSheetButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openDietPlanSelectSheet();
+        });
     }
 
-    strip.innerHTML = slotHtml.join("");
+    const newPlanButton = strip.querySelector(".js-diet-chart-create");
+    if (newPlanButton) {
+        newPlanButton.addEventListener("click", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            await createDietChartFromPrompt();
+        });
+    }
 
-    const selectedChart = charts.find((chart) => String(chart.id) === String(DIET_STATE.selectedChartId));
     if (selectedChart) {
         setSelectedDietChartName(getDietChartName(selectedChart));
     } else if (charts.length > 0) {
@@ -856,6 +884,148 @@ function renderDietChartSelector() {
 
     renderDietChartFabMenu();
     refreshIcons();
+}
+
+function ensureDietPlanSelectSheet() {
+    if (getEl("dietPlanSelectSheet")) {
+        return;
+    }
+
+    document.body.insertAdjacentHTML("beforeend", `
+        <div class="diet-plan-sheet-overlay" id="dietPlanSelectSheet" hidden aria-hidden="true">
+            <button type="button" class="diet-plan-sheet-backdrop" data-plan-sheet-close aria-label="Close plan selector"></button>
+            <section class="diet-plan-bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="dietPlanSheetTitle">
+                <button type="button" class="diet-plan-sheet-handle" data-plan-sheet-close aria-label="Close plan selector"></button>
+                <div class="diet-plan-sheet-head">
+                    <h3 id="dietPlanSheetTitle">Select Diet Plan</h3>
+                </div>
+                <div class="diet-plan-sheet-list" id="dietPlanSheetList"></div>
+            </section>
+        </div>
+    `);
+
+    const sheet = getEl("dietPlanSelectSheet");
+    if (!sheet) {
+        return;
+    }
+
+    sheet.addEventListener("click", async (event) => {
+        if (event.target.closest("[data-plan-sheet-close]")) {
+            closeDietPlanSelectSheet();
+            return;
+        }
+
+        const createBtn = event.target.closest("[data-plan-sheet-create]");
+        if (createBtn) {
+            closeDietPlanSelectSheet();
+            await createDietChartFromPrompt();
+            return;
+        }
+
+        const optionBtn = event.target.closest("[data-plan-sheet-chart-id]");
+        if (!optionBtn) {
+            return;
+        }
+
+        const nextChartId = optionBtn.getAttribute("data-plan-sheet-chart-id");
+        if (!nextChartId) {
+            return;
+        }
+
+        closeDietPlanSelectSheet();
+        await selectDietChartFromSelector(nextChartId);
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeDietPlanSelectSheet();
+        }
+    });
+}
+
+function renderDietPlanSelectSheet() {
+    ensureDietPlanSelectSheet();
+    const list = getEl("dietPlanSheetList");
+    if (!list) {
+        return;
+    }
+
+    const charts = sortDietChartsForDisplay(DIET_STATE.dietCharts || []);
+    const planIcons = ["apple", "dumbbell", "salad", "utensils"];
+
+    const rows = charts.map((chart, index) => {
+        const isSelected = String(chart.id) === String(DIET_STATE.selectedChartId);
+        const fullName = getDietChartName(chart, index);
+        return `
+            <button type="button" class="diet-plan-option ${isSelected ? "is-selected" : ""}" data-plan-sheet-chart-id="${chart.id}">
+                <span class="diet-plan-option-check" aria-hidden="true"><i data-lucide="${isSelected ? "check" : "circle"}"></i></span>
+                <span class="diet-plan-option-icon" aria-hidden="true"><i data-lucide="${planIcons[index % planIcons.length]}"></i></span>
+                <span class="diet-plan-option-copy">
+                    <strong>${escapeHtml(formatDietChartDisplayName(fullName))}</strong>
+                    <small>${escapeHtml(getDietChartSelectorMeta(chart))}</small>
+                </span>
+                ${isSelected ? '<span class="diet-plan-active-badge">Active</span>' : ""}
+            </button>
+        `;
+    });
+
+    rows.push(`
+        <button type="button" class="diet-plan-option diet-plan-option--create" data-plan-sheet-create>
+            <span class="diet-plan-option-create-icon" aria-hidden="true"><i data-lucide="plus"></i></span>
+            <span class="diet-plan-option-copy">
+                <strong>Create New Plan</strong>
+                <small>Start a fresh nutrition plan</small>
+            </span>
+        </button>
+    `);
+
+    list.innerHTML = rows.join("");
+    refreshIcons();
+}
+
+function openDietPlanSelectSheet() {
+    renderDietPlanSelectSheet();
+    const sheet = getEl("dietPlanSelectSheet");
+    const opener = document.querySelector(".js-plan-sheet-open");
+    if (!sheet) {
+        return;
+    }
+
+    sheet.hidden = false;
+    sheet.setAttribute("aria-hidden", "false");
+    opener?.setAttribute("aria-expanded", "true");
+    document.body.classList.add("diet-plan-sheet-open");
+}
+
+function closeDietPlanSelectSheet() {
+    const sheet = getEl("dietPlanSelectSheet");
+    const opener = document.querySelector(".js-plan-sheet-open");
+    if (!sheet) {
+        return;
+    }
+
+    sheet.hidden = true;
+    sheet.setAttribute("aria-hidden", "true");
+    opener?.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("diet-plan-sheet-open");
+}
+
+async function selectDietChartFromSelector(nextChartId) {
+    if (!nextChartId || String(nextChartId) === String(DIET_STATE.selectedChartId)) {
+        return;
+    }
+
+    DIET_STATE.selectedChartId = nextChartId;
+    renderDietChartSelector();
+    closeDietChartActionsMenu();
+    hidePageStatus();
+    showDietChartSectionLoading();
+    try {
+        await loadAndRenderDietChart(nextChartId);
+    } catch (error) {
+        console.error("chart switch error:", error);
+        showPageStatus(error.message || "Failed to load selected diet chart.", "danger");
+    }
 }
 
 function closeDietChartActionsMenu() {
@@ -4801,6 +4971,14 @@ function bindDietChartEvents() {
         }
 
         chartStrip.addEventListener("click", async (event) => {
+            const planSheetBtn = event.target.closest(".js-plan-sheet-open");
+            if (planSheetBtn) {
+                event.preventDefault();
+                event.stopPropagation();
+                openDietPlanSelectSheet();
+                return;
+            }
+
             // Create new chart card
             const createCard = event.target.closest(".js-diet-chart-create");
             if (createCard) {
@@ -4885,18 +5063,7 @@ function bindDietChartEvents() {
                 return;
             }
 
-            // Immediately reflect selection for snappier UI, then load chart data.
-            DIET_STATE.selectedChartId = nextChartId;
-            renderDietChartSelector();
-            closeDietChartActionsMenu();
-            hidePageStatus();
-            showDietChartSectionLoading();
-            try {
-                await loadAndRenderDietChart(nextChartId);
-            } catch (error) {
-                console.error("chart switch error:", error);
-                showPageStatus(error.message || "Failed to load selected diet chart.", "danger");
-            }
+            await selectDietChartFromSelector(nextChartId);
         });
 
         // Long-press on mobile/tablet → show per-card edit/delete menu
