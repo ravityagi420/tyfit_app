@@ -705,7 +705,7 @@ function renderDietChartSelector() {
             const accentSoft = hexToRgba(accent, 0.1);
             const accentLine = hexToRgba(accent, 0.24);
             const isPinnedReadOnly = isCreatedByAdminOtherThanCurrent(chart);
-            return `<div class="tp-plan-card-wrap">
+            return `<div class="tp-plan-card-wrap diet-segment-wrap ${isPinnedReadOnly ? "is-readonly" : "has-menu"}">
                 <button type="button" class="tp-plan-card ${active}" data-chart-id="${chart.id}" title="${escapeHtml(fullName)}" style="--diet-accent:${accent};--diet-accent-soft:${accentSoft};--diet-accent-line:${accentLine};">
                     <span class="diet-plan-icon" aria-hidden="true"><i data-lucide="${iconName}"></i></span>
                     <span class="diet-plan-copy">
@@ -713,9 +713,7 @@ function renderDietChartSelector() {
                     </span>
                 </button>
                 ${isPinnedReadOnly
-                    ? `<button type="button" class="tp-plan-card-menu-btn is-pinned" data-chart-id="${chart.id}" aria-label="Pinned by admin" title="Pinned by admin" disabled style="--diet-accent:${accent};--diet-accent-soft:${accentSoft};--diet-accent-line:${accentLine};">
-                        <i data-lucide="pin"></i>
-                    </button>`
+                    ? ""
                     : `<button type="button" class="tp-plan-card-menu-btn js-card-menu-btn" data-chart-id="${chart.id}" aria-label="Chart options">
                         <i data-lucide="ellipsis-vertical"></i>
                     </button>
@@ -764,7 +762,7 @@ function closeDietChartActionsMenu() {
 }
 
 function isDietChartMobileMenuMode() {
-    return window.matchMedia("(max-width: 767px)").matches;
+    return window.matchMedia("(max-width: 991px)").matches;
 }
 
 function ensureDietChartCardActionSheet() {
@@ -1771,7 +1769,7 @@ function renderDietChartView(chartData) {
 
         DIET_STATE.currentChartData = chartData;
         const chartTitle = getDietChartName(chartData?.chart) || "Diet Chart";
-        const chartHeading = `Diet Chart - ${chartTitle}`;
+        const chartHeading = "Today's Nutrition";
     setSelectedDietChartName(chartTitle);
 
         const meals = chartData?.meals || [];
@@ -1877,6 +1875,7 @@ function renderDietChartView(chartData) {
                             </div>
                         </div>
                         <div class="diet-view-meal-header-actions">
+                            <span class="diet-view-meal-calories">${formatMacro(mealTotals.calories)} kcal</span>
                             ${canEditChart
                                 ? `<button type="button" class="diet-meal-add-btn" data-meal-index="${mealIndex}" aria-label="Add food item">
                                     <i class="fa fa-plus"></i>
@@ -1904,10 +1903,6 @@ function renderDietChartView(chartData) {
                     <div class="diet-view-meal-content">
                         ${itemCards || '<div class="text-center text-muted" style="padding: 20px;">No items</div>'}
                     </div>
-                    <div class="diet-view-meal-totals">
-                        <span class="diet-view-meal-total-chip protein"><i class="fa fa-dumbbell"></i> Total Protein: ${formatMacro(mealTotals.protein)} g</span>
-                        <span class="diet-view-meal-total-chip calories"><i class="fa fa-fire"></i> Total Calories: ${formatMacro(mealTotals.calories)} kcal</span>
-                    </div>
                 </div>
             `;
         }).join("");
@@ -1921,6 +1916,10 @@ function renderDietChartView(chartData) {
                     ? `<div class="diet-view-chart-container">
                         <div class="diet-chart-wrapper">
                             <canvas id="dietMacroChart"></canvas>
+                            <div class="diet-chart-center-label" aria-hidden="true">
+                                <strong>${formatMacro(overall.calories)}</strong>
+                                <span>kcal</span>
+                            </div>
                         </div>
                         <div class="diet-view-chart-stats">
                             <div class="chart-stat-row carbs">
@@ -1937,11 +1936,6 @@ function renderDietChartView(chartData) {
                                 <span class="chart-stat-color"></span>
                                 <span class="chart-stat-label">Fats</span>
                                 <span class="chart-stat-value fats">${formatMacro(overall.fats)} gms</span>
-                            </div>
-                            <div class="chart-stat-row calories total">
-                                <span class="chart-stat-color"></span>
-                                <span class="chart-stat-label">Total Calories</span>
-                                <span class="chart-stat-value calories">${formatMacro(overall.calories)} kcal</span>
                             </div>
                         </div>
                     </div>`
@@ -3183,7 +3177,7 @@ function renderMacroPieChart(macros) {
     }
 
     const colors = {
-        carbs: "#d97706",
+        carbs: "#f68708",
         protein: "#16a34a",
         fats: "#2563eb"
     };
@@ -3225,7 +3219,7 @@ function renderMacroPieChart(macros) {
                     }
                 }
             },
-            cutout: "50%"
+            cutout: "75%"
         }
     });
 }
@@ -4719,6 +4713,14 @@ function bindDietChartEvents() {
                         menu.hidden = true;
                     } else {
                         menu.hidden = false;
+                        const rect = menuBtn.getBoundingClientRect();
+                        const menuWidth = 156;
+                        const left = Math.max(12, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 12));
+                        menu.style.position = "fixed";
+                        menu.style.top = `${Math.min(rect.bottom + 8, window.innerHeight - 12)}px`;
+                        menu.style.left = `${left}px`;
+                        menu.style.right = "auto";
+                        menu.style.minWidth = `${menuWidth}px`;
                         requestAnimationFrame(() => {
                             menu.classList.add("is-open");
                         });

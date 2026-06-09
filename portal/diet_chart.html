@@ -19,18 +19,29 @@
     <link href="../lib/lightbox/css/lightbox.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../css/style.css?v=20260527a" rel="stylesheet">
-    <link href="../css/admin.css?v=20260608-diet-modals-loader" rel="stylesheet">
+    <link href="../css/admin.css?v=20260609-diet-premium-ui" rel="stylesheet">
     <link href="../css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
     <link href="../css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
 </head>
 
 <body class="tyfit-app diet-auth-pending" data-page="diet-chart">
-    <header class="tyfit-mobile-topbar tyfit-subpage-topbar">
-        <a class="tyfit-subpage-back-btn" href="../index.html" aria-label="Back to Home">
-            <i data-lucide="arrow-left"></i>
+    <header class="tyfit-mobile-topbar">
+        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+        </button>
+        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="../index.html" aria-label="TYFIT home">
+            <img src="../assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+            <span class="tyfit-wordmark">TYFIT</span>
         </a>
-        <h1 class="tyfit-subpage-title">Diet Chart</h1>
-        <span class="tyfit-subpage-topbar-spacer" aria-hidden="true"></span>
+        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown">
+            <button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications">
+                <i data-lucide="bell"></i>
+                <span class="tyfit-dot" id="mobileNotifDot" hidden></span>
+            </button>
+            <div class="tyfit-popover-menu" id="mobileNotifMenu" aria-hidden="true">
+                <p class="tyfit-popover-empty">No new notification</p>
+            </div>
+        </div>
     </header>
 
     <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
@@ -138,13 +149,18 @@
         </div>
     </section>
 
-    <div class="admin-section diet-page-shell" style="padding: 80px 0;">
-        <div class="container">
-            <section class="tp-hero-header diet-hero-header">
-                <div>
-                    <p class="tp-eyebrow" id="dietPageSubtitle">DIET CHART</p>
-                    <h2 class="tp-page-title">Diet Chart</h2>
-                    <p class="tp-page-subtitle">Build and manage personalized nutrition plans.</p>
+    <div class="admin-section diet-page-shell">
+        <div class="container diet-page-container">
+            <section class="diet-hero" aria-label="Diet Chart overview">
+                <div class="diet-hero-copy">
+                    <h1>Diet Planning</h1>
+                    <p>Track your nutrition today</p>
+                </div>
+                <div class="diet-hero-illustration" aria-hidden="true">
+                    <span class="diet-sparkle diet-sparkle--one"></span>
+                    <span class="diet-sparkle diet-sparkle--two"></span>
+                    <span class="diet-sparkle diet-sparkle--three"></span>
+                    <img src="../assets/svg_icons/tyfit_premium_food_bowl.svg" alt="">
                 </div>
             </section>
 
@@ -157,7 +173,7 @@
                 </div>
                 <div class="tybot-entry-copy">
                     <span class="tybot-entry-title">Ask TyBot</span>
-                    <span class="tybot-entry-subtitle">Get plans, replacements &amp; diet help</span>
+                    <span class="tybot-entry-subtitle">Create plans &amp; replacements</span>
                 </div>
                 <span class="tybot-entry-sparkle" aria-hidden="true"><i data-lucide="sparkles"></i></span>
                 <span class="tybot-entry-arrow" id="tybotOpenBtn" aria-hidden="true">
@@ -173,7 +189,7 @@
             </div>
 
             <div class="row">
-                <div class="col-12">
+                <div class="col-12" style="padding: 0;">
                     <div class="diet-user-toolbar mb-3" id="dietUserToolbar" hidden>
                         <div class="diet-admin-toolbar-row">
                             <div class="diet-admin-toolbar-head">
@@ -207,7 +223,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4">
+            <div class="row mt-1">
                 <div class="col-12" style="padding: 0;">
                     <div id="dietChartPageStatus" class="alert" style="display: none;"></div>
 
@@ -593,7 +609,7 @@
     <script src="../js/login.js?v=20260523l"></script>
     <script src="../js/profile-utils.js?v=20260608-footer-avatar"></script>
     <script src="../js/shell.js?v=20260608-avatar-key-fix"></script>
-    <script src="../js/diet_chart.js?v=20260608-diet-switch-loader"></script>
+    <script src="../js/diet_chart.js?v=20260609-diet-premium-ui"></script>
     <script src="../assets/js/tybot-diet-coach.js?v=20260608-tybot-row"></script>
 </body>
 </html>

@@ -1,0 +1,81 @@
+<svg width="520" height="360" viewBox="0 0 520 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="48%" r="55%">
+      <stop offset="0%" stop-color="#6C63FF" stop-opacity="0.16"/>
+      <stop offset="72%" stop-color="#6C63FF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#6C63FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="90" y1="70" x2="220" y2="210" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D9FFD8"/>
+      <stop offset="1" stop-color="#8FECA8"/>
+    </linearGradient>
+    <linearGradient id="leaf2" x1="330" y1="72" x2="420" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDFEDC"/>
+      <stop offset="1" stop-color="#91ECA7"/>
+    </linearGradient>
+    <linearGradient id="avoSkin" x1="190" y1="115" x2="328" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FFD6"/>
+      <stop offset="1" stop-color="#A9ED80"/>
+    </linearGradient>
+    <linearGradient id="avoEdge" x1="245" y1="120" x2="300" y2="260" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC95A"/>
+      <stop offset="1" stop-color="#F28A2E"/>
+    </linearGradient>
+    <linearGradient id="tomato" x1="333" y1="147" x2="438" y2="247" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF866F"/>
+      <stop offset="1" stop-color="#F04E3C"/>
+    </linearGradient>
+    <linearGradient id="bowl" x1="75" y1="230" x2="450" y2="316" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F5F2FF"/>
+    </linearGradient>
+    <filter id="softShadow" x="50" y="220" width="420" height="110" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#6C63FF" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <circle cx="275" cy="165" r="158" fill="url(#glow)"/>
+
+  <!-- decorative sparkles -->
+  <path d="M435 71C439 84 445 90 458 94C445 98 439 104 435 117C431 104 425 98 412 94C425 90 431 84 435 71Z" fill="#A79CFF" opacity="0.8"/>
+  <circle cx="470" cy="148" r="6" fill="#8A7CFF" opacity="0.55"/>
+  <circle cx="116" cy="86" r="5" fill="#B9B2FF" opacity="0.6"/>
+  <circle cx="386" cy="53" r="4" fill="#B9B2FF" opacity="0.45"/>
+
+  <!-- left greens -->
+  <path d="M126 212C90 194 61 161 74 131C86 102 126 115 139 143C139 105 166 72 198 85C232 99 222 145 193 171C231 151 267 158 274 186C281 217 238 238 202 218C178 232 151 225 126 212Z" fill="url(#leaf)" stroke="#3B2E9B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M139 202C131 167 118 142 99 121" stroke="#3B2E9B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M164 191C166 150 174 121 197 92" stroke="#3B2E9B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M193 198C210 178 231 168 257 164" stroke="#3B2E9B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M123 158L95 150" stroke="#3B2E9B" stroke-width="5" stroke-linecap="round"/>
+  <path d="M165 148L140 132" stroke="#3B2E9B" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- right greens -->
+  <path d="M358 218C330 201 316 166 336 140C355 115 390 128 397 161C408 133 443 113 465 136C489 162 461 199 426 207C400 229 377 229 358 218Z" fill="url(#leaf2)" stroke="#3B2E9B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M385 205C390 174 404 147 429 126" stroke="#3B2E9B" stroke-width="6" stroke-linecap="round"/>
+  <path d="M410 199C433 188 447 173 456 151" stroke="#3B2E9B" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- avocado -->
+  <path d="M191 204C187 159 225 126 276 116C321 107 347 131 336 167C329 193 302 226 264 238C224 249 195 237 191 204Z" fill="url(#avoEdge)" stroke="#3B2E9B" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M180 191C176 145 216 112 268 102C315 93 342 118 331 153C323 182 294 212 255 223C214 235 184 223 180 191Z" fill="url(#avoSkin)" stroke="#3B2E9B" stroke-width="7" stroke-linejoin="round"/>
+  <ellipse cx="250" cy="166" rx="42" ry="30" transform="rotate(-14 250 166)" fill="#FFFBE1" opacity="0.8"/>
+  <ellipse cx="251" cy="166" rx="33" ry="24" transform="rotate(-14 251 166)" fill="#C9820F" stroke="#3B2E9B" stroke-width="6"/>
+  <ellipse cx="241" cy="158" rx="20" ry="11" transform="rotate(-14 241 158)" fill="#E9B238" opacity="0.75"/>
+  <path d="M197 143C218 121 250 113 284 110" stroke="white" stroke-width="8" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- tomato -->
+  <path d="M357 151C372 135 410 133 434 153C461 176 454 225 420 243C386 261 342 245 333 211C326 186 338 165 357 151Z" fill="url(#tomato)" stroke="#3B2E9B" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M387 143L398 123L407 145L430 136L418 157L436 170L411 170L403 193L394 170L369 174L385 157L365 143L387 143Z" fill="#8CE9D2" stroke="#3B2E9B" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M361 169C369 155 388 151 405 155" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
+
+  <!-- small chickpea / accent -->
+  <path d="M299 228C290 215 297 198 314 197C332 196 342 211 335 226C329 239 308 240 299 228Z" fill="#FFC06E" stroke="#3B2E9B" stroke-width="6"/>
+  <path d="M319 204C324 205 327 209 328 214" stroke="white" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- bowl -->
+  <g filter="url(#softShadow)">
+    <path d="M70 221C102 242 174 254 265 254C356 254 428 242 460 221" stroke="#3B2E9B" stroke-width="7" stroke-linecap="round"/>
+    <path d="M82 222C94 280 147 314 263 314C379 314 431 280 444 222C405 244 340 256 263 256C186 256 121 244 82 222Z" fill="url(#bowl)" stroke="#3B2E9B" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M119 271C166 285 348 286 405 270" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+  </g>
+</svg>
