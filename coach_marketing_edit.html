@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Edit Coach Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Edit your Tyfit coach marketing profile">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
+    <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
+    <link href="css/coach.css?v=20260621-coach-profile-polish" rel="stylesheet">
+</head>
+<body class="tyfit-app tyfit-ui-page" data-page="coach-marketing-edit">
+    <header class="tyfit-mobile-topbar">
+        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
+        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a>
+        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown"><button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i></button></div>
+    </header>
+
+    <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
+        <div class="sidebar-inner">
+            <div class="tyfit-mobile-drawer-head"><button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu"><i data-lucide="x"></i></button><a class="tyfit-logo-link" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a></div>
+            <div class="sidebar-menu"></div>
+        </div>
+    </aside>
+    <div class="tyfit-mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
+
+    <div class="tyfit-layout" id="tyfitLayout">
+        <aside class="tyfit-sidebar sidebar" id="tyfitSidebar">
+            <div class="sidebar-inner">
+                <div class="tyfit-sidebar-head"><a class="tyfit-logo-link sidebar-logo" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a></div>
+                <div class="sidebar-menu"></div>
+            </div>
+        </aside>
+        <button class="tyfit-sidebar-toggle-floating" id="sidebarCollapseBtn" aria-label="Toggle sidebar"><i data-lucide="panel-left-close"></i></button>
+
+        <main class="tyfit-main">
+            <div class="tyfit-desktop-actions">
+                <div class="tyfit-dropdown-wrap"><button class="tyfit-icon-btn tyfit-notif-btn" id="desktopNotifBtn" aria-label="Notifications"><i data-lucide="bell"></i><span class="tyfit-dot" id="desktopNotifDot" hidden></span></button><div class="tyfit-popover-menu" id="desktopNotifMenu" aria-hidden="true"><p class="tyfit-popover-empty">No new notification</p></div></div>
+                <span class="tyfit-desktop-separator" aria-hidden="true"></span>
+                <div class="tyfit-dropdown-wrap" id="desktopAccountWrap"><button class="tyfit-account-btn" id="desktopAccountBtn" aria-label="Account menu"><img id="desktopProfileAvatar" class="tyfit-account-avatar" src="assets/avatars/avatar-1.svg" alt="Profile"><span id="desktopProfileName">Account</span><i data-lucide="chevron-down"></i></button><div class="tyfit-popover-menu tyfit-popover-menu--account" id="desktopAccountMenu" aria-hidden="true"><button type="button" class="tyfit-menu-action" data-action="account">My Account</button><button type="button" class="tyfit-menu-action" data-action="logout">Logout</button></div></div>
+            </div>
+
+            <div class="coach-shell">
+                <div class="coach-page-status" id="coachPageStatus" aria-live="polite"></div>
+                <nav class="coach-editor-tabs" aria-label="Coach marketing sections">
+                    <button class="coach-editor-tab is-active" type="button" data-coach-tab="profile" aria-selected="true" aria-label="Profile and publishing"><i data-lucide="user-round"></i><span>Profile</span><b data-tab-status></b></button>
+                    <button class="coach-editor-tab" type="button" data-coach-tab="plans" aria-selected="false" aria-label="Coaching plans"><i data-lucide="badge-euro"></i><span>Plans</span><b data-tab-status></b></button>
+                    <button class="coach-editor-tab" type="button" data-coach-tab="testimonials" aria-selected="false" aria-label="Testimonials"><i data-lucide="message-square-heart"></i><span>Reviews</span><b data-tab-status></b></button>
+                    <button class="coach-editor-tab" type="button" data-coach-tab="transformations" aria-selected="false" aria-label="Transformations"><i data-lucide="trending-up"></i><span>Results</span><b data-tab-status></b></button>
+                </nav>
+
+                <section class="coach-card coach-tab-panel is-active" id="profile" data-coach-panel="profile">
+                    <div class="coach-section-head"><div><h2>Profile & Publishing</h2><p>Your public identity, positioning and main contact details.</p></div><button type="button" class="coach-secondary-btn" id="previewCoachPageBtn"><i data-lucide="external-link"></i> Preview</button></div>
+                    <div class="coach-profile-image-row">
+                        <label class="coach-editor-avatar-picker" aria-label="Change coach profile image">
+                            <img id="coachProfilePreview" class="coach-editor-avatar" src="assets/tyfit_img/coaching_images/coach-avatar.svg" alt="Coach profile">
+                            <span><i data-lucide="camera"></i></span>
+                            <input id="coachProfileImageFile" type="file" accept="image/*">
+                        </label>
+                    </div>
+                    <div class="coach-form-grid">
+                        <div class="coach-field"><label for="coachDisplayName">Coach name</label><input class="coach-input" id="coachDisplayName" type="text" placeholder="Ravi Tyagi"></div>
+                        <div class="coach-field"><label for="coachBrandName">Brand name</label><input class="coach-input" id="coachBrandName" type="text" placeholder="Tyfit Coaching"></div>
+                        <div class="coach-field"><label for="coachSlug">Public slug</label><input class="coach-input" id="coachSlug" type="text" placeholder="ravi-tyagi"></div>
+                        <div class="coach-field"><label for="coachTitle">Professional title</label><input class="coach-input" id="coachTitle" type="text" placeholder="Certified Nutrition Coach"></div>
+                        <div class="coach-field is-full"><label for="coachTagline">Short tagline</label><input class="coach-input" id="coachTagline" type="text" placeholder="Practical coaching for sustainable transformations."></div>
+                        <div class="coach-field is-full"><label for="coachBio">Bio</label><textarea class="coach-textarea" id="coachBio" placeholder="Tell visitors how you coach and who you help."></textarea></div>
+                        <div class="coach-field"><label for="coachRating">Rating</label><input class="coach-input" id="coachRating" type="number" min="0" max="5" step="0.1"></div>
+                        <div class="coach-field"><label for="coachClientsCount">Clients count</label><input class="coach-input" id="coachClientsCount" type="number" min="0" step="1"></div>
+                        <div class="coach-field"><label for="coachYearsExperience">Years experience</label><input class="coach-input" id="coachYearsExperience" type="number" min="0" step="1"></div>
+                        <label class="coach-toggle-field"><input id="coachPublished" type="checkbox"><span>Publish public profile</span></label>
+                    </div>
+                    <div class="coach-form-grid">
+                        <div class="coach-field"><label for="coachInstagram">Instagram</label><input class="coach-input" id="coachInstagram" type="url" placeholder="https://instagram.com/..."></div>
+                        <div class="coach-field"><label for="coachLinkedin">LinkedIn</label><input class="coach-input" id="coachLinkedin" type="url" placeholder="https://linkedin.com/in/..."></div>
+                        <div class="coach-field"><label for="coachFacebook">Facebook</label><input class="coach-input" id="coachFacebook" type="url" placeholder="https://facebook.com/..."></div>
+                        <div class="coach-field"><label for="coachWhatsapp">WhatsApp</label><input class="coach-input" id="coachWhatsapp" type="text" placeholder="+49123456789"></div>
+                        <div class="coach-field"><label for="coachEmail">Email</label><input class="coach-input" id="coachEmail" type="email" placeholder="coach@example.com"></div>
+                        <div class="coach-field"><label for="coachPhone">Call</label><input class="coach-input" id="coachPhone" type="tel" placeholder="+49123456789"></div>
+                        <div class="coach-field is-full"><label for="coachExpertise">Expertise chips</label><input class="coach-input" id="coachExpertise" type="text" placeholder="Fat Loss, Muscle Gain, Diabetes, Vegetarian Diet"></div>
+                    </div>
+                    <div class="coach-inline-actions"><button type="button" class="coach-primary-btn" id="saveCoachProfileBtn"><i data-lucide="save"></i> Save Marketing Page</button></div>
+                </section>
+
+                <section class="coach-card coach-tab-panel" id="plans" data-coach-panel="plans" hidden>
+                    <div class="coach-section-head"><div><h2>Coaching Plans</h2><p>Create offers shown on your public plan page.</p></div><button type="button" class="coach-secondary-btn" data-preview-coach><i data-lucide="external-link"></i> Preview</button></div>
+                    <div class="coach-list" id="coachPlansList"></div>
+                    <div class="coach-add-row"><button type="button" class="coach-secondary-btn" id="addPlanBtn"><i data-lucide="plus"></i> Add Plan</button></div>
+                    <div class="coach-editor-form-shell" id="coachPlanFormShell" hidden>
+                        <div class="coach-form-grid">
+                            <div class="coach-field"><label for="planTitle">Plan title</label><input class="coach-input" id="planTitle" type="text" placeholder="12 Week Transformation"></div>
+                            <div class="coach-field"><label for="planSubtitle">Subtitle</label><input class="coach-input" id="planSubtitle" type="text" placeholder="Perfect to kickstart your fitness journey."></div>
+                            <div class="coach-field"><label for="planPrice">Price</label><input class="coach-input" id="planPrice" type="number" min="0" step="1" placeholder="175"></div>
+                            <div class="coach-field"><label for="planCurrency">Currency</label><select class="coach-select" id="planCurrency"><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="INR">INR</option></select></div>
+                            <div class="coach-field"><label for="planPriceLabel">Price label</label><input class="coach-input" id="planPriceLabel" type="text" value="One-time"></div>
+                            <div class="coach-field"><label for="planDuration">Duration weeks</label><input class="coach-input" id="planDuration" type="number" min="0" step="1" placeholder="12"></div>
+                            <div class="coach-field"><label for="planIcon">Icon</label><select class="coach-select" id="planIcon"><option value="sparkles">Sparkles</option><option value="badge-check">Badge</option><option value="heart-handshake">Heart</option><option value="dumbbell">Dumbbell</option></select></div>
+                            <div class="coach-field"><label for="planChips">Feature chips</label><input class="coach-input" id="planChips" type="text" placeholder="Nutrition, Training, Check-ins"></div>
+                            <div class="coach-field is-full"><label for="planBestFor">Best for</label><textarea class="coach-textarea" id="planBestFor" placeholder="Who this plan helps most."></textarea></div>
+                            <div class="coach-field is-full"><label for="planFeatures">Included features</label><textarea class="coach-textarea" id="planFeatures" placeholder="One feature per line"></textarea></div>
+                        </div>
+                        <div class="coach-inline-actions"><button type="button" class="coach-primary-btn" id="savePlanBtn"><i data-lucide="plus"></i> Save Plan</button><button type="button" class="coach-secondary-btn" id="cancelPlanBtn">Cancel</button></div>
+                    </div>
+                </section>
+
+                <section class="coach-card coach-tab-panel" id="testimonials" data-coach-panel="testimonials" hidden>
+                    <div class="coach-section-head"><div><h2>Testimonials</h2><p>Short, credible client proof.</p></div><button type="button" class="coach-secondary-btn" data-preview-coach><i data-lucide="external-link"></i> Preview</button></div>
+                    <div class="coach-list" id="coachTestimonialsList"></div>
+                    <div class="coach-add-row"><button type="button" class="coach-secondary-btn" id="addTestimonialBtn"><i data-lucide="plus"></i> Add Testimonial</button></div>
+                    <div class="coach-editor-form-shell" id="coachTestimonialFormShell" hidden>
+                        <div class="coach-form-grid">
+                            <div class="coach-field"><label for="testimonialName">Client name</label><input class="coach-input" id="testimonialName" type="text" placeholder="Client name"></div>
+                            <div class="coach-field"><label for="testimonialRating">Rating</label><input class="coach-input" id="testimonialRating" type="number" min="1" max="5" step="1" value="5"></div>
+                            <div class="coach-field"><label for="testimonialAvatarFile">Client image</label><input class="coach-input" id="testimonialAvatarFile" type="file" accept="image/*"></div>
+                            <div class="coach-field is-full"><label for="testimonialQuote">Quote</label><textarea class="coach-textarea" id="testimonialQuote" placeholder="What did they achieve or feel?"></textarea></div>
+                        </div>
+                        <div class="coach-inline-actions"><button type="button" class="coach-primary-btn" id="saveTestimonialBtn"><i data-lucide="plus"></i> Save Testimonial</button><button type="button" class="coach-secondary-btn" id="cancelTestimonialBtn">Cancel</button></div>
+                    </div>
+                </section>
+
+                <section class="coach-card coach-tab-panel" id="transformations" data-coach-panel="transformations" hidden>
+                    <div class="coach-section-head"><div><h2>Transformations</h2><p>Show progress stories with optional before/after images.</p></div><button type="button" class="coach-secondary-btn" data-preview-coach><i data-lucide="external-link"></i> Preview</button></div>
+                    <div class="coach-list" id="coachTransformationsList"></div>
+                    <div class="coach-form-grid">
+                        <div class="coach-field"><label for="transformationClient">Client name</label><input class="coach-input" id="transformationClient" type="text" placeholder="Optional"></div>
+                        <div class="coach-field"><label for="transformationTitle">Title</label><input class="coach-input" id="transformationTitle" type="text" placeholder="Lost 8kg in 12 weeks"></div>
+                        <div class="coach-field"><label for="transformationMetric">Result metric</label><input class="coach-input" id="transformationMetric" type="text" placeholder="-8kg · stronger habits"></div>
+                        <div class="coach-field"><label for="transformationBeforeFile">Before image</label><input class="coach-input" id="transformationBeforeFile" type="file" accept="image/*"></div>
+                        <div class="coach-field"><label for="transformationAfterFile">After image</label><input class="coach-input" id="transformationAfterFile" type="file" accept="image/*"></div>
+                        <div class="coach-field"><label for="transformationBefore">Before image URL</label><input class="coach-input" id="transformationBefore" type="url" placeholder="Optional"></div>
+                        <div class="coach-field"><label for="transformationAfter">After image URL</label><input class="coach-input" id="transformationAfter" type="url" placeholder="Optional"></div>
+                        <div class="coach-field is-full"><label for="transformationSummary">Summary</label><textarea class="coach-textarea" id="transformationSummary" placeholder="Short story behind the result."></textarea></div>
+                    </div>
+                    <div class="coach-inline-actions"><button type="button" class="coach-primary-btn" id="saveTransformationBtn"><i data-lucide="plus"></i> Save Transformation</button></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div data-tyfit-bottom-nav></div>
+    <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
+    <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
+        <header><h4>Quick Actions</h4><button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close"><i data-lucide="x"></i></button></header>
+        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i> Log Progress</button>
+        <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
+    </section>
+    <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="lib/lucide/lucide.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/login.js?v=20260523l"></script>
+    <script src="js/profile-utils.js?v=20260423d"></script>
+    <script src="js/shell.js?v=20260621-coach-profile-polish"></script>
+    <script src="js/coach.js?v=20260621-coach-profile-polish"></script>
+</body>
+</html>

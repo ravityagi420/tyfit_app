@@ -428,7 +428,7 @@
         if (page === 'diet-chart') return 'diet';
         if (page === 'daily-checkin' || page === 'checkin-goals' || page === 'checkin-summary' || page === 'checkin-success') return 'checkin';
         if (page === 'training-plan') return 'training';
-        if (page === 'profile' || page === 'profile-edit') return 'profile';
+        if (page === 'profile' || page === 'profile-edit' || page.startsWith('coach')) return 'profile';
         if (page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') return 'settings';
         return '';
     }
@@ -473,7 +473,7 @@
         if (page === 'daily-checkin' || page === 'checkin-goals' || page === 'checkin-summary') return 'checkin';
         if (page === 'training-plan') return 'training';
         if (page === 'journey') return 'profile';
-        if (page === 'profile' || page === 'profile-edit' || page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') {
+        if (page === 'profile' || page === 'profile-edit' || page.startsWith('coach') || page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') {
             return 'profile';
         }
         return '';
@@ -530,6 +530,7 @@
         if (page === 'checkin-goals') return false;
         if (page === 'diet-chart' || page === 'training-plan') return false;
         if (page === 'profile' || page === 'profile-edit') return false;
+        if (page.startsWith('coach-')) return false;
         if (page.startsWith('privacy') || page === 'terms' || page === 'cookie-policy' || page === 'data-processing') return false;
         return true;
     }

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="140" viewBox="0 0 220 140" fill="none">
+  <rect width="220" height="140" rx="24" fill="#FFF8EF"/>
+  <ellipse cx="106" cy="125" rx="73" ry="9" fill="#F8B45E" opacity=".18"/>
+  <path d="M22 70c9-9 19-9 28 0 9-7 20-7 29 1" stroke="#EAE1D6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M161 68c8-8 16-8 24 0 8-6 16-6 24 1" stroke="#EAE1D6" stroke-width="5" stroke-linecap="round"/>
+  <path d="M93 34h57l-11 12 11 12H93V34Z" fill="#F97316"/>
+  <path d="M108 43c5-4 10-4 15 0-6 3-6 7 0 10-5 4-10 4-15 0 6-3 6-7 0-10Z" fill="#FFE0B4"/>
+  <path d="M92 34v66" stroke="#9A5B1D" stroke-width="5" stroke-linecap="round"/>
+  <path d="M27 118 82 55l30 63H27Z" fill="url(#a)"/>
+  <path d="M68 118 124 42l62 76H68Z" fill="url(#b)"/>
+  <path d="m124 42 14 76H68l41-56 8 14 7-34Z" fill="#F59E0B" opacity=".55"/>
+  <path d="m82 55 9 63H27l43-49 6 12 6-26Z" fill="#FB923C" opacity=".7"/>
+  <path d="m124 42 15 19-12-4-9 15-9-10 15-20Z" fill="#FFE6C7"/>
+  <path d="m82 55 12 14-11-3-7 12-6-9 12-14Z" fill="#FFE8CB"/>
+  <defs>
+    <linearGradient id="a" x1="27" x2="115" y1="118" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDBA74"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+    <linearGradient id="b" x1="68" x2="178" y1="118" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FED7AA"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+  </defs>
+</svg>

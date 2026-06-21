@@ -290,6 +290,15 @@ function renderProfileOverview(data) {
                 icon: "shield"
             }
         ];
+        const role = String(data._profile?.role || "").toLowerCase();
+        if (role === "coach") {
+            rows.push({
+                key: "coachStudio",
+                title: "Coach Studio",
+                subtitle: "Marketing page, plans, testimonials and transformations",
+                icon: "badge-check"
+            });
+        }
 
         sectionsList.innerHTML = rows.map((row) => {
             const rawProfile = data._profile || null;
@@ -391,6 +400,11 @@ function bindProfileInteractions() {
 
             if (section === "fitnessGoal") {
                 window.location.href = "daily_checkin.html";
+                return;
+            }
+
+            if (section === "coachStudio") {
+                window.location.href = "coach_studio.html";
                 return;
             }
         });
