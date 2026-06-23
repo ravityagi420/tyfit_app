@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
     <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
-    <link href="css/coach.css?v=20260621-coach-profile-polish" rel="stylesheet">
+    <link href="css/coach.css?v=20260623-coach-studio-final-scroll" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="coach-studio">
     <header class="tyfit-mobile-topbar">
@@ -52,53 +52,97 @@
                 <div class="tyfit-dropdown-wrap" id="desktopAccountWrap"><button class="tyfit-account-btn" id="desktopAccountBtn" aria-label="Account menu"><img id="desktopProfileAvatar" class="tyfit-account-avatar" src="assets/avatars/avatar-1.svg" alt="Profile"><span id="desktopProfileName">Account</span><i data-lucide="chevron-down"></i></button><div class="tyfit-popover-menu tyfit-popover-menu--account" id="desktopAccountMenu" aria-hidden="true"><button type="button" class="tyfit-menu-action" data-action="account">My Account</button><button type="button" class="tyfit-menu-action" data-action="logout">Logout</button></div></div>
             </div>
             <div class="coach-shell">
-                <section class="coach-studio-head">
+                <section class="coach-studio-titlebar">
                     <div>
-                        <span class="coach-dashboard-kicker">Coach Studio</span>
-                        <!-- <h1>Dashboard</h1>
-                        <p>Manage your public coaching page now, and prepare your client workspace for the next workflow.</p> -->
+                        <h1>Coach Studio</h1>
+                        <p>Manage your profile, plans and grow your coaching business.</p>
+                    </div>
+                    <div class="coach-studio-title-actions">
+                        <a class="coach-title-preview" id="coachPreviewLink" href="coach_public_profile.html"><i data-lucide="globe-2"></i><span>Public Page</span></a>
+                        <button class="coach-title-share" type="button" id="coachShareProfileBtn" aria-label="Share public page"><i data-lucide="share-2"></i></button>
                     </div>
                 </section>
 
-                <section class="coach-dashboard-profile">
-                    <div class="coach-dashboard-profile-main">
+                <section class="coach-business-hero">
+                    <div class="coach-business-hero-avatar">
                         <button class="coach-dashboard-avatar-btn" id="coachStudioAvatarBtn" type="button" aria-label="Change marketing profile image">
                             <img id="coachStudioAvatar" src="assets/coach/coach-avatar-premium.svg" alt="Coach profile">
                             <span><i data-lucide="camera"></i></span>
                         </button>
                         <input id="coachStudioAvatarFile" type="file" accept="image/*" hidden>
-                        <strong id="coachStudioName">Coach Page</strong>
-                        <span id="coachStudioTitle">Marketing profile</span>
+                    </div>
+                    <div class="coach-business-hero-copy">
+                        <h2><span id="coachStudioName">Coach Page</span><i data-lucide="badge-check"></i></h2>
+                        <p id="coachStudioTitle">Marketing profile</p>
                         <div class="coach-studio-status" id="coachStudioStatus"></div>
+                        <span class="coach-business-tagline">Helping busy professionals transform their health.</span>
                     </div>
                 </section>
 
-                <nav class="coach-studio-tabs" aria-label="Coach Studio dashboard">
-                    <button class="coach-studio-tab is-active" type="button" data-studio-tab="marketing" aria-selected="true"><i data-lucide="layout-dashboard"></i><span>Marketing Page</span></button>
-                    <button class="coach-studio-tab" type="button" data-studio-tab="clients" aria-selected="false"><i data-lucide="users"></i><span>Client Workspace</span></button>
-                </nav>
-
-                <section class="coach-studio-panel is-active" data-studio-panel="marketing">
-                    <div class="coach-dashboard-section-head"><div><h2>Marketing Page</h2><p>Edit what clients see before they contact you.</p></div></div>
-                    <div class="coach-marketing-command">
-                        <a class="coach-mini-action is-preview" id="coachPreviewLink" href="coach_public_profile.html" aria-label="Preview public page"><i data-lucide="external-link"></i><span>Preview</span></a>
-                        <a class="coach-mini-action" href="coach_marketing_edit.html#profile" aria-label="Edit marketing page"><i data-lucide="file-pen-line"></i><span>Edit</span></a>
+                <section class="coach-business-stats coach-analytics-coming-soon" aria-label="Coach analytics coming soon">
+                    <div class="coach-analytics-head">
+                        <span class="coach-stat-icon is-muted"><i data-lucide="lock"></i></span>
+                        <div>
+                            <h2>Analytics</h2>
+                            <p>Coming Soon</p>
+                        </div>
+                        <small>Track profile views, leads and enrollments in real time.</small>
                     </div>
-                    <div class="coach-dashboard-grid" aria-label="Marketing page actions">
-                        <a class="coach-dashboard-card" href="coach_marketing_edit.html#profile"><span class="coach-action-icon"><i data-lucide="user-round"></i></span><span><strong>Profile & Publishing</strong><small>Name, photo, tagline, socials and visibility.</small></span><i data-lucide="chevron-right"></i></a>
-                        <a class="coach-dashboard-card" href="coach_marketing_edit.html#plans"><span class="coach-action-icon is-green"><i data-lucide="badge-euro"></i></span><span><strong>Coaching Plans</strong><small>Pricing, features, duration and enrollment CTA.</small></span><i data-lucide="chevron-right"></i></a>
-                        <a class="coach-dashboard-card" href="coach_marketing_edit.html#testimonials"><span class="coach-action-icon is-amber"><i data-lucide="message-square-heart"></i></span><span><strong>Testimonials</strong><small>Client quotes, ratings and proof images.</small></span><i data-lucide="chevron-right"></i></a>
-                        <a class="coach-dashboard-card" href="coach_marketing_edit.html#transformations"><span class="coach-action-icon is-pink"><i data-lucide="trending-up"></i></span><span><strong>Transformations</strong><small>Before/after stories and results gallery.</small></span><i data-lucide="chevron-right"></i></a>
-                    </div>
+                    <article>
+                        <strong>—</strong>
+                        <small>Profile Views</small>
+                    </article>
+                    <article>
+                        <strong>—</strong>
+                        <small>Leads / Inquiries</small>
+                    </article>
+                    <article>
+                        <strong>—</strong>
+                        <small>Active Clients</small>
+                    </article>
                 </section>
 
-                <section class="coach-studio-panel" data-studio-panel="clients" hidden>
-                    <div class="coach-dashboard-section-head"><div><h2>Client Workspace</h2><p>Client tools planned for the next coach workflow.</p></div><span class="coach-coming-pill">Coming soon</span></div>
-                    <div class="coach-dashboard-grid is-muted" aria-label="Future client tools">
-                        <button class="coach-dashboard-card is-disabled" type="button" disabled><span class="coach-action-icon is-blue"><i data-lucide="users"></i></span><span><strong>Client Information</strong><small>View client goals, profile details, check-ins and progress.</small></span><i data-lucide="lock"></i></button>
-                        <button class="coach-dashboard-card is-disabled" type="button" disabled><span class="coach-action-icon is-green"><i data-lucide="user-plus"></i></span><span><strong>Add Client</strong><small>Invite a new client or connect an existing Tyfit user.</small></span><i data-lucide="lock"></i></button>
-                        <button class="coach-dashboard-card is-disabled" type="button" disabled><span class="coach-action-icon is-amber"><i data-lucide="send"></i></span><span><strong>Invite Existing User</strong><small>Send a secure coach access invite.</small></span><i data-lucide="lock"></i></button>
-                        <button class="coach-dashboard-card is-disabled" type="button" disabled><span class="coach-action-icon is-pink"><i data-lucide="user-x"></i></span><span><strong>Remove Client</strong><small>Manage coach-client access safely.</small></span><i data-lucide="lock"></i></button>
+                <a class="coach-profile-strength-compact" id="coachCompletionWidget" href="coach_marketing_edit.html#profile" data-completion-state="started">
+                    <span class="coach-strength-icon" id="coachCompletionIcon"><i data-lucide="alert-circle"></i></span>
+                    <span class="coach-strength-copy">
+                        <strong id="coachCompletionTitle">Getting Started</strong>
+                        <small id="coachCompletionMessage">Complete your coach profile to start accepting clients.</small>
+                        <span><b id="coachCompletionBar" style="width:0%"></b></span>
+                    </span>
+                    <em id="coachCompletionPercent">0%</em>
+                    <i data-lucide="chevron-right"></i>
+                </a>
+
+                <section class="coach-business-section">
+                    <div class="coach-business-section-head">
+                        <h2>Manage Your Business</h2>
+                    </div>
+                    <div class="coach-business-grid">
+                        <a class="coach-business-card" href="coach_marketing_edit.html#profile">
+                            <span class="coach-business-icon is-purple"><i data-lucide="user-round"></i></span>
+                            <strong>Marketing Profile</strong>
+                            <p>Update your name, photo, tagline, social links and contact details.</p>
+                            <span class="coach-card-progress"><b id="coachMarketingProgressBar" style="width:0%"></b></span>
+                            <small id="coachMarketingProgressText">0% Complete</small>
+                        </a>
+                        <a class="coach-business-card" href="coach_marketing_edit.html#plans">
+                            <span class="coach-business-icon is-green"><i data-lucide="clipboard-list"></i></span>
+                            <strong>Coaching Plans</strong>
+                            <p>Create and manage your coaching plans and pricing.</p>
+                            <em id="coachPlansCount">0 Active Plans</em>
+                        </a>
+                        <a class="coach-business-card" href="coach_marketing_edit.html#testimonials">
+                            <span class="coach-business-icon is-amber"><i data-lucide="star"></i></span>
+                            <strong>Social Proof</strong>
+                            <p>Manage testimonials from clients and transformation stories.</p>
+                            <span class="coach-pill-row"><em id="coachTestimonialsCount">0 Testimonials</em><em id="coachTransformationsCount">0 Transformations</em></span>
+                        </a>
+                        <a class="coach-business-card is-future" href="#" aria-disabled="true">
+                            <span class="coach-business-icon is-blue"><i data-lucide="users"></i></span>
+                            <strong>Clients</strong>
+                            <p>Manage your active clients and coaching relationships.</p>
+                            <em id="coachClientsCount">0 Active Clients</em>
+                        </a>
                     </div>
                 </section>
                 <div class="coach-page-status" id="coachPageStatus" aria-live="polite"></div>
@@ -120,7 +164,7 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
-    <script src="js/shell.js?v=20260621-coach-profile-polish"></script>
-    <script src="js/coach.js?v=20260621-coach-profile-polish"></script>
+    <script src="js/shell.js?v=20260623-coach-studio-final-scroll"></script>
+    <script src="js/coach.js?v=20260623-coach-studio-final-scroll"></script>
 </body>
 </html>

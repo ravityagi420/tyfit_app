@@ -417,6 +417,60 @@
         });
     }
 
+    function calculateCoachCompletion() {
+        const p = state.coachProfile || {};
+        const has = (value) => String(value || "").trim().length > 0;
+        const checks = [
+            { key: "photo", label: "Add your profile photo.", points: 10, done: has(p.profile_image_url) },
+            { key: "name", label: "Add your coach name.", points: 10, done: has(p.display_name) || has(p.brand_name) },
+            { key: "title", label: "Add your professional title.", points: 10, done: has(p.professional_title) },
+            { key: "tagline", label: "Add a clear profile tagline.", points: 5, done: has(p.tagline) },
+            { key: "contact", label: "Add contact information.", points: 10, done: state.contacts.some((item) => has(item.value)) },
+            { key: "social", label: "Add at least one social link.", points: 5, done: state.socialLinks.some((item) => has(item.url)) },
+            { key: "plans", label: "Add your first coaching plan.", points: 20, done: state.plans.some((item) => item.is_active !== false) },
+            { key: "testimonial", label: "Add testimonials to build trust.", points: 15, done: state.testimonials.length > 0 },
+            { key: "transformation", label: "Add transformations to strengthen your profile.", points: 15, done: state.transformations.length > 0 }
+        ];
+        const score = checks.reduce((sum, item) => sum + (item.done ? item.points : 0), 0);
+        const percent = Math.min(100, Math.max(0, score));
+        const missing = checks.filter((item) => !item.done);
+        const published = Boolean(p.is_published);
+        let stateName = "started";
+        let status = "Getting Started";
+        let icon = "alert-circle";
+        let message = missing[0]?.label || "Complete your coach profile to start accepting clients.";
+        let href = "coach_marketing_edit.html#profile";
+
+        if (percent >= 100 && published) {
+            stateName = "live";
+            status = "Live";
+            icon = "badge-check";
+            message = "Your public page is live and ready for clients.";
+            href = profileLink("coach_public_profile.html");
+        } else if (percent >= 80) {
+            stateName = "ready";
+            status = "Ready to Publish";
+            icon = "rocket";
+            message = missing[0]?.label || "Your profile looks great. Publish your page and start sharing it.";
+            href = "coach_marketing_edit.html#profile";
+        } else if (percent >= 50) {
+            stateName = "almost";
+            status = "Almost Ready";
+            icon = "sparkles";
+            message = missing[0]?.label || "Publish your page when ready.";
+            href = missing[0]?.key === "plans" ? "coach_marketing_edit.html#plans" : "coach_marketing_edit.html#testimonials";
+        }
+
+        const profilePoints = checks.slice(0, 6).reduce((sum, item) => sum + (item.done ? item.points : 0), 0);
+        const marketingPercent = Math.round((profilePoints / 50) * 100);
+        return { percent, status, icon, message, href, stateName, marketingPercent };
+    }
+
+    function setIconHtml(node, iconName) {
+        if (!node) return;
+        node.innerHTML = `<i data-lucide="${iconName}"></i>`;
+    }
+
     function initCoachMarketingTabs() {
         const tabs = Array.from(document.querySelectorAll("[data-coach-tab]"));
         const panels = Array.from(document.querySelectorAll("[data-coach-panel]"));
@@ -459,6 +513,8 @@
         const name = el("coachStudioName");
         const title = el("coachStudioTitle");
         const status = el("coachStudioStatus");
+        const completion = calculateCoachCompletion();
+        const activePlans = state.plans.filter((item) => item.is_active !== false).length;
         if (avatar) avatar.src = displayUrl(profile?.profile_image_url || DEFAULT_PROFILE_IMAGE);
         if (name) name.textContent = profile?.brand_name || profile?.display_name || "Coach Page";
         if (title) title.textContent = profile?.professional_title || "Marketing profile";
@@ -469,6 +525,32 @@
         }
         const preview = el("coachPreviewLink");
         if (preview) preview.href = profileLink("coach_public_profile.html");
+        const completionWidget = el("coachCompletionWidget");
+        if (completionWidget) {
+            completionWidget.href = completion.href;
+            completionWidget.dataset.completionState = completion.stateName;
+        }
+        setIconHtml(el("coachCompletionIcon"), completion.icon);
+        const completionTitle = el("coachCompletionTitle");
+        if (completionTitle) completionTitle.textContent = completion.status;
+        const completionMessage = el("coachCompletionMessage");
+        if (completionMessage) completionMessage.textContent = completion.message;
+        const completionPercent = el("coachCompletionPercent");
+        if (completionPercent) completionPercent.textContent = `${completion.percent}%`;
+        const completionBar = el("coachCompletionBar");
+        if (completionBar) completionBar.style.width = `${completion.percent}%`;
+        const marketingBar = el("coachMarketingProgressBar");
+        if (marketingBar) marketingBar.style.width = `${completion.marketingPercent}%`;
+        const marketingText = el("coachMarketingProgressText");
+        if (marketingText) marketingText.textContent = `${completion.marketingPercent}% Complete`;
+        const plansCount = el("coachPlansCount");
+        if (plansCount) plansCount.textContent = `${activePlans} Active ${activePlans === 1 ? "Plan" : "Plans"}`;
+        const testimonialsCount = el("coachTestimonialsCount");
+        if (testimonialsCount) testimonialsCount.textContent = `${state.testimonials.length} ${state.testimonials.length === 1 ? "Testimonial" : "Testimonials"}`;
+        const transformationsCount = el("coachTransformationsCount");
+        if (transformationsCount) transformationsCount.textContent = `${state.transformations.length} ${state.transformations.length === 1 ? "Transformation" : "Transformations"}`;
+        const clientsCount = el("coachClientsCount");
+        if (clientsCount) clientsCount.textContent = "0 Active Clients";
         refreshIcons();
     }
 
@@ -926,11 +1008,6 @@
             window.clearTimeout(state.publicTestimonialTimer);
             state.publicTestimonialTimer = null;
         }
-        if (page() !== "coach-public-profile" || state.testimonials.length < 2) return;
-        state.publicTestimonialTimer = window.setTimeout(() => {
-            state.publicTestimonialIndex = (state.publicTestimonialIndex + 1) % state.testimonials.length;
-            renderPublicProfile();
-        }, 7000);
     }
 
     function renderPublicProfile() {
@@ -954,78 +1031,103 @@
         };
         const visibleSocial = state.socialLinks.filter((link) => link?.url);
         const firstTransformation = transformations[0] || null;
+        const contactActions = [
+            ["whatsapp", "WhatsApp", "message-circle"],
+            ["email", "Email", "mail"],
+            ["phone", "Call", "phone"]
+        ].map(([type, label, icon]) => {
+            const href = contactHref(type);
+            return href ? `<a class="coach-public-contact-action is-${type}" href="${escapeHtml(href)}"><i data-lucide="${icon}"></i><span>${label}</span></a>` : "";
+        }).join("");
         const root = el("coachPublicRoot");
         if (!root) return;
         root.innerHTML = `
-            <section class="coach-profile-hero">
-                <div class="coach-profile-photo-wrap">
-                    <img class="coach-profile-photo" src="${escapeHtml(image)}" alt="${escapeHtml(p.display_name)}">
-                    <span class="coach-profile-check"><i data-lucide="check"></i></span>
-                </div>
-                <div class="coach-profile-intro">
-                    <span class="coach-certified-pill"><i data-lucide="shield-check"></i>${escapeHtml(p.professional_title || "Certified Nutrition Coach")}</span>
-                    <h1>${escapeHtml(p.brand_name || p.display_name)} <span class="coach-title-check"><i data-lucide="badge-check"></i></span></h1>
-                    <p>${escapeHtml(p.tagline || "Helping busy professionals build sustainable fitness habits.")}</p>
-                    <div class="coach-profile-stats">
-                        <span><i data-lucide="star"></i><strong>${Number(p.rating || 5).toFixed(1)}</strong><small>(${reviews} Reviews)</small></span>
-                        <span><i data-lucide="users"></i><strong>${Number(p.clients_count || 0)}+</strong><small>Clients</small></span>
-                        <span><i data-lucide="shield-check"></i><strong>${Number(p.years_experience || 0)}+</strong><small>Years Exp.</small></span>
+            <div class="coach-public-shell">
+                <div class="coach-public-grid">
+                    <div class="coach-public-main">
+                        <section class="coach-public-hero">
+                            <div class="coach-profile-photo-wrap">
+                                <img class="coach-profile-photo" src="${escapeHtml(image)}" alt="${escapeHtml(p.display_name)}">
+                                <span class="coach-profile-check"><i data-lucide="check"></i></span>
+                            </div>
+                            <div class="coach-profile-intro coach-public-intro">
+                                <span class="coach-certified-pill"><i data-lucide="shield-check"></i>${escapeHtml(p.professional_title || "Certified Nutrition Coach")}</span>
+                                <h1>${escapeHtml(p.brand_name || p.display_name)} <span class="coach-title-check"><i data-lucide="badge-check"></i></span></h1>
+                                <p>${escapeHtml(p.tagline || "Build a stronger routine with practical coaching.")}</p>
+                            </div>
+                            <div class="coach-public-stats" aria-label="Coach stats">
+                                <span><i data-lucide="star"></i><strong>${Number(p.rating || 5).toFixed(1)}</strong><small>(${reviews} Reviews)</small></span>
+                                <span><i data-lucide="users"></i><strong>${Number(p.clients_count || 0)}+</strong><small>Clients</small></span>
+                                <span><i data-lucide="shield-check"></i><strong>${Number(p.years_experience || 0)}+</strong><small>Years Exp.</small></span>
+                            </div>
+                            <a class="coach-book-cta" href="${escapeHtml(contactHref("whatsapp") || contactHref("email") || "#")}"><i data-lucide="calendar-days"></i><span>Book Consultation</span><i data-lucide="arrow-right"></i></a>
+                        </section>
+
+                        ${visibleSocial.length ? `<section class="coach-public-socials">
+                            <div class="coach-public-section-head"><h2>Follow & Connect</h2></div>
+                            <div class="coach-public-social-row">
+                                ${visibleSocial.map((link) => {
+                                    const meta = socialMeta[link.platform] || [link.platform, "link"];
+                                    return `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(meta[0])}"><span class="coach-social-logo is-${escapeHtml(link.platform)}"><img src="${escapeHtml(meta[1])}" alt=""></span><span>${escapeHtml(meta[0])}</span></a>`;
+                                }).join("")}
+                            </div>
+                        </section>` : ""}
+
+                        <section class="coach-public-section"><h2>Expertise</h2><div class="coach-expertise-grid">${(state.expertise.length ? state.expertise : [
+                            { label: "Fat Loss" }, { label: "Muscle Gain" }, { label: "Diabetes" }, { label: "Vegetarian Diet" }, { label: "Strength Training" }
+                        ]).map((x, index) => `<span class="coach-expertise-pill is-${index % 5}"><i data-lucide="${["flame", "dumbbell", "droplet", "leaf", "bone"][index % 5]}"></i>${escapeHtml(x.label)}</span>`).join("")}</div></section>
+
+                        ${testimonial ? `<section class="coach-public-section">
+                            <div class="coach-public-section-head"><h2>Testimonials</h2><span>${state.publicTestimonialIndex + 1} / ${testimonials.length}</span></div>
+                            <article class="coach-testimonial-card" id="testimonials">
+                                <button type="button" class="coach-round-nav" data-testimonial-nav="-1" aria-label="Previous testimonial"${testimonials.length < 2 ? " disabled" : ""}><i data-lucide="chevron-left"></i></button>
+                                <span class="coach-quote-mark">“</span>
+                                <img class="coach-testimonial-avatar" src="${escapeHtml(displayUrl(testimonial.client_image_url || DEFAULT_PROFILE_IMAGE))}" alt="${escapeHtml(testimonial.client_name)}">
+                                <div><span class="coach-stars">★★★★★</span><p>“${escapeHtml(truncateText(testimonial.quote, 126))}”</p><strong>${escapeHtml(testimonial.client_name)}</strong><small>${escapeHtml(testimonial.client_title || "Software Engineer")}</small></div>
+                                <button type="button" class="coach-round-nav" data-testimonial-nav="1" aria-label="Next testimonial"${testimonials.length < 2 ? " disabled" : ""}><i data-lucide="chevron-right"></i></button>
+                            </article>
+                            <div class="coach-testimonial-dots">${testimonials.map((_, index) => `<button type="button" class="${index === state.publicTestimonialIndex ? "is-active" : ""}" data-testimonial-dot="${index}" aria-label="Show testimonial ${index + 1}"></button>`).join("")}</div>
+                        </section>` : ""}
+
+                        ${firstTransformation ? `<section class="coach-public-section">
+                            <div class="coach-public-section-head"><h2>Transformations</h2></div>
+                            <div class="coach-public-transform-row" id="transformations">
+                                <article class="coach-before-after">
+                                    <img src="${escapeHtml(displayUrl(firstTransformation.before_image_url || DEFAULT_BEFORE_IMAGE))}" alt="Before">
+                                    <img src="${escapeHtml(displayUrl(firstTransformation.after_image_url || DEFAULT_AFTER_IMAGE))}" alt="After">
+                                    <span>Before</span><b>After</b>
+                                    <button type="button" class="coach-before-after-handle" aria-label="Compare"><i data-lucide="chevrons-left-right"></i></button>
+                                </article>
+                                <div class="coach-success-count"><strong>${transformations.length}+</strong><span>Success Stories</span><small>Real people. Real results.</small><div class="coach-mini-avatar-row">${testimonials.slice(0, 3).map((item) => `<img src="${escapeHtml(displayUrl(item.client_image_url || DEFAULT_PROFILE_IMAGE))}" alt="">`).join("")}${testimonials.length > 3 ? `<span>+${testimonials.length - 3}</span>` : ""}</div></div>
+                            </div>
+                        </section>` : ""}
                     </div>
+
+                    <aside class="coach-public-side">
+                        <section class="coach-public-contact-card">
+                            <div class="coach-contact-panel">
+                                <span class="coach-contact-bubble"><i data-lucide="message-circle"></i></span>
+                                <div>
+                                    <h2>Contact Coach</h2>
+                                    <p>Choose how you’d like to connect.</p>
+                                </div>
+                                <div class="coach-contact-actions coach-public-contact-actions">
+                                    ${contactActions || '<span class="coach-empty">Contact details coming soon.</span>'}
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="coach-public-plan-card"><h2>Coaching Plans</h2>${primaryPlan ? `
+                            <a class="coach-feature-plan" href="${profileLink("coach_plans.html")}">
+                                <span class="coach-plan-illustration"><img src="${PLAN_MOUNTAIN_IMAGE}" alt=""></span>
+                                <span><strong>${escapeHtml(primaryPlan.title)}</strong><small>${(primaryPlan.feature_chips || []).slice(0, 4).map((chip) => `<em>${escapeHtml(chip)}</em>`).join("")}</small></span>
+                                <b>${money(primaryPlan.price_amount, primaryPlan.currency)}</b>
+                                <i data-lucide="arrow-right"></i>
+                            </a>` : '<div class="coach-empty">Coaching plans coming soon.</div>'}</section>
+                    </aside>
                 </div>
-            </section>
-            <a class="coach-book-cta" href="${escapeHtml(contactHref("whatsapp") || contactHref("email") || "#")}"><i data-lucide="calendar-days"></i><span>Book Consultation</span><i data-lucide="arrow-right"></i></a>
-            <section class="coach-contact-panel coach-social-contact-panel">
-                <span class="coach-contact-bubble"><i data-lucide="message-circle"></i></span>
-                <div>
-                    <h2>Get In Touch</h2>
-                    <p>Let’s start your transformation journey.</p>
-                    <div class="coach-contact-actions">
-                        <a href="${escapeHtml(contactHref("whatsapp") || "#")}"><i data-lucide="message-circle"></i>WhatsApp</a>
-                        <a href="${escapeHtml(contactHref("email") || "#")}"><i data-lucide="mail"></i>Email</a>
-                        <a href="${escapeHtml(contactHref("phone") || "#")}"><i data-lucide="phone"></i>Call</a>
-                    </div>
-                    <div class="coach-social-icon-row" aria-label="Social profiles">
-                    ${visibleSocial.map((link) => {
-                        const meta = socialMeta[link.platform] || [link.platform, "link"];
-                        return `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(meta[0])}"><span class="coach-social-logo is-${escapeHtml(link.platform)}"><img src="${escapeHtml(meta[1])}" alt=""></span></a>`;
-                    }).join("")}
-                    </div>
-                </div>
-            </section>
-            <section class="coach-public-section"><h2>Expertise</h2><div class="coach-expertise-grid">${(state.expertise.length ? state.expertise : [
-                { label: "Fat Loss" }, { label: "Muscle Gain" }, { label: "Diabetes" }, { label: "Vegetarian Diet" }, { label: "Strength Training" }
-            ]).map((x, index) => `<span class="coach-expertise-pill is-${index % 5}"><i data-lucide="${["flame", "dumbbell", "droplet", "leaf", "bone"][index % 5]}"></i>${escapeHtml(x.label)}</span>`).join("")}</div></section>
-            <section class="coach-public-section"><h2>Coaching Plans</h2>${primaryPlan ? `
-                <a class="coach-feature-plan" href="${profileLink("coach_plans.html")}">
-                    <span class="coach-plan-illustration"><img src="${PLAN_MOUNTAIN_IMAGE}" alt=""></span>
-                    <span><strong>${escapeHtml(primaryPlan.title)}</strong><small>${(primaryPlan.feature_chips || []).slice(0, 4).map((chip) => `<em>${escapeHtml(chip)}</em>`).join("")}</small></span>
-                    <b>${money(primaryPlan.price_amount, primaryPlan.currency)}</b>
-                    <i data-lucide="arrow-right"></i>
-                </a>` : '<div class="coach-empty">Coaching plans coming soon.</div>'}</section>
-            ${testimonial ? `<section class="coach-public-section">
-                <div class="coach-public-section-head"><h2>Testimonials</h2><span>${state.publicTestimonialIndex + 1} / ${testimonials.length}</span></div>
-                <article class="coach-testimonial-card" id="testimonials">
-                    <button type="button" class="coach-round-nav" data-testimonial-nav="-1" aria-label="Previous testimonial"${testimonials.length < 2 ? " disabled" : ""}><i data-lucide="chevron-left"></i></button>
-                    <span class="coach-quote-mark">“</span>
-                    <img class="coach-testimonial-avatar" src="${escapeHtml(displayUrl(testimonial.client_image_url || DEFAULT_PROFILE_IMAGE))}" alt="${escapeHtml(testimonial.client_name)}">
-                    <div><span class="coach-stars">★★★★★</span><p>“${escapeHtml(truncateText(testimonial.quote, 126))}”</p><strong>${escapeHtml(testimonial.client_name)}</strong><small>${escapeHtml(testimonial.client_title || "Software Engineer")}</small></div>
-                    <button type="button" class="coach-round-nav" data-testimonial-nav="1" aria-label="Next testimonial"${testimonials.length < 2 ? " disabled" : ""}><i data-lucide="chevron-right"></i></button>
-                </article>
-                <div class="coach-testimonial-dots">${testimonials.map((_, index) => `<button type="button" class="${index === state.publicTestimonialIndex ? "is-active" : ""}" data-testimonial-dot="${index}" aria-label="Show testimonial ${index + 1}"></button>`).join("")}</div>
-            </section>` : ""}
-            ${firstTransformation ? `<section class="coach-public-section">
-                <div class="coach-public-section-head"><h2>Transformations</h2></div>
-                <div class="coach-public-transform-row" id="transformations">
-                    <article class="coach-before-after">
-                        <img src="${escapeHtml(displayUrl(firstTransformation.before_image_url || DEFAULT_BEFORE_IMAGE))}" alt="Before">
-                        <img src="${escapeHtml(displayUrl(firstTransformation.after_image_url || DEFAULT_AFTER_IMAGE))}" alt="After">
-                        <span>Before</span><b>After</b>
-                        <button type="button" class="coach-before-after-handle" aria-label="Compare"><i data-lucide="chevrons-left-right"></i></button>
-                    </article>
-                    <div class="coach-success-count"><strong>${transformations.length}+</strong><span>Success Stories</span><small>Real people. Real results.</small><div class="coach-mini-avatar-row">${testimonials.slice(0, 3).map((item) => `<img src="${escapeHtml(displayUrl(item.client_image_url || DEFAULT_PROFILE_IMAGE))}" alt="">`).join("")}${testimonials.length > 3 ? `<span>+${testimonials.length - 3}</span>` : ""}</div></div>
-                </div>
-            </section>` : ""}
-            <p class="coach-privacy-note"><i data-lucide="lock"></i> All consultations are private and confidential.</p>
+                <p class="coach-privacy-note"><i data-lucide="lock"></i> All consultations are private and confidential.</p>
+            </div>
         `;
         refreshIcons();
         scheduleTestimonialAutoAdvance();
@@ -1223,7 +1325,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
         refreshIcons();
-        document.querySelectorAll("#coachShareBtn, #coachShareDesktopBtn").forEach((shareButton) => shareButton.addEventListener("click", async () => {
+        document.querySelectorAll("#coachShareBtn, #coachShareDesktopBtn, #coachShareProfileBtn").forEach((shareButton) => shareButton.addEventListener("click", async () => {
             try {
                 if (navigator.share) await navigator.share({ title: document.title, url: window.location.href });
                 else await navigator.clipboard?.writeText?.(window.location.href);
