@@ -1010,6 +1010,27 @@
         }
     }
 
+    function coachContactIcon(type) {
+        const icons = {
+            whatsapp: `<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="16" r="15" fill="#25D366"/><path fill="#fff" d="M22.8 18.9c-.4-.2-2.2-1.1-2.5-1.2-.3-.1-.5-.2-.8.2-.2.4-.9 1.2-1.1 1.4-.2.2-.4.3-.8.1-.4-.2-1.5-.5-2.8-1.7-1-1-1.7-2.1-1.9-2.5-.2-.4 0-.6.2-.8l.6-.7c.2-.2.2-.4.3-.6.1-.2 0-.5 0-.7-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.7.1-1 .5-.3.4-1.3 1.2-1.3 3 0 1.8 1.3 3.5 1.5 3.8.2.2 2.6 4 6.3 5.5.9.4 1.6.6 2.1.8.9.3 1.7.3 2.3.2.7-.1 2.2-.9 2.5-1.7.3-.8.3-1.5.2-1.7-.1-.3-.4-.4-.8-.6z"/><path fill="#fff" fill-rule="evenodd" d="M16 5.8c-5.6 0-10.2 4.5-10.2 10.1 0 1.8.5 3.5 1.3 5l-1.4 5.3 5.5-1.4c1.4.8 3.1 1.2 4.8 1.2 5.6 0 10.2-4.5 10.2-10.1S21.6 5.8 16 5.8zm0 18.5c-1.5 0-3-.4-4.2-1.1l-.3-.2-3.2.8.9-3.1-.2-.3c-.8-1.3-1.2-2.8-1.2-4.4 0-4.6 3.7-8.4 8.3-8.4s8.3 3.8 8.3 8.4-3.8 8.3-8.4 8.3z" clip-rule="evenodd"/></svg>`,
+            linkedin: `<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="7" fill="#0A66C2"/><path fill="#fff" d="M9.4 13.2h4.1v12.1H9.4V13.2zm2.1-6c1.3 0 2.3 1 2.3 2.2 0 1.3-1 2.2-2.4 2.2-1.3 0-2.3-1-2.3-2.2s1-2.2 2.4-2.2zm4.3 6h3.9v1.7h.1c.5-1 1.9-2 3.8-2 4.1 0 4.9 2.7 4.9 6.2v6.2h-4.1v-5.5c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.6h-4.1V13.2z"/></svg>`,
+            instagram: `<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><defs><linearGradient id="coachIgGradient" x1="5" y1="28" x2="28" y2="4" gradientUnits="userSpaceOnUse"><stop stop-color="#FEDA75"/><stop offset=".25" stop-color="#FA7E1E"/><stop offset=".5" stop-color="#D62976"/><stop offset=".75" stop-color="#962FBF"/><stop offset="1" stop-color="#4F5BD5"/></linearGradient></defs><rect x="3" y="3" width="26" height="26" rx="7" fill="url(#coachIgGradient)"/><rect x="9" y="9" width="14" height="14" rx="4.5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="3.3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="21.4" cy="10.8" r="1.3" fill="#fff"/></svg>`,
+            facebook: `<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="16" r="15" fill="#1877F2"/><path fill="#fff" d="M18.5 25.2v-8.3h2.8l.4-3.2h-3.2v-2c0-.9.3-1.6 1.7-1.6h1.8V7.2c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5v2.5h-3v3.2h3v8.3h3.5z"/></svg>`
+        };
+        if (icons[type]) return icons[type];
+        const lucide = type === "email" ? "mail" : type === "phone" ? "phone" : "link";
+        return `<i data-lucide="${lucide}" aria-hidden="true"></i>`;
+    }
+
+    function coachContactRow({ type, label, href, external = false }) {
+        if (!href) return "";
+        return `<a class="coach-public-contact-action is-${escapeHtml(type)}" href="${escapeHtml(href)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ""}>
+            <span class="coach-contact-action-icon is-${escapeHtml(type)}">${coachContactIcon(type)}</span>
+            <span>${escapeHtml(label)}</span>
+            <i class="coach-contact-action-chevron" data-lucide="chevron-right" aria-hidden="true"></i>
+        </a>`;
+    }
+
     function renderPublicProfile() {
         const p = state.coachProfile;
         if (!p) {
@@ -1025,20 +1046,30 @@
         if (state.publicTestimonialIndex >= testimonials.length) state.publicTestimonialIndex = 0;
         const testimonial = testimonials[state.publicTestimonialIndex] || null;
         const socialMeta = {
-            instagram: ["Instagram", "assets/coach/instagram-icon.svg"],
-            linkedin: ["LinkedIn", "assets/coach/linkedin-icon.svg"],
-            facebook: ["Facebook", "assets/coach/facebook-icon.svg"]
+            instagram: "Instagram",
+            linkedin: "LinkedIn",
+            facebook: "Facebook"
         };
-        const visibleSocial = state.socialLinks.filter((link) => link?.url);
+        const visibleSocial = state.socialLinks.filter((link) => link?.url && String(link.url).trim());
         const firstTransformation = transformations[0] || null;
+        const coachFirstName = String(p.display_name || p.brand_name || "Coach").trim().split(/\s+/)[0] || "Coach";
         const contactActions = [
-            ["whatsapp", "WhatsApp", "message-circle"],
-            ["email", "Email", "mail"],
-            ["phone", "Call", "phone"]
-        ].map(([type, label, icon]) => {
-            const href = contactHref(type);
-            return href ? `<a class="coach-public-contact-action is-${type}" href="${escapeHtml(href)}"><i data-lucide="${icon}"></i><span>${label}</span></a>` : "";
+            { type: "whatsapp", label: "WhatsApp", href: contactHref("whatsapp"), external: true },
+            { type: "email", label: "Email", href: contactHref("email") },
+            { type: "phone", label: "Call", href: contactHref("phone") }
+        ].map(coachContactRow).join("");
+        const socialActions = visibleSocial.map((link) => {
+            const label = socialMeta[link.platform] || link.platform;
+            return coachContactRow({ type: link.platform, label, href: link.url, external: true });
         }).join("");
+        const floatingContactContent = [contactActions, socialActions].filter(Boolean).join("");
+        const plansMarkup = primaryPlan ? `
+            <a class="coach-feature-plan" href="${profileLink("coach_plans.html")}">
+                <span class="coach-plan-illustration"><img src="${PLAN_MOUNTAIN_IMAGE}" alt=""></span>
+                <span><strong>${escapeHtml(primaryPlan.title)}</strong><small>${(primaryPlan.feature_chips || []).slice(0, 4).map((chip) => `<em>${escapeHtml(chip)}</em>`).join("")}</small></span>
+                <b>${money(primaryPlan.price_amount, primaryPlan.currency)}</b>
+                <i data-lucide="arrow-right"></i>
+            </a>` : '<div class="coach-empty">Coaching plans coming soon.</div>';
         const root = el("coachPublicRoot");
         if (!root) return;
         root.innerHTML = `
@@ -1063,19 +1094,11 @@
                             <a class="coach-book-cta" href="${escapeHtml(contactHref("whatsapp") || contactHref("email") || "#")}"><i data-lucide="calendar-days"></i><span>Book Consultation</span><i data-lucide="arrow-right"></i></a>
                         </section>
 
-                        ${visibleSocial.length ? `<section class="coach-public-socials">
-                            <div class="coach-public-section-head"><h2>Follow & Connect</h2></div>
-                            <div class="coach-public-social-row">
-                                ${visibleSocial.map((link) => {
-                                    const meta = socialMeta[link.platform] || [link.platform, "link"];
-                                    return `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(meta[0])}"><span class="coach-social-logo is-${escapeHtml(link.platform)}"><img src="${escapeHtml(meta[1])}" alt=""></span><span>${escapeHtml(meta[0])}</span></a>`;
-                                }).join("")}
-                            </div>
-                        </section>` : ""}
-
                         <section class="coach-public-section"><h2>Expertise</h2><div class="coach-expertise-grid">${(state.expertise.length ? state.expertise : [
                             { label: "Fat Loss" }, { label: "Muscle Gain" }, { label: "Diabetes" }, { label: "Vegetarian Diet" }, { label: "Strength Training" }
                         ]).map((x, index) => `<span class="coach-expertise-pill is-${index % 5}"><i data-lucide="${["flame", "dumbbell", "droplet", "leaf", "bone"][index % 5]}"></i>${escapeHtml(x.label)}</span>`).join("")}</div></section>
+
+                        <section class="coach-public-section coach-public-plans-inline"><h2>Coaching Plans</h2>${plansMarkup}</section>
 
                         ${testimonial ? `<section class="coach-public-section">
                             <div class="coach-public-section-head"><h2>Testimonials</h2><span>${state.publicTestimonialIndex + 1} / ${testimonials.length}</span></div>
@@ -1104,29 +1127,26 @@
                     </div>
 
                     <aside class="coach-public-side">
-                        <section class="coach-public-contact-card">
-                            <div class="coach-contact-panel">
-                                <span class="coach-contact-bubble"><i data-lucide="message-circle"></i></span>
-                                <div>
-                                    <h2>Contact Coach</h2>
-                                    <p>Choose how you’d like to connect.</p>
-                                </div>
-                                <div class="coach-contact-actions coach-public-contact-actions">
-                                    ${contactActions || '<span class="coach-empty">Contact details coming soon.</span>'}
-                                </div>
-                            </div>
-                        </section>
-
-                        <section class="coach-public-plan-card"><h2>Coaching Plans</h2>${primaryPlan ? `
-                            <a class="coach-feature-plan" href="${profileLink("coach_plans.html")}">
-                                <span class="coach-plan-illustration"><img src="${PLAN_MOUNTAIN_IMAGE}" alt=""></span>
-                                <span><strong>${escapeHtml(primaryPlan.title)}</strong><small>${(primaryPlan.feature_chips || []).slice(0, 4).map((chip) => `<em>${escapeHtml(chip)}</em>`).join("")}</small></span>
-                                <b>${money(primaryPlan.price_amount, primaryPlan.currency)}</b>
-                                <i data-lucide="arrow-right"></i>
-                            </a>` : '<div class="coach-empty">Coaching plans coming soon.</div>'}</section>
+                        <section class="coach-public-plan-card"><h2>Coaching Plans</h2>${plansMarkup}</section>
                     </aside>
                 </div>
                 <p class="coach-privacy-note"><i data-lucide="lock"></i> All consultations are private and confidential.</p>
+                ${floatingContactContent ? `
+                    <button type="button" class="coach-floating-contact-btn" id="coachFloatingContactBtn" aria-label="Contact coach" aria-haspopup="dialog" aria-expanded="false" aria-controls="coachContactMenu"><i data-lucide="message-square-dot"></i></button>
+                    <div class="coach-contact-menu-backdrop" id="coachContactMenuBackdrop" hidden></div>
+                    <section class="coach-contact-menu" id="coachContactMenu" role="dialog" aria-modal="false" aria-labelledby="coachContactMenuTitle" aria-hidden="true" tabindex="-1">
+                        <header>
+                            <div>
+                                <h2 id="coachContactMenuTitle">Contact Coach</h2>
+                                <p>Choose how you’d like to connect</p>
+                            </div>
+                            <button type="button" class="coach-contact-menu-close" id="coachContactMenuClose" aria-label="Close contact menu"><i data-lucide="x"></i></button>
+                        </header>
+                        <div class="coach-contact-menu-actions">
+                            ${floatingContactContent}
+                        </div>
+                    </section>
+                ` : ""}
             </div>
         `;
         refreshIcons();
@@ -1142,8 +1162,39 @@
         renderPlanCards(el("coachPlansPublicList"), state.plans, false);
     }
 
+    function setContactMenu(open) {
+        const button = el("coachFloatingContactBtn");
+        const menu = el("coachContactMenu");
+        const backdrop = el("coachContactMenuBackdrop");
+        if (!button || !menu || !backdrop) return;
+        button.setAttribute("aria-expanded", open ? "true" : "false");
+        menu.classList.toggle("is-open", open);
+        menu.setAttribute("aria-hidden", open ? "false" : "true");
+        backdrop.hidden = !open;
+        backdrop.classList.toggle("is-open", open);
+        document.body.classList.toggle("coach-contact-menu-open", open);
+        if (open) {
+            window.setTimeout(() => {
+                menu.querySelector("a, button")?.focus?.();
+            }, 40);
+        } else {
+            button.focus?.();
+        }
+    }
+
     function bindPlanToggles() {
         document.addEventListener("click", (event) => {
+            const contactButton = event.target.closest("#coachFloatingContactBtn");
+            const contactClose = event.target.closest("#coachContactMenuClose, #coachContactMenuBackdrop");
+            const contactAction = event.target.closest("#coachContactMenu a");
+            if (contactButton) {
+                setContactMenu(!el("coachContactMenu")?.classList.contains("is-open"));
+                return;
+            }
+            if (contactClose || contactAction) {
+                setContactMenu(false);
+                if (contactClose) return;
+            }
             const testimonialNav = event.target.closest("[data-testimonial-nav]");
             const testimonialDot = event.target.closest("[data-testimonial-dot]");
             if (testimonialNav && state.testimonials.length > 1) {
@@ -1160,6 +1211,11 @@
             const toggle = event.target.closest("[data-plan-toggle]");
             if (!toggle) return;
             toggle.closest(".coach-plan-card")?.classList.toggle("is-open");
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && el("coachContactMenu")?.classList.contains("is-open")) {
+                setContactMenu(false);
+            }
         });
     }
 

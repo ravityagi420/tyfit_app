@@ -7,6 +7,980 @@ body[data-page^="coach"] {
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Coach public profile: compact contact FAB menu + mobile plan ordering */
+body[data-page="coach-public-profile"] .coach-public-plans-inline {
+    display: none;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn {
+    box-shadow:
+        0 18px 34px rgba(108, 99, 255, 0.34),
+        0 8px 16px rgba(17, 24, 39, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn svg {
+    width: 27px;
+    height: 27px;
+    stroke-width: 2.35;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: block !important;
+    background: transparent;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    right: 18px;
+    bottom: 94px;
+    left: auto;
+    width: auto;
+    max-width: calc(100vw - 32px);
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(16px) scale(.94);
+    transform-origin: right bottom;
+    transition:
+        opacity .24s ease,
+        transform .34s cubic-bezier(.18, .95, .2, 1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-actions {
+    display: grid;
+    justify-items: end;
+    gap: 10px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action {
+    width: max-content;
+    min-width: 150px;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 0 14px;
+    border: 1px solid rgba(231, 228, 255, .9);
+    border-radius: 16px;
+    color: #2F3448;
+    background: rgba(255, 255, 255, .97);
+    box-shadow: 0 14px 30px rgba(42, 37, 112, .13);
+    backdrop-filter: blur(12px);
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    transition: transform .18s ease, background .18s ease, color .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:hover {
+    transform: translateX(-2px);
+    color: #191F38;
+    background: #fff;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action > svg {
+    width: 19px;
+    height: 19px;
+    color: #6C63FF;
+    stroke-width: 2.35;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo {
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+    display: inline-grid;
+    place-items: center;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo img {
+    width: 21px;
+    height: 21px;
+    object-fit: contain;
+}
+
+@media (max-width: 991px) {
+    body[data-page="coach-public-profile"].coach-contact-menu-open {
+        overflow: auto;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-plans-inline {
+        display: block;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-side {
+        display: none;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu {
+        right: 16px;
+        bottom: calc(var(--bottom-nav-height, 72px) + 84px + env(safe-area-inset-bottom));
+        width: auto;
+        max-width: calc(100vw - 32px);
+        padding: 0;
+        border-radius: 0;
+        transform: translateY(16px) scale(.94);
+        transform-origin: right bottom;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Coach contact menu screenshot match - must stay last */
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    position: fixed;
+    right: 14px;
+    bottom: 92px;
+    left: auto;
+    z-index: 119;
+    width: min(292px, calc(100vw - 28px));
+    max-width: calc(100vw - 28px);
+    max-height: none;
+    display: grid;
+    gap: 12px;
+    padding: 16px 14px 14px;
+    border: 1px solid rgba(108, 99, 255, 0.10);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 22px 48px rgba(17, 24, 39, 0.14), 0 8px 20px rgba(108, 99, 255, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    transform: translateY(10px) scale(.98);
+    transform-origin: right bottom;
+    transition: opacity .2s ease, transform .22s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 18px;
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin: 6px 0 0;
+    color: #667085;
+    font-size: 10.5px;
+    line-height: 1.3;
+    font-weight: 450;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-actions {
+    display: grid;
+    gap: 10px;
+    justify-items: stretch;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 16px;
+    align-items: center;
+    gap: 11px;
+    padding: 0 12px;
+    border: 1px solid rgba(15, 23, 42, 0.055);
+    border-radius: 12px;
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    font-size: 12.5px;
+    font-weight: 650;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon {
+    width: 22px;
+    height: 22px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 7px;
+    background: transparent;
+    overflow: hidden;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon > svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone {
+    color: #5B48FF;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 2.15;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-chevron {
+    width: 15px;
+    height: 15px;
+    color: #667085;
+    stroke-width: 2.2;
+    justify-self: end;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: block !important;
+    background: transparent;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 480px) {
+    body[data-page="coach-public-profile"] .coach-contact-menu {
+        right: 8px;
+        left: auto;
+        bottom: calc(var(--bottom-nav-height, 72px) + 80px + env(safe-area-inset-bottom));
+        width: min(292px, calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+        max-height: calc(100vh - var(--bottom-nav-height, 72px) - 118px);
+        overflow-y: auto;
+        padding: 16px 14px 14px;
+        border-radius: 22px;
+        transform: translateY(10px) scale(.98);
+        transform-origin: right bottom;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+        transform: translateY(0) scale(1);
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+        background: transparent;
+    }
+}
+
+/* Coach contact menu reference polish */
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    position: fixed;
+    right: 14px;
+    bottom: 92px;
+    left: auto;
+    z-index: 119;
+    width: min(292px, calc(100vw - 28px));
+    max-width: calc(100vw - 28px);
+    max-height: none;
+    display: grid;
+    gap: 12px;
+    padding: 16px 14px 14px;
+    border: 1px solid rgba(108, 99, 255, 0.10);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 22px 48px rgba(17, 24, 39, 0.14), 0 8px 20px rgba(108, 99, 255, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    transform: translateY(10px) scale(.98);
+    transform-origin: right bottom;
+    transition: opacity .2s ease, transform .22s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 18px;
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin: 6px 0 0;
+    color: #667085;
+    font-size: 10.5px;
+    line-height: 1.3;
+    font-weight: 450;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-actions {
+    display: grid;
+    gap: 10px;
+    justify-items: stretch;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 16px;
+    align-items: center;
+    gap: 11px;
+    padding: 0 12px;
+    border: 1px solid rgba(15, 23, 42, 0.055);
+    border-radius: 12px;
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    font-size: 12.5px;
+    font-weight: 650;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:hover,
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:active {
+    transform: translateY(-1px);
+    border-color: rgba(108, 99, 255, 0.14);
+    background: #FCFBFF;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon {
+    width: 22px;
+    height: 22px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 7px;
+    background: transparent;
+    overflow: hidden;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon > svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone {
+    color: #5B48FF;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 2.15;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-chevron {
+    width: 15px;
+    height: 15px;
+    color: #667085;
+    stroke-width: 2.2;
+    justify-self: end;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: block !important;
+    background: transparent;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 480px) {
+    body[data-page="coach-public-profile"] .coach-contact-menu {
+        right: 8px;
+        left: auto;
+        bottom: calc(var(--bottom-nav-height, 72px) + 80px + env(safe-area-inset-bottom));
+        width: min(292px, calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+        max-height: calc(100vh - var(--bottom-nav-height, 72px) - 118px);
+        overflow-y: auto;
+        padding: 16px 14px 14px;
+        border-radius: 22px;
+        transform: translateY(10px) scale(.98);
+        transform-origin: right bottom;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+        transform: translateY(0) scale(1);
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+        background: transparent;
+    }
+}
+
+/* Contact panel final cascade */
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    z-index: 118;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    position: fixed;
+    right: 16px;
+    bottom: 94px;
+    left: auto;
+    z-index: 119;
+    width: min(340px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    max-height: none;
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid rgba(108, 99, 255, 0.14);
+    border-radius: 24px;
+    background: #FFFFFF;
+    box-shadow: 0 24px 58px rgba(15, 23, 42, 0.16), 0 8px 22px rgba(108, 99, 255, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    transform: translateY(10px) scale(.98);
+    transform-origin: right bottom;
+    transition: opacity .2s ease, transform .22s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2,
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin: 0;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2 {
+    color: #111827;
+    font-size: 21px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin-top: 5px;
+    color: #667085;
+    font-size: 13.5px;
+    line-height: 1.35;
+    font-weight: 450;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close:hover {
+    background: #F3EEFF;
+    color: #6C63FF;
+    transform: translateY(-1px);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close svg {
+    width: 19px;
+    height: 19px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-actions {
+    display: grid;
+    gap: 11px;
+    justify-items: stretch;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 12px;
+    padding: 0 15px;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    border-radius: 16px;
+    background: #FFFFFF;
+    color: #111827;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:hover,
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:active {
+    transform: translateY(-1px);
+    border-color: rgba(108, 99, 255, 0.18);
+    background: #FCFBFF;
+    box-shadow: 0 10px 22px rgba(108, 99, 255, 0.08);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:focus-visible,
+body[data-page="coach-public-profile"] .coach-contact-menu-close:focus-visible {
+    outline: 3px solid rgba(108, 99, 255, 0.22);
+    outline-offset: 2px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 12px;
+    color: #6C63FF;
+    background: #F3EEFF;
+    overflow: hidden;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon i,
+body[data-page="coach-public-profile"] .coach-contact-action-icon > svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone svg {
+    width: 19px;
+    height: 19px;
+    stroke-width: 2.2;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-instagram,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-linkedin,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-facebook,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-whatsapp {
+    background: transparent;
+    border-radius: 9px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-chevron {
+    width: 17px;
+    height: 17px;
+    color: #98A2B3;
+    stroke-width: 2.3;
+    justify-self: end;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn[aria-expanded="true"] {
+    transform: translateY(-1px) scale(.98);
+    box-shadow:
+        0 20px 38px rgba(108, 99, 255, 0.36),
+        0 0 0 7px rgba(108, 99, 255, 0.10);
+}
+
+@media (max-width: 480px) {
+    body[data-page="coach-public-profile"].coach-contact-menu-open {
+        overflow: hidden;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+        background: rgba(15, 23, 42, 0.28);
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu {
+        left: 12px;
+        right: 12px;
+        bottom: calc(var(--bottom-nav-height, 72px) + 8px + env(safe-area-inset-bottom));
+        width: auto;
+        max-width: none;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 20px;
+        border-radius: 24px;
+        transform: translateY(16px);
+        transform-origin: center bottom;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-page="coach-public-profile"] .coach-contact-menu,
+    body[data-page="coach-public-profile"] .coach-contact-menu-backdrop,
+    body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action,
+    body[data-page="coach-public-profile"] .coach-contact-menu-close {
+        transition: none;
+    }
+}
+
+/* Final public profile section rhythm */
+body[data-page="coach-public-profile"] .coach-public-section {
+    margin-top: 22px;
+}
+
+body[data-page="coach-public-profile"] .coach-public-section:first-of-type {
+    margin-top: 10px;
+}
+
+@media (max-width: 991px) {
+    body[data-page="coach-public-profile"] .coach-public-section {
+        margin-top: 14px;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-section:first-of-type {
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 767px) {
+    body[data-page="coach-public-profile"] .coach-public-section {
+        margin-top: 10px;
+    }
+}
+
+/* Final contact panel redesign */
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    z-index: 118;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    position: fixed;
+    right: 16px;
+    bottom: 94px;
+    z-index: 119;
+    width: min(340px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid rgba(108, 99, 255, 0.14);
+    border-radius: 24px;
+    background: #FFFFFF;
+    box-shadow: 0 24px 58px rgba(15, 23, 42, 0.16), 0 8px 22px rgba(108, 99, 255, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    transform: translateY(10px) scale(.98);
+    transform-origin: right bottom;
+    transition: opacity .2s ease, transform .22s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2,
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin: 0;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2 {
+    color: #111827;
+    font-size: 21px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin-top: 5px;
+    color: #667085;
+    font-size: 13.5px;
+    line-height: 1.35;
+    font-weight: 450;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close:hover {
+    background: #F3EEFF;
+    color: #6C63FF;
+    transform: translateY(-1px);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close svg {
+    width: 19px;
+    height: 19px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-actions {
+    display: grid;
+    gap: 11px;
+    justify-items: stretch;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 12px;
+    padding: 0 15px;
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    border-radius: 16px;
+    background: #FFFFFF;
+    color: #111827;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.045);
+    font-size: 15.5px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:hover,
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:active {
+    transform: translateY(-1px);
+    border-color: rgba(108, 99, 255, 0.18);
+    background: #FCFBFF;
+    box-shadow: 0 10px 22px rgba(108, 99, 255, 0.08);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:focus-visible,
+body[data-page="coach-public-profile"] .coach-contact-menu-close:focus-visible {
+    outline: 3px solid rgba(108, 99, 255, 0.22);
+    outline-offset: 2px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon {
+    width: 34px;
+    height: 34px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 12px;
+    color: #6C63FF;
+    background: #F3EEFF;
+    overflow: hidden;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon i,
+body[data-page="coach-public-profile"] .coach-contact-action-icon > svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone svg {
+    width: 19px;
+    height: 19px;
+    stroke-width: 2.2;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-instagram,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-linkedin,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-facebook,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-whatsapp {
+    background: transparent;
+    border-radius: 9px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-chevron {
+    width: 17px;
+    height: 17px;
+    color: #98A2B3;
+    stroke-width: 2.3;
+    justify-self: end;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn[aria-expanded="true"] {
+    transform: translateY(-1px) scale(.98);
+    box-shadow:
+        0 20px 38px rgba(108, 99, 255, 0.36),
+        0 0 0 7px rgba(108, 99, 255, 0.10);
+}
+
+@media (max-width: 480px) {
+    body[data-page="coach-public-profile"].coach-contact-menu-open {
+        overflow: hidden;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+        background: rgba(15, 23, 42, 0.28);
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu {
+        left: 12px;
+        right: 12px;
+        bottom: calc(var(--bottom-nav-height, 72px) + 8px + env(safe-area-inset-bottom));
+        width: auto;
+        max-width: none;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 20px;
+        border-radius: 24px;
+        transform: translateY(16px);
+        transform-origin: center bottom;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-page="coach-public-profile"] .coach-contact-menu,
+    body[data-page="coach-public-profile"] .coach-contact-menu-backdrop,
+    body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action,
+    body[data-page="coach-public-profile"] .coach-contact-menu-close {
+        transition: none;
+    }
+}
+
 body[data-page="coach-public-profile"] {
     background:
         radial-gradient(circle at 72% 10%, rgba(108, 99, 255, 0.08), transparent 26%),
@@ -2938,14 +3912,14 @@ body[data-page="coach-public-profile"] .coach-public-hero {
     align-items: center;
     gap: 28px;
     min-width: 0;
-    padding: 22px;
-    border: 1px solid rgba(108, 99, 255, 0.12);
+    /* padding: 22px; */
+    /* border: 1px solid rgba(108, 99, 255, 0.12);
     border-radius: 30px;
     background:
         radial-gradient(circle at 92% 10%, rgba(108, 99, 255, 0.10), transparent 28%),
         radial-gradient(circle at 0% 100%, rgba(34, 197, 94, 0.07), transparent 24%),
         rgba(255, 255, 255, 0.94);
-    box-shadow: 0 18px 42px rgba(108, 99, 255, 0.08);
+    box-shadow: 0 18px 42px rgba(108, 99, 255, 0.08); */
 }
 
 body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-photo-wrap {
@@ -3192,7 +4166,7 @@ body[data-page="coach-public-profile"] .coach-public-section {
     body[data-page="coach-public-profile"] .coach-shell {
         width: auto;
         max-width: none;
-        padding: 72px 16px calc(112px + env(safe-area-inset-bottom));
+        padding: 10px 16px calc(112px + env(safe-area-inset-bottom));
     }
 }
 
@@ -3207,7 +4181,7 @@ body[data-page="coach-public-profile"] .coach-public-section {
         grid-template-columns: minmax(0, 1fr);
         justify-items: center;
         gap: 14px;
-        padding: 18px 16px;
+        /* padding: 18px 16px; */
         text-align: center;
     }
 
@@ -3786,6 +4760,250 @@ body[data-page="coach-studio"] .coach-analytics-btn {
 
     body[data-page="coach-studio"] .coach-business-card {
         min-height: 0;
+    }
+}
+
+/* Coach Studio mobile refinement */
+@media (max-width: 620px) {
+    body[data-page="coach-studio"] .coach-shell {
+        padding-top: 72px;
+        padding-inline: 14px;
+        gap: 13px;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-titlebar {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        gap: 10px;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-titlebar h1 {
+        margin: 0 0 4px;
+        font-size: 24px;
+        line-height: 1.06;
+        letter-spacing: -0.03em;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-titlebar p {
+        max-width: 230px;
+        font-size: 12px;
+        line-height: 1.32;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-title-actions {
+        width: auto;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 7px;
+    }
+
+    body[data-page="coach-studio"] .coach-title-preview {
+        min-height: 34px;
+        gap: 5px;
+        padding: 0 9px;
+        font-size: 11px;
+        box-shadow: 0 8px 18px rgba(108, 99, 255, 0.08);
+    }
+
+    body[data-page="coach-studio"] .coach-title-share {
+        width: 34px;
+        height: 34px;
+        box-shadow: 0 8px 18px rgba(108, 99, 255, 0.08);
+    }
+
+    body[data-page="coach-studio"] .coach-title-preview svg,
+    body[data-page="coach-studio"] .coach-title-share svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero {
+        grid-template-columns: 82px minmax(0, 1fr);
+        align-items: center;
+        gap: 12px;
+        min-height: 112px;
+        padding: 14px;
+        border-radius: 24px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero::after {
+        right: -20px;
+        top: -24px;
+        width: 96px;
+        height: 96px;
+        opacity: 0.72;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-avatar,
+    body[data-page="coach-studio"] .coach-business-hero-copy {
+        align-self: stretch;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-avatar {
+        display: flex;
+        align-items: center;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero .coach-dashboard-avatar-btn {
+        width: 82px;
+        height: 82px;
+        flex: 0 0 82px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero .coach-dashboard-avatar-btn span {
+        width: 24px;
+        height: 24px;
+        right: 2px;
+        bottom: 3px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-copy {
+        min-height: 82px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-copy h2 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.12;
+        font-weight: 650;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-copy h2 span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-copy h2 svg {
+        width: 17px;
+        height: 17px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-copy > p {
+        margin: 0;
+        font-size: 11.5px;
+        line-height: 1.25;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-status {
+        margin-top: 1px;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-status .coach-badge {
+        min-height: 24px;
+        padding: 0 8px;
+        font-size: 10.5px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-tagline {
+        display: none;
+    }
+
+    body[data-page="coach-studio"] .coach-analytics-coming-soon {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 7px;
+        padding: 9px;
+        border-radius: 22px;
+    }
+
+    body[data-page="coach-studio"] .coach-analytics-head {
+        grid-template-columns: 36px minmax(0, 1fr);
+        padding: 9px;
+    }
+
+    body[data-page="coach-studio"] .coach-analytics-head > small {
+        grid-column: 1 / -1;
+        font-size: 11px;
+    }
+
+    body[data-page="coach-studio"] .coach-analytics-coming-soon article {
+        min-height: 62px;
+        padding: 8px 3px;
+    }
+
+    body[data-page="coach-studio"] .coach-profile-strength-compact {
+        min-height: 74px;
+        grid-template-columns: 40px minmax(0, 1fr) auto;
+        gap: 9px;
+        padding: 11px;
+        border-radius: 22px;
+    }
+
+    body[data-page="coach-studio"] .coach-strength-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-section {
+        gap: 10px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-section-head h2 {
+        font-size: 18px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card {
+        position: relative;
+        min-height: 0;
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+        align-items: center;
+        align-content: center;
+        column-gap: 12px;
+        row-gap: 4px;
+        padding: 13px;
+        border-radius: 22px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card::after {
+        content: "";
+        width: 28px;
+        height: 28px;
+        grid-column: 3;
+        grid-row: 1 / span 3;
+        align-self: center;
+        justify-self: end;
+        border-radius: 999px;
+        background: rgba(108, 99, 255, 0.08);
+        mask: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 6l6 6-6 6' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px 18px no-repeat;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card.is-future::after {
+        opacity: 0.35;
+    }
+
+    body[data-page="coach-studio"] .coach-business-icon {
+        grid-row: 1 / span 3;
+        width: 42px;
+        height: 42px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card strong {
+        font-size: 14px;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card p {
+        padding-right: 30px;
+        font-size: 11.5px;
+        line-height: 1.32;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card small,
+    body[data-page="coach-studio"] .coach-business-card em,
+    body[data-page="coach-studio"] .coach-business-card .coach-pill-row {
+        grid-column: 2 / 3;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card:active {
+        transform: scale(0.985);
     }
 }
 
@@ -5354,7 +6572,7 @@ body[data-page="coach-plans"] .coach-plan-list--public .coach-primary-btn {
     body[data-page="coach-plans"] .coach-shell {
         width: auto;
         max-width: none;
-        padding-top: 68px;
+        padding-top: 10px;
         padding-bottom: 148px;
     }
 
@@ -5907,7 +7125,7 @@ body[data-page="coach-public-profile"] .coach-public-contact-card .coach-public-
             "cta cta";
         justify-items: stretch;
         gap: 12px;
-        padding: 16px;
+        /* padding: 16px; */
         text-align: left;
     }
 
@@ -6642,5 +7860,756 @@ body[data-page="coach-studio"] .coach-business-card .coach-pill-row {
 
     body[data-page="coach-studio"] .coach-business-card {
         min-height: 0;
+    }
+}
+
+/* Coach Studio mobile hard fix: must stay last */
+@media (max-width: 991px) {
+    body[data-page="coach-studio"] .coach-shell {
+        padding-top: 72px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card {
+        min-height: 0 !important;
+        grid-template-columns: 42px minmax(0, 1fr) auto !important;
+        align-items: center !important;
+        align-content: center !important;
+        column-gap: 12px !important;
+        row-gap: 4px !important;
+        padding: 13px !important;
+        border-radius: 22px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-icon {
+        grid-row: 1 / span 3;
+        width: 42px !important;
+        height: 42px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card p {
+        padding-right: 24px;
+        font-size: 11.5px !important;
+        line-height: 1.32 !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-card small,
+    body[data-page="coach-studio"] .coach-business-card em,
+    body[data-page="coach-studio"] .coach-business-card .coach-pill-row,
+    body[data-page="coach-studio"] .coach-business-card .coach-card-progress {
+        grid-column: 2 / 3;
+    }
+
+    body[data-page="coach-studio"] .coach-title-preview {
+        width: auto !important;
+        min-width: 112px !important;
+        min-height: 36px !important;
+        display: inline-flex !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        padding: 0 11px !important;
+        white-space: nowrap !important;
+    }
+
+    body[data-page="coach-studio"] .coach-title-preview span {
+        display: inline !important;
+        visibility: visible !important;
+    }
+}
+
+@media (max-width: 620px) {
+    body[data-page="coach-studio"] .coach-studio-titlebar {
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        gap: 8px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-titlebar p {
+        max-width: 210px;
+    }
+
+    body[data-page="coach-studio"] .coach-studio-title-actions {
+        width: auto !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-title-preview {
+        min-width: 106px !important;
+        font-size: 11px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-title-share {
+        width: 36px !important;
+        height: 36px !important;
+        flex: 0 0 36px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero {
+        grid-template-columns: 82px minmax(0, 1fr) !important;
+        min-height: 112px !important;
+        align-items: center !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-avatar,
+    body[data-page="coach-studio"] .coach-business-hero-copy {
+        align-self: stretch !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-avatar {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero .coach-dashboard-avatar-btn {
+        width: 82px !important;
+        height: 82px !important;
+        flex: 0 0 82px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-hero-copy {
+        min-height: 82px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 5px !important;
+    }
+
+    body[data-page="coach-studio"] .coach-business-tagline {
+        display: none !important;
+    }
+}
+
+/* Coach public profile compact hero + floating contact */
+body[data-page="coach-public-profile"].coach-contact-menu-open {
+    overflow: hidden;
+}
+
+body[data-page="coach-public-profile"] .coach-shell {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-inline: 24px;
+}
+
+body[data-page="coach-public-profile"] .coach-public-shell {
+    width: 100%;
+}
+
+body[data-page="coach-public-profile"] .coach-public-grid {
+    grid-template-columns: minmax(0, 1.4fr) 360px;
+    gap: 22px;
+}
+
+body[data-page="coach-public-profile"] .coach-public-main,
+body[data-page="coach-public-profile"] .coach-public-side {
+    gap: 28px;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    grid-template-areas:
+        "photo intro"
+        "stats stats"
+        "cta cta";
+    align-items: center;
+    gap: 16px;
+    /* padding: 20px; */
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-photo-wrap {
+    grid-area: photo;
+    position: relative;
+    width: 132px;
+    min-width: 0;
+    justify-self: start;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-check {
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    transform: translateX(22%);
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-public-intro {
+    grid-area: intro;
+    min-width: 0;
+    padding-left: 5px;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-certified-pill {
+    max-width: 100%;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro h1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    margin: 10px 0 8px;
+    font-size: clamp(30px, 4vw, 46px);
+    line-height: 1.05;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-title-check {
+    flex: 0 0 auto;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro p {
+    max-width: 620px;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    color: #475467;
+    line-height: 1.45;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-public-stats {
+    grid-area: stats;
+    margin-top: 2px;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-book-cta {
+    grid-area: cta;
+    width: 100%;
+    margin-top: 2px;
+}
+
+body[data-page="coach-public-profile"] .coach-public-socials,
+body[data-page="coach-public-profile"] .coach-public-contact-card {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-public-section:first-of-type {
+    margin-top: 0;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn {
+    position: fixed;
+    right: 18px;
+    bottom: 24px;
+    z-index: 120;
+    width: 58px;
+    height: 58px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(145deg, #6C63FF, #554BF5);
+    color: #FFFFFF;
+    box-shadow: 0 18px 34px rgba(85, 75, 245, 0.28), 0 0 0 6px rgba(108, 99, 255, 0.08);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 42px rgba(85, 75, 245, 0.34), 0 0 0 7px rgba(108, 99, 255, 0.10);
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn:focus-visible,
+body[data-page="coach-public-profile"] .coach-contact-menu a:focus-visible,
+body[data-page="coach-public-profile"] .coach-contact-menu button:focus-visible {
+    outline: 3px solid rgba(108, 99, 255, 0.28);
+    outline-offset: 3px;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn svg {
+    width: 25px;
+    height: 25px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 118;
+    background: rgba(15, 23, 42, 0.26);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    position: fixed;
+    right: 18px;
+    bottom: 92px;
+    z-index: 119;
+    width: min(340px, calc(100vw - 32px));
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid rgba(108, 99, 255, 0.14);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 24px 54px rgba(15, 23, 42, 0.16);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px) scale(0.98);
+    transform-origin: right bottom;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-handle {
+    display: none;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2,
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin: 0;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2 {
+    color: #111827;
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 640;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin-top: 4px;
+    color: #667085;
+    font-size: 12.5px;
+    line-height: 1.35;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 13px;
+    background: #F3EEFF;
+    color: #6C63FF;
+    cursor: pointer;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-actions {
+    display: grid;
+    gap: 9px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action {
+    min-height: 50px;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid rgba(108, 99, 255, 0.10);
+    border-radius: 16px;
+    background: #FFFFFF;
+    color: #111827;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 560;
+    box-shadow: 0 10px 22px rgba(108, 99, 255, 0.06);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action > svg {
+    width: 20px;
+    height: 20px;
+    justify-self: center;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo {
+    width: 34px;
+    height: 34px;
+    background: transparent;
+    box-shadow: none;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo img {
+    width: 31px;
+    height: 31px;
+    object-fit: contain;
+}
+
+@media (max-width: 991px) {
+    body[data-page="coach-public-profile"] .coach-shell {
+        max-width: none;
+        padding: 10px 16px calc(108px + env(safe-area-inset-bottom));
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 28px;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-side {
+        position: static;
+    }
+
+    body[data-page="coach-public-profile"] .coach-floating-contact-btn {
+        right: 16px;
+        bottom: calc(var(--bottom-nav-height, 72px) + 16px + env(safe-area-inset-bottom));
+        width: 56px;
+        height: 56px;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu {
+        left: 0;
+        right: 0;
+        bottom: calc(var(--bottom-nav-height, 72px) + env(safe-area-inset-bottom));
+        width: auto;
+        max-height: min(72vh, 560px);
+        overflow: auto;
+        padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
+        border-radius: 28px 28px 0 0;
+        transform: translateY(100%);
+        transform-origin: center bottom;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+        transform: translateY(0);
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu-handle {
+        width: 44px;
+        height: 5px;
+        display: block;
+        justify-self: center;
+        border-radius: 999px;
+        background: #D0D5DD;
+    }
+}
+
+@media (max-width: 767px) {
+    body[data-page="coach-public-profile"] .coach-shell {
+        padding-inline: 16px;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero {
+        grid-template-columns: 104px minmax(0, 1fr);
+        grid-template-areas:
+            "photo intro"
+            "stats stats"
+            "cta cta";
+        gap: 12px;
+        /* padding: 16px; */
+        text-align: left;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-photo-wrap {
+        width: 104px;
+        min-width: 104px;
+        justify-self: start;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-check {
+        right: 2px;
+        bottom: 7px;
+        transform: translateX(18%);
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-certified-pill {
+        min-height: 24px;
+        padding: 0 8px;
+        font-size: 9.5px;
+        white-space: normal;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro h1 {
+        justify-content: flex-start;
+        gap: 6px;
+        margin: 7px 0 5px;
+        font-size: clamp(21px, 6vw, 28px);
+        line-height: 1.08;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-title-check,
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-title-check svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro p {
+        font-size: 12.5px;
+        line-height: 1.38;
+    }
+}
+
+@media (max-width: 359px) {
+    body[data-page="coach-public-profile"] .coach-shell {
+        padding-inline: 12px;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "photo"
+            "intro"
+            "stats"
+            "cta";
+        justify-items: center;
+        text-align: center;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-photo-wrap {
+        justify-self: center;
+        width: 96px;
+        min-width: 96px;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro h1 {
+        justify-content: center;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro p {
+        margin-inline: auto;
+    }
+}
+
+/* Final public profile overrides: screenshot-style contact menu */
+body[data-page="coach-public-profile"] .coach-public-plans-inline {
+    display: none;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn {
+    box-shadow:
+        0 18px 34px rgba(108, 99, 255, 0.34),
+        0 8px 16px rgba(17, 24, 39, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn svg {
+    width: 27px;
+    height: 27px;
+    stroke-width: 2.35;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    position: fixed;
+    right: 14px;
+    bottom: 92px;
+    left: auto;
+    z-index: 119;
+    width: min(292px, calc(100vw - 28px));
+    max-width: calc(100vw - 28px);
+    max-height: none;
+    overflow: hidden;
+    padding: 16px 14px 14px;
+    border: 1px solid rgba(108, 99, 255, 0.10);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 22px 48px rgba(17, 24, 39, 0.14), 0 8px 20px rgba(108, 99, 255, 0.08);
+    display: grid;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px) scale(.98);
+    transform-origin: right bottom;
+    transition: opacity .2s ease, transform .22s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-actions {
+    display: grid;
+    justify-items: end;
+    gap: 10px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) 16px;
+    align-items: center;
+    gap: 11px;
+    padding: 0 12px;
+    border: 1px solid rgba(15, 23, 42, 0.055);
+    border-radius: 12px;
+    color: #111827;
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    font-size: 12.5px;
+    font-weight: 650;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action:hover {
+    transform: translateY(-1px);
+    border-color: rgba(108, 99, 255, 0.14);
+    background: #FCFBFF;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-public-contact-action > svg {
+    width: 15px;
+    height: 15px;
+    color: #667085;
+    stroke-width: 2.2;
+    justify-self: end;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 18px;
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu p {
+    margin: 6px 0 0;
+    color: #667085;
+    font-size: 10.5px;
+    line-height: 1.3;
+    font-weight: 450;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon {
+    width: 22px;
+    height: 22px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 7px;
+    background: transparent;
+    overflow: hidden;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon > svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone {
+    color: #5B48FF;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-email svg,
+body[data-page="coach-public-profile"] .coach-contact-action-icon.is-phone svg {
+    width: 21px;
+    height: 21px;
+    stroke-width: 2.15;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-action-chevron {
+    width: 15px;
+    height: 15px;
+    color: #667085;
+    stroke-width: 2.2;
+    justify-self: end;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo {
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+    display: inline-grid;
+    place-items: center;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo img {
+    width: 21px;
+    height: 21px;
+    object-fit: contain;
+}
+
+@media (max-width: 991px) {
+    body[data-page="coach-public-profile"].coach-contact-menu-open {
+        overflow: auto;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-plans-inline {
+        display: block;
+    }
+
+    body[data-page="coach-public-profile"] .coach-public-side {
+        display: none;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu {
+        right: 8px;
+        left: auto;
+        bottom: calc(var(--bottom-nav-height, 72px) + 80px + env(safe-area-inset-bottom));
+        width: min(292px, calc(100vw - 16px));
+        max-width: calc(100vw - 16px);
+        max-height: calc(100vh - var(--bottom-nav-height, 72px) - 118px);
+        overflow-y: auto;
+        padding: 16px 14px 14px;
+        border-radius: 22px;
+        transform: translateY(10px) scale(.98);
+        transform-origin: right bottom;
+    }
+
+    body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+        transform: translateY(0) scale(1);
     }
 }
