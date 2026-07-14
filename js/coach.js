@@ -286,6 +286,8 @@
             .from("coach_marketing_profiles")
             .select("*")
             .eq("is_published", true)
+            .order("published_at", { ascending: false, nullsFirst: false })
+            .order("updated_at", { ascending: false, nullsFirst: false })
             .limit(1);
         if (slug) query = query.eq("slug", slug);
         if (coachId) query = query.eq("coach_user_id", coachId);
@@ -631,12 +633,13 @@
         if (insertError) throw new Error(insertError.message || `Failed to save ${table}.`);
     }
 
-    async function saveProfileBasics() {
+    async function saveProfileBasics(options = {}) {
         const file = el("coachProfileImageFile")?.files?.[0];
         let imageUrl = state.coachProfile.profile_image_url || null;
         if (file) imageUrl = await uploadCoachImage(file, "profile");
 
-        const isPublished = Boolean(getValue("coachPublished"));
+        if (options.publish === true) setValue("coachPublished", true);
+        const isPublished = options.publish === true || Boolean(getValue("coachPublished"));
         const payload = {
             display_name: getValue("coachDisplayName").trim(),
             brand_name: getValue("coachBrandName").trim() || null,
@@ -683,7 +686,7 @@
 
         await loadCoachChildren(state.coachProfile.id);
         fillEditor();
-        setStatus("Coach profile saved.");
+        setStatus(isPublished ? "Marketing page saved and published." : "Coach profile saved as draft.");
     }
 
     function planFromForm() {
@@ -954,7 +957,7 @@
     }
 
     async function autosaveBeforePreview() {
-        await saveProfileBasics();
+        await saveProfileBasics({ publish: true });
         const active = activePanelName();
         if (active === "plans" && !el("coachPlanFormShell")?.hidden && planDraftHasValue()) await savePlan();
         if (active === "testimonials" && !el("coachTestimonialFormShell")?.hidden && testimonialDraftHasValue()) await saveTestimonial();
@@ -1287,7 +1290,7 @@
             textarea.addEventListener("click", () => openTextareaEditor(textarea));
         });
         el("saveCoachProfileBtn")?.addEventListener("click", async () => {
-            try { await saveProfileBasics(); } catch (error) { setStatus(error.message || "Save failed.", "error"); }
+            try { await saveProfileBasics({ publish: true }); } catch (error) { setStatus(error.message || "Save failed.", "error"); }
         });
         el("addPlanBtn")?.addEventListener("click", () => openPlanForm());
         el("cancelPlanBtn")?.addEventListener("click", closePlanForm);
