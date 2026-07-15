@@ -147,6 +147,71 @@ body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo im
     }
 }
 
+/* Coach contact overlay final override */
+body[data-page="coach-public-profile"] .coach-profile-check {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-public-intro,
+body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro {
+    padding-left: 15px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    z-index: 118;
+    background: rgba(255, 255, 255, 0);
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease, background .22s ease, backdrop-filter .22s ease, -webkit-backdrop-filter .22s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+    background: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(8px) saturate(1.08);
+    -webkit-backdrop-filter: blur(8px) saturate(1.08);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn {
+    transition: transform .28s cubic-bezier(.2, .8, .2, 1), box-shadow .24s ease, filter .24s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn svg {
+    transition: transform .32s cubic-bezier(.2, .8, .2, 1), opacity .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn[aria-expanded="true"] {
+    transform: translateY(-1px) rotate(90deg) scale(.98);
+    box-shadow: 0 20px 38px rgba(108, 99, 255, 0.36), 0 0 0 7px rgba(108, 99, 255, 0.10);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    z-index: 119;
+    transform: translateY(14px) scale(.96);
+    transition: opacity .22s ease, transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    transform: translateY(0) scale(1);
+}
+
+@media (max-width: 767px) {
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-public-intro,
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro {
+        padding-left: 5px;
+    }
+}
+
 /* Coach contact menu screenshot match - must stay last */
 body[data-page="coach-public-profile"] .coach-contact-menu {
     position: fixed;
@@ -314,6 +379,91 @@ body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
 
     body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
         background: transparent;
+    }
+}
+
+/* Coach contact menu overlay + icon morph */
+body[data-page="coach-public-profile"] .coach-profile-check {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-public-hero .coach-public-intro,
+body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro {
+    padding-left: 15px;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    z-index: 118;
+    background: rgba(255, 255, 255, 0);
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity .22s ease,
+        background .22s ease,
+        backdrop-filter .22s ease,
+        -webkit-backdrop-filter .22s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop[hidden] {
+    display: none !important;
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu-backdrop.is-open {
+    background: rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(8px) saturate(1.08);
+    -webkit-backdrop-filter: blur(8px) saturate(1.08);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn {
+    transition:
+        transform .28s cubic-bezier(.2, .8, .2, 1),
+        box-shadow .24s ease,
+        filter .24s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn svg {
+    transition: transform .32s cubic-bezier(.2, .8, .2, 1), opacity .18s ease;
+}
+
+body[data-page="coach-public-profile"] .coach-floating-contact-btn[aria-expanded="true"] {
+    transform: translateY(-1px) rotate(90deg) scale(.98);
+    box-shadow:
+        0 20px 38px rgba(108, 99, 255, 0.36),
+        0 0 0 7px rgba(108, 99, 255, 0.10);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu {
+    z-index: 119;
+    transform: translateY(14px) scale(.96);
+    transition:
+        opacity .22s ease,
+        transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+
+body[data-page="coach-public-profile"] .coach-contact-menu.is-open {
+    transform: translateY(0) scale(1);
+}
+
+@media (max-width: 767px) {
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-public-intro,
+    body[data-page="coach-public-profile"] .coach-public-hero .coach-profile-intro {
+        padding-left: 5px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-page="coach-public-profile"] .coach-contact-menu,
+    body[data-page="coach-public-profile"] .coach-contact-menu-backdrop,
+    body[data-page="coach-public-profile"] .coach-floating-contact-btn,
+    body[data-page="coach-public-profile"] .coach-floating-contact-btn svg {
+        transition: none;
     }
 }
 

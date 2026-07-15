@@ -1041,7 +1041,10 @@
             return;
         }
         const image = displayUrl(p.profile_image_url);
-        const reviews = Number(p.reviews_count || 120);
+        const rating = Number(p.rating || 0);
+        const reviews = Number(p.reviews_count || 0);
+        const clientsCount = Number(p.clients_count || 0);
+        const yearsExperience = Number(p.years_experience || 0);
         const plansPreview = state.plans.length ? state.plans.slice(0, 1) : DEFAULT_PLANS.slice(0, 1);
         const primaryPlan = plansPreview[0] || null;
         const testimonials = state.testimonials;
@@ -1066,6 +1069,27 @@
             return coachContactRow({ type: link.platform, label, href: link.url, external: true });
         }).join("");
         const floatingContactContent = [contactActions, socialActions].filter(Boolean).join("");
+        const heroExpertise = state.expertise.slice(0, 2);
+        const heroExpertiseMarkup = heroExpertise.length ? `<div class="coach-primary-expertise">${heroExpertise.map((x, index) => {
+            const rawLabel = String(x.label || "");
+            const label = rawLabel.trim().toLowerCase() === "muscle gain" ? "Training" : rawLabel;
+            return `<span class="coach-expertise-pill is-${index % 2}"><i data-lucide="${["flame", "dumbbell", "droplet", "leaf", "bone"][index % 2]}"></i>${escapeHtml(label)}</span>`;
+        }).join("")}</div>` : "";
+        const proofMetric = clientsCount > 0
+            ? `<strong>${clientsCount}+</strong><small>Happy Clients</small>`
+            : transformations.length > 0
+                ? `<strong>${transformations.length}+</strong><small>Success Stories</small>`
+                : "";
+        const roundedRating = Math.max(0, Math.min(5, rating || 0));
+        const proofStars = Array.from({ length: 5 }, (_, index) => `<span class="${index < Math.round(roundedRating) ? "is-filled" : ""}">★</span>`).join("");
+        const proofRating = rating > 0 ? `<span class="coach-hero-proof-rating"><span class="coach-proof-stars" aria-label="${escapeHtml(rating.toFixed(1))} out of 5 stars">${proofStars}</span><b>${rating.toFixed(1)}</b>${reviews > 0 ? `<small>(${reviews}+ reviewed)</small>` : ""}</span>` : "";
+        const proofCard = (proofMetric || proofRating) ? `
+            <div class="coach-proof-card" aria-label="Coach social proof">
+                ${proofMetric ? `<div class="coach-hero-proof-metric">${proofMetric}</div>` : ""}
+                ${proofRating}
+            </div>
+        ` : "";
+        const bookingHref = contactHref("whatsapp") || contactHref("email") || "#";
         const plansMarkup = primaryPlan ? `
             <a class="coach-feature-plan" href="${profileLink("coach_plans.html")}">
                 <span class="coach-plan-illustration"><img src="${PLAN_MOUNTAIN_IMAGE}" alt=""></span>
@@ -1079,22 +1103,35 @@
             <div class="coach-public-shell">
                 <div class="coach-public-grid">
                     <div class="coach-public-main">
-                        <section class="coach-public-hero">
-                            <div class="coach-profile-photo-wrap">
-                                <img class="coach-profile-photo" src="${escapeHtml(image)}" alt="${escapeHtml(p.display_name)}">
-                                <span class="coach-profile-check"><i data-lucide="check"></i></span>
+                        <section class="coach-profile-hero">
+                            <div class="coach-portrait-area">
+                                <div class="coach-portrait-shell">
+                                    <img class="coach-portrait-image" src="${escapeHtml(image)}" alt="${escapeHtml(p.display_name || p.brand_name || "Coach")}">
+                                </div>
+                                ${proofCard}
                             </div>
-                            <div class="coach-profile-intro coach-public-intro">
-                                <span class="coach-certified-pill"><i data-lucide="shield-check"></i>${escapeHtml(p.professional_title || "Certified Nutrition Coach")}</span>
-                                <h1>${escapeHtml(p.brand_name || p.display_name)} <span class="coach-title-check"><i data-lucide="badge-check"></i></span></h1>
-                                <p>${escapeHtml(p.tagline || "Build a stronger routine with practical coaching.")}</p>
+                            <div class="coach-hero-content">
+                                <div class="coach-certified-badge"><i data-lucide="shield-check"></i>Certified Coach</div>
+                                <div class="coach-name-row">
+                                    <h1 class="coach-name">${escapeHtml(p.brand_name || p.display_name)}</h1>
+                                    <span class="coach-verified-icon" aria-label="Verified coach"><i data-lucide="badge-check"></i></span>
+                                </div>
+                                <p class="coach-tagline">${escapeHtml(p.tagline || "Build a stronger routine with practical coaching.")}</p>
+                                ${heroExpertiseMarkup}
                             </div>
-                            <div class="coach-public-stats" aria-label="Coach stats">
-                                <span><i data-lucide="star"></i><strong>${Number(p.rating || 5).toFixed(1)}</strong><small>(${reviews} Reviews)</small></span>
-                                <span><i data-lucide="users"></i><strong>${Number(p.clients_count || 0)}+</strong><small>Clients</small></span>
-                                <span><i data-lucide="shield-check"></i><strong>${Number(p.years_experience || 0)}+</strong><small>Years Exp.</small></span>
+                            <div class="coach-conversion-panel">
+                                <div class="coach-statistics" aria-label="Coach stats">
+                                    <span><i data-lucide="star"></i><strong>${rating ? rating.toFixed(1) : "—"}</strong><small>${reviews ? `(${reviews} Reviews)` : "Rating"}</small></span>
+                                    <span><i data-lucide="users"></i><strong>${clientsCount ? `${clientsCount}+` : "—"}</strong><small>Clients</small></span>
+                                    <span><i data-lucide="shield-check"></i><strong>${yearsExperience ? `${yearsExperience}+` : "—"}</strong><small>Years Exp.</small></span>
+                                </div>
+                                <a class="coach-booking-button" href="${escapeHtml(bookingHref)}"><span class="coach-booking-icon"><i data-lucide="calendar-days"></i></span><span class="coach-booking-copy"><strong>Book Consultation</strong><small>Get a personalised plan</small></span><span class="coach-booking-arrow"><i data-lucide="arrow-right"></i></span></a>
+                                <div class="coach-trust-strip" aria-label="Consultation benefits">
+                                    <span><i data-lucide="lock"></i>Private consultation</span>
+                                    <span><i data-lucide="message-square"></i>Direct coach contact</span>
+                                    <span><i data-lucide="clipboard-check"></i>Personalised plan</span>
+                                </div>
                             </div>
-                            <a class="coach-book-cta" href="${escapeHtml(contactHref("whatsapp") || contactHref("email") || "#")}"><i data-lucide="calendar-days"></i><span>Book Consultation</span><i data-lucide="arrow-right"></i></a>
                         </section>
 
                         <section class="coach-public-section"><h2>Expertise</h2><div class="coach-expertise-grid">${(state.expertise.length ? state.expertise : [
@@ -1135,7 +1172,10 @@
                 </div>
                 <p class="coach-privacy-note"><i data-lucide="lock"></i> All consultations are private and confidential.</p>
                 ${floatingContactContent ? `
-                    <button type="button" class="coach-floating-contact-btn" id="coachFloatingContactBtn" aria-label="Contact coach" aria-haspopup="dialog" aria-expanded="false" aria-controls="coachContactMenu"><i data-lucide="message-square-dot"></i></button>
+                    <button type="button" class="coach-floating-contact-btn" id="coachFloatingContactBtn" aria-label="Contact coach" aria-haspopup="dialog" aria-expanded="false" aria-controls="coachContactMenu">
+                        <span class="coach-floating-contact-icon is-message"><i data-lucide="message-square-dot"></i></span>
+                        <span class="coach-floating-contact-icon is-close"><i data-lucide="x"></i></span>
+                    </button>
                     <div class="coach-contact-menu-backdrop" id="coachContactMenuBackdrop" hidden></div>
                     <section class="coach-contact-menu" id="coachContactMenu" role="dialog" aria-modal="false" aria-labelledby="coachContactMenuTitle" aria-hidden="true" tabindex="-1">
                         <header>

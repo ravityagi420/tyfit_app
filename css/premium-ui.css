@@ -1186,7 +1186,7 @@ body:not([data-page="diet-chart"]):not([data-page="food-catalog"]) .tyfit-main *
 }
 
 .tyfit-main {
-    padding: 70px 14px 50px;
+    padding: 70px 14px 120px;
 }
 
 .tyfit-main-inner {
