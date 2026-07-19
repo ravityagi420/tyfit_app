@@ -300,7 +300,6 @@
         if (error) throw new Error(error.message || "Failed to load public coach profile.");
         if (!data) return null;
         state.coachProfile = data;
-        await loadCoachChildren(data.id, true);
         return data;
     }
 
@@ -1120,6 +1119,7 @@
         </div>` : '<div class="coach-empty">Coaching plans coming soon.</div>';
         const root = el("coachPublicRoot");
         if (!root) return;
+        root.setAttribute("aria-busy", "false");
         root.innerHTML = `
             <div class="coach-public-shell">
                 <div class="coach-public-grid">
@@ -1238,6 +1238,8 @@
                 ` : ""}
             </div>
         `;
+        document.body.classList.remove("coach-public-loading");
+        window.requestAnimationFrame(() => root.classList.add("is-ready"));
         refreshIcons();
         window.requestAnimationFrame(() => initializePlanCarousels());
         scheduleTestimonialAutoAdvance();
@@ -1567,12 +1569,30 @@
 
     async function initPublic() {
         try {
-            await loadPublicCoachProfile();
+            const publicProfile = await loadPublicCoachProfile();
+            if (!publicProfile) throw new Error("This coach page is not published yet.");
+
+            // Paint the complete page structure as soon as the primary profile row arrives.
             if (page() === "coach-public-profile") renderPublicProfile();
             if (page() === "coach-plans") renderPublicPlansPage();
             bindPlanToggles();
+
+            // Secondary profile collections load afterward and progressively enhance the page.
+            try {
+                await loadCoachChildren(publicProfile.id, true);
+                if (page() === "coach-public-profile") renderPublicProfile();
+                if (page() === "coach-plans") renderPublicPlansPage();
+            } catch (secondaryError) {
+                console.warn("Coach profile extras could not be loaded:", secondaryError);
+            }
         } catch (error) {
-            document.querySelector(".coach-shell")?.insertAdjacentHTML("afterbegin", `<div class="coach-page-status is-show is-error">${escapeHtml(error.message || "Unable to load coach page.")}</div>`);
+            document.body.classList.remove("coach-public-loading");
+            const root = el("coachPublicRoot");
+            if (root) {
+                root.setAttribute("aria-busy", "false");
+                root.innerHTML = `<section class="coach-load-error"><span><i data-lucide="circle-alert"></i></span><h2>We couldn’t load this coach profile</h2><p>${escapeHtml(error.message || "Please check your connection and try again.")}</p><button type="button" onclick="window.location.reload()">Try again</button></section>`;
+                refreshIcons();
+            }
         }
     }
 

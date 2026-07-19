@@ -11,13 +11,51 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
 
+    <style>
+        html, body { min-height: 100%; background: #fbfaff; }
+        body[data-page="coach-public-profile"] { margin: 0; color: #111827; }
+        .coach-profile-skeleton { width: 100%; max-width: 860px; margin: 0 auto; padding: 24px 0 120px; }
+        .coach-skeleton-shimmer { position: relative; overflow: hidden; background: #eeeef6; }
+        .coach-skeleton-shimmer::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.72), transparent); animation: coachSkeletonSweep 1.35s ease-in-out infinite; }
+        .coach-skeleton-hero { display: grid; grid-template-columns: minmax(0,1fr) 210px; gap: 30px; align-items: center; }
+        .coach-skeleton-copy { display: grid; gap: 13px; }
+        .coach-skeleton-line { height: 16px; border-radius: 999px; }
+        .coach-skeleton-line.is-badge { width: 130px; height: 30px; }
+        .coach-skeleton-line.is-title { width: min(330px, 84%); height: 42px; }
+        .coach-skeleton-line.is-text { width: min(390px, 94%); }
+        .coach-skeleton-line.is-short { width: 62%; }
+        .coach-skeleton-pills { display: flex; gap: 12px; margin-top: 7px; }
+        .coach-skeleton-pill { width: 118px; height: 38px; border-radius: 999px; }
+        .coach-skeleton-portrait { width: 210px; aspect-ratio: 1; border-radius: 50%; }
+        .coach-skeleton-panel { height: 220px; margin-top: 28px; border-radius: 25px; }
+        .coach-skeleton-section { margin-top: 30px; }
+        .coach-skeleton-heading { width: 190px; height: 25px; margin-bottom: 16px; border-radius: 999px; }
+        .coach-skeleton-tags { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+        .coach-skeleton-tag { height: 44px; border-radius: 999px; }
+        .coach-skeleton-plans { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+        .coach-skeleton-plan { height: 270px; border-radius: 22px; }
+        @keyframes coachSkeletonSweep { to { transform: translateX(100%); } }
+        @media (max-width: 767px) {
+            .coach-profile-skeleton { padding: 16px 0 170px; }
+            .coach-skeleton-hero { grid-template-columns: minmax(0,1fr) 145px; gap: 12px; }
+            .coach-skeleton-portrait { width: 145px; }
+            .coach-skeleton-line.is-title { height: 30px; }
+            .coach-skeleton-panel { height: 205px; margin-top: 22px; }
+            .coach-skeleton-tags { grid-template-columns: repeat(2,1fr); }
+            .coach-skeleton-plans { grid-template-columns: repeat(2, minmax(0,1fr)); overflow: hidden; }
+            .coach-skeleton-plan { height: 250px; }
+            .coach-skeleton-plan:nth-child(3) { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { .coach-skeleton-shimmer::after { animation: none; } }
+    </style>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
     <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
     <link href="css/coach.css?v=20260714-coach-contact-overlay" rel="stylesheet">
     <link href="css/coach-public-overrides.css?v=20260719-bmr-form-refinement" rel="stylesheet">
 </head>
-<body class="tyfit-app" data-page="coach-public-profile">
+<body class="tyfit-app coach-public-loading" data-page="coach-public-profile">
     <header class="tyfit-mobile-topbar coach-app-mobile-topbar">
         <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu"><i data-lucide="menu"></i></button>
         <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home"><img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img"><span class="tyfit-wordmark">TYFIT</span></a>
@@ -51,8 +89,22 @@
                 <div class="tyfit-dropdown-wrap" id="desktopAccountWrap"><button class="tyfit-account-btn" id="desktopAccountBtn" aria-label="Account menu"><img id="desktopProfileAvatar" class="tyfit-account-avatar" src="assets/avatars/avatar-1.svg" alt="Profile"><span id="desktopProfileName">Account</span><i data-lucide="chevron-down"></i></button><div class="tyfit-popover-menu tyfit-popover-menu--account" id="desktopAccountMenu" aria-hidden="true"><button type="button" class="tyfit-menu-action" data-action="account">My Account</button><button type="button" class="tyfit-menu-action" data-action="logout">Logout</button></div></div>
             </div>
             <div class="coach-shell">
-                <div id="coachPublicRoot">
-                    <section class="coach-card"><div class="coach-empty">Loading coach profile...</div></section>
+                <div id="coachPublicRoot" aria-busy="true" aria-label="Loading coach profile">
+                    <section class="coach-profile-skeleton" aria-hidden="true">
+                        <div class="coach-skeleton-hero">
+                            <div class="coach-skeleton-copy">
+                                <span class="coach-skeleton-line is-badge coach-skeleton-shimmer"></span>
+                                <span class="coach-skeleton-line is-title coach-skeleton-shimmer"></span>
+                                <span class="coach-skeleton-line is-text coach-skeleton-shimmer"></span>
+                                <span class="coach-skeleton-line is-short coach-skeleton-shimmer"></span>
+                                <div class="coach-skeleton-pills"><span class="coach-skeleton-pill coach-skeleton-shimmer"></span><span class="coach-skeleton-pill coach-skeleton-shimmer"></span></div>
+                            </div>
+                            <span class="coach-skeleton-portrait coach-skeleton-shimmer"></span>
+                        </div>
+                        <div class="coach-skeleton-panel coach-skeleton-shimmer"></div>
+                        <div class="coach-skeleton-section"><div class="coach-skeleton-heading coach-skeleton-shimmer"></div><div class="coach-skeleton-tags"><span class="coach-skeleton-tag coach-skeleton-shimmer"></span><span class="coach-skeleton-tag coach-skeleton-shimmer"></span><span class="coach-skeleton-tag coach-skeleton-shimmer"></span></div></div>
+                        <div class="coach-skeleton-section"><div class="coach-skeleton-heading coach-skeleton-shimmer"></div><div class="coach-skeleton-plans"><span class="coach-skeleton-plan coach-skeleton-shimmer"></span><span class="coach-skeleton-plan coach-skeleton-shimmer"></span><span class="coach-skeleton-plan coach-skeleton-shimmer"></span></div></div>
+                    </section>
                 </div>
             </div>
         </main>
@@ -65,6 +117,6 @@
     <script src="js/supabase-client.js"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/shell.js?v=20260714-coach-contact-overlay"></script>
-    <script src="js/coach.js?v=20260719-bmr-form-refinement"></script>
+    <script src="js/coach.js?v=20260719-progressive-profile-load"></script>
 </body>
 </html>
