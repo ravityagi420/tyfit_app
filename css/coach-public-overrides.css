@@ -856,6 +856,59 @@ body.coach-consultation-open {
     }
 }
 
+/* Consultation dialog: centered consistently across every viewport. */
+html body[data-page="coach-public-profile"] .coach-consultation-modal {
+    display: grid !important;
+    place-items: center !important;
+    align-items: center !important;
+    justify-items: center !important;
+    padding: clamp(12px, 3vw, 28px) !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-modal[hidden] {
+    display: none !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-dialog {
+    width: min(680px, calc(100vw - 24px)) !important;
+    max-width: 680px !important;
+    max-height: min(86vh, 820px) !important;
+    margin: auto !important;
+    border-radius: clamp(18px, 3vw, 26px) !important;
+    transform: none !important;
+    overflow-y: auto !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-drag-handle {
+    display: none !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-dialog > header {
+    top: 0 !important;
+}
+
+@media (max-width: 767px) {
+    html body[data-page="coach-public-profile"] .coach-consultation-dialog {
+        width: min(94vw, 620px) !important;
+        max-height: 88vh !important;
+        border-radius: 20px !important;
+    }
+}
+
+/* Lift the persistent consultation CTA clearly above page content. */
+html body[data-page="coach-public-profile"] .coach-floating-cta {
+    z-index: 220 !important;
+    border: 1px solid rgba(92, 76, 232, .22) !important;
+    background: rgba(255, 255, 255, .985) !important;
+    box-shadow:
+        0 24px 60px rgba(32, 26, 86, .20),
+        0 10px 24px rgba(79, 65, 190, .14),
+        0 2px 7px rgba(15, 23, 42, .08),
+        inset 0 1px 0 rgba(255, 255, 255, .95) !important;
+    backdrop-filter: blur(20px) saturate(1.08) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(1.08) !important;
+}
+
 /* Final polish: clean booking CTA, calculator-style controls and mobile sheet gestures. */
 html body[data-page="coach-public-profile"] button.coach-booking-button {
     appearance: none !important;
@@ -4246,5 +4299,45 @@ html body[data-page="coach-public-profile"] .coach-consultation-modal.is-success
 
     html body[data-page="coach-public-profile"] .coach-consultation-modal.is-success .coach-consultation-drag-handle {
         display: flex !important;
+    }
+}
+
+/* Authoritative centered consultation layout after all legacy mobile sheet rules. */
+html body[data-page="coach-public-profile"] .coach-consultation-modal {
+    display: grid !important;
+    place-items: center !important;
+    align-items: center !important;
+    justify-items: center !important;
+    padding: clamp(12px, 3vw, 28px) !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-modal[hidden] {
+    display: none !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-dialog {
+    width: min(680px, calc(100vw - 24px)) !important;
+    max-width: 680px !important;
+    max-height: min(86vh, 820px) !important;
+    margin: auto !important;
+    border-radius: clamp(18px, 3vw, 26px) !important;
+    transform: none !important;
+    overflow-y: auto !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-drag-handle,
+html body[data-page="coach-public-profile"] .coach-consultation-modal.is-success .coach-consultation-drag-handle {
+    display: none !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-dialog > header {
+    top: 0 !important;
+}
+
+@media (max-width: 767px) {
+    html body[data-page="coach-public-profile"] .coach-consultation-dialog {
+        width: min(94vw, 620px) !important;
+        max-height: 88vh !important;
+        border-radius: 20px !important;
     }
 }
