@@ -710,100 +710,42 @@ function ensureDietChartFloatingFab() {
 
     host.insertAdjacentHTML("beforeend", `
         <div class="diet-chart-fab-wrap" id="dietChartFabWrap">
-            <div class="diet-chart-fab-menu" id="dietChartFabMenu" hidden></div>
-            <button type="button" class="diet-chart-fab" id="dietChartFab" aria-label="Diet chart actions">
-                <i data-lucide="plus"></i>
+            <button type="button" class="diet-chart-fab" id="dietChartFab" aria-label="Open TyBot nutrition coach" aria-haspopup="dialog" aria-controls="tybotSheet">
+                <span class="diet-chart-fab-bot" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                </span>
             </button>
         </div>
     `);
 
     const fab = getEl("dietChartFab");
-    const menu = getEl("dietChartFabMenu");
-    if (!fab || !menu) {
+    if (!fab) {
         return;
     }
 
     fab.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
-        const isHidden = menu.hidden;
-        menu.hidden = !isHidden;
-        if (!menu.hidden) {
-            renderDietChartFabMenu();
-        }
-    });
-
-    document.addEventListener("click", () => {
-        if (menu) {
-            menu.hidden = true;
-        }
-    });
-
-    menu.addEventListener("click", async (event) => {
-        const actionBtn = event.target.closest("[data-fab-action]");
-        if (!actionBtn) {
-            return;
-        }
-
-        const action = actionBtn.getAttribute("data-fab-action");
-        menu.hidden = true;
-        event.stopPropagation();
-
-        if (action === "create") {
-            await createDietChartFromPrompt();
-            return;
-        }
-
-        if (action === "add-meal") {
-            if (!guardActiveChartEditable("add meals")) {
-                return;
-            }
-            addMeal({ meal_name: `Meal ${DIET_STATE.mealCounter + 1}` });
-        }
+        window.tybotDietCoach?.open?.();
     });
 
     refreshIcons();
 }
 
 function renderDietChartFabMenu() {
-    const menu = getEl("dietChartFabMenu");
-    if (!menu) {
-        return;
-    }
-
-    const charts = sortDietChartsForDisplay(DIET_STATE.dietCharts || []);
-    const hasActiveChart = Boolean(DIET_STATE.selectedChartId && charts.some((chart) => String(chart.id) === String(DIET_STATE.selectedChartId)));
-
-    let actions = [];
-    if (!hasActiveChart || charts.length === 0) {
-        actions = [{ label: "Create Diet Plan", action: "create" }];
-    } else {
-        actions.push({ label: "Add Meal", action: "add-meal" });
-        if (charts.length < 3) {
-            actions.push({ label: "New Diet Plan", action: "create" });
-        }
-    }
-
-    menu.innerHTML = actions.map((item) => `
-        <button type="button" class="diet-chart-fab-menu-item" data-fab-action="${item.action}">
-            ${escapeHtml(item.label)}
-        </button>
-    `).join("");
+    // The diet-page floating action now opens TyBot directly.
 }
 
 function updateDietChartFabVisibility() {
     const wrap = getEl("dietChartFabWrap");
     const btn = getEl("dietChartFab");
-    const menu = getEl("dietChartFabMenu");
-    if (!wrap || !btn || !menu) {
+    if (!wrap || !btn) {
         return;
     }
 
     const hasUser = Boolean(DIET_STATE.selectedUserId);
     wrap.hidden = !hasUser;
-    if (!hasUser) {
-        menu.hidden = true;
-    }
 }
 
 function renderDietChartSelector() {
@@ -922,6 +864,14 @@ function ensureDietPlanSelectSheet() {
             return;
         }
 
+        const deleteBtn = event.target.closest("[data-plan-sheet-delete-chart-id]");
+        if (deleteBtn) {
+            const chartId = deleteBtn.getAttribute("data-plan-sheet-delete-chart-id");
+            closeDietPlanSelectSheet();
+            await deleteDietChart(chartId);
+            return;
+        }
+
         const optionBtn = event.target.closest("[data-plan-sheet-chart-id]");
         if (!optionBtn) {
             return;
@@ -956,7 +906,9 @@ function renderDietPlanSelectSheet() {
     const rows = charts.map((chart, index) => {
         const isSelected = String(chart.id) === String(DIET_STATE.selectedChartId);
         const fullName = getDietChartName(chart, index);
+        const canDelete = !isCreatedByAdminOtherThanCurrent(chart);
         return `
+            <div class="diet-plan-option-row ${isSelected ? "is-selected" : ""}">
             <button type="button" class="diet-plan-option ${isSelected ? "is-selected" : ""}" data-plan-sheet-chart-id="${chart.id}">
                 <span class="diet-plan-option-check" aria-hidden="true"><i data-lucide="${isSelected ? "check" : "circle"}"></i></span>
                 <span class="diet-plan-option-icon" aria-hidden="true"><i data-lucide="${planIcons[index % planIcons.length]}"></i></span>
@@ -966,6 +918,8 @@ function renderDietPlanSelectSheet() {
                 </span>
                 ${isSelected ? '<span class="diet-plan-active-badge">Active</span>' : ""}
             </button>
+            ${canDelete ? `<button type="button" class="diet-plan-option-delete" data-plan-sheet-delete-chart-id="${chart.id}" aria-label="Delete ${escapeHtml(formatDietChartDisplayName(fullName))}"><i data-lucide="trash-2"></i></button>` : ""}
+            </div>
         `;
     });
 

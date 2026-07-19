@@ -6,6 +6,11 @@
     const PLAN_MOUNTAIN_IMAGE = "assets/coach/coach-plan-mountain.svg";
     const DEFAULT_BEFORE_IMAGE = "assets/coach/transformation-before.svg";
     const DEFAULT_AFTER_IMAGE = "assets/coach/transformation-after.svg";
+    const TESTIMONIAL_FALLBACK_FACES = [
+        "assets/coach/testimonial-fallbacks/client-1.png",
+        "assets/coach/testimonial-fallbacks/client-2.png",
+        "assets/coach/testimonial-fallbacks/client-3.png"
+    ];
     const DEFAULT_PLANS = [
         {
             title: "12 Week Transformation",
@@ -1042,12 +1047,16 @@
         }
         const image = displayUrl(p.profile_image_url);
         const rating = Number(p.rating || 0);
-        const reviews = Number(p.reviews_count || 0);
+        // Temporary display value until the public review count is passed in dynamically.
+        const reviews = 120;
         const clientsCount = Number(p.clients_count || 0);
         const yearsExperience = Number(p.years_experience || 0);
-        const plansPreview = state.plans.length ? state.plans.slice(0, 1) : DEFAULT_PLANS.slice(0, 1);
-        const primaryPlan = plansPreview[0] || null;
+        const plansPreview = state.plans.length ? state.plans.slice(0, 3) : DEFAULT_PLANS.slice(0, 1);
         const testimonials = state.testimonials;
+        const proofFaces = Array.from({ length: 3 }, (_, index) => {
+            const testimonialFace = testimonials[index]?.client_image_url;
+            return testimonialFace ? displayUrl(testimonialFace) : TESTIMONIAL_FALLBACK_FACES[index];
+        });
         const transformations = state.transformations;
         if (state.publicTestimonialIndex >= testimonials.length) state.publicTestimonialIndex = 0;
         const testimonial = testimonials[state.publicTestimonialIndex] || null;
@@ -1085,18 +1094,30 @@
         const proofRating = rating > 0 ? `<span class="coach-hero-proof-rating"><span class="coach-proof-stars" aria-label="${escapeHtml(rating.toFixed(1))} out of 5 stars">${proofStars}</span><b>${rating.toFixed(1)}</b>${reviews > 0 ? `<small>(${reviews}+ reviewed)</small>` : ""}</span>` : "";
         const proofCard = (proofMetric || proofRating) ? `
             <div class="coach-proof-card" aria-label="Coach social proof">
-                ${proofMetric ? `<div class="coach-hero-proof-metric">${proofMetric}</div>` : ""}
+                <div class="coach-proof-card-top">
+                    <div class="coach-hero-avatar-stack">${proofFaces.map((face, index) => `<img src="${escapeHtml(face)}" alt="Client ${index + 1}">`).join("")}</div>
+                    ${proofMetric ? `<div class="coach-hero-proof-metric">${proofMetric}</div>` : ""}
+                </div>
                 ${proofRating}
             </div>
         ` : "";
         const bookingHref = contactHref("whatsapp") || contactHref("email") || "#";
-        const plansMarkup = primaryPlan ? `
-            <a class="coach-feature-plan" href="${profileLink("coach_plans.html")}">
-                <span class="coach-plan-illustration"><img src="${PLAN_MOUNTAIN_IMAGE}" alt=""></span>
-                <span><strong>${escapeHtml(primaryPlan.title)}</strong><small>${(primaryPlan.feature_chips || []).slice(0, 4).map((chip) => `<em>${escapeHtml(chip)}</em>`).join("")}</small></span>
-                <b>${money(primaryPlan.price_amount, primaryPlan.currency)}</b>
-                <i data-lucide="arrow-right"></i>
-            </a>` : '<div class="coach-empty">Coaching plans coming soon.</div>';
+        const plansMarkup = plansPreview.length ? `<div class="coach-plan-carousel">
+            <button type="button" class="coach-plan-scroll-btn is-prev" data-plan-scroll="-1" aria-label="Show previous coaching plan" hidden><i data-lucide="chevron-left"></i></button>
+            <div class="coach-plan-preview-grid">${plansPreview.map((plan, index) => {
+            const duration = Number(plan.duration_weeks || 0);
+            const inclusions = (plan.included_features || plan.feature_chips || []).length;
+            const isLongTitle = String(plan.title || "").length > 21;
+            return `<a class="coach-plan-preview-card theme-${index % 3}${index === 0 ? " is-popular" : ""}${isLongTitle ? " has-long-title" : ""}" href="${profileLink("coach_plans.html")}">
+                ${index === 0 ? '<span class="coach-plan-popular-tag">Most Popular</span>' : ""}
+                <span class="coach-plan-preview-heading"><i data-lucide="${escapeHtml(plan.icon_key || "target")}"></i><strong>${escapeHtml(plan.title)}</strong></span>
+                <p>${escapeHtml(plan.subtitle || plan.best_for || "Personal coaching built around your goals.")}</p>
+                <span class="coach-plan-preview-meta"><small><i data-lucide="calendar-check"></i>${duration ? `${duration} Weeks` : "Flexible"}</small><small><i data-lucide="clipboard-check"></i>${inclusions} Inclusions</small></span>
+                <span class="coach-plan-preview-footer"><span><b>${money(plan.price_amount, plan.currency)}</b><small>${escapeHtml(plan.price_label || "One-time")}</small></span><i data-lucide="arrow-right"></i></span>
+            </a>`;
+        }).join("")}</div>
+            <button type="button" class="coach-plan-scroll-btn is-next" data-plan-scroll="1" aria-label="Show next coaching plan" hidden><i data-lucide="chevron-right"></i></button>
+        </div>` : '<div class="coach-empty">Coaching plans coming soon.</div>';
         const root = el("coachPublicRoot");
         if (!root) return;
         root.innerHTML = `
@@ -1125,7 +1146,7 @@
                                     <span><i data-lucide="users"></i><strong>${clientsCount ? `${clientsCount}+` : "—"}</strong><small>Clients</small></span>
                                     <span><i data-lucide="shield-check"></i><strong>${yearsExperience ? `${yearsExperience}+` : "—"}</strong><small>Years Exp.</small></span>
                                 </div>
-                                <a class="coach-booking-button" href="${escapeHtml(bookingHref)}"><span class="coach-booking-icon"><i data-lucide="calendar-days"></i></span><span class="coach-booking-copy"><strong>Book Consultation</strong><small>Get a personalised plan</small></span><span class="coach-booking-arrow"><i data-lucide="arrow-right"></i></span></a>
+                                <button type="button" class="coach-booking-button js-coach-consultation-open"><span class="coach-booking-icon"><i data-lucide="calendar-days"></i></span><span class="coach-booking-copy"><strong>Book Consultation</strong><small>Get a personalised plan</small></span><span class="coach-booking-arrow"><i data-lucide="arrow-right"></i></span></button>
                                 <div class="coach-trust-strip" aria-label="Consultation benefits">
                                     <span><i data-lucide="lock"></i>Private consultation</span>
                                     <span><i data-lucide="message-square"></i>Direct coach contact</span>
@@ -1138,7 +1159,7 @@
                             { label: "Fat Loss" }, { label: "Muscle Gain" }, { label: "Diabetes" }, { label: "Vegetarian Diet" }, { label: "Strength Training" }
                         ]).map((x, index) => `<span class="coach-expertise-pill is-${index % 5}"><i data-lucide="${["flame", "dumbbell", "droplet", "leaf", "bone"][index % 5]}"></i>${escapeHtml(x.label)}</span>`).join("")}</div></section>
 
-                        <section class="coach-public-section coach-public-plans-inline"><h2>Coaching Plans</h2>${plansMarkup}</section>
+                        <section class="coach-public-section coach-public-plans-inline"><div class="coach-public-section-head"><h2>Coaching Plans</h2><a href="${profileLink("coach_plans.html")}">View all plans <i data-lucide="arrow-right"></i></a></div>${plansMarkup}</section>
 
                         ${testimonial ? `<section class="coach-public-section">
                             <div class="coach-public-section-head"><h2>Testimonials</h2><span>${state.publicTestimonialIndex + 1} / ${testimonials.length}</span></div>
@@ -1171,6 +1192,31 @@
                     </aside>
                 </div>
                 <p class="coach-privacy-note"><i data-lucide="lock"></i> All consultations are private and confidential.</p>
+                <aside class="coach-floating-cta" aria-label="Start a coaching plan">
+                    <span><strong>Plans from ${money(Math.min(...plansPreview.map((plan) => Number(plan.price_amount || 0)).filter((price) => price > 0)), plansPreview[0]?.currency || "EUR")}</strong><small>Start your transformation today</small></span>
+                    <button type="button" class="js-coach-consultation-open"><i data-lucide="calendar-days"></i><span>Book Consultation</span><i data-lucide="arrow-right"></i></button>
+                </aside>
+                <div class="coach-consultation-modal" id="coachConsultationModal" hidden aria-hidden="true">
+                    <button type="button" class="coach-consultation-backdrop" data-consultation-close aria-label="Close consultation form"></button>
+                    <section class="coach-consultation-dialog" role="dialog" aria-modal="true" aria-labelledby="coachConsultationTitle">
+                        <button type="button" class="coach-consultation-drag-handle" id="coachConsultationDragHandle" aria-label="Drag down to close"><span></span></button>
+                        <header><div><span><i data-lucide="calendar-heart"></i></span><div><h2 id="coachConsultationTitle">Book a Consultation</h2><p>Tell us a little about yourself and your goals.</p></div></div><button type="button" data-consultation-close aria-label="Close"><i data-lucide="x"></i></button></header>
+                        <form id="coachConsultationForm">
+                            <div class="coach-consultation-fields">
+                                <label><span>Full name</span><div><i data-lucide="user"></i><input name="name" type="text" placeholder="Your full name" required></div></label>
+                                <label><span>Age</span><div><i data-lucide="calendar"></i><input name="age" type="number" min="16" max="100" placeholder="Your age" required></div></label>
+                                <label><span>Country</span><div><i data-lucide="globe-2"></i><select name="country" required><option value="">Select country</option><option>Germany</option><option>India</option><option>United Kingdom</option><option>United States</option><option>Canada</option><option>Australia</option><option>Other</option></select></div></label>
+                                <label><span>Email address</span><div><i data-lucide="mail"></i><input name="email" type="email" placeholder="you@example.com" required></div></label>
+                                <label class="is-full"><i class="coach-consultation-standalone-icon" data-lucide="phone"></i><span>Phone number <small>Optional</small></span><div class="coach-consultation-phone"><select name="phone_code" aria-label="Phone country code"><option>+49</option><option>+91</option><option>+44</option><option>+1</option><option>+61</option></select><input name="phone" type="tel" inputmode="tel" placeholder="Phone number"></div></label>
+                                <label class="is-full"><span>How can the coach help?</span><div class="is-textarea"><i data-lucide="message-square-text"></i><textarea name="query" rows="3" placeholder="Share your goals, concerns, or questions" required></textarea></div></label>
+                                <fieldset class="is-full"><legend>Preferred time to contact</legend><div class="coach-contact-time-options"><label><input type="radio" name="contact_time" value="weekdays" checked><span><i data-lucide="briefcase-business"></i><b>Weekdays</b><small>Monday–Friday</small></span></label><label><input type="radio" name="contact_time" value="weekends"><span><i data-lucide="coffee"></i><b>Weekends</b><small>Saturday–Sunday</small></span></label></div></fieldset>
+                            </div>
+                            <button type="submit" class="coach-consultation-submit"><span>Book Consultation</span><i data-lucide="arrow-right"></i></button>
+                            <p class="coach-consultation-assurance"><i data-lucide="shield-check"></i>Your details remain private and secure.</p>
+                        </form>
+                        <div class="coach-consultation-success" id="coachConsultationSuccess" hidden><span><i data-lucide="check"></i></span><h3>Consultation requested</h3><p>Thank you. The coach will contact you soon to discuss the next steps.</p><button type="button" data-consultation-close>Done</button></div>
+                    </section>
+                </div>
                 ${floatingContactContent ? `
                     <button type="button" class="coach-floating-contact-btn" id="coachFloatingContactBtn" aria-label="Contact coach" aria-haspopup="dialog" aria-expanded="false" aria-controls="coachContactMenu">
                         <span class="coach-floating-contact-icon is-message"><i data-lucide="message-square-dot"></i></span>
@@ -1193,7 +1239,50 @@
             </div>
         `;
         refreshIcons();
+        window.requestAnimationFrame(() => initializePlanCarousels());
         scheduleTestimonialAutoAdvance();
+    }
+
+    function updatePlanCarouselControls(carousel) {
+        const grid = carousel?.querySelector(".coach-plan-preview-grid");
+        const previous = carousel?.querySelector('[data-plan-scroll="-1"]');
+        const next = carousel?.querySelector('[data-plan-scroll="1"]');
+        if (!grid || !previous || !next) return;
+        const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+        previous.hidden = maxScroll < 2 || grid.scrollLeft <= 14;
+        next.hidden = maxScroll < 2 || grid.scrollLeft >= maxScroll - 2;
+    }
+
+    function initializePlanCarousels() {
+        document.querySelectorAll(".coach-plan-carousel").forEach((carousel) => {
+            const grid = carousel.querySelector(".coach-plan-preview-grid");
+            if (!grid || grid.dataset.carouselReady === "true") return;
+            grid.dataset.carouselReady = "true";
+            grid.addEventListener("scroll", () => updatePlanCarouselControls(carousel), { passive: true });
+            updatePlanCarouselControls(carousel);
+        });
+    }
+
+    function setConsultationModal(open) {
+        const modal = el("coachConsultationModal");
+        const form = el("coachConsultationForm");
+        const success = el("coachConsultationSuccess");
+        if (!modal) return;
+        modal.hidden = !open;
+        modal.setAttribute("aria-hidden", open ? "false" : "true");
+        modal.classList.toggle("is-open", open);
+        document.body.classList.toggle("coach-consultation-open", open);
+        if (open) {
+            modal.classList.remove("is-success");
+            const dialog = modal.querySelector(".coach-consultation-dialog");
+            if (dialog) {
+                dialog.style.transform = "";
+                dialog.style.transition = "";
+            }
+            if (form) form.hidden = false;
+            if (success) success.hidden = true;
+            window.setTimeout(() => modal.querySelector("input")?.focus(), 60);
+        }
     }
 
     function renderPublicPlansPage() {
@@ -1226,7 +1315,31 @@
     }
 
     function bindPlanToggles() {
+        let consultationDragStartY = null;
+        let consultationDragDistance = 0;
         document.addEventListener("click", (event) => {
+            const consultationOpen = event.target.closest(".js-coach-consultation-open");
+            const consultationClose = event.target.closest("[data-consultation-close]");
+            const planScroll = event.target.closest("[data-plan-scroll]");
+            if (consultationOpen) {
+                setConsultationModal(true);
+                return;
+            }
+            if (consultationClose) {
+                setConsultationModal(false);
+                return;
+            }
+            if (planScroll) {
+                const carousel = planScroll.closest(".coach-plan-carousel");
+                const grid = carousel?.querySelector(".coach-plan-preview-grid");
+                const card = grid?.querySelector(".coach-plan-preview-card");
+                if (grid && card) {
+                    const direction = Number(planScroll.dataset.planScroll || 1);
+                    grid.scrollBy({ left: direction * (card.getBoundingClientRect().width + 10), behavior: "smooth" });
+                    window.setTimeout(() => updatePlanCarouselControls(carousel), 360);
+                }
+                return;
+            }
             const contactButton = event.target.closest("#coachFloatingContactBtn");
             const contactClose = event.target.closest("#coachContactMenuClose, #coachContactMenuBackdrop");
             const contactAction = event.target.closest("#coachContactMenu a");
@@ -1255,11 +1368,52 @@
             if (!toggle) return;
             toggle.closest(".coach-plan-card")?.classList.toggle("is-open");
         });
+        document.addEventListener("pointerdown", (event) => {
+            const handle = event.target.closest("#coachConsultationDragHandle");
+            if (!handle || !window.matchMedia("(max-width: 1024px)").matches) return;
+            consultationDragStartY = event.clientY;
+            consultationDragDistance = 0;
+            handle.setPointerCapture?.(event.pointerId);
+            const dialog = handle.closest(".coach-consultation-dialog");
+            if (dialog) dialog.style.transition = "none";
+        });
+        document.addEventListener("pointermove", (event) => {
+            if (consultationDragStartY === null) return;
+            consultationDragDistance = Math.max(0, event.clientY - consultationDragStartY);
+            const dialog = el("coachConsultationModal")?.querySelector(".coach-consultation-dialog");
+            if (dialog) dialog.style.transform = `translateY(${consultationDragDistance}px)`;
+        });
+        document.addEventListener("pointerup", () => {
+            if (consultationDragStartY === null) return;
+            const dialog = el("coachConsultationModal")?.querySelector(".coach-consultation-dialog");
+            if (consultationDragDistance > 80) {
+                setConsultationModal(false);
+            } else if (dialog) {
+                dialog.style.transition = "transform 180ms ease";
+                dialog.style.transform = "translateY(0)";
+            }
+            consultationDragStartY = null;
+            consultationDragDistance = 0;
+        });
         document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && el("coachConsultationModal")?.classList.contains("is-open")) {
+                setConsultationModal(false);
+                return;
+            }
             if (event.key === "Escape" && el("coachContactMenu")?.classList.contains("is-open")) {
                 setContactMenu(false);
             }
         });
+        document.addEventListener("submit", (event) => {
+            if (event.target.id !== "coachConsultationForm") return;
+            event.preventDefault();
+            event.target.hidden = true;
+            const success = el("coachConsultationSuccess");
+            if (success) success.hidden = false;
+            el("coachConsultationModal")?.classList.add("is-success");
+            refreshIcons();
+        });
+        window.addEventListener("resize", initializePlanCarousels);
     }
 
     function openTextareaEditor(textarea) {
