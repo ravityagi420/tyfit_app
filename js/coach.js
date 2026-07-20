@@ -970,7 +970,7 @@
 
     async function previewCoachPage() {
         await autosaveBeforePreview();
-        window.open(profileLink("coach_public_profile.html"), "_blank", "noopener");
+        window.location.href = profileLink("coach_public_profile.html");
     }
 
     function iconForPlan(plan, index = 0) {
@@ -1200,7 +1200,7 @@
                     <button type="button" class="coach-consultation-backdrop" data-consultation-close aria-label="Close consultation form"></button>
                     <section class="coach-consultation-dialog" role="dialog" aria-modal="true" aria-labelledby="coachConsultationTitle">
                         <button type="button" class="coach-consultation-drag-handle" id="coachConsultationDragHandle" aria-label="Drag down to close"><span></span></button>
-                        <header><div><span><i data-lucide="messages-square"></i></span><div><h2 id="coachConsultationTitle">Find Your Best Coaching Fit</h2></div></div><button type="button" data-consultation-close aria-label="Close"><i data-lucide="x"></i></button></header>
+                        <header><div><span><i data-lucide="messages-square"></i></span><div><h2 id="coachConsultationTitle">Book a Consultation</h2></div></div><button type="button" data-consultation-close aria-label="Close"><i data-lucide="x"></i></button></header>
                         <form id="coachConsultationForm">
                             <div class="coach-consultation-fields">
                                 <label class="is-full"><span>Full name</span><div><input name="full_name" type="text" autocomplete="name" maxlength="120" placeholder="Your full name" required></div></label>
@@ -1257,10 +1257,18 @@
     function initializePlanCarousels() {
         document.querySelectorAll(".coach-plan-carousel").forEach((carousel) => {
             const grid = carousel.querySelector(".coach-plan-preview-grid");
-            if (!grid || grid.dataset.carouselReady === "true") return;
-            grid.dataset.carouselReady = "true";
-            grid.addEventListener("scroll", () => updatePlanCarouselControls(carousel), { passive: true });
+            if (!grid) return;
+            if (grid.dataset.carouselReady !== "true") {
+                grid.dataset.carouselReady = "true";
+                grid.addEventListener("scroll", () => updatePlanCarouselControls(carousel), { passive: true });
+                if (window.ResizeObserver) {
+                    const observer = new ResizeObserver(() => updatePlanCarouselControls(carousel));
+                    observer.observe(grid);
+                    Array.from(grid.children).forEach((card) => observer.observe(card));
+                }
+            }
             updatePlanCarouselControls(carousel);
+            window.requestAnimationFrame(() => window.requestAnimationFrame(() => updatePlanCarouselControls(carousel)));
         });
     }
 
@@ -1528,13 +1536,19 @@
         enhanceCoachFields();
         const imageInput = el("coachProfileImageFile");
         const imagePreview = el("coachProfilePreview");
-        imagePreview?.addEventListener("click", () => imageInput?.click());
-        imageInput?.addEventListener("change", () => {
+        imageInput?.addEventListener("change", async () => {
             const file = imageInput.files?.[0];
             if (!file || !imagePreview) return;
             imagePreview.src = URL.createObjectURL(file);
-            setStatus("New image selected. Save to publish it.");
-            updateCoachTabStatuses();
+            try {
+                await saveStudioProfileImage(file);
+                imagePreview.src = displayUrl(state.coachProfile?.profile_image_url);
+                imageInput.value = "";
+                updateCoachTabStatuses();
+            } catch (error) {
+                imagePreview.src = displayUrl(state.coachProfile?.profile_image_url);
+                setStatus(error.message || "Could not update profile image.", "error");
+            }
         });
         document.querySelectorAll(".coach-field input, .coach-field select, .coach-field textarea").forEach((control) => {
             control.addEventListener("input", updateCoachTabStatuses);
