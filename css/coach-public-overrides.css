@@ -895,6 +895,467 @@ html body[data-page="coach-public-profile"] .coach-consultation-dialog > header 
     }
 }
 
+/* Final compact consultation overrides. Keep last in the cascade. */
+html body[data-page="coach-public-profile"] .coach-consultation-dialog { max-height: min(94vh, 780px) !important; }
+html body[data-page="coach-public-profile"] .coach-consultation-dialog > header { min-height: 68px !important; padding: 10px 14px !important; }
+html body[data-page="coach-public-profile"] #coachConsultationForm { padding: 9px 14px 11px !important; }
+html body[data-page="coach-public-profile"] .coach-consultation-fields {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px 11px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label,
+html body[data-page="coach-public-profile"] .coach-consultation-fields > fieldset {
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label::after,
+html body[data-page="coach-public-profile"] .coach-consultation-fields > fieldset::after { display: none !important; }
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label > span,
+html body[data-page="coach-public-profile"] .coach-consultation-fields legend {
+    display: block !important;
+    margin: 0 0 4px !important;
+    color: #30384b !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    line-height: 1.25 !important;
+}
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label > div:not(.coach-consultation-phone),
+html body[data-page="coach-public-profile"] .coach-consultation-phone {
+    display: flex !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid #e5e2ef !important;
+    border-radius: 10px !important;
+    background: #fbfbfd !important;
+    overflow: hidden !important;
+}
+html body[data-page="coach-public-profile"] .coach-consultation-fields input,
+html body[data-page="coach-public-profile"] .coach-consultation-fields select,
+html body[data-page="coach-public-profile"] .coach-consultation-fields textarea {
+    width: 100% !important;
+    min-height: 38px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    font-size: 13px !important;
+}
+html body[data-page="coach-public-profile"] .coach-consultation-fields textarea { min-height: 52px !important; max-height: 62px !important; }
+html body[data-page="coach-public-profile"] .coach-consultation-phone select { flex: 0 0 78px !important; width: 78px !important; border-right: 1px solid #e8e5f0 !important; }
+html body[data-page="coach-public-profile"] .coach-contact-method-options { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 7px !important; }
+html body[data-page="coach-public-profile"] .coach-contact-method-options span { justify-content: center !important; min-height: 40px !important; padding: 6px 5px !important; font-size: 11px !important; }
+html body[data-page="coach-public-profile"] .coach-consultation-submit { min-height: 44px !important; margin-top: 10px !important; }
+html body[data-page="coach-public-profile"] .coach-consultation-assurance { margin: 7px 0 0 !important; }
+
+@media (max-width: 600px) {
+    html body[data-page="coach-public-profile"] .coach-consultation-dialog { max-height: 94vh !important; }
+    html body[data-page="coach-public-profile"] .coach-consultation-fields { grid-template-columns: 1fr !important; gap: 7px !important; }
+    html body[data-page="coach-public-profile"] .coach-contact-method-options { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
+/* Public marketing header and review catalogue — final cascade authority. */
+html body[data-page="coach-public-profile"] [data-tyfit-bottom-nav],
+html body[data-page="coach-public-profile"] .tyfit-bottom-nav,
+html body[data-page="coach-public-profile"] .tyfit-sidebar,
+html body[data-page="coach-public-profile"] .tyfit-mobile-drawer,
+html body[data-page="coach-public-profile"] .tyfit-sidebar-toggle-floating,
+html body[data-page="coach-public-profile"] .tyfit-desktop-actions { display: none !important; }
+
+html body[data-page="coach-public-profile"] .tyfit-layout,
+html body[data-page="coach-public-profile"] .tyfit-main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-storefront-header {
+    position: sticky;
+    top: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 66px;
+    padding: 10px clamp(16px, 4vw, 48px);
+    border-bottom: 1px solid rgba(20, 25, 48, .09);
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 8px 28px rgba(31, 27, 78, .04);
+    backdrop-filter: blur(18px);
+}
+
+html body[data-page="coach-public-profile"] .coach-storefront-header .tyfit-logo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    color: #11182b;
+    text-decoration: none;
+}
+
+html body[data-page="coach-public-profile"] .coach-storefront-header .tyfit-logo-img { width: 35px; height: 35px; object-fit: contain; }
+html body[data-page="coach-public-profile"] .coach-storefront-header .tyfit-wordmark { font-size: 21px; font-weight: 750; letter-spacing: .12em; }
+html body[data-page="coach-public-profile"] .coach-storefront-header .tyfit-icon-btn { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 14px; background: #f6f5fb; color: #1c2438; }
+
+html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-statistics strong {
+    font-size: clamp(20px, 2.4vw, 30px) !important;
+    font-weight: 700 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-statistics small {
+    font-size: clamp(11px, 1.25vw, 14px) !important;
+    font-weight: 550 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-booking-copy strong {
+    font-size: clamp(18px, 2.1vw, 24px) !important;
+    font-weight: 650 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-booking-copy small {
+    font-size: clamp(12px, 1.35vw, 15px) !important;
+    font-weight: 500 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-trust-strip {
+    font-size: clamp(11px, 1.25vw, 14px) !important;
+    font-weight: 550 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-public-testimonials { overflow: visible; }
+html body[data-page="coach-public-profile"] .coach-testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(12px, 2vw, 20px);
+    align-items: stretch;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(17px, 2.2vw, 24px);
+    border: 1px solid #e8e5f2;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(40, 34, 80, .07);
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    border-radius: 20px 20px 0 0;
+    background: linear-gradient(90deg, #6656f5, #9d76ff);
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card-head {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 20px;
+    align-items: center;
+    gap: 11px;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card-head img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #f1eff8; }
+html body[data-page="coach-public-profile"] .coach-review-card-head strong,
+html body[data-page="coach-public-profile"] .coach-review-card-head small { display: block; }
+html body[data-page="coach-public-profile"] .coach-review-card-head strong { color: #12192c; font-size: 14px; font-weight: 700; }
+html body[data-page="coach-public-profile"] .coach-review-card-head small { margin-top: 3px; color: #7b8294; font-size: 11px; }
+html body[data-page="coach-public-profile"] .coach-review-card-head > svg { width: 19px; color: #6656f5; }
+html body[data-page="coach-public-profile"] .coach-review-card > .coach-stars { display: block; margin: 15px 0 9px; color: #ffad16; font-size: 15px; letter-spacing: 2px; }
+html body[data-page="coach-public-profile"] .coach-review-copy { margin: 0; color: #4e576d; font-size: 13px; line-height: 1.65; }
+html body[data-page="coach-public-profile"] .coach-review-copy.is-collapsible { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 5; }
+html body[data-page="coach-public-profile"] .coach-review-card.is-expanded .coach-review-copy { display: block; overflow: visible; }
+html body[data-page="coach-public-profile"] .coach-review-more { align-self: flex-start; margin-top: 9px; padding: 0; border: 0; background: transparent; color: #5d4df1; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+@media (max-width: 767px) {
+    html body[data-page="coach-public-profile"] .coach-storefront-header { min-height: 60px; padding: 7px 16px; }
+    html body[data-page="coach-public-profile"] .coach-storefront-header .tyfit-logo-img { width: 31px; height: 31px; }
+    html body[data-page="coach-public-profile"] .coach-storefront-header .tyfit-wordmark { font-size: 18px; }
+    html body[data-page="coach-public-profile"] .coach-testimonial-grid {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: calc((100% - 12px) / 2.2);
+        gap: 12px;
+        overflow-x: auto;
+        padding: 4px 3px 15px;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        overscroll-behavior-inline: contain;
+    }
+    html body[data-page="coach-public-profile"] .coach-testimonial-grid::-webkit-scrollbar { display: none; }
+    html body[data-page="coach-public-profile"] .coach-review-card { min-height: 260px; padding: 15px; scroll-snap-align: start; }
+    html body[data-page="coach-public-profile"] .coach-review-card-head { grid-template-columns: 42px minmax(0, 1fr); }
+    html body[data-page="coach-public-profile"] .coach-review-card-head img { width: 42px; height: 42px; }
+    html body[data-page="coach-public-profile"] .coach-review-card-head > svg { display: none; }
+}
+
+/* Storefront spacing, compact reviews and consultation v2. */
+html body[data-page="coach-public-profile"] .tyfit-main.coach-public-page {
+    box-sizing: border-box;
+    padding: 12px clamp(16px, 4vw, 48px) 76px !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-shell {
+    width: min(1180px, 100%) !important;
+    margin-inline: auto !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-public-testimonials .coach-public-section-head {
+    margin-bottom: clamp(14px, 2vw, 20px) !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card {
+    min-height: 0 !important;
+    padding: 18px !important;
+    border-color: rgba(95, 78, 205, .13) !important;
+    border-radius: 18px !important;
+    background: linear-gradient(145deg, #fff 65%, #faf9ff) !important;
+    box-shadow: 0 10px 28px rgba(35, 27, 80, .065) !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card::before {
+    width: 36px;
+    height: 3px;
+    inset: 0 auto auto 18px;
+    border-radius: 0 0 5px 5px;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card-head {
+    grid-template-columns: 42px minmax(0, 1fr) 18px !important;
+    gap: 10px !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-card-head img {
+    width: 42px !important;
+    height: 42px !important;
+    border: 2px solid #fff;
+    box-shadow: 0 3px 11px rgba(38, 31, 78, .12);
+}
+
+html body[data-page="coach-public-profile"] .coach-review-copy {
+    position: relative;
+    margin-top: 16px !important;
+    padding: 0 11px;
+    color: #465066 !important;
+    font-size: 12.5px !important;
+    line-height: 1.58 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-copy::before,
+html body[data-page="coach-public-profile"] .coach-review-copy::after {
+    position: absolute;
+    color: #8b7cf6;
+    font-family: Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+html body[data-page="coach-public-profile"] .coach-review-copy::before { content: "“"; left: -2px; top: -3px; }
+html body[data-page="coach-public-profile"] .coach-review-copy::after { content: "”"; right: -1px; bottom: -7px; }
+html body[data-page="coach-public-profile"] .coach-review-copy.is-collapsible { -webkit-line-clamp: 4 !important; }
+html body[data-page="coach-public-profile"] .coach-review-more { margin: 8px 0 0 11px !important; }
+
+html body[data-page="coach-public-profile"] .coach-contact-method-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+}
+
+html body[data-page="coach-public-profile"] .coach-contact-method-options label { cursor: pointer; }
+html body[data-page="coach-public-profile"] .coach-contact-method-options input { position: absolute; opacity: 0; pointer-events: none; }
+html body[data-page="coach-public-profile"] .coach-contact-method-options span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 48px;
+    padding: 8px 10px;
+    border: 1px solid #e6e2f4;
+    border-radius: 13px;
+    background: #fff;
+    color: #555e73;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    transition: border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+html body[data-page="coach-public-profile"] .coach-contact-method-options svg { width: 17px !important; height: 17px !important; }
+html body[data-page="coach-public-profile"] .coach-contact-method-options input:checked + span {
+    border-color: #7668f4;
+    background: #f5f3ff;
+    color: #5545e8;
+    box-shadow: 0 0 0 3px rgba(118, 104, 244, .08);
+}
+html body[data-page="coach-public-profile"] [data-whatsapp-field][hidden] { display: none !important; }
+
+@media (max-width: 767px) {
+    html body[data-page="coach-public-profile"] .tyfit-main.coach-public-page { padding: 6px 16px 58px !important; }
+    html body[data-page="coach-public-profile"] .coach-testimonial-grid {
+        grid-auto-columns: calc((100% - 12px) / 2.06) !important;
+        padding-top: 2px !important;
+    }
+    html body[data-page="coach-public-profile"] .coach-review-card { min-height: 218px !important; padding: 14px !important; }
+    html body[data-page="coach-public-profile"] .coach-review-card-head { grid-template-columns: 38px minmax(0, 1fr) !important; }
+    html body[data-page="coach-public-profile"] .coach-review-card-head img { width: 38px !important; height: 38px !important; }
+    html body[data-page="coach-public-profile"] .coach-review-copy { margin-top: 13px !important; padding-inline: 9px; font-size: 11.5px !important; }
+    html body[data-page="coach-public-profile"] .coach-contact-method-options { grid-template-columns: 1fr; }
+    html body[data-page="coach-public-profile"] .coach-contact-method-options span { justify-content: flex-start; min-height: 44px; }
+}
+
+/* Compact consultation form with a focused marketing header. */
+html body[data-page="coach-public-profile"] .coach-consultation-dialog {
+    max-height: min(92vh, 780px) !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-dialog > header {
+    min-height: 74px !important;
+    padding: 13px 18px !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-dialog > header > div > span {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(145deg, #6757f6, #8c72ff) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(102, 86, 245, .22);
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-dialog > header h2 {
+    font-size: clamp(19px, 3vw, 24px) !important;
+    font-weight: 750 !important;
+    letter-spacing: -.025em;
+}
+
+html body[data-page="coach-public-profile"] #coachConsultationForm {
+    padding: 12px 18px 14px !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px 12px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label,
+html body[data-page="coach-public-profile"] .coach-consultation-fields > fieldset {
+    display: block !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label::after,
+html body[data-page="coach-public-profile"] .coach-consultation-fields > fieldset::after { display: none !important; }
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label > span,
+html body[data-page="coach-public-profile"] .coach-consultation-fields legend {
+    display: block !important;
+    margin: 0 0 5px !important;
+    color: #30384b !important;
+    font-size: 11px !important;
+    font-weight: 650 !important;
+    line-height: 1.3 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label > div:not(.coach-consultation-phone),
+html body[data-page="coach-public-profile"] .coach-consultation-phone {
+    display: flex !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 1px solid #e5e2ef !important;
+    border-radius: 11px !important;
+    background: #fbfbfd !important;
+    overflow: hidden !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields input,
+html body[data-page="coach-public-profile"] .coach-consultation-fields select,
+html body[data-page="coach-public-profile"] .coach-consultation-fields textarea {
+    width: 100% !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    padding: 9px 11px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #1c2435 !important;
+    font-size: 13px !important;
+    outline: 0 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields > label > div:focus-within,
+html body[data-page="coach-public-profile"] .coach-consultation-phone:focus-within {
+    border-color: #7565f4 !important;
+    box-shadow: 0 0 0 3px rgba(117, 101, 244, .09) !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-fields textarea {
+    min-height: 56px !important;
+    max-height: 76px !important;
+    resize: vertical;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-phone select {
+    flex: 0 0 82px !important;
+    width: 82px !important;
+    border-right: 1px solid #e8e5f0 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-contact-method-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-contact-method-options span {
+    justify-content: center !important;
+    min-height: 42px !important;
+    padding: 7px 6px !important;
+    font-size: 11px !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-submit {
+    min-height: 46px !important;
+    margin-top: 12px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+}
+
+html body[data-page="coach-public-profile"] .coach-consultation-submit.is-loading { opacity: .72; cursor: wait; }
+html body[data-page="coach-public-profile"] .coach-consultation-assurance { margin: 8px 0 0 !important; font-size: 10px !important; }
+
+@media (max-width: 600px) {
+    html body[data-page="coach-public-profile"] .coach-consultation-dialog { max-height: 94vh !important; }
+    html body[data-page="coach-public-profile"] .coach-consultation-dialog > header { min-height: 68px !important; padding: 10px 14px !important; }
+    html body[data-page="coach-public-profile"] #coachConsultationForm { padding: 10px 14px 12px !important; }
+    html body[data-page="coach-public-profile"] .coach-consultation-fields { grid-template-columns: 1fr !important; gap: 7px !important; }
+    html body[data-page="coach-public-profile"] .coach-contact-method-options { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
 /* Lift the persistent consultation CTA clearly above page content. */
 html body[data-page="coach-public-profile"] .coach-floating-cta {
     z-index: 220 !important;

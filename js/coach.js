@@ -1155,22 +1155,23 @@
                             </div>
                         </section>
 
-                        <section class="coach-public-section"><h2>Expertise</h2><div class="coach-expertise-grid">${(state.expertise.length ? state.expertise : [
+                        <section class="coach-public-section coach-public-plans-inline"><div class="coach-public-section-head"><h2>Coaching Plans</h2><a href="${profileLink("coach_plans.html")}">View all plans <i data-lucide="arrow-right"></i></a></div>${plansMarkup}</section>
+
+                        <section class="coach-public-section coach-public-expertise"><h2>My Expertise</h2><div class="coach-expertise-grid">${(state.expertise.length ? state.expertise : [
                             { label: "Fat Loss" }, { label: "Muscle Gain" }, { label: "Diabetes" }, { label: "Vegetarian Diet" }, { label: "Strength Training" }
                         ]).map((x, index) => `<span class="coach-expertise-pill is-${index % 5}"><i data-lucide="${["flame", "dumbbell", "droplet", "leaf", "bone"][index % 5]}"></i>${escapeHtml(x.label)}</span>`).join("")}</div></section>
 
-                        <section class="coach-public-section coach-public-plans-inline"><div class="coach-public-section-head"><h2>Coaching Plans</h2><a href="${profileLink("coach_plans.html")}">View all plans <i data-lucide="arrow-right"></i></a></div>${plansMarkup}</section>
-
-                        ${testimonial ? `<section class="coach-public-section">
-                            <div class="coach-public-section-head"><h2>Testimonials</h2><span>${state.publicTestimonialIndex + 1} / ${testimonials.length}</span></div>
-                            <article class="coach-testimonial-card" id="testimonials">
-                                <button type="button" class="coach-round-nav" data-testimonial-nav="-1" aria-label="Previous testimonial"${testimonials.length < 2 ? " disabled" : ""}><i data-lucide="chevron-left"></i></button>
-                                <span class="coach-quote-mark">“</span>
-                                <img class="coach-testimonial-avatar" src="${escapeHtml(displayUrl(testimonial.client_image_url || DEFAULT_PROFILE_IMAGE))}" alt="${escapeHtml(testimonial.client_name)}">
-                                <div><span class="coach-stars">★★★★★</span><p>“${escapeHtml(truncateText(testimonial.quote, 126))}”</p><strong>${escapeHtml(testimonial.client_name)}</strong><small>${escapeHtml(testimonial.client_title || "Software Engineer")}</small></div>
-                                <button type="button" class="coach-round-nav" data-testimonial-nav="1" aria-label="Next testimonial"${testimonials.length < 2 ? " disabled" : ""}><i data-lucide="chevron-right"></i></button>
-                            </article>
-                            <div class="coach-testimonial-dots">${testimonials.map((_, index) => `<button type="button" class="${index === state.publicTestimonialIndex ? "is-active" : ""}" data-testimonial-dot="${index}" aria-label="Show testimonial ${index + 1}"></button>`).join("")}</div>
+                        ${testimonial ? `<section class="coach-public-section coach-public-testimonials" id="testimonials">
+                            <div class="coach-public-section-head"><h2>What Clients Say</h2><span>${testimonials.length} ${testimonials.length === 1 ? "review" : "reviews"}</span></div>
+                            <div class="coach-testimonial-grid">${testimonials.map((item) => {
+                                const quote = String(item.quote || "");
+                                const isLong = quote.length > 180;
+                                return `<article class="coach-review-card">
+                                    <div class="coach-review-card-head"><img src="${escapeHtml(displayUrl(item.client_image_url || DEFAULT_PROFILE_IMAGE))}" alt="${escapeHtml(item.client_name)}"><div><strong>${escapeHtml(item.client_name)}</strong><small>${escapeHtml(item.client_title || "Verified client")}</small></div><i data-lucide="badge-check" aria-label="Verified review"></i></div>
+                                    <p class="coach-review-copy${isLong ? " is-collapsible" : ""}">${escapeHtml(quote)}</p>
+                                    ${isLong ? '<button type="button" class="coach-review-more" data-review-more aria-expanded="false">View more</button>' : ""}
+                                </article>`;
+                            }).join("")}</div>
                         </section>` : ""}
 
                         ${firstTransformation ? `<section class="coach-public-section">
@@ -1191,7 +1192,6 @@
                         <section class="coach-public-plan-card"><h2>Coaching Plans</h2>${plansMarkup}</section>
                     </aside>
                 </div>
-                <p class="coach-privacy-note"><i data-lucide="lock"></i> All consultations are private and confidential.</p>
                 <aside class="coach-floating-cta" aria-label="Start a coaching plan">
                     <span><strong>Plans from ${money(Math.min(...plansPreview.map((plan) => Number(plan.price_amount || 0)).filter((price) => price > 0)), plansPreview[0]?.currency || "EUR")}</strong><small>Start your transformation today</small></span>
                     <button type="button" class="js-coach-consultation-open"><i data-lucide="calendar-days"></i><span>Book Consultation</span><i data-lucide="arrow-right"></i></button>
@@ -1200,21 +1200,20 @@
                     <button type="button" class="coach-consultation-backdrop" data-consultation-close aria-label="Close consultation form"></button>
                     <section class="coach-consultation-dialog" role="dialog" aria-modal="true" aria-labelledby="coachConsultationTitle">
                         <button type="button" class="coach-consultation-drag-handle" id="coachConsultationDragHandle" aria-label="Drag down to close"><span></span></button>
-                        <header><div><span><i data-lucide="calendar-heart"></i></span><div><h2 id="coachConsultationTitle">Book a Consultation</h2><p>Tell us a little about yourself and your goals.</p></div></div><button type="button" data-consultation-close aria-label="Close"><i data-lucide="x"></i></button></header>
+                        <header><div><span><i data-lucide="messages-square"></i></span><div><h2 id="coachConsultationTitle">Find Your Best Coaching Fit</h2></div></div><button type="button" data-consultation-close aria-label="Close"><i data-lucide="x"></i></button></header>
                         <form id="coachConsultationForm">
                             <div class="coach-consultation-fields">
-                                <label><span>Full name</span><div><i data-lucide="user"></i><input name="name" type="text" placeholder="Your full name" required></div></label>
-                                <label><span>Age</span><div><i data-lucide="calendar"></i><input name="age" type="number" min="16" max="100" placeholder="Your age" required></div></label>
-                                <label><span>Country</span><div><i data-lucide="globe-2"></i><select name="country" required><option value="">Select country</option><option>Germany</option><option>India</option><option>United Kingdom</option><option>United States</option><option>Canada</option><option>Australia</option><option>Other</option></select></div></label>
-                                <label><span>Email address</span><div><i data-lucide="mail"></i><input name="email" type="email" placeholder="you@example.com" required></div></label>
-                                <label class="is-full"><i class="coach-consultation-standalone-icon" data-lucide="phone"></i><span>Phone number <small>Optional</small></span><div class="coach-consultation-phone"><select name="phone_code" aria-label="Phone country code"><option>+49</option><option>+91</option><option>+44</option><option>+1</option><option>+61</option></select><input name="phone" type="tel" inputmode="tel" placeholder="Phone number"></div></label>
-                                <label class="is-full"><span>How can the coach help?</span><div class="is-textarea"><i data-lucide="message-square-text"></i><textarea name="query" rows="3" placeholder="Share your goals, concerns, or questions" required></textarea></div></label>
-                                <fieldset class="is-full"><legend>Preferred time to contact</legend><div class="coach-contact-time-options"><label><input type="radio" name="contact_time" value="weekdays" checked><span><i data-lucide="briefcase-business"></i><b>Weekdays</b><small>Monday–Friday</small></span></label><label><input type="radio" name="contact_time" value="weekends"><span><i data-lucide="coffee"></i><b>Weekends</b><small>Saturday–Sunday</small></span></label></div></fieldset>
+                                <label class="is-full"><span>Full name</span><div><input name="full_name" type="text" autocomplete="name" maxlength="120" placeholder="Your full name" required></div></label>
+                                <label class="is-full"><span>Email</span><div><input name="email" type="email" autocomplete="email" maxlength="320" placeholder="you@example.com" required></div></label>
+                                <fieldset class="is-full coach-contact-preference"><legend>How would you prefer to be contacted?</legend><div class="coach-contact-method-options"><label><input type="radio" name="contact_method" value="whatsapp" checked><span>WhatsApp</span></label><label><input type="radio" name="contact_method" value="email"><span>Email</span></label><label><input type="radio" name="contact_method" value="either"><span>Either is fine</span></label></div></fieldset>
+                                <label class="is-full coach-whatsapp-field" data-whatsapp-field><span>WhatsApp number</span><div class="coach-consultation-phone"><select name="phone_code" aria-label="WhatsApp country code"><option>+49</option><option>+91</option><option>+44</option><option>+1</option><option>+61</option></select><input name="whatsapp_number" type="tel" inputmode="tel" autocomplete="tel" placeholder="WhatsApp number" required></div></label>
+                                <label class="is-full"><span>What would you like help with?</span><div><select name="help_topic" required><option>Fat Loss</option><option>Muscle Gain</option><option>Nutrition</option><option>Fitness Training</option><option>Lifestyle &amp; Habits</option><option>Other</option></select></div></label>
+                                <label class="is-full"><span>Anything you’d like me to know? <small>Optional</small></span><div class="is-textarea"><textarea name="notes" rows="2" maxlength="1000" placeholder="Share any useful context"></textarea></div></label>
                             </div>
-                            <button type="submit" class="coach-consultation-submit"><span>Book Consultation</span><i data-lucide="arrow-right"></i></button>
-                            <p class="coach-consultation-assurance"><i data-lucide="shield-check"></i>Your details remain private and secure.</p>
+                            <button type="submit" class="coach-consultation-submit"><span>Request Free Consultation</span><i data-lucide="arrow-right"></i></button>
+                            <p class="coach-consultation-assurance"><i data-lucide="lock"></i>Your details are shared only with your coach.</p>
                         </form>
-                        <div class="coach-consultation-success" id="coachConsultationSuccess" hidden><span><i data-lucide="check"></i></span><h3>Consultation requested</h3><p>Thank you. The coach will contact you soon to discuss the next steps.</p><button type="button" data-consultation-close>Done</button></div>
+                        <div class="coach-consultation-success" id="coachConsultationSuccess" hidden><span><i data-lucide="check"></i></span><h3>Request received</h3><p>Your details have been shared securely with ${escapeHtml(coachFirstName)}. You’ll be contacted soon.</p><button type="button" data-consultation-close>Done</button></div>
                     </section>
                 </div>
                 ${floatingContactContent ? `
@@ -1283,6 +1282,17 @@
             }
             if (form) form.hidden = false;
             if (success) success.hidden = true;
+            const submitButton = form?.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.classList.remove("is-loading");
+                const label = submitButton.querySelector("span");
+                if (label) label.textContent = "Request Free Consultation";
+            }
+            const whatsappField = form?.querySelector("[data-whatsapp-field]");
+            if (whatsappField) whatsappField.hidden = false;
+            const whatsappInput = whatsappField?.querySelector('input[name="whatsapp_number"]');
+            if (whatsappInput) whatsappInput.required = true;
             window.setTimeout(() => modal.querySelector("input")?.focus(), 60);
         }
     }
@@ -1353,6 +1363,14 @@
                 setContactMenu(false);
                 if (contactClose) return;
             }
+            const reviewMore = event.target.closest("[data-review-more]");
+            if (reviewMore) {
+                const card = reviewMore.closest(".coach-review-card");
+                const expanded = card?.classList.toggle("is-expanded") || false;
+                reviewMore.setAttribute("aria-expanded", String(expanded));
+                reviewMore.textContent = expanded ? "View less" : "View more";
+                return;
+            }
             const testimonialNav = event.target.closest("[data-testimonial-nav]");
             const testimonialDot = event.target.closest("[data-testimonial-dot]");
             if (testimonialNav && state.testimonials.length > 1) {
@@ -1406,14 +1424,54 @@
                 setContactMenu(false);
             }
         });
-        document.addEventListener("submit", (event) => {
+        document.addEventListener("submit", async (event) => {
             if (event.target.id !== "coachConsultationForm") return;
             event.preventDefault();
-            event.target.hidden = true;
-            const success = el("coachConsultationSuccess");
-            if (success) success.hidden = false;
-            el("coachConsultationModal")?.classList.add("is-success");
-            refreshIcons();
+            const form = event.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (!state.coachProfile?.id || submitButton?.disabled) return;
+            const fields = new FormData(form);
+            const contactMethod = String(fields.get("contact_method") || "whatsapp");
+            const payload = {
+                coach_profile_id: state.coachProfile.id,
+                full_name: String(fields.get("full_name") || "").trim(),
+                email: String(fields.get("email") || "").trim(),
+                contact_method: contactMethod,
+                phone_country_code: contactMethod === "email" ? null : String(fields.get("phone_code") || "").trim(),
+                whatsapp_number: contactMethod === "email" ? null : String(fields.get("whatsapp_number") || "").trim(),
+                help_topic: String(fields.get("help_topic") || "").trim(),
+                notes: String(fields.get("notes") || "").trim() || null
+            };
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.classList.add("is-loading");
+                submitButton.querySelector("span").textContent = "Sending request…";
+            }
+            try {
+                const { error } = await window.supabaseClient.from("coach_consultation_requests").insert(payload);
+                if (error) throw error;
+                form.hidden = true;
+                const success = el("coachConsultationSuccess");
+                if (success) success.hidden = false;
+                el("coachConsultationModal")?.classList.add("is-success");
+                form.reset();
+                refreshIcons();
+            } catch (error) {
+                setStatus(error.message || "We couldn’t send your request. Please try again.", "error");
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.classList.remove("is-loading");
+                    submitButton.querySelector("span").textContent = "Request Free Consultation";
+                }
+            }
+        });
+        document.addEventListener("change", (event) => {
+            if (event.target.name !== "contact_method") return;
+            const whatsappField = document.querySelector("[data-whatsapp-field]");
+            const showWhatsApp = event.target.value !== "email";
+            if (whatsappField) whatsappField.hidden = !showWhatsApp;
+            const numberInput = whatsappField?.querySelector('input[name="whatsapp_number"]');
+            if (numberInput) numberInput.required = showWhatsApp;
         });
         window.addEventListener("resize", initializePlanCarousels);
     }
