@@ -438,7 +438,7 @@ html body[data-page="coach-public-profile"] .coach-floating-cta > button svg {
 
 html body[data-page="coach-public-profile"] .coach-floating-contact-btn {
     right: 18px !important;
-    bottom: 100px !important;
+    bottom: 60px !important;
     z-index: 143 !important;
 }
 
@@ -826,7 +826,7 @@ body.coach-consultation-open {
 
     html body[data-page="coach-public-profile"] .coach-floating-contact-btn {
         right: 18px !important;
-        bottom: 166px !important;
+        bottom: 100px !important;
     }
 
     html body[data-page="coach-public-profile"] .coach-consultation-modal {
@@ -4558,7 +4558,7 @@ html body[data-page="coach-public-profile"] .coach-plan-preview-footer > svg {
     }
 
     html body[data-page="coach-public-profile"] .coach-floating-contact-btn {
-        bottom: 156px !important;
+        bottom: 90px !important;
     }
 }
 

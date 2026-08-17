@@ -1328,17 +1328,17 @@
                         </section>` : ""}
 
                         ${firstTransformation ? `<section class="coach-public-section coach-public-transformations" id="transformations">
-                            <div class="coach-public-section-head"><h2>Transformations</h2><span class="coach-transformation-total">${transformations.length} ${transformations.length === 1 ? "Result" : "Results"}</span></div>
+                            <div class="coach-public-section-head"><h2>Transformations</h2><span>${transformations.length} ${transformations.length === 1 ? "Result" : "Results"}</span></div>
                             <div class="coach-transformation-carousel">${transformations.map((item) => `
                                 <article class="coach-transformation-card">
                                     <div class="coach-before-after">
                                         <img src="${escapeHtml(displayUrl(item.before_image_url || DEFAULT_BEFORE_IMAGE))}" alt="${escapeHtml(item.client_name ? `${item.client_name} before` : "Before transformation")}">
                                         <img src="${escapeHtml(displayUrl(item.after_image_url || DEFAULT_AFTER_IMAGE))}" alt="${escapeHtml(item.client_name ? `${item.client_name} after` : "After transformation")}">
-                                        <span class="coach-transformation-label is-before"><i data-lucide="circle-dot"></i>Before</span><b class="coach-transformation-label is-after"><i data-lucide="sparkles"></i>After</b>
+                                        <span class="coach-transformation-label is-before">Before</span><b class="coach-transformation-label is-after">After</b>
                                         <div class="coach-before-after-handle" aria-hidden="true"><i data-lucide="chevrons-left-right"></i></div>
                                     </div>
                                     <div class="coach-transformation-content">
-                                        <div class="coach-transformation-eyebrow"><span><i data-lucide="badge-check"></i>Verified</span>${item.client_name ? `<small><i data-lucide="user-round"></i>${escapeHtml(item.client_name)}</small>` : ""}</div>
+                                        ${item.client_name ? `<div class="coach-transformation-client"><strong>${escapeHtml(item.client_name)}</strong><i class="coach-verified-icon" data-lucide="badge-check" aria-label="Verified client"></i></div>` : ""}
                                         <h3>${escapeHtml(item.title || "Client transformation")}</h3>
                                         ${item.result_metric ? `<strong>${escapeHtml(item.result_metric)}</strong>` : ""}
                                         ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
@@ -1414,6 +1414,7 @@
         const panelBounds = panel.getBoundingClientRect();
         const panelTopHalfHasPassed = panelBounds.top + (panelBounds.height / 2) <= 0;
         cta.classList.toggle("is-visible", panelTopHalfHasPassed);
+        document.body.classList.toggle("coach-floating-cta-visible", panelTopHalfHasPassed);
     }
 
     function requestFloatingCtaVisibilityUpdate() {
