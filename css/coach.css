@@ -118,6 +118,36 @@ body[data-page="coach-public-profile"] .coach-contact-menu .coach-social-logo im
     object-fit: contain;
 }
 
+/* Reusable crop editor for coach, testimonial and transformation uploads. */
+.coach-image-editor {
+    position: fixed;
+    inset: 0;
+    z-index: 2600;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+}
+.coach-image-editor[hidden] { display: none; }
+.coach-image-editor-backdrop { position: absolute; inset: 0; border: 0; background: rgba(13, 16, 35, .72); backdrop-filter: blur(5px); }
+.coach-image-editor-dialog { position: relative; width: min(560px, 100%); padding: 18px; border-radius: 24px; background: #fff; box-shadow: 0 28px 80px rgba(10, 13, 35, .34); }
+.coach-image-editor-dialog > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 14px; }
+.coach-image-editor-dialog > header h2 { margin: 0; color: #171a2d; font-size: 20px; }
+.coach-image-editor-dialog > header p { margin: 4px 0 0; color: #70778a; font-size: 12px; }
+.coach-image-editor-dialog > header button { width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #f3f1fb; color: #555d72; cursor: pointer; }
+.coach-image-editor-dialog > header svg { width: 18px; height: 18px; }
+.coach-image-editor-stage { display: grid; place-items: center; max-height: min(58vh, 540px); overflow: hidden; border-radius: 18px; background: #121525; touch-action: none; }
+.coach-image-editor-stage canvas { display: block; width: 100%; max-height: min(58vh, 540px); object-fit: contain; cursor: grab; touch-action: none; }
+.coach-image-editor-stage canvas:active { cursor: grabbing; }
+.coach-image-editor-zoom { display: grid; grid-template-columns: 20px minmax(0, 1fr) 20px; align-items: center; gap: 10px; padding: 16px 4px 12px; color: #6254ec; }
+.coach-image-editor-zoom svg { width: 18px; height: 18px; }
+.coach-image-editor-zoom input { width: 100%; accent-color: #6557ef; }
+.coach-image-editor-actions { display: flex; justify-content: flex-end; gap: 9px; }
+body.coach-image-editor-open { overflow: hidden; }
+@media (max-width: 600px) {
+    .coach-image-editor { align-items: end; padding: 0; }
+    .coach-image-editor-dialog { width: 100%; padding: 16px; border-radius: 24px 24px 0 0; }
+}
+
 @media (max-width: 991px) {
     body[data-page="coach-public-profile"].coach-contact-menu-open {
         overflow: auto;

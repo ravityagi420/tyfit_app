@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/premium-ui.css?v=20260608-checkin-save" rel="stylesheet">
     <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
-    <link href="css/coach.css?v=20260714-coach-contact-overlay" rel="stylesheet">
+    <link href="css/coach.css?v=20260817-image-editor" rel="stylesheet">
 </head>
 <body class="tyfit-app tyfit-ui-page" data-page="coach-marketing-edit">
     <header class="tyfit-mobile-topbar">
@@ -153,12 +153,22 @@
     </section>
     <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
 
+    <div class="coach-image-editor" id="coachImageEditor" hidden aria-hidden="true">
+        <button type="button" class="coach-image-editor-backdrop" data-image-editor-cancel aria-label="Cancel image editing"></button>
+        <section class="coach-image-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="coachImageEditorTitle">
+            <header><div><h2 id="coachImageEditorTitle">Edit image</h2><p>Drag to crop · scroll or pinch to zoom</p></div><button type="button" data-image-editor-cancel aria-label="Close"><i data-lucide="x"></i></button></header>
+            <div class="coach-image-editor-stage"><canvas id="coachImageEditorCanvas" aria-label="Image crop preview"></canvas></div>
+            <label class="coach-image-editor-zoom" for="coachImageEditorZoom"><i data-lucide="zoom-out"></i><input id="coachImageEditorZoom" type="range" min="1" max="3" step="0.01" value="1"><i data-lucide="zoom-in"></i></label>
+            <div class="coach-image-editor-actions"><button type="button" class="coach-secondary-btn" data-image-editor-cancel>Cancel</button><button type="button" class="coach-primary-btn" id="coachImageEditorApply"><i data-lucide="crop"></i> Use this crop</button></div>
+        </section>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="lib/lucide/lucide.min.js"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/login.js?v=20260523l"></script>
     <script src="js/profile-utils.js?v=20260423d"></script>
     <script src="js/shell.js?v=20260714-coach-contact-overlay"></script>
-    <script src="js/coach.js?v=20260714-coach-contact-overlay"></script>
+    <script src="js/coach.js?v=20260817-transform-polish"></script>
 </body>
 </html>

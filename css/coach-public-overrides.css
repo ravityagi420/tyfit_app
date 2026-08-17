@@ -1019,8 +1019,8 @@ html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-stati
 }
 
 html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-booking-copy strong {
-    font-size: clamp(18px, 2.1vw, 24px) !important;
-    font-weight: 650 !important;
+    font-size: clamp(15px, 1.8vw, 20px) !important;
+    font-weight: 500 !important;
 }
 
 html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-booking-copy small {
@@ -1030,7 +1030,7 @@ html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-booki
 
 html body[data-page="coach-public-profile"] .coach-conversion-panel .coach-trust-strip {
     font-size: clamp(11px, 1.25vw, 14px) !important;
-    font-weight: 550 !important;
+    font-weight: 450 !important;
 }
 
 html body[data-page="coach-public-profile"] .coach-public-testimonials { overflow: visible; }

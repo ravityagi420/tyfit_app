@@ -76,6 +76,9 @@
         editingPlanId: null,
         editingTestimonialId: null
     };
+    let floatingCtaVisibilityBound = false;
+    let floatingCtaVisibilityTicking = false;
+    const editedImageFiles = new Map();
 
     function el(id) {
         return document.getElementById(id);
@@ -196,6 +199,152 @@
         });
         if (error) throw new Error(error.message || "Image upload failed.");
         return path;
+    }
+
+    function imageFileFor(inputId) {
+        return editedImageFiles.get(inputId) || el(inputId)?.files?.[0] || null;
+    }
+
+    function editImage(file, aspectRatio = 1) {
+        const modal = el("coachImageEditor");
+        const canvas = el("coachImageEditorCanvas");
+        const zoomInput = el("coachImageEditorZoom");
+        const applyButton = el("coachImageEditorApply");
+        if (!modal || !canvas || !zoomInput || !applyButton || !file) return Promise.resolve(file || null);
+
+        return new Promise((resolve) => {
+            const context = canvas.getContext("2d");
+            const image = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            const outputWidth = 1000;
+            const outputHeight = Math.round(outputWidth / aspectRatio);
+            let zoom = 1;
+            let centerX = 0;
+            let centerY = 0;
+            let dragStart = null;
+            const activePointers = new Map();
+            let pinchStart = null;
+            let settled = false;
+
+            canvas.width = outputWidth;
+            canvas.height = outputHeight;
+            canvas.style.aspectRatio = String(aspectRatio);
+            zoomInput.value = "1";
+
+            function cropSize() {
+                const baseWidth = Math.min(image.naturalWidth, image.naturalHeight * aspectRatio);
+                return { width: baseWidth / zoom, height: (baseWidth / aspectRatio) / zoom };
+            }
+
+            function clampCenter() {
+                const crop = cropSize();
+                centerX = Math.max(crop.width / 2, Math.min(image.naturalWidth - crop.width / 2, centerX));
+                centerY = Math.max(crop.height / 2, Math.min(image.naturalHeight - crop.height / 2, centerY));
+            }
+
+            function draw() {
+                if (!image.naturalWidth) return;
+                clampCenter();
+                const crop = cropSize();
+                context.clearRect(0, 0, outputWidth, outputHeight);
+                context.drawImage(image, centerX - crop.width / 2, centerY - crop.height / 2, crop.width, crop.height, 0, 0, outputWidth, outputHeight);
+            }
+
+            function setZoom(nextZoom) {
+                zoom = Math.max(1, Math.min(3, nextZoom));
+                zoomInput.value = String(zoom);
+                draw();
+            }
+
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                modal.hidden = true;
+                modal.setAttribute("aria-hidden", "true");
+                document.body.classList.remove("coach-image-editor-open");
+                URL.revokeObjectURL(objectUrl);
+                resolve(result);
+            }
+
+            function cancel() { finish(null); }
+
+            image.onload = () => {
+                centerX = image.naturalWidth / 2;
+                centerY = image.naturalHeight / 2;
+                draw();
+            };
+            image.onerror = cancel;
+            image.src = objectUrl;
+            modal.hidden = false;
+            modal.setAttribute("aria-hidden", "false");
+            document.body.classList.add("coach-image-editor-open");
+            refreshIcons();
+
+            zoomInput.oninput = () => {
+                setZoom(Number(zoomInput.value || 1));
+            };
+            canvas.onpointerdown = (event) => {
+                activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+                if (activePointers.size === 2) {
+                    const points = Array.from(activePointers.values());
+                    pinchStart = { distance: Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y), zoom };
+                    dragStart = null;
+                } else {
+                dragStart = { x: event.clientX, y: event.clientY, centerX, centerY };
+                }
+                canvas.setPointerCapture?.(event.pointerId);
+            };
+            canvas.onpointermove = (event) => {
+                if (activePointers.has(event.pointerId)) activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+                if (activePointers.size === 2 && pinchStart) {
+                    const points = Array.from(activePointers.values());
+                    const distance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+                    setZoom(pinchStart.zoom * distance / Math.max(1, pinchStart.distance));
+                    return;
+                }
+                if (!dragStart) return;
+                const crop = cropSize();
+                const bounds = canvas.getBoundingClientRect();
+                centerX = dragStart.centerX - ((event.clientX - dragStart.x) * crop.width / bounds.width);
+                centerY = dragStart.centerY - ((event.clientY - dragStart.y) * crop.height / bounds.height);
+                draw();
+            };
+            canvas.onpointerup = canvas.onpointercancel = (event) => {
+                activePointers.delete(event.pointerId);
+                pinchStart = null;
+                dragStart = null;
+            };
+            canvas.onwheel = (event) => {
+                event.preventDefault();
+                setZoom(zoom + (event.deltaY < 0 ? .12 : -.12));
+            };
+            modal.querySelectorAll("[data-image-editor-cancel]").forEach((button) => { button.onclick = cancel; });
+            applyButton.onclick = () => {
+                canvas.toBlob((blob) => {
+                    if (!blob) return cancel();
+                    const baseName = String(file.name || "image").replace(/\.[^.]+$/, "");
+                    finish(new File([blob], `${baseName}-cropped.jpg`, { type: "image/jpeg", lastModified: Date.now() }));
+                }, "image/jpeg", .9);
+            };
+        });
+    }
+
+    function bindImageEditorInput(inputId, aspectRatio, onReady) {
+        const input = el(inputId);
+        if (!input) return;
+        input.addEventListener("change", async () => {
+            const original = input.files?.[0];
+            if (!original) return;
+            const edited = await editImage(original, aspectRatio);
+            if (!edited) {
+                input.value = "";
+                editedImageFiles.delete(inputId);
+                return;
+            }
+            editedImageFiles.set(inputId, edited);
+            updateCoachTabStatuses();
+            await onReady?.(edited);
+        });
     }
 
     async function requireCoach() {
@@ -832,6 +981,7 @@
 
     function resetTestimonialForm() {
         editorState.editingTestimonialId = null;
+        editedImageFiles.delete("testimonialAvatarFile");
         setValue("testimonialName", "");
         setValue("testimonialRating", "5");
         setValue("testimonialAvatarFile", "");
@@ -867,7 +1017,7 @@
     }
 
     async function saveTestimonial() {
-        const avatarFile = el("testimonialAvatarFile")?.files?.[0];
+        const avatarFile = imageFileFor("testimonialAvatarFile");
         const existing = state.testimonials.find((item) => item.id === editorState.editingTestimonialId);
         const clientImage = avatarFile ? await uploadCoachImage(avatarFile, "testimonials") : (existing?.client_image_url || null);
         const payload = {
@@ -911,8 +1061,8 @@
     }
 
     async function saveTransformation() {
-        const beforeFile = el("transformationBeforeFile")?.files?.[0];
-        const afterFile = el("transformationAfterFile")?.files?.[0];
+        const beforeFile = imageFileFor("transformationBeforeFile");
+        const afterFile = imageFileFor("transformationAfterFile");
         const beforeImage = beforeFile ? await uploadCoachImage(beforeFile, "transformations") : getValue("transformationBefore").trim();
         const afterImage = afterFile ? await uploadCoachImage(afterFile, "transformations") : getValue("transformationAfter").trim();
         const payload = {
@@ -929,6 +1079,9 @@
         if (!payload.title) throw new Error("Transformation title is required.");
         const { error } = await window.supabaseClient.from("coach_transformations").insert(payload);
         if (error) throw new Error(error.message || "Failed to save transformation.");
+        editedImageFiles.delete("transformationBeforeFile");
+        editedImageFiles.delete("transformationAfterFile");
+        ["transformationClient", "transformationTitle", "transformationMetric", "transformationBeforeFile", "transformationAfterFile", "transformationBefore", "transformationAfter", "transformationSummary"].forEach((id) => setValue(id, ""));
         await loadCoachChildren(state.coachProfile.id);
         renderTransformationsEditor();
         setStatus("Transformation saved.");
@@ -1174,16 +1327,23 @@
                             }).join("")}</div>
                         </section>` : ""}
 
-                        ${firstTransformation ? `<section class="coach-public-section">
-                            <div class="coach-public-section-head"><h2>Transformations</h2></div>
-                            <div class="coach-public-transform-row" id="transformations">
-                                <article class="coach-before-after">
-                                    <img src="${escapeHtml(displayUrl(firstTransformation.before_image_url || DEFAULT_BEFORE_IMAGE))}" alt="Before">
-                                    <img src="${escapeHtml(displayUrl(firstTransformation.after_image_url || DEFAULT_AFTER_IMAGE))}" alt="After">
-                                    <span>Before</span><b>After</b>
-                                    <button type="button" class="coach-before-after-handle" aria-label="Compare"><i data-lucide="chevrons-left-right"></i></button>
-                                </article>
-                                <div class="coach-success-count"><strong>${transformations.length}+</strong><span>Success Stories</span><small>Real people. Real results.</small><div class="coach-mini-avatar-row">${testimonials.slice(0, 3).map((item) => `<img src="${escapeHtml(displayUrl(item.client_image_url || DEFAULT_PROFILE_IMAGE))}" alt="">`).join("")}${testimonials.length > 3 ? `<span>+${testimonials.length - 3}</span>` : ""}</div></div>
+                        ${firstTransformation ? `<section class="coach-public-section coach-public-transformations" id="transformations">
+                            <div class="coach-public-section-head"><h2>Transformations</h2><span class="coach-transformation-total">${transformations.length} ${transformations.length === 1 ? "Result" : "Results"}</span></div>
+                            <div class="coach-transformation-carousel">${transformations.map((item) => `
+                                <article class="coach-transformation-card">
+                                    <div class="coach-before-after">
+                                        <img src="${escapeHtml(displayUrl(item.before_image_url || DEFAULT_BEFORE_IMAGE))}" alt="${escapeHtml(item.client_name ? `${item.client_name} before` : "Before transformation")}">
+                                        <img src="${escapeHtml(displayUrl(item.after_image_url || DEFAULT_AFTER_IMAGE))}" alt="${escapeHtml(item.client_name ? `${item.client_name} after` : "After transformation")}">
+                                        <span class="coach-transformation-label is-before"><i data-lucide="circle-dot"></i>Before</span><b class="coach-transformation-label is-after"><i data-lucide="sparkles"></i>After</b>
+                                        <div class="coach-before-after-handle" aria-hidden="true"><i data-lucide="chevrons-left-right"></i></div>
+                                    </div>
+                                    <div class="coach-transformation-content">
+                                        <div class="coach-transformation-eyebrow"><span><i data-lucide="badge-check"></i>Verified</span>${item.client_name ? `<small><i data-lucide="user-round"></i>${escapeHtml(item.client_name)}</small>` : ""}</div>
+                                        <h3>${escapeHtml(item.title || "Client transformation")}</h3>
+                                        ${item.result_metric ? `<strong>${escapeHtml(item.result_metric)}</strong>` : ""}
+                                        ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
+                                    </div>
+                                </article>`).join("")}
                             </div>
                         </section>` : ""}
                     </div>
@@ -1241,7 +1401,33 @@
         window.requestAnimationFrame(() => root.classList.add("is-ready"));
         refreshIcons();
         window.requestAnimationFrame(() => initializePlanCarousels());
+        initializeFloatingCtaVisibility();
         scheduleTestimonialAutoAdvance();
+    }
+
+    function updateFloatingCtaVisibility() {
+        floatingCtaVisibilityTicking = false;
+        const cta = document.querySelector(".coach-floating-cta");
+        const panel = document.querySelector(".coach-conversion-panel");
+        if (!cta || !panel) return;
+
+        const panelBounds = panel.getBoundingClientRect();
+        const panelTopHalfHasPassed = panelBounds.top + (panelBounds.height / 2) <= 0;
+        cta.classList.toggle("is-visible", panelTopHalfHasPassed);
+    }
+
+    function requestFloatingCtaVisibilityUpdate() {
+        if (floatingCtaVisibilityTicking) return;
+        floatingCtaVisibilityTicking = true;
+        window.requestAnimationFrame(updateFloatingCtaVisibility);
+    }
+
+    function initializeFloatingCtaVisibility() {
+        updateFloatingCtaVisibility();
+        if (floatingCtaVisibilityBound) return;
+        floatingCtaVisibilityBound = true;
+        window.addEventListener("scroll", requestFloatingCtaVisibilityUpdate, { passive: true });
+        window.addEventListener("resize", requestFloatingCtaVisibilityUpdate, { passive: true });
     }
 
     function updatePlanCarouselControls(carousel) {
@@ -1536,20 +1722,26 @@
         enhanceCoachFields();
         const imageInput = el("coachProfileImageFile");
         const imagePreview = el("coachProfilePreview");
-        imageInput?.addEventListener("change", async () => {
-            const file = imageInput.files?.[0];
-            if (!file || !imagePreview) return;
-            imagePreview.src = URL.createObjectURL(file);
+        bindImageEditorInput("coachProfileImageFile", 1, async (file) => {
+            if (!imagePreview) return;
+            const previewUrl = URL.createObjectURL(file);
+            imagePreview.src = previewUrl;
             try {
                 await saveStudioProfileImage(file);
                 imagePreview.src = displayUrl(state.coachProfile?.profile_image_url);
-                imageInput.value = "";
+                if (imageInput) imageInput.value = "";
+                editedImageFiles.delete("coachProfileImageFile");
                 updateCoachTabStatuses();
             } catch (error) {
                 imagePreview.src = displayUrl(state.coachProfile?.profile_image_url);
                 setStatus(error.message || "Could not update profile image.", "error");
+            } finally {
+                URL.revokeObjectURL(previewUrl);
             }
         });
+        bindImageEditorInput("testimonialAvatarFile", 1);
+        bindImageEditorInput("transformationBeforeFile", 4 / 5);
+        bindImageEditorInput("transformationAfterFile", 4 / 5);
         document.querySelectorAll(".coach-field input, .coach-field select, .coach-field textarea").forEach((control) => {
             control.addEventListener("input", updateCoachTabStatuses);
             control.addEventListener("change", updateCoachTabStatuses);
