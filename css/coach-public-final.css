@@ -326,3 +326,103 @@ body[data-page="coach-public-profile"].coach-floating-cta-visible .coach-floatin
 @media (min-width: 768px) and (max-width: 1023px) {
     body[data-page="coach-public-profile"] .coach-transformation-carousel { grid-auto-columns: 90% !important; gap: 16px !important; }
 }
+
+/* Contact overlay stacking: backdrop, menu, then the persistent close control. */
+html body[data-page="coach-public-profile"] .coach-contact-menu-backdrop {
+    z-index: 9997 !important;
+}
+html body[data-page="coach-public-profile"] .coach-contact-menu {
+    z-index: 9998 !important;
+}
+html body[data-page="coach-public-profile"] .coach-floating-contact-btn,
+html body[data-page="coach-public-profile"].coach-contact-menu-open .coach-floating-contact-btn {
+    z-index: 9999 !important;
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    filter: none !important;
+    isolation: isolate;
+}
+html body[data-page="coach-public-profile"].coach-consultation-open .coach-floating-contact-btn {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: scale(.88) !important;
+}
+html:has(body[data-page="coach-public-profile"].coach-consultation-open),
+body[data-page="coach-public-profile"].coach-consultation-open {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+}
+body[data-page="coach-public-profile"].coach-consultation-open .coach-consultation-modal {
+    overscroll-behavior: contain;
+}
+body[data-page="coach-public-profile"].coach-consultation-open .coach-consultation-dialog {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+
+/* Stable mobile form focus and balanced contact-method iconography. */
+#coachConsultationModal .coach-contact-preference {
+    padding-top: 15px !important;
+}
+#coachConsultationModal .coach-contact-preference legend {
+    margin-top: 3px !important;
+    margin-bottom: 0 !important;
+}
+#coachConsultationModal .coach-contact-preference .coach-contact-method-options {
+    padding-top: 2px !important;
+}
+#coachConsultationModal .coach-contact-method-options span {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+#coachConsultationModal .coach-contact-method-options span b {
+    min-width: 0;
+    font: inherit;
+    font-weight: 550;
+    white-space: nowrap;
+}
+#coachConsultationModal .coach-contact-method-options span > svg {
+    flex: 0 0 auto;
+    width: 15px !important;
+    height: 15px !important;
+    stroke-width: 2;
+}
+#coachConsultationModal .coach-contact-method-options label:first-child span > svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+@media (max-width: 1024px) {
+    #coachConsultationModal .coach-consultation-fields input:not([type="radio"]),
+    #coachConsultationModal .coach-consultation-fields select,
+    #coachConsultationModal .coach-consultation-fields textarea {
+        font-size: 16px !important;
+    }
+}
+
+#coachConsultationModal .coach-required {
+    margin-left: 2px;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 750;
+    line-height: 1;
+}
+#coachConsultationModal .coach-consultation-fields > label.has-error,
+#coachConsultationModal .coach-consultation-fields > fieldset.has-error {
+    background: #fffafa !important;
+}
+#coachConsultationModal [aria-invalid="true"] {
+    color: #991b1b !important;
+}
+#coachConsultationModal .coach-field-error {
+    display: block;
+    margin: 3px 0 0 !important;
+    color: #dc2626 !important;
+    font-size: 10px !important;
+    font-weight: 550 !important;
+    line-height: 1.25 !important;
+}

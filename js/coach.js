@@ -1361,13 +1361,13 @@
                     <section class="coach-consultation-dialog" role="dialog" aria-modal="true" aria-labelledby="coachConsultationTitle">
                         <button type="button" class="coach-consultation-drag-handle" id="coachConsultationDragHandle" aria-label="Drag down to close"><span></span></button>
                         <header><div><span><i data-lucide="messages-square"></i></span><div><h2 id="coachConsultationTitle">Book a Consultation</h2></div></div><button type="button" data-consultation-close aria-label="Close"><i data-lucide="x"></i></button></header>
-                        <form id="coachConsultationForm">
+                        <form id="coachConsultationForm" novalidate>
                             <div class="coach-consultation-fields">
-                                <label class="is-full"><span>Full name</span><div><input name="full_name" type="text" autocomplete="name" maxlength="120" placeholder="Your full name" required></div></label>
-                                <label class="is-full"><span>Email</span><div><input name="email" type="email" autocomplete="email" maxlength="320" placeholder="you@example.com" required></div></label>
-                                <fieldset class="is-full coach-contact-preference"><legend>How would you prefer to be contacted?</legend><div class="coach-contact-method-options"><label><input type="radio" name="contact_method" value="whatsapp" checked><span>WhatsApp</span></label><label><input type="radio" name="contact_method" value="email"><span>Email</span></label><label><input type="radio" name="contact_method" value="either"><span>Either is fine</span></label></div></fieldset>
-                                <label class="is-full coach-whatsapp-field" data-whatsapp-field><span>WhatsApp number</span><div class="coach-consultation-phone"><select name="phone_code" aria-label="WhatsApp country code"><option>+49</option><option>+91</option><option>+44</option><option>+1</option><option>+61</option></select><input name="whatsapp_number" type="tel" inputmode="tel" autocomplete="tel" placeholder="WhatsApp number" required></div></label>
-                                <label class="is-full"><span>What would you like help with?</span><div><select name="help_topic" required><option>Fat Loss</option><option>Muscle Gain</option><option>Nutrition</option><option>Fitness Training</option><option>Lifestyle &amp; Habits</option><option>Other</option></select></div></label>
+                                <label class="is-full"><span>Full name <sup class="coach-required" aria-hidden="true">*</sup></span><div><input name="full_name" type="text" autocomplete="name" maxlength="120" placeholder="Your full name" required></div></label>
+                                <label class="is-full"><span>Email <sup class="coach-required" aria-hidden="true">*</sup></span><div><input name="email" type="email" autocomplete="email" maxlength="320" placeholder="you@example.com" required></div></label>
+                                <fieldset class="is-full coach-contact-preference"><legend>How would you prefer to be contacted? <sup class="coach-required" aria-hidden="true">*</sup></legend><div class="coach-contact-method-options"><label><input type="radio" name="contact_method" value="whatsapp" checked><span>${coachContactIcon("whatsapp")}<b>WhatsApp</b></span></label><label><input type="radio" name="contact_method" value="email"><span><i data-lucide="mail"></i><b>Email</b></span></label><label><input type="radio" name="contact_method" value="either"><span><i data-lucide="messages-square"></i><b>Either is fine</b></span></label></div></fieldset>
+                                <label class="is-full coach-whatsapp-field" data-whatsapp-field><span>WhatsApp number <sup class="coach-required" aria-hidden="true">*</sup></span><div class="coach-consultation-phone"><select name="phone_code" aria-label="WhatsApp country code"><option>+49</option><option>+91</option><option>+44</option><option>+1</option><option>+61</option></select><input name="whatsapp_number" type="tel" inputmode="tel" autocomplete="tel" placeholder="WhatsApp number" required></div></label>
+                                <label class="is-full"><span>What would you like help with? <sup class="coach-required" aria-hidden="true">*</sup></span><div><select name="help_topic" required><option>Fat Loss</option><option>Muscle Gain</option><option>Nutrition</option><option>Fitness Training</option><option>Lifestyle &amp; Habits</option><option>Other</option></select></div></label>
                                 <label class="is-full"><span>Anything you’d like me to know? <small>Optional</small></span><div class="is-textarea"><textarea name="notes" rows="2" maxlength="1000" placeholder="Share any useful context"></textarea></div></label>
                             </div>
                             <button type="submit" class="coach-consultation-submit"><span>Request Free Consultation</span><i data-lucide="arrow-right"></i></button>
@@ -1469,6 +1469,7 @@
         modal.classList.toggle("is-open", open);
         document.body.classList.toggle("coach-consultation-open", open);
         if (open) {
+            clearConsultationValidation(form);
             modal.classList.remove("is-success");
             const dialog = modal.querySelector(".coach-consultation-dialog");
             if (dialog) {
@@ -1490,6 +1491,40 @@
             if (whatsappInput) whatsappInput.required = true;
             window.setTimeout(() => modal.querySelector("input")?.focus(), 60);
         }
+    }
+
+    function clearConsultationValidation(form) {
+        if (!form) return;
+        form.querySelectorAll("[aria-invalid]").forEach((control) => control.removeAttribute("aria-invalid"));
+        form.querySelectorAll(".has-error").forEach((field) => field.classList.remove("has-error"));
+        form.querySelectorAll(".coach-field-error").forEach((message) => message.remove());
+    }
+
+    function consultationErrorMessage(control) {
+        if (control.name === "full_name") return "Enter your full name.";
+        if (control.name === "email") return control.validity.typeMismatch ? "Enter a valid email address." : "Enter your email address.";
+        if (control.name === "whatsapp_number") return "Enter your WhatsApp number.";
+        if (control.name === "help_topic") return "Choose what you would like help with.";
+        return "Complete this field.";
+    }
+
+    function validateConsultationForm(form) {
+        clearConsultationValidation(form);
+        const invalidControls = Array.from(form.querySelectorAll("input[required], select[required], textarea[required]"))
+            .filter((control) => !control.disabled && !control.closest("[hidden]") && (!String(control.value || "").trim() || !control.checkValidity()));
+        invalidControls.forEach((control) => {
+            const field = control.closest("label, fieldset");
+            control.setAttribute("aria-invalid", "true");
+            field?.classList.add("has-error");
+            if (field && !field.querySelector(".coach-field-error")) {
+                const message = document.createElement("small");
+                message.className = "coach-field-error";
+                message.textContent = consultationErrorMessage(control);
+                field.appendChild(message);
+            }
+        });
+        invalidControls[0]?.focus();
+        return invalidControls.length === 0;
     }
 
     function renderPublicPlansPage() {
@@ -1625,6 +1660,7 @@
             const form = event.target;
             const submitButton = form.querySelector('button[type="submit"]');
             if (!state.coachProfile?.id || submitButton?.disabled) return;
+            if (!validateConsultationForm(form)) return;
             const fields = new FormData(form);
             const contactMethod = String(fields.get("contact_method") || "whatsapp");
             const payload = {
@@ -1667,6 +1703,14 @@
             if (whatsappField) whatsappField.hidden = !showWhatsApp;
             const numberInput = whatsappField?.querySelector('input[name="whatsapp_number"]');
             if (numberInput) numberInput.required = showWhatsApp;
+        });
+        document.addEventListener("input", (event) => {
+            const form = event.target.closest?.("#coachConsultationForm");
+            if (!form || !event.target.matches("input, select, textarea")) return;
+            const field = event.target.closest("label, fieldset");
+            event.target.removeAttribute("aria-invalid");
+            field?.classList.remove("has-error");
+            field?.querySelector(".coach-field-error")?.remove();
         });
         window.addEventListener("resize", initializePlanCarousels);
     }

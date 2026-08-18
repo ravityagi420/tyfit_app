@@ -8,10 +8,75 @@
     let iconRefreshRaf = null;
     let iconRefreshIdle = null;
     let loaderVisibleAt = 0;
+    let modalScrollLocked = false;
+    let modalScrollY = 0;
+    let modalBodyStyles = null;
     const PHOSPHOR_CSS_ID = 'tyfitPhosphorIcons';
     const PHOSPHOR_CSS_HREF = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css';
     const PHOSPHOR_FILL_CSS_ID = 'tyfitPhosphorFillIcons';
     const PHOSPHOR_FILL_CSS_HREF = 'https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css';
+
+    function visibleModalExists() {
+        return Array.from(document.querySelectorAll('[role="dialog"]')).some(function (dialog) {
+            if (dialog.getAttribute('aria-modal') === 'false') return false;
+            if (dialog.hidden || dialog.closest('[hidden]')) return false;
+            const hiddenAncestor = dialog.closest('[aria-hidden="true"]');
+            if (hiddenAncestor) return false;
+            const styles = window.getComputedStyle(dialog);
+            return styles.display !== 'none' && styles.visibility !== 'hidden' && dialog.getClientRects().length > 0;
+        });
+    }
+
+    function syncModalScrollLock() {
+        const shouldLock = visibleModalExists();
+        if (shouldLock === modalScrollLocked) return;
+        modalScrollLocked = shouldLock;
+
+        if (shouldLock) {
+            modalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+            modalBodyStyles = {
+                position: document.body.style.position,
+                top: document.body.style.top,
+                width: document.body.style.width,
+                overflow: document.body.style.overflow
+            };
+            document.documentElement.classList.add('tyfit-modal-scroll-lock');
+            document.body.classList.add('tyfit-modal-scroll-lock');
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${modalScrollY}px`;
+            document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
+            return;
+        }
+
+        document.documentElement.classList.remove('tyfit-modal-scroll-lock');
+        document.body.classList.remove('tyfit-modal-scroll-lock');
+        if (modalBodyStyles) {
+            document.body.style.position = modalBodyStyles.position;
+            document.body.style.top = modalBodyStyles.top;
+            document.body.style.width = modalBodyStyles.width;
+            document.body.style.overflow = modalBodyStyles.overflow;
+        }
+        modalBodyStyles = null;
+        window.scrollTo(0, modalScrollY);
+    }
+
+    function initializeModalScrollLock() {
+        let scheduled = false;
+        const requestSync = function () {
+            if (scheduled) return;
+            scheduled = true;
+            window.requestAnimationFrame(function () {
+                scheduled = false;
+                syncModalScrollLock();
+            });
+        };
+        const observer = new MutationObserver(requestSync);
+        observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden', 'aria-hidden', 'open'] });
+        document.addEventListener('dialog-opened', requestSync);
+        document.addEventListener('dialog-closed', requestSync);
+        requestSync();
+    }
 
     function mountPageLoader() {
         if (byId('tyfitPageLoader')) return;
@@ -905,6 +970,7 @@
 
         observeDynamicIcons();
         refreshIcons();
+        initializeModalScrollLock();
 
         document.addEventListener('component-loaded', refreshIcons);
         unmountPageLoaderWhenReady();
