@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TYFIT | Metric History</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TYFIT personalized fitness tools and coaching">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="preload" as="image" href="assets/gamification/home-hero-mountain-1200.jpg" type="image/jpeg" fetchpriority="high">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/premium-ui.css?v=20260818-viewport-stability" rel="stylesheet">
+    <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
+    <link href="css/calculators.css?v=20260530c" rel="stylesheet">
+    <link href="css/metrics.css" rel="stylesheet">
+</head>
+<body class="tyfit-app" data-page="metrics">
+    <header class="tyfit-mobile-topbar">
+        <button class="tyfit-icon-btn" id="mobileMenuBtn" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+        </button>
+        <a class="tyfit-logo-link tyfit-mobile-logo-center" href="index.html" aria-label="TYFIT home">
+            <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+            <span class="tyfit-wordmark">TYFIT</span>
+        </a>
+        <div class="tyfit-dropdown-wrap tyfit-mobile-topbar-dropdown">
+            <button class="tyfit-icon-btn" id="mobileNotifBtn" aria-label="Notifications">
+                <i data-lucide="bell"></i>
+                <span class="tyfit-dot" id="mobileNotifDot" hidden></span>
+            </button>
+            <div class="tyfit-popover-menu" id="mobileNotifMenu" aria-hidden="true">
+                <p class="tyfit-popover-empty">No new notification</p>
+            </div>
+        </div>
+    </header>
+
+    <aside class="tyfit-mobile-drawer sidebar" id="mobileDrawer" aria-hidden="true">
+        <div class="sidebar-inner">
+            <div class="tyfit-mobile-drawer-head">
+                <button class="tyfit-icon-btn" id="mobileDrawerClose" aria-label="Close menu">
+                    <i data-lucide="x"></i>
+                </button>
+                <a class="tyfit-logo-link" href="index.html" aria-label="TYFIT home">
+                    <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                    <span class="tyfit-wordmark">TYFIT</span>
+                </a>
+            </div>
+            <div class="sidebar-menu">
+                <p class="sidebar-section-label">MAIN</p>
+                <a href="index.html" class="sidebar-nav-item active"><i data-lucide="home"></i><span>Home</span></a>
+                <a href="portal/diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                <a href="portal/food_catalog.html" class="sidebar-nav-item"><i data-lucide="book-open"></i><span>Food Catalog</span></a>
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">TOOLS</p>
+                <a href="training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                <a href="#" class="sidebar-nav-item" data-calculator="bmr" data-calculator-title="BMR Calculator"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+                <a href="#" class="sidebar-nav-item" data-calculator="macro" data-calculator-title="Macro Calculator"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                <a href="#" class="sidebar-nav-item" data-calculator="goal" data-calculator-title="Goal Calculator"><i data-lucide="target"></i><span>Goal Calculator</span></a>
+                
+                <hr class="sidebar-divider">
+                <p class="sidebar-section-label">ACCOUNT</p>
+                <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+            </div>
+            
+        </div>
+    </aside>
+    <div class="tyfit-mobile-drawer-backdrop" id="mobileDrawerBackdrop" hidden></div>
+
+    <div class="tyfit-layout" id="tyfitLayout">
+        <aside class="tyfit-sidebar sidebar" id="tyfitSidebar">
+            <div class="sidebar-inner">
+                <div class="tyfit-sidebar-head">
+                    <a class="tyfit-logo-link sidebar-logo" href="index.html" aria-label="TYFIT home">
+                        <img src="assets/tyfit_img/black_icon_logo.png" alt="TYFIT" class="tyfit-logo-img">
+                        <span class="tyfit-wordmark">TYFIT</span>
+                    </a>
+                </div>
+                <div class="sidebar-menu">
+                    <p class="sidebar-section-label">MAIN</p>
+                    <a href="index.html" class="sidebar-nav-item active"><i data-lucide="home"></i><span>Home</span></a>
+                    <a href="portal/diet_chart.html" class="sidebar-nav-item"><i data-lucide="clipboard-list"></i><span>Diet Chart</span></a>
+                    <a href="training_plan.html" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>Training Plan</span></a>
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">TOOLS</p>
+                    
+                    <a href="#" class="sidebar-nav-item" data-calculator="bmr" data-calculator-title="BMR Calculator"><i data-lucide="calculator"></i><span>BMR Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="percent"></i><span>Body Fat Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item" data-calculator="macro" data-calculator-title="Macro Calculator"><i data-lucide="pie-chart"></i><span>Macro Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item" data-calculator="goal" data-calculator-title="Goal Calculator"><i data-lucide="target"></i><span>Goal Calculator</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="dumbbell"></i><span>1RM Calculator</span></a>
+                    
+                    <hr class="sidebar-divider">
+                    <p class="sidebar-section-label">ACCOUNT</p>
+                    <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user"></i><span>Profile</span></a>
+                    <a href="#" class="sidebar-nav-item"><i data-lucide="settings"></i><span>Settings</span></a>
+                </div>
+            </div>
+        </aside>
+
+        <button class="tyfit-sidebar-toggle-floating" id="sidebarCollapseBtn" aria-label="Toggle sidebar">
+            <i data-lucide="panel-left-close"></i>
+        </button>
+
+        <main class="tyfit-main">
+            <div id="metricHistory" class="metric-page"></div>
+        </main>
+    </div>
+
+    <nav class="tyfit-mobile-bottom-nav" aria-label="Bottom navigation">
+        <a href="index.html" class="is-active"><i data-lucide="home"></i><span>Home</span></a>
+        <a href="portal/diet_chart.html"><i data-lucide="salad"></i><span>Diet Chart</span></a>
+        <a href="daily_checkin.html" class="tyfit-checkin-nav-btn" aria-label="Daily CheckIn"><i data-lucide="clipboard-check"></i><span>CheckIn</span></a>
+        <a href="training_plan.html"><i data-lucide="dumbbell"></i><span>Training</span></a>
+        <a href="profile.html"><i data-lucide="user"></i><span>Profile</span></a>
+    </nav>
+
+    <div class="tyfit-sheet-backdrop" id="quickSheetBackdrop" hidden></div>
+    <section class="tyfit-quick-sheet" id="quickSheet" aria-hidden="true">
+        <header>
+            <h4>Quick Actions</h4>
+            <button type="button" class="tyfit-icon-btn" id="quickSheetClose" aria-label="Close">
+                <i data-lucide="x"></i>
+            </button>
+        </header>
+        <button type="button" class="tyfit-sheet-action" data-action="checkin"><i data-lucide="clipboard-check"></i> Log Progress</button>
+        <button type="button" class="tyfit-sheet-action" data-action="weight"><i data-lucide="scale"></i> Log Weight</button>
+    </section>
+
+    <div class="tyfit-toast" id="appToast" aria-live="polite"></div>
+
+    <div class="tyfit-calc-modal" id="calculatorModal" hidden aria-hidden="true">
+        <div class="tyfit-calc-modal-backdrop" data-calculator-close></div>
+        <section class="tyfit-calc-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="calculatorModalTitle">
+            <header class="tyfit-calc-modal-header">
+                <button type="button" class="tyfit-icon-btn tyfit-calc-back-btn" id="calculatorBackBtn" aria-label="Back" hidden>
+                    <i data-lucide="chevron-left"></i>
+                </button>
+                <h4 id="calculatorModalTitle">Calculator</h4>
+                <button type="button" class="tyfit-icon-btn" id="calculatorModalClose" aria-label="Close calculator">
+                    <i data-lucide="x"></i>
+                </button>
+            </header>
+            <div class="tyfit-calc-modal-body" id="calculatorModalBody"></div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="lib/lucide/lucide.min.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/profile-utils.js?v=20260423d"></script>
+    <script src="js/login.js?v=20260525m"></script>
+    <script src="js/journey.js?v=20260602-climb"></script>
+    <script src="js/calculators.js?v=20260530b"></script>
+    <script src="js/shell.js?v=20260818-modal-scroll-lock"></script>
+
+    <script type="module" src="js/metrics.js"></script>
+</body>
+</html>

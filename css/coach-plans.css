@@ -1,0 +1,323 @@
+body[data-page="coach-plans"] {
+    --plans-primary: #6558ff;
+    --plans-primary-dark: #4f46e5;
+    --plans-purple-soft: #f2efff;
+    --plans-text: #111827;
+    --plans-muted: #64748b;
+    --plans-border: #e8e7f5;
+    background: #fff;
+}
+
+body[data-page="coach-plans"] .coach-plans-shell {
+    width: min(100%, 1080px);
+    display: grid;
+    gap: 28px;
+    margin-inline: auto;
+    padding-bottom: 132px;
+}
+
+body[data-page="coach-plans"] .coach-app-mobile-topbar {
+    background: rgba(255,255,255,.94);
+    border-bottom: 0;
+    backdrop-filter: blur(16px);
+}
+
+body[data-page="coach-plans"] .coach-app-mobile-topbar .tyfit-icon-btn {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+}
+
+body[data-page="coach-plans"] .coach-plans-hero {
+    position: relative;
+    min-height: 292px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(260px, .95fr);
+    align-items: center;
+    overflow: hidden;
+    padding: 34px 38px;
+    border: 1px solid rgba(101,88,255,.12);
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at 72% 30%, rgba(255,255,255,.9), transparent 31%),
+        linear-gradient(118deg, #fbfaff 0%, #f4f1ff 55%, #eeeaff 100%);
+    box-shadow: 0 18px 48px rgba(73,61,166,.08);
+}
+
+body[data-page="coach-plans"] .coach-plans-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -8% -42% 36%;
+    height: 75%;
+    border-radius: 50%;
+    background: rgba(255,255,255,.52);
+    filter: blur(16px);
+}
+
+body[data-page="coach-plans"] .coach-plans-hero-copy { position: relative; z-index: 2; min-width: 0; }
+
+body[data-page="coach-plans"] .coach-plans-kicker {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(101,88,255,.09);
+    color: #555d78;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+body[data-page="coach-plans"] .coach-plans-kicker svg {
+    width: 17px;
+    height: 17px;
+    padding: 3px;
+    border-radius: 5px;
+    background: var(--plans-primary);
+    color: #fff;
+    fill: var(--plans-primary);
+    stroke: #fff;
+}
+
+body[data-page="coach-plans"] .coach-plans-hero h1 {
+    max-width: 590px;
+    margin: 20px 0 12px;
+    color: var(--plans-text);
+    font-size: clamp(31px, 4vw, 48px);
+    line-height: 1.06;
+    font-weight: 750;
+    letter-spacing: -.045em;
+}
+
+body[data-page="coach-plans"] .coach-plans-hero p {
+    max-width: 510px;
+    margin: 0;
+    color: #58657d;
+    font-size: clamp(14px, 1.6vw, 17px);
+    line-height: 1.65;
+}
+
+body[data-page="coach-plans"] .coach-plans-hero-art {
+    position: relative;
+    z-index: 1;
+    justify-self: end;
+    width: min(100%, 420px);
+    max-height: 270px;
+    object-fit: contain;
+}
+
+body[data-page="coach-plans"] .coach-plans-marketplace { min-width: 0; }
+body[data-page="coach-plans"] .coach-plans-marketplace > h2 {
+    margin: 0 0 17px 4px;
+    color: var(--plans-text);
+    font-size: 24px;
+    font-weight: 750;
+    letter-spacing: -.025em;
+}
+
+body[data-page="coach-plans"] .coach-plan-list--public { display: grid; grid-template-columns: 1fr; gap: 14px; }
+
+body[data-page="coach-plans"] .coach-plan-list--public .coach-plan-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--plans-border);
+    border-radius: 23px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(45,39,91,.055);
+    transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+body[data-page="coach-plans"] .coach-plan-list--public .coach-plan-card.is-open {
+    border-color: rgba(101,88,255,.3);
+    box-shadow: 0 20px 48px rgba(72,59,174,.11);
+}
+
+body[data-page="coach-plans"] .coach-plan-list--public .coach-plan-summary {
+    width: 100%;
+    min-height: 142px;
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr) auto 48px;
+    align-items: center;
+    gap: 18px;
+    padding: 20px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+body[data-page="coach-plans"] .coach-plan-list--public .coach-plan-summary:focus-visible {
+    outline: 3px solid rgba(101,88,255,.22);
+    outline-offset: -3px;
+}
+
+body[data-page="coach-plans"] .coach-plan-visual {
+    width: 84px;
+    height: 84px;
+    display: grid;
+    place-items: center;
+    border-radius: 20px;
+    background: #f2efff;
+    color: #6759f6;
+}
+
+body[data-page="coach-plans"] .coach-plan-visual.is-green { background: #edfaef; color: #22b84d; }
+body[data-page="coach-plans"] .coach-plan-visual.is-red { background: #fff0f1; color: #ef4444; }
+body[data-page="coach-plans"] .coach-plan-visual.is-blue { background: #eef4ff; color: #3b82f6; }
+body[data-page="coach-plans"] .coach-plan-visual.is-violet { background: #f8efff; color: #8758f5; }
+body[data-page="coach-plans"] .coach-plan-visual svg { width: 39px; height: 39px; stroke-width: 1.9; }
+
+body[data-page="coach-plans"] .coach-plan-main { min-width: 0; }
+body[data-page="coach-plans"] .coach-plan-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+body[data-page="coach-plans"] .coach-plan-title-row h3 {
+    margin: 0;
+    color: var(--plans-text);
+    font-size: clamp(17px, 2vw, 21px);
+    line-height: 1.2;
+    font-weight: 760;
+    letter-spacing: -.025em;
+}
+
+body[data-page="coach-plans"] .coach-plan-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 7px 0 12px;
+    color: var(--plans-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+body[data-page="coach-plans"] .coach-plan-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+body[data-page="coach-plans"] .coach-plan-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 27px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #f7f7fb;
+    color: #283044;
+    font-size: 10.5px;
+    font-weight: 650;
+}
+body[data-page="coach-plans"] .coach-plan-chip svg { width: 14px; height: 14px; color: #6558ff; }
+body[data-page="coach-plans"] .coach-plan-chip.is-nutrition svg { color: #22b84d; }
+body[data-page="coach-plans"] .coach-plan-chip.is-checkins svg { color: #f59e0b; }
+body[data-page="coach-plans"] .coach-plan-chip.is-support svg { color: #3b82f6; }
+
+body[data-page="coach-plans"] .coach-plan-price { min-width: 98px; text-align: right; }
+body[data-page="coach-plans"] .coach-plan-price strong { display: block; color: #0d1427; font-size: 25px; line-height: 1; font-weight: 780; letter-spacing: -.035em; }
+body[data-page="coach-plans"] .coach-plan-price small { display: block; margin-top: 9px; color: var(--plans-muted); font-size: 11px; font-weight: 550; }
+
+body[data-page="coach-plans"] .coach-plan-chevron {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    color: #111827;
+    box-shadow: 0 8px 22px rgba(48,40,109,.12);
+}
+body[data-page="coach-plans"] .coach-plan-chevron svg { width: 20px; height: 20px; transition: transform 240ms ease; }
+body[data-page="coach-plans"] .coach-plan-card.is-open .coach-plan-chevron svg { transform: rotate(90deg); }
+
+body[data-page="coach-plans"] .coach-plan-detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    padding: 0 20px;
+    border-top: 0;
+    opacity: 0;
+    transition: grid-template-rows 260ms ease, opacity 180ms ease, padding 260ms ease;
+}
+body[data-page="coach-plans"] .coach-plan-detail-inner { min-height: 0; overflow: hidden; }
+body[data-page="coach-plans"] .coach-plan-card.is-open .coach-plan-detail { grid-template-rows: 1fr; padding: 0 20px 22px; opacity: 1; }
+body[data-page="coach-plans"] .coach-plan-detail-content { display: grid; gap: 20px; padding-top: 22px; border-top: 1px solid #eceaf5; }
+body[data-page="coach-plans"] .coach-plan-detail h4 { margin: 0 0 12px; color: var(--plans-text); font-size: 14px; font-weight: 750; }
+body[data-page="coach-plans"] .coach-plan-feature-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px 16px; margin: 0; padding: 0; list-style: none; }
+body[data-page="coach-plans"] .coach-plan-feature-list li { display: grid; grid-template-columns: 25px minmax(0,1fr); align-items: center; gap: 8px; color: #465168; font-size: 12px; line-height: 1.45; }
+body[data-page="coach-plans"] .coach-plan-feature-list li i { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: #edfaef; color: #20a647; }
+body[data-page="coach-plans"] .coach-plan-feature-list li svg { width: 14px; height: 14px; stroke-width: 2.6; }
+body[data-page="coach-plans"] .coach-plan-info-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+body[data-page="coach-plans"] .coach-plan-info { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 14px; background: #f8f7fc; }
+body[data-page="coach-plans"] .coach-plan-info > i { width: 31px; height: 31px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 10px; background: #eeeafe; color: #6154ee; }
+body[data-page="coach-plans"] .coach-plan-info svg { width: 16px; height: 16px; }
+body[data-page="coach-plans"] .coach-plan-info span { min-width: 0; display: grid; gap: 2px; }
+body[data-page="coach-plans"] .coach-plan-info small { color: #81889a; font-size: 9px; font-weight: 650; text-transform: uppercase; letter-spacing: .05em; }
+body[data-page="coach-plans"] .coach-plan-info strong { overflow-wrap: anywhere; color: #252b3b; font-size: 12px; font-weight: 700; }
+body[data-page="coach-plans"] .coach-plan-about p { margin: 0; color: #5c667a; font-size: 12.5px; line-height: 1.65; }
+body[data-page="coach-plans"] .coach-plan-choose { min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 9px; border-radius: 15px; background: linear-gradient(135deg,#6558ff,#7c55f5); color: #fff; text-decoration: none; font-size: 14px; font-weight: 700; box-shadow: 0 12px 26px rgba(101,88,255,.22); }
+body[data-page="coach-plans"] .coach-plan-choose svg { width: 18px; height: 18px; }
+
+body[data-page="coach-plans"] .coach-plans-trust {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    padding: 18px 20px;
+    border-radius: 22px;
+    background: linear-gradient(100deg,#fbfaff,#f8f7ff);
+}
+body[data-page="coach-plans"] .coach-plans-trust > div { display: flex; align-items: center; justify-content: center; gap: 11px; min-width: 0; padding: 0 16px; border-right: 1px solid #dedaf4; }
+body[data-page="coach-plans"] .coach-plans-trust > div:last-child { border-right: 0; }
+body[data-page="coach-plans"] .coach-plans-trust > div > svg { flex: 0 0 auto; width: 27px; height: 27px; color: #5b52b9; stroke-width: 1.8; }
+body[data-page="coach-plans"] .coach-plans-trust span { min-width: 0; display: grid; gap: 3px; }
+body[data-page="coach-plans"] .coach-plans-trust strong { color: #232a3d; font-size: 11px; font-weight: 700; }
+body[data-page="coach-plans"] .coach-plans-trust small { color: #747d90; font-size: 9.5px; }
+
+body[data-page="coach-plans"] .coach-plans-skeleton { display: grid; gap: 14px; }
+body[data-page="coach-plans"] .coach-plans-skeleton span { height: 142px; border-radius: 23px; background: linear-gradient(90deg,#f4f3f8 25%,#fbfaff 42%,#f4f3f8 62%); background-size: 300% 100%; animation: coachPlansShimmer 1.5s ease infinite; }
+@keyframes coachPlansShimmer { to { background-position: -150% 0; } }
+
+body[data-page="coach-plans"] .coach-plans-state { display: grid; justify-items: center; gap: 8px; padding: 44px 20px; border: 1px solid var(--plans-border); border-radius: 22px; background: #fbfaff; text-align: center; }
+body[data-page="coach-plans"] .coach-plans-state > i { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 15px; background: #efecff; color: #6255ef; }
+body[data-page="coach-plans"] .coach-plans-state svg { width: 22px; height: 22px; }
+body[data-page="coach-plans"] .coach-plans-state h3 { margin: 4px 0 0; color: var(--plans-text); font-size: 17px; }
+body[data-page="coach-plans"] .coach-plans-state p { max-width: 360px; margin: 0; color: var(--plans-muted); font-size: 12px; line-height: 1.55; }
+
+@media (max-width: 767px) {
+    body[data-page="coach-plans"] .tyfit-main.coach-public-page { padding: 6px 16px 96px !important; }
+    body[data-page="coach-plans"] .coach-plans-shell { gap: 24px; padding: 0 0 24px !important; }
+    body[data-page="coach-plans"] .coach-plans-hero { min-height: 0; grid-template-columns: minmax(0,1fr) 43%; padding: 21px 18px; border-radius: 24px; }
+    body[data-page="coach-plans"] .coach-plans-kicker { padding: 6px 9px; font-size: 10px; }
+    body[data-page="coach-plans"] .coach-plans-hero h1 { margin: 16px 0 10px; font-size: clamp(23px,7vw,31px); }
+    body[data-page="coach-plans"] .coach-plans-hero p { max-width: 58vw; font-size: 11.5px; line-height: 1.65; }
+    body[data-page="coach-plans"] .coach-plans-hero-art { position: absolute; right: -17px; bottom: 2px; width: 49%; max-height: 82%; }
+    body[data-page="coach-plans"] .coach-plans-marketplace > h2 { margin: 0 0 13px 3px; font-size: 19px; }
+    body[data-page="coach-plans"] .coach-plan-list--public .coach-plan-summary { min-height: 0; grid-template-columns: 54px minmax(0,1fr) 72px 44px; gap: 10px; padding: 15px 12px; }
+    body[data-page="coach-plans"] .coach-plan-visual { width: 52px; height: 58px; border-radius: 15px; }
+    body[data-page="coach-plans"] .coach-plan-visual svg { width: 28px; height: 28px; }
+    body[data-page="coach-plans"] .coach-plan-title-row h3 { font-size: 15px; }
+    body[data-page="coach-plans"] .coach-plan-description { margin: 5px 0 9px; font-size: 10.5px; -webkit-line-clamp: 1; }
+    body[data-page="coach-plans"] .coach-plan-chips { gap: 5px; }
+    body[data-page="coach-plans"] .coach-plan-chip { min-height: 23px; padding: 3px 6px; font-size: 8.5px; }
+    body[data-page="coach-plans"] .coach-plan-chip svg { width: 12px; height: 12px; }
+    body[data-page="coach-plans"] .coach-plan-price { min-width: 0; }
+    body[data-page="coach-plans"] .coach-plan-price strong { font-size: 18px; }
+    body[data-page="coach-plans"] .coach-plan-price small { margin-top: 7px; font-size: 9px; }
+    body[data-page="coach-plans"] .coach-plan-detail-content { gap: 16px; }
+    body[data-page="coach-plans"] .coach-plan-feature-list { grid-template-columns: 1fr; }
+    body[data-page="coach-plans"] .coach-plan-info-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    body[data-page="coach-plans"] .coach-plans-trust { padding: 14px 6px; }
+    body[data-page="coach-plans"] .coach-plans-trust > div { align-items: flex-start; gap: 6px; padding: 0 7px; }
+    body[data-page="coach-plans"] .coach-plans-trust > div > svg { width: 20px; height: 20px; }
+    body[data-page="coach-plans"] .coach-plans-trust strong { font-size: 8.5px; }
+    body[data-page="coach-plans"] .coach-plans-trust small { font-size: 7.5px; line-height: 1.35; }
+}
+
+@media (max-width: 390px) {
+    body[data-page="coach-plans"] .coach-plan-list--public .coach-plan-summary { grid-template-columns: 48px minmax(0,1fr) 62px 40px; gap: 8px; padding-inline: 10px; }
+    body[data-page="coach-plans"] .coach-plan-visual { width: 47px; height: 53px; }
+    body[data-page="coach-plans"] .coach-plan-chip:nth-child(n+4) { display: none; }
+    body[data-page="coach-plans"] .coach-plan-title-row h3 { font-size: 14px; }
+    body[data-page="coach-plans"] .coach-plan-price strong { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-page="coach-plans"] .coach-plan-detail,
+    body[data-page="coach-plans"] .coach-plan-chevron svg,
+    body[data-page="coach-plans"] .coach-plan-card { transition: none; }
+    body[data-page="coach-plans"] .coach-plans-skeleton span { animation: none; }
+}

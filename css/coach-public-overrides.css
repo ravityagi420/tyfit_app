@@ -1760,7 +1760,7 @@ body[data-page="coach-public-profile"] .coach-hero-proof-metric small {
 }
 
 body[data-page="coach-public-profile"] .coach-hero-proof-rating {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 3px;
@@ -3057,7 +3057,7 @@ body[data-page="coach-public-profile"] .coach-hero-proof-metric {
 }
 
 body[data-page="coach-public-profile"] .coach-hero-proof-rating {
-    display: flex !important;
+    display: none !important;
     width: 100% !important;
     justify-content: center !important;
     align-items: center !important;

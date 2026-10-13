@@ -3563,33 +3563,12 @@ async function loadUsersList() {
         return;
     }
 
-    const { data, error } = await window.supabaseClient
-        .from("profiles")
-        .select("id, email, full_name, role")
-        .order("email", { ascending: true });
-
-    if (error) {
-        console.error("loadUsersList error:", error);
-        throw new Error("Failed to load users: " + error.message);
-    }
-
-    DIET_STATE.users = data || [];
-
+    const { fetchSelectableClients, populateClientSelector } = await import('./client-selector.js');
+    DIET_STATE.users = await fetchSelectableClients(window.supabaseClient);
     if (DIET_STATE.isAdmin && DIET_STATE.users.length <= 1) {
         console.warn("Admin can currently see only one profile row. Check Supabase RLS policy on profiles SELECT for admin role.");
     }
-
-    selectEl.innerHTML = '<option value="">Select</option>';
-    DIET_STATE.users.forEach((user) => {
-        const fullName = (user.full_name || "Unnamed User").trim();
-        const roleText = user.role ? user.role.replace(/[_-]/g, " ") : "user";
-        const roleLabel = roleText.charAt(0).toUpperCase() + roleText.slice(1);
-        const label = `${fullName} - ${roleLabel}`;
-        const option = document.createElement("option");
-        option.value = user.id;
-        option.textContent = label;
-        selectEl.appendChild(option);
-    });
+    populateClientSelector(selectEl, DIET_STATE.users);
 }
 
 async function loadFoodCatalogOptions(searchTerm = "") {

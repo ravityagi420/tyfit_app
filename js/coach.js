@@ -1131,26 +1131,59 @@
         return icon;
     }
 
+    function publicPlanVisual(plan, index = 0) {
+        const text = `${plan?.title || ""} ${plan?.best_for || ""} ${plan?.icon_key || ""}`.toLowerCase();
+        if (/lean|loss|target|cut/.test(text)) return { icon: "target", tone: "is-green" };
+        if (/muscle|strength|dumbbell|builder/.test(text)) return { icon: "dumbbell", tone: "is-red" };
+        if (/wellness|lifestyle|reset|habit|heart/.test(text)) return { icon: "flower-2", tone: "is-blue" };
+        if (/kickstart|starter|star/.test(text)) return { icon: "star", tone: "is-violet" };
+        const allowed = new Set(["sparkles", "badge-check", "heart-handshake", "target", "dumbbell", "flower-2", "star", "flame", "zap"]);
+        return { icon: allowed.has(plan?.icon_key) ? plan.icon_key : ["sparkles", "target", "dumbbell", "flower-2", "star"][index % 5], tone: ["", "is-green", "is-red", "is-blue", "is-violet"][index % 5] };
+    }
+
+    function publicPlanChipVisual(label) {
+        const text = String(label || "").toLowerCase();
+        if (/nutrition|diet|meal|food/.test(text)) return { icon: "leaf", tone: "is-nutrition" };
+        if (/check|review|weekly|calendar/.test(text)) return { icon: "calendar-days", tone: "is-checkins" };
+        if (/support|message|chat|coach|contact/.test(text)) return { icon: "message-square", tone: "is-support" };
+        if (/train|workout|strength|exercise/.test(text)) return { icon: "dumbbell", tone: "is-training" };
+        return { icon: "check", tone: "" };
+    }
+
+    function publicPlanPrice(plan) {
+        return Number(plan?.price_amount || 0) === 0 ? "Free" : money(plan.price_amount, plan.currency);
+    }
+
+    function renderPublicPlanCard(plan, index) {
+        const visual = publicPlanVisual(plan, index);
+        const chips = Array.isArray(plan.feature_chips) ? plan.feature_chips.filter(Boolean) : [];
+        const features = Array.isArray(plan.included_features) ? plan.included_features.filter(Boolean) : [];
+        const safeId = `coachPlanDetail-${String(plan.id || index).replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+        const contactUrl = contactHref("whatsapp") || contactHref("email") || contactHref("phone");
+        const hasDetails = features.length || plan.duration_weeks || plan.best_for || contactUrl;
+        const detailSections = [
+            features.length ? `<section><h4>What's included</h4><ul class="coach-plan-feature-list">${features.map((feature) => `<li><i><i data-lucide="check"></i></i><span>${escapeHtml(feature)}</span></li>`).join("")}</ul></section>` : "",
+            (plan.duration_weeks || plan.best_for) ? `<div class="coach-plan-info-grid">${plan.duration_weeks ? `<div class="coach-plan-info"><i><i data-lucide="calendar-range"></i></i><span><small>Duration</small><strong>${escapeHtml(plan.duration_weeks)} Weeks</strong></span></div>` : ""}${plan.best_for ? `<div class="coach-plan-info"><i><i data-lucide="user-round-check"></i></i><span><small>Best for</small><strong>${escapeHtml(plan.best_for)}</strong></span></div>` : ""}</div>` : "",
+            contactUrl ? `<a class="coach-plan-choose" href="${escapeHtml(contactUrl)}"${/^https?:/i.test(contactUrl) ? ' target="_blank" rel="noopener noreferrer"' : ""}>Choose This Plan <i data-lucide="arrow-right"></i></a>` : ""
+        ].filter(Boolean).join("");
+        return `<article class="coach-plan-card" data-public-plan-card>
+            <button type="button" class="coach-plan-summary" data-plan-toggle aria-expanded="false" aria-controls="${safeId}">
+                <span class="coach-plan-visual ${visual.tone}"><i data-lucide="${visual.icon}"></i></span>
+                <span class="coach-plan-main">
+                    <span class="coach-plan-title-row"><h3>${escapeHtml(plan.title || "Coaching Plan")}</h3></span>
+                    ${plan.subtitle ? `<span class="coach-plan-description">${escapeHtml(plan.subtitle)}</span>` : ""}
+                    ${chips.length ? `<span class="coach-plan-chips">${chips.slice(0, 4).map((chip) => { const chipVisual = publicPlanChipVisual(chip); return `<span class="coach-plan-chip ${chipVisual.tone}"><i data-lucide="${chipVisual.icon}"></i>${escapeHtml(chip)}</span>`; }).join("")}</span>` : ""}
+                </span>
+                <span class="coach-plan-price"><strong>${escapeHtml(publicPlanPrice(plan))}</strong><small>${escapeHtml(plan.price_label || "One-time")}</small></span>
+                <span class="coach-plan-chevron" aria-hidden="true"><i data-lucide="chevron-right"></i></span>
+            </button>
+            ${hasDetails ? `<div class="coach-plan-detail" id="${safeId}"><div class="coach-plan-detail-inner"><div class="coach-plan-detail-content">${detailSections}</div></div></div>` : ""}
+        </article>`;
+    }
+
     function renderPlanCards(host, plans, expanded = false) {
         if (!host) return;
-        host.innerHTML = plans.length ? plans.map((plan, index) => `
-            <article class="coach-plan-card ${expanded ? "is-open" : ""}">
-                <button type="button" class="coach-plan-toggle" data-plan-toggle>
-                    <span class="coach-icon-tile ${index === 1 ? "is-green" : index === 2 ? "is-pink" : ""}"><i data-lucide="${iconForPlan(plan, index)}"></i></span>
-                    <span class="coach-plan-copy">
-                        <h3>${escapeHtml(plan.title)}</h3>
-                        <p>${escapeHtml(plan.subtitle || "")}</p>
-                        <span class="coach-chip-list">${(plan.feature_chips || []).slice(0, 4).map((chip) => `<span class="coach-chip">${escapeHtml(chip)}</span>`).join("")}</span>
-                    </span>
-                    <span class="coach-plan-price"><strong>${money(plan.price_amount, plan.currency)}</strong><span>${escapeHtml(plan.price_label || "One-time")}</span></span>
-                </button>
-                <div class="coach-plan-detail">
-                    <ul class="coach-feature-list">${(plan.included_features || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-                    <p class="coach-subtitle"><strong>Duration:</strong> ${plan.duration_weeks || "-"} weeks · <strong>Best for:</strong> ${escapeHtml(plan.best_for || "Coaching clients")}</p>
-                    <a class="coach-primary-btn" href="${contactHref("whatsapp") || "#"}">Enroll Now <i data-lucide="arrow-right"></i></a>
-                </div>
-            </article>
-        `).join("") : '<div class="coach-empty">No published coaching plans yet.</div>';
+        host.innerHTML = plans.length ? plans.map(renderPublicPlanCard).join("") : '<div class="coach-plans-state"><i><i data-lucide="clipboard-list"></i></i><h3>No coaching plans available yet</h3><p>This coach hasn’t published any plans right now.</p></div>';
         refreshIcons();
     }
 
@@ -1529,8 +1562,10 @@
 
     function renderPublicPlansPage() {
         const p = state.coachProfile;
+        const root = el("coachPlansRoot");
+        if (root) root.setAttribute("aria-busy", "false");
         const title = el("coachPlansTitle");
-        if (title) title.textContent = p ? `${p.brand_name || p.display_name} Plans` : "Coaching Plans";
+        if (title) title.textContent = p ? `${p.display_name || p.brand_name} Plans` : "Coaching Plans";
         const backLink = el("coachPlansBackLink");
         if (backLink) backLink.href = profileLink("coach_public_profile.html");
         renderPlanCards(el("coachPlansPublicList"), state.plans, false);
@@ -1616,7 +1651,17 @@
             }
             const toggle = event.target.closest("[data-plan-toggle]");
             if (!toggle) return;
-            toggle.closest(".coach-plan-card")?.classList.toggle("is-open");
+            const card = toggle.closest(".coach-plan-card");
+            const willOpen = !card?.classList.contains("is-open");
+            if (page() === "coach-plans") {
+                document.querySelectorAll("[data-public-plan-card].is-open").forEach((openCard) => {
+                    if (openCard === card) return;
+                    openCard.classList.remove("is-open");
+                    openCard.querySelector("[data-plan-toggle]")?.setAttribute("aria-expanded", "false");
+                });
+            }
+            card?.classList.toggle("is-open", willOpen);
+            toggle.setAttribute("aria-expanded", String(willOpen));
         });
         document.addEventListener("pointerdown", (event) => {
             const handle = event.target.closest("#coachConsultationDragHandle");
@@ -1883,7 +1928,12 @@
 
             // Paint the complete page structure as soon as the primary profile row arrives.
             if (page() === "coach-public-profile") renderPublicProfile();
-            if (page() === "coach-plans") renderPublicPlansPage();
+            if (page() === "coach-plans") {
+                const title = el("coachPlansTitle");
+                if (title) title.textContent = `${publicProfile.display_name || publicProfile.brand_name} Plans`;
+                const backLink = el("coachPlansBackLink");
+                if (backLink) backLink.href = profileLink("coach_public_profile.html");
+            }
             bindPlanToggles();
 
             // Secondary profile collections load afterward and progressively enhance the page.
@@ -1893,9 +1943,25 @@
                 if (page() === "coach-plans") renderPublicPlansPage();
             } catch (secondaryError) {
                 console.warn("Coach profile extras could not be loaded:", secondaryError);
+                if (page() === "coach-plans") {
+                    const plansRoot = el("coachPlansRoot");
+                    const plansList = el("coachPlansPublicList");
+                    if (plansRoot) plansRoot.setAttribute("aria-busy", "false");
+                    if (plansList) plansList.innerHTML = '<div class="coach-plans-state"><i><i data-lucide="circle-alert"></i></i><h3>We couldn’t load these coaching plans</h3><p>Please try again in a moment.</p></div>';
+                    refreshIcons();
+                }
             }
         } catch (error) {
             document.body.classList.remove("coach-public-loading");
+            if (page() === "coach-plans") {
+                console.error("Coaching plans could not be loaded:", error);
+                const plansRoot = el("coachPlansRoot");
+                const plansList = el("coachPlansPublicList");
+                if (plansRoot) plansRoot.setAttribute("aria-busy", "false");
+                if (plansList) plansList.innerHTML = '<div class="coach-plans-state"><i><i data-lucide="circle-alert"></i></i><h3>We couldn’t load these coaching plans</h3><p>Please check the profile link or try again in a moment.</p></div>';
+                refreshIcons();
+                return;
+            }
             const root = el("coachPublicRoot");
             if (root) {
                 root.setAttribute("aria-busy", "false");

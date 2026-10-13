@@ -739,6 +739,7 @@
             if (error) throw error;
             closeWeightModal();
             showToast('Weight logged');
+            window.dispatchEvent(new CustomEvent('tyfit:weight-saved'));
         } catch (error) {
             console.error('weight log error:', error);
             showToast(error?.message || 'Could not log weight.');

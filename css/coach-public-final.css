@@ -249,7 +249,7 @@ body[data-page="coach-public-profile"] .coach-transformation-content p {
     body[data-page="coach-public-profile"] .coach-transformation-content strong { font-size: 13px; }
     body[data-page="coach-public-profile"] .coach-transformation-content p { font-size: 10.5px; }
     body[data-page="coach-public-profile"] .coach-hero-proof-rating {
-        display: grid !important;
+        display: none !important;
         grid-template-columns: auto auto !important;
         align-items: center !important;
         justify-content: center !important;
@@ -259,7 +259,7 @@ body[data-page="coach-public-profile"] .coach-transformation-content p {
     }
     body[data-page="coach-public-profile"] .coach-hero-proof-rating small {
         grid-column: 1 / -1 !important;
-        display: block !important;
+        display: none !important;
         text-align: center !important;
         white-space: normal !important;
     }

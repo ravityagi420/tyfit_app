@@ -16,6 +16,7 @@
     <link href="css/premium-ui.css?v=20260818-viewport-stability" rel="stylesheet">
     <link href="css/tyfit-design-system.css?v=20260608-standard-ui" rel="stylesheet">
     <link href="css/calculators.css?v=20260530c" rel="stylesheet">
+    <link href="css/metrics.css" rel="stylesheet">
 </head>
 <body class="tyfit-app" data-page="home">
     <header class="tyfit-mobile-topbar">
@@ -177,6 +178,10 @@
                     <div class="tyfit-tools-grid" id="homeToolsGrid"></div>
                 </section>
 
+                <section class="tyfit-section" aria-label="Your Progress">
+                    <div class="tyfit-section-head"><h4>Your Progress</h4><a class="tyfit-view-all-link" href="metric_history.html?metric=weight">See all →</a></div>
+                    <div id="metricProgress"></div>
+                </section>
                 <nav class="tyfit-legal-links" aria-label="Legal links">
                     <a href="privacy-policy.html">Privacy Policy</a>
                     <a href="terms.html">Terms</a>
@@ -273,5 +278,6 @@
     <script src="js/calculators.js?v=20260530b"></script>
     <script src="js/shell.js?v=20260818-modal-scroll-lock"></script>
     <script src="js/home.js?v=20260608-sidebar-module"></script>
+    <script type="module" src="js/metrics.js"></script>
 </body>
 </html>
